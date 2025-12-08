@@ -15,6 +15,7 @@ class ModelConfig:
     token_hidden_dim: int = 64
     num_layers: int = 4
     action_chunk_size: int = 8
+    simulated_delay: int | None = None
 
 
 def posemb_sincos(pos: jax.Array, embedding_dim: int, min_period: float, max_period: float) -> jax.Array:
@@ -76,8 +77,8 @@ class MLPMixerBlock(nnx.Module):
         self.adaln_2 = nnx.Linear(channel_dim, 3 * channel_dim, kernel_init=nnx.initializers.zeros_init(), rngs=rngs)
 
     def __call__(self, x: jax.Array, adaln_cond: jax.Array) -> jax.Array:
-        scale_1, shift_1, gate_1 = jnp.split(self.adaln_1(adaln_cond)[:, None], 3, axis=-1)
-        scale_2, shift_2, gate_2 = jnp.split(self.adaln_2(adaln_cond)[:, None], 3, axis=-1)
+        scale_1, shift_1, gate_1 = jnp.split(self.adaln_1(adaln_cond), 3, axis=-1)
+        scale_2, shift_2, gate_2 = jnp.split(self.adaln_2(adaln_cond), 3, axis=-1)
 
         # token mix
         residual = x
@@ -111,6 +112,7 @@ class FlowPolicy(nnx.Module):
         self.channel_dim = config.channel_dim
         self.action_dim = action_dim
         self.action_chunk_size = config.action_chunk_size
+        self.simulated_delay = config.simulated_delay
 
         self.in_proj = nnx.Linear(action_dim + obs_dim, config.channel_dim, rngs=rngs)
         self.mlp_stack = [
@@ -137,9 +139,12 @@ class FlowPolicy(nnx.Module):
 
     def __call__(self, obs: jax.Array, x_t: jax.Array, time: jax.Array) -> jax.Array:
         assert x_t.shape == (obs.shape[0], self.action_chunk_size, self.action_dim), x_t.shape
-        time_emb = posemb_sincos(
-            jnp.broadcast_to(time, obs.shape[0]), self.channel_dim, min_period=4e-3, max_period=4.0
-        )
+        if time.ndim == 1:
+            time = time[:, None]
+        time = jnp.broadcast_to(time, (obs.shape[0], self.action_chunk_size))
+        time_emb = jax.vmap(
+            functools.partial(posemb_sincos, embedding_dim=self.channel_dim, min_period=4e-3, max_period=4.0)
+        )(time)
         time_emb = self.time_mlp(time_emb)
         obs = einops.repeat(obs, "b e -> b c e", c=self.action_chunk_size)
         x = jnp.concatenate([x_t, obs], axis=-1)
@@ -147,7 +152,7 @@ class FlowPolicy(nnx.Module):
         for mlp in self.mlp_stack:
             x = mlp(x, time_emb)
         assert x.shape == (obs.shape[0], self.action_chunk_size, self.channel_dim), x.shape
-        scale, shift = jnp.split(self.final_adaln(time_emb)[:, None], 2, axis=-1)
+        scale, shift = jnp.split(self.final_adaln(time_emb), 2, axis=-1)
         x = self.final_norm(x) * (1 + scale) + shift
         x = self.out_proj(x)
         return x
@@ -245,7 +250,13 @@ class FlowPolicy(nnx.Module):
                 guidance_weight = jnp.minimum(c * inv_r2, max_guidance_weight)
                 return v_t + guidance_weight * pinv_correction
 
-            v_t = pinv_corrected_velocity(obs, x_t, prev_action_chunk, time)
+            if self.simulated_delay is not None:
+                mask = jnp.arange(self.action_chunk_size)[None, :] < inference_delay
+                x_t = jnp.where(mask[:, :, None], prev_action_chunk, x_t)
+                time_chunk = jnp.where(mask, 1.0, time)
+                v_t = self(obs, x_t, time_chunk)
+            else:
+                v_t = pinv_corrected_velocity(obs, x_t, prev_action_chunk, time)
             return (x_t + dt * v_t, time + dt), None
 
         noise = jax.random.normal(rng, shape=(obs.shape[0], self.action_chunk_size, self.action_dim))
@@ -256,11 +267,23 @@ class FlowPolicy(nnx.Module):
     def loss(self, rng: jax.Array, obs: jax.Array, action: jax.Array):
         assert action.dtype == jnp.float32
         assert action.shape == (obs.shape[0], self.action_chunk_size, self.action_dim), action.shape
-        noise_rng, time_rng = jax.random.split(rng, 2)
+        noise_rng, time_rng, delay_rng = jax.random.split(rng, 3)
         time = jax.random.uniform(time_rng, (obs.shape[0],))
         noise = jax.random.normal(noise_rng, shape=action.shape)
-
-        x_t = (1 - time[:, None, None]) * noise + time[:, None, None] * action
         u_t = action - noise
+
+        if self.simulated_delay is None:
+            x_t = (1 - time[:, None, None]) * noise + time[:, None, None] * action
+            pred = self(obs, x_t, time)
+            return jnp.mean(jnp.square(pred - u_t))
+
+        w = jnp.exp(jnp.arange(0, self.simulated_delay)[::-1])
+        w = w / jnp.sum(w)
+        delay = jax.random.choice(delay_rng, self.simulated_delay, (obs.shape[0],), p=w)
+        mask = jnp.arange(self.action_chunk_size)[None, :] < delay[:, None]
+        time = jnp.where(mask, 1.0, time[:, None])
+        x_t = (1 - time[:, :, None]) * noise + time[:, :, None] * action
         pred = self(obs, x_t, time)
-        return jnp.mean(jnp.square(pred - u_t))
+        loss = jnp.square(pred - u_t)
+        loss_mask = jnp.logical_not(mask)[:, :, None]
+        return jnp.sum(loss * loss_mask) / (jnp.sum(loss_mask) + 1e-8)

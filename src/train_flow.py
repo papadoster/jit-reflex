@@ -56,6 +56,8 @@ class Config:
     weight_decay: float = 1e-2
     lr_warmup_steps: int = 1000
 
+    load_dir: str | None = None
+
 
 @struct.dataclass
 class EpochCarry:
@@ -80,6 +82,7 @@ def main(config: Config):
     # load data
     def load_data(level_path: str):
         level_name = level_path.replace("/", "_").replace(".json", "")
+        print("Loading data for level:", level_name)
         return dict(np.load(pathlib.Path(config.run_path) / "data" / f"{level_name}.npz"))
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -112,9 +115,19 @@ def main(config: Config):
     obs_dim = data.obs.shape[-1]
     action_dim = env.action_space(env_params).shape[0]
 
+    if config.load_dir is not None:
+        state_dicts = []
+        for level_path in config.level_paths:
+            level_name = level_path.replace("/", "_").replace(".json", "")
+            with (pathlib.Path(config.load_dir) / "policies" / f"{level_name}.pkl").open("rb") as f:
+                state_dicts.append(pickle.load(f))
+        state_dicts = jax.device_put(jax.tree.map(lambda *x: jnp.array(x), *state_dicts))
+    else:
+        state_dicts = None
+
     @functools.partial(jax.jit, in_shardings=sharding, out_shardings=sharding)
     @jax.vmap
-    def init(rng: jax.Array) -> EpochCarry:
+    def init(rng: jax.Array, state_dict: dict | None) -> EpochCarry:
         rng, key = jax.random.split(rng)
         policy = _model.FlowPolicy(
             obs_dim=obs_dim,
@@ -122,6 +135,10 @@ def main(config: Config):
             config=config.eval.model,
             rngs=nnx.Rngs(key),
         )
+        if state_dict is not None:
+            graphdef, state = nnx.split(policy)
+            state.replace_by_pure_dict(state_dict)
+            policy = nnx.merge(graphdef, state)
         total_params = sum(x.size for x in jax.tree.leaves(nnx.state(policy, nnx.Param)))
         print(f"Total params: {total_params:,}")
         optimizer = nnx.Optimizer(
@@ -192,7 +209,7 @@ def main(config: Config):
 
     wandb.init(project=WANDB_PROJECT)
     rng = jax.random.key(config.seed)
-    epoch_carry = init(jax.random.split(rng, len(config.level_paths)))
+    epoch_carry = init(jax.random.split(rng, len(config.level_paths)), state_dicts)
     for epoch_idx in tqdm.tqdm(range(config.num_epochs)):
         epoch_carry, (info, video) = train_epoch(epoch_carry, levels, data)
 
