@@ -1,4 +1,4 @@
-Simulated experiments for the paper [Real-Time Execution of Action Chunking Flow Policies](https://pi.website/download/real_time_chunking.pdf).
+Simulated experiments for the papers [Real-Time Execution of Action Chunking Flow Policies](https://arxiv.org/abs/2506.07339) and [Training-Time Action Conditioning for Efficient Real-Time Chunking](https://arxiv.org/abs/2512.05964).
 
 ## Installation
 
@@ -33,3 +33,10 @@ sharded over levels.
 4. Evaluate imitation learning policies: `uv run src/eval_flow.py --config.run-path ./logs-bc/<wandb-run-name> --output-dir <output-dir>`
     - This will load the checkpoints from step 3 and evaluate them for 2048 trials per level by default.
     - Currently, the script performs an exhaustive sweep over inference delay and execution horizon for all methods.
+  
+## Training-Time RTC
+To reproduce the results for training-time RTC, follow the following steps:
+
+1. Change `simulated_delay` in the model config to 5.
+2. Fine-tune the pre-trained checkpoint with simulated delay for 8 epochs: `uv run src/train_flow.py --config.run-path <run_path> --config.load-dir bc/24 --config.num-epochs 8` where `bc` is the contents of `gs://rtc-assets/bc/`.
+3. Evaluate as above.
