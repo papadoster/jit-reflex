@@ -158,6 +158,10 @@ class FlowPolicy(nnx.Module):
         return x
 
     def action(self, rng: jax.Array, obs: jax.Array, num_steps: int) -> jax.Array:
+        noise = jax.random.normal(rng, shape=(obs.shape[0], self.action_chunk_size, self.action_dim))
+        return self.action_from_noise(noise, obs, num_steps)
+
+    def action_from_noise(self, noise: jax.Array, obs: jax.Array, num_steps: int) -> jax.Array:
         dt = 1 / num_steps
 
         def step(carry, _):
@@ -165,7 +169,6 @@ class FlowPolicy(nnx.Module):
             v_t = self(obs, x_t, time)
             return (x_t + dt * v_t, time + dt), None
 
-        noise = jax.random.normal(rng, shape=(obs.shape[0], self.action_chunk_size, self.action_dim))
         (x_1, _), _ = jax.lax.scan(step, (noise, 0.0), length=num_steps)
         assert x_1.shape == (obs.shape[0], self.action_chunk_size, self.action_dim), x_1.shape
         return x_1
