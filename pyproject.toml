@@ -11,7 +11,7 @@ authors = [
 description = ""
 requires-python = ">=3.11"
 dependencies = [
-    "jax[cuda12]==0.4.35",
+    "jax==0.4.35",
     "numpy==1.26.4",
     "tyro",
     "einops",
@@ -24,6 +24,13 @@ dependencies = [
 [tool.ruff]
 line-length = 120
 
+[tool.uv]
+# CUDA only on Linux; macOS gets CPU jax. Overrides also replace Kinetix's own jax[cuda12_pip] pin.
+override-dependencies = [
+    "jax[cuda12]==0.4.35; sys_platform == 'linux'",
+    "jax==0.4.35; sys_platform != 'linux'",
+]
+
 [tool.uv.sources]
 kinetix = { path = "third_party/kinetix", editable = true }
 
@@ -32,3 +39,12 @@ force-single-line = true
 force-sort-within-sections = true
 single-line-exclusions = ["collections.abc", "typing", "typing_extensions"]
 known-third-party = ["wandb"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
