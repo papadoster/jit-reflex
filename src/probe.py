@@ -45,10 +45,27 @@ LEVELS = (
 ERRORS = ("chunk", "pred", "lin", "lin_clip", "chunk_lin", "floor", "dev")
 
 
-def errors(chunk, a_ref, jac, nom_obs, obs, a_star, max_correction: float = 1.0):
+def executed(action, env_state):
+    """The action Kinetix actually applies (env.convert_continuous_actions), for E1b.
+
+    Motor dims go to their joints via motor_bindings and are clipped to [-1, 1], thruster dims to [0, 1]; joints
+    without a running motor and inactive thrusters are zeroed. So "-0.5" and "-0.1" on a thruster are the same action,
+    and action dims that drive nothing don't count. action [..., A] -> [..., num_joints + num_thrusters].
+    """
+    static = kenv_state.StaticEnvParams(**train_expert.LARGE_ENV_PARAMS, frame_skip=train_expert.FRAME_SKIP)
+    mask = jnp.concatenate([env_state.joint.active & env_state.joint.motor_on, env_state.thruster.active])
+
+    def one(a):
+        return kenv.convert_continuous_actions(a, env_state, static, None) * mask
+
+    return jnp.vectorize(one, signature="(a)->(e)")(action)
+
+
+def errors(chunk, a_ref, jac, nom_obs, obs, a_star, max_correction: float = 1.0, act=lambda a: a):
     """Squared action errors against the oracle a* (spec E1). lin_clip clips J·delta like the E2 method (E1b).
 
     chunk, a_ref [K, A]; jac [K, A, O]; nom_obs [K, O]; obs [..., K, O]; a_star [..., K, A] -> dict of [..., K].
+    act maps an action to the space it is compared in: identity (E1) or `executed` (E1b).
     """
     delta = obs - nom_obs
     lin = jnp.einsum("kao,...ko->...ka", jac, delta)
@@ -56,13 +73,14 @@ def errors(chunk, a_ref, jac, nom_obs, obs, a_star, max_correction: float = 1.0)
     def sq(x):
         return jnp.sum(jnp.square(x), axis=-1)
 
+    a_star = act(a_star)
     return {
-        "chunk": sq(chunk - a_star),
-        "pred": sq(a_ref - a_star),
-        "lin": sq(a_ref + lin - a_star),
-        "lin_clip": sq(a_ref + jnp.clip(lin, -max_correction, max_correction) - a_star),
-        "chunk_lin": sq(chunk + lin - a_star),
-        "floor": jnp.broadcast_to(sq(chunk - a_ref), a_star.shape[:-1]),
+        "chunk": sq(act(chunk) - a_star),
+        "pred": sq(act(a_ref) - a_star),
+        "lin": sq(act(a_ref + lin) - a_star),
+        "lin_clip": sq(act(a_ref + jnp.clip(lin, -max_correction, max_correction)) - a_star),
+        "chunk_lin": sq(act(chunk + lin) - a_star),
+        "floor": jnp.broadcast_to(sq(act(chunk) - act(a_ref)), a_star.shape[:-1]),
         "dev": jnp.sqrt(sq(delta)),
     }
 
@@ -158,7 +176,10 @@ def sample(boundaries, key, num_states: int):
     return obs[idx], jax.tree.map(lambda x: x[idx], state)
 
 
-def probe_one(env, env_params, policy, state, obs, key, sigmas: Sequence[float], num_draws: int, num_steps: int):
+def probe_one(
+    env, env_params, policy, state, obs, key, sigmas: Sequence[float], num_draws: int, num_steps: int,
+    executed_actions: bool = False,
+):
     """E1 errors for one state: ERRORS + 'valid', each [S, M, K] (sigmas, draws, offsets k = 1..H-1)."""
     H, A = policy.action_chunk_size, policy.action_dim
     K = H - 1
@@ -188,7 +209,8 @@ def probe_one(env, env_params, policy, state, obs, key, sigmas: Sequence[float],
     flat = obs_t.reshape(-1, obs_t.shape[-1])
     noises = jnp.broadcast_to(shifted, (*obs_t.shape[:-1], H, A)).reshape(-1, H, A)  # K axes aligned, like flat
     a_star = policy.action_from_noise(noises, flat, num_steps)[:, 0]
-    out = errors(chunk[1:], a_ref, jac, nom_obs, obs_t, a_star.reshape(*obs_t.shape[:-1], A))
+    act = (lambda a: executed(a, state.env_state)) if executed_actions else (lambda a: a)
+    out = errors(chunk[1:], a_ref, jac, nom_obs, obs_t, a_star.reshape(*obs_t.shape[:-1], A), act=act)
     out["valid"] = ~(ended | nom_ended)
     return out
 
@@ -223,6 +245,7 @@ def run(
     seed: int = 0,
     output_dir: str = "results/probe",
     verdict_on: str = "lin",  # E1: "lin"; E1b: "lin_clip" (spec section 5, E1b)
+    action_space: str = "raw",  # E1: "raw"; E1b: "executed" (what Kinetix applies, see `executed`)
 ):
     """E1 kill-test (spec section 5): writes summary.csv and verdict.json to output_dir."""
     env, env_params, levels, obs_dim, action_dim = setup(level_paths)
@@ -239,7 +262,10 @@ def run(
         obs, state = sample(boundaries, k_sample, num_states)
 
         def one(x):
-            return probe_one(env, env_params, policy, x[0], x[1], x[2], sigmas, num_draws, num_flow_steps)
+            return probe_one(
+                env, env_params, policy, x[0], x[1], x[2], sigmas, num_draws, num_flow_steps,
+                executed_actions=action_space == "executed",
+            )
 
         res = jax.lax.map(one, (state, obs, jax.random.split(k_probe, num_states)), batch_size=batch_size)
         return res, boundaries[2].sum()

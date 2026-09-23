@@ -171,3 +171,13 @@ def test_verdict_on_clipped_correction():
     s["lin_clip"] = 0.2  # rho_clip = 0.8 with pred = 1
     assert probe.verdict(s)["verdict"] == "KILL"
     assert probe.verdict(s, "lin_clip")["verdict"] == "GO"
+
+
+def test_executed_action_is_what_kinetix_applies():
+    env, env_params, levels, _, action_dim = probe.setup(["worlds/l/grasp_easy.json"])
+    _, state = env.reset_to_level(jax.random.key(0), jax.tree.map(lambda x: x[0], levels), env_params)
+    s = state.env_state
+    a = jnp.array([3.0, -3.0, 0.5, 0.2, -0.5, 2.0])
+    b = a.at[0].set(1.5).at[4].set(-0.1)  # motor 3.0 vs 1.5 -> both 1; thruster -0.5 vs -0.1 -> both 0 (off)
+    np.testing.assert_array_equal(probe.executed(a, s), probe.executed(b, s))
+    assert probe.executed(jnp.ones((3, 7, action_dim)), s).shape[:2] == (3, 7)
