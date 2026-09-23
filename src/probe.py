@@ -257,7 +257,11 @@ def run(
     v = verdict(summary)
     (out / "verdict.json").write_text(json.dumps(v, indent=2))
     near = summary[(summary["sigma"] == v["sigma"]) & summary["k"].between(1, 4)]
-    print(near.groupby("level")[["rho", "rho_total", "rel", "floor"]].mean().round(3).to_string())
+    g = near.groupby("level")
+    table = g[["rel", "floor"]].mean()
+    table.insert(0, "rho", 1 - g["lin"].sum() / g["pred"].sum())  # pooled over k, as in verdict()
+    table.insert(1, "rho_total", 1 - g["lin"].sum() / g["chunk"].sum())
+    print(table.round(3).to_string())
     print(json.dumps(v))
 
 
