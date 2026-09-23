@@ -1,7 +1,8 @@
 """JIT Reflex: linearize a frozen chunking flow policy along its predicted trajectory.
 
-Between policy calls the robot acts with  a = nom + clip(gain @ (obs - ref)),  where ref is the predicted
-observation, nom = pi(z, ref)[0] (or the chunk's action) and gain = d pi(z, o)[0] / d o at o = ref.
+Between policy calls the robot acts with  a = nom + clip(gain @ (obs - ref)),  where ref_j is the predicted
+observation at chunk index j, nom_j = pi(roll(z, -j), ref_j)[0] (or the chunk's action) and
+gain_j = d pi(roll(z, -j), o)[0] / d o at o = ref_j. The noise is rolled so that row 0 is z[j]: see shifted_noise.
 See docs/superpowers/specs/2026-09-23-jit-reflex-phase-a-design.md (section 4).
 """
 
@@ -33,11 +34,21 @@ def nominal_obs(step_fn, state, actions):
     return jax.lax.scan(body, state, actions)[1]
 
 
+def shifted_noise(noise):
+    """noise [H, A] -> [H, H, A]; entry j = roll(noise, -j), so row 0 is noise[j], the noise of chunk index j.
+
+    A fresh call's first action comes from noise row 0, so re-asking pi about chunk index j must start from row j:
+    with the unshifted noise, pi(z, o^_j)[0] is effectively a different sample than chunk[j].
+    """
+    return jax.vmap(lambda j: jnp.roll(noise, -j, axis=0))(jnp.arange(noise.shape[0]))
+
+
 def package(policy, noise, ref, chunk, num_steps, requery: bool, feedback: bool, batch_size: int = 16):
     """Reflex package for one policy call, in chunk frame.
 
-    noise [B, H, A] (the call's sampling noise), ref [B, H, O] (predicted obs per chunk index), chunk [B, H, A].
-    Returns nom [B, H, A] (pi(noise, ref)[0] if requery else chunk) and gain [B, H, A, O] (None without feedback).
+    noise [B, H, A] (the call's sampling noise z), ref [B, H, O] (predicted obs per chunk index), chunk [B, H, A].
+    Returns nom [B, H, A] (nom_j = pi(roll(z, -j), ref_j)[0] if requery else chunk) and gain [B, H, A, O]
+    (gain_j = d pi(roll(z, -j), o)[0] / d o at ref_j; None without feedback).
     Envs are processed batch_size at a time because Jacobian activations are large.
     """
     if not (requery or feedback):
@@ -46,8 +57,8 @@ def package(policy, noise, ref, chunk, num_steps, requery: bool, feedback: bool,
     def per_env(x):
         n, r = x
         if feedback:
-            return jax.vmap(lambda o: first_action_and_jacobian(policy, n, o, num_steps))(r)
-        return policy.action_from_noise(jnp.broadcast_to(n, (r.shape[0], *n.shape)), r, num_steps)[:, 0], None
+            return jax.vmap(lambda nj, o: first_action_and_jacobian(policy, nj, o, num_steps))(shifted_noise(n), r)
+        return policy.action_from_noise(shifted_noise(n), r, num_steps)[:, 0], None
 
     a0, jac = jax.lax.map(per_env, (noise, ref), batch_size=min(batch_size, noise.shape[0]))
     return (a0 if requery else chunk), jac

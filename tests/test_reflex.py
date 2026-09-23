@@ -69,20 +69,33 @@ def test_package_flags():
     noise = jax.random.normal(jax.random.key(5), (B, H, A))
     ref = jax.random.normal(jax.random.key(6), (B, H, O))
     chunk = jnp.ones((B, H, A))
-    a0, jac = reflex.first_action_and_jacobian(policy, noise[1], ref[1, 3], 5)
+    a0, jac = reflex.first_action_and_jacobian(policy, jnp.roll(noise[1], -3, axis=0), ref[1, 3], 5)
+    a0_first, jac_first = reflex.first_action_and_jacobian(policy, noise[1], ref[1, 0], 5)  # index 0: roll by 0
 
     nom, gain = reflex.package(policy, noise, ref, chunk, 5, requery=True, feedback=True)
     assert nom.shape == (B, H, A) and gain.shape == (B, H, A, O)
     np.testing.assert_allclose(nom[1, 3], a0, atol=1e-5)
     np.testing.assert_allclose(gain[1, 3], jac, atol=1e-5)
+    np.testing.assert_allclose(nom[1, 0], a0_first, atol=1e-5)
+    np.testing.assert_allclose(gain[1, 0], jac_first, atol=1e-5)
 
     nom, gain = reflex.package(policy, noise, ref, chunk, 5, requery=True, feedback=False)
     assert gain is None
     np.testing.assert_allclose(nom[1, 3], a0, atol=1e-5)
+    np.testing.assert_allclose(nom[1, 0], a0_first, atol=1e-5)
 
     nom, gain = reflex.package(policy, noise, ref, chunk, 5, requery=False, feedback=False)
     assert gain is None
     np.testing.assert_allclose(nom, chunk)
+
+
+def test_shifted_noise():
+    z = jax.random.normal(jax.random.key(8), (8, 3))
+    s = reflex.shifted_noise(z)
+    assert s.shape == (8, 8, 3)
+    np.testing.assert_array_equal(s[:, 0], z)  # row 0 of entry j is z[j]
+    np.testing.assert_array_equal(s[0], z)
+    np.testing.assert_array_equal(s[3], jnp.roll(z, -3, axis=0))
 
 
 def test_correct_is_identity_at_zero_deviation_and_clips():

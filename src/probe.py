@@ -1,7 +1,8 @@
 """E1 kill-test: is a frozen flow policy locally linear along its predicted trajectory?
 
 For sampled states x_t: chunk A = pi(z, o_t); predicted obs o^_{t+k} (noise-free fork of the simulator);
-noisy obs o_{t+k} (action noise sigma); oracle a* = pi(z, o_{t+k})[0] = what a fresh call would do now.
+noisy obs o_{t+k} (action noise sigma); oracle a* = pi(roll(z, -k), o_{t+k})[0] = what a fresh call would do now.
+The noise is rolled so that row 0 is z[k], the noise chunk[k] came from (reflex.shifted_noise).
 See docs/superpowers/specs/2026-09-23-jit-reflex-phase-a-design.md (section 5, E1).
 """
 
@@ -170,7 +171,8 @@ def probe_one(env, env_params, policy, state, obs, key, sigmas: Sequence[float],
         return jax.lax.scan(one_step, (state, jnp.bool_(False)), (actions, jax.random.split(key, K)))[1]
 
     nom_obs, nom_ended = rollout(chunk[:K], k_nom)  # o^_{t+1..t+K}
-    a_ref, jac = jax.vmap(lambda o: reflex.first_action_and_jacobian(policy, z, o, num_steps))(nom_obs)
+    shifted = reflex.shifted_noise(z)[1:]  # [K, H, A]: offset k starts from row z[k]
+    a_ref, jac = jax.vmap(lambda n, o: reflex.first_action_and_jacobian(policy, n, o, num_steps))(shifted, nom_obs)
 
     S = len(sigmas)
     noise = jax.random.normal(k_eps, (S, num_draws, K, A))
@@ -179,7 +181,8 @@ def probe_one(env, env_params, policy, state, obs, key, sigmas: Sequence[float],
     obs_t, ended = jax.vmap(jax.vmap(rollout))(noisy_actions, roll_keys)  # [S, M, K, O], [S, M, K]
 
     flat = obs_t.reshape(-1, obs_t.shape[-1])
-    a_star = policy.action_from_noise(jnp.broadcast_to(z, (flat.shape[0], H, A)), flat, num_steps)[:, 0]
+    noises = jnp.broadcast_to(shifted, (*obs_t.shape[:-1], H, A)).reshape(-1, H, A)  # K axes aligned, like flat
+    a_star = policy.action_from_noise(noises, flat, num_steps)[:, 0]
     out = errors(chunk[1:], a_ref, jac, nom_obs, obs_t, a_star.reshape(*obs_t.shape[:-1], A))
     out["valid"] = ~(ended | nom_ended)
     return out
