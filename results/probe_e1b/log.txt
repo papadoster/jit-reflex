@@ -1,0 +1,27 @@
+worlds/l/grasp_easy.json: 613 alive boundary states
+worlds/l/catapult.json: 1944 alive boundary states
+worlds/l/cartpole_thrust.json: 804 alive boundary states
+worlds/l/hard_lunar_lander.json: 821 alive boundary states
+worlds/l/mjc_half_cheetah.json: 1266 alive boundary states
+worlds/l/mjc_swimmer.json: 2767 alive boundary states
+worlds/l/mjc_walker.json: 2917 alive boundary states
+worlds/l/h17_unicycle.json: 1291 alive boundary states
+worlds/l/chain_lander.json: 778 alive boundary states
+worlds/l/catcher_v3.json: 1101 alive boundary states
+worlds/l/trampoline.json: 2783 alive boundary states
+worlds/l/car_launch.json: 864 alive boundary states
+                                   rho  rho_clip  rho_total    rel  floor
+level                                                                    
+worlds/l/car_launch.json         0.759     0.747      0.931  0.296  0.093
+worlds/l/cartpole_thrust.json    0.409     0.409      0.702  0.489  0.009
+worlds/l/catapult.json           0.399     0.519      0.933  0.119  0.071
+worlds/l/catcher_v3.json         0.772     0.832      0.958  0.177  0.092
+worlds/l/chain_lander.json       0.565     0.565      0.957  0.089  0.016
+worlds/l/grasp_easy.json         0.549     0.562      0.889  0.229  0.203
+worlds/l/h17_unicycle.json       0.375     0.389      0.759  0.363  0.147
+worlds/l/hard_lunar_lander.json  0.473     0.516      0.799  0.380  0.032
+worlds/l/mjc_half_cheetah.json   0.645     0.647      0.955  0.116  0.363
+worlds/l/mjc_swimmer.json        0.424     0.435      0.816  0.291  0.270
+worlds/l/mjc_walker.json         0.537     0.522      0.944  0.116  0.875
+worlds/l/trampoline.json         0.836     0.832      0.973  0.160  0.054
+{"verdict": "GO", "on": "lin_clip", "sigma": 0.1, "R": 0.5417958052830165, "levels_ok": 12, "levels": 12, "rel": 0.23530536822435577}
