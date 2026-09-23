@@ -2,9 +2,11 @@ import flax.nnx as nnx
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pandas as pd
 
 import eval_flow
 import model as _model
+import probe
 import reflex
 
 
@@ -97,3 +99,39 @@ def test_forward_equivalents():
     assert reflex.forward_equivalents("realtime") == 15
     assert reflex.forward_equivalents("pred") == 45
     assert reflex.forward_equivalents("reflex") == reflex.forward_equivalents("reflex_chunk") == 525
+
+
+def test_errors_exact_for_linear_oracle():
+    K, A, O = 3, 2, 4
+    k = jax.random.split(jax.random.key(7), 4)
+    jac = jax.random.normal(k[0], (K, A, O))
+    a_ref = jax.random.normal(k[1], (K, A))
+    nom_obs = jax.random.normal(k[2], (K, O))
+    obs = nom_obs + 0.1 * jax.random.normal(k[3], (5, K, O))
+    a_star = a_ref + jnp.einsum("kao,nko->nka", jac, obs - nom_obs)  # an oracle that IS linear
+    e = probe.errors(a_ref, a_ref, jac, nom_obs, obs, a_star)
+    np.testing.assert_allclose(e["lin"], 0, atol=1e-8)
+    np.testing.assert_allclose(e["floor"], 0)
+    assert e["pred"].shape == (5, K) and float(e["pred"].mean()) > 0
+
+
+def _summary(rho_by_level, rel=0.5):
+    rows = [
+        {"level": lvl, "sigma": s, "k": k, "rho": r, "rel": rel}
+        for lvl, r in rho_by_level.items()
+        for s in (0.1, 0.2)
+        for k in range(1, 8)
+    ]
+    return pd.DataFrame(rows)
+
+
+def test_verdict_rules():
+    assert probe.verdict(_summary({f"l{i}": 0.8 for i in range(12)}))["verdict"] == "GO"
+    assert probe.verdict(_summary({f"l{i}": 0.1 for i in range(12)}))["verdict"] == "KILL"
+    assert probe.verdict(_summary({f"l{i}": 0.3 for i in range(12)}))["verdict"] == "GRAY"
+    seven_good = {f"l{i}": (0.9 if i < 7 else 0.1) for i in range(12)}  # median 0.9 but only 7/12 levels ok
+    assert probe.verdict(_summary(seven_good))["verdict"] == "GRAY"
+    weak_noise = _summary({f"l{i}": 0.1 for i in range(12)}, rel=0.05)  # deviations barely matter at sigma=0.1
+    weak_noise.loc[weak_noise["sigma"] == 0.2, "rho"] = 0.8
+    v = probe.verdict(weak_noise)
+    assert v["sigma"] == 0.2 and v["verdict"] == "GO"
