@@ -130,7 +130,7 @@ def test_errors_exact_for_linear_oracle():
 
 def _summary(rho_by_level, rel=0.5):
     rows = [
-        {"level": lvl, "sigma": s, "k": k, "rho": r, "rel": rel}
+        {"level": lvl, "sigma": s, "k": k, "rho": r, "rel": rel, "pred": 1.0, "lin": 1 - r}
         for lvl, r in rho_by_level.items()
         for s in (0.1, 0.2)
         for k in range(1, 8)
@@ -145,6 +145,14 @@ def test_verdict_rules():
     seven_good = {f"l{i}": (0.9 if i < 7 else 0.1) for i in range(12)}  # median 0.9 but only 7/12 levels ok
     assert probe.verdict(_summary(seven_good))["verdict"] == "GRAY"
     weak_noise = _summary({f"l{i}": 0.1 for i in range(12)}, rel=0.05)  # deviations barely matter at sigma=0.1
-    weak_noise.loc[weak_noise["sigma"] == 0.2, "rho"] = 0.8
+    weak_noise.loc[weak_noise["sigma"] == 0.2, ["rho", "lin"]] = [0.8, 0.2]
     v = probe.verdict(weak_noise)
     assert v["sigma"] == 0.2 and v["verdict"] == "GO"
+
+
+def test_verdict_pools_over_k():
+    df = _summary({f"l{i}": 0.8 for i in range(12)})
+    df.loc[df["k"] == 1, ["pred", "lin"]] = [1e-3, 0.01]  # per-k rho = -9 at k = 1
+    df.loc[df["k"].between(2, 4), ["pred", "lin"]] = [1.0, 0.2]
+    # pooled: 1 - 0.61 / 3.001 = 0.80 -> GO; the mean of per-k rho would be (-9 + 3 * 0.8) / 4 = -1.65 -> KILL
+    assert probe.verdict(df)["verdict"] == "GO"

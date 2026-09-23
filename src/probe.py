@@ -67,11 +67,15 @@ def errors(chunk, a_ref, jac, nom_obs, obs, a_star):
 
 
 def verdict(summary: pd.DataFrame) -> dict:
-    """Pre-registered E1 decision rule (spec section 5). summary needs columns level, sigma, k, rho, rel."""
+    """Pre-registered E1 decision rule (spec section 5). summary needs columns level, sigma, k, lin, pred, rel.
+
+    Level rho is pooled over k = 1..4: 1 - sum_k mean e_lin / sum_k mean e_pred.
+    """
     near = summary[summary["k"].between(1, 4)]
     rel = float(near[near["sigma"] == 0.1]["rel"].mean())
     sigma = 0.1 if rel >= 0.1 else 0.2  # relevance check: deviations must actually change the policy's decisions
-    per_level = near[near["sigma"] == sigma].groupby("level")["rho"].mean()
+    g = near[near["sigma"] == sigma].groupby("level")[["lin", "pred"]].sum()
+    per_level = 1 - g["lin"] / g["pred"]  # pooled over k = 1..4: one k with a tiny e_pred can't decide a level
     r, n_ok, n = float(per_level.median()), int((per_level >= 0.3).sum()), len(per_level)
     if r >= 0.5 and n_ok >= math.ceil(2 * n / 3):
         v = "GO"
@@ -237,6 +241,8 @@ def run(
         res = jax.lax.map(one, (state, obs, jax.random.split(k_probe, num_states)), batch_size=batch_size)
         return res, boundaries[2].sum()
 
+    out = pathlib.Path(output_dir)
+    out.mkdir(parents=True, exist_ok=True)
     frames = []
     for i, level_path in enumerate(level_paths):
         level = jax.tree.map(lambda x: x[i], levels)
@@ -246,10 +252,8 @@ def run(
         print(f"{level_path}: {int(n_alive)} alive boundary states")
         assert n_alive >= num_states, "too few alive states: sample() would pick finished episodes; raise --num-envs"
         frames.append(summarize(level_path, res, sigmas))
-    summary = pd.concat(frames, ignore_index=True)
-    out = pathlib.Path(output_dir)
-    out.mkdir(parents=True, exist_ok=True)
-    summary.to_csv(out / "summary.csv", index=False)
+        summary = pd.concat(frames, ignore_index=True)
+        summary.to_csv(out / "summary.csv", index=False)  # after every level: a crash keeps the finished ones
     v = verdict(summary)
     (out / "verdict.json").write_text(json.dumps(v, indent=2))
     near = summary[(summary["sigma"] == v["sigma"]) & summary["k"].between(1, 4)]
