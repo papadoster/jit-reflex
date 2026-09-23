@@ -168,6 +168,25 @@ def eval(
     return return_info, video
 
 
+METHODS = {
+    "naive": NaiveMethodConfig(),
+    "realtime": RealtimeMethodConfig(),
+    "bid": BIDMethodConfig(),
+    "hard_masking": RealtimeMethodConfig(prefix_attention_schedule="zeros"),
+}
+
+
+def horizons_for(delay: int, chunk_size: int, horizons: Sequence[int], minmax: bool) -> list[int]:
+    """Execute horizons to evaluate at `delay`: explicit list, {min, max}, or upstream's full sweep.
+
+    Keeps max(1, delay) <= s <= chunk_size - delay: upstream asserts s >= d, and s + d > H would execute padding zeros.
+    """
+    lo, hi = max(1, delay), chunk_size - delay
+    if horizons:
+        return [s for s in horizons if lo <= s <= hi]
+    return sorted({lo, hi}) if minmax else list(range(lo, hi + 1))
+
+
 def main(
     run_path: str,
     config: EvalConfig = EvalConfig(),
@@ -185,8 +204,12 @@ def main(
         "worlds/l/trampoline.json",
         "worlds/l/car_launch.json",
     ),
-    seed: int = 0,
+    seeds: Sequence[int] = (0,),
     output_dir: str | None = "eval_output",
+    methods: Sequence[str] = ("naive", "realtime", "bid", "hard_masking"),
+    delays: Sequence[int] = (0, 1, 2, 3, 4),
+    horizons: Sequence[int] = (),
+    minmax: bool = False,
 ):
     static_env_params = kenv_state.StaticEnvParams(**train_expert.LARGE_ENV_PARAMS, frame_skip=train_expert.FRAME_SKIP)
     env_params = kenv_state.EnvParams()
@@ -245,64 +268,27 @@ def main(
         eval_info, _ = eval(config, env, rng, level, policy, env_params, static_env_params, weak_policy)
         return eval_info
 
-    rngs = jax.random.split(jax.random.key(seed), len(level_paths))
     results = collections.defaultdict(list)
-    for inference_delay in [0, 1, 2, 3, 4]:
-        for execute_horizon in range(max(1, inference_delay), 8 - inference_delay + 1):
-            print(f"{inference_delay=} {execute_horizon=}")
-            c = dataclasses.replace(
-                config, inference_delay=inference_delay, execute_horizon=execute_horizon, method=NaiveMethodConfig()
-            )
-            out = jax.device_get(_eval(c, rngs, levels, state_dicts, weak_state_dicts))
-            for i in range(len(level_paths)):
-                for k, v in out.items():
-                    results[k].append(v[i])
-                results["delay"].append(inference_delay)
-                results["method"].append("naive")
-                results["level"].append(level_paths[i])
-                results["execute_horizon"].append(execute_horizon)
-
-            c = dataclasses.replace(
-                config, inference_delay=inference_delay, execute_horizon=execute_horizon, method=RealtimeMethodConfig()
-            )
-            out = jax.device_get(_eval(c, rngs, levels, state_dicts, weak_state_dicts))
-            for i in range(len(level_paths)):
-                for k, v in out.items():
-                    results[k].append(v[i])
-                results["delay"].append(inference_delay)
-                results["method"].append("realtime")
-                results["level"].append(level_paths[i])
-                results["execute_horizon"].append(execute_horizon)
-
-            c = dataclasses.replace(
-                config, inference_delay=inference_delay, execute_horizon=execute_horizon, method=BIDMethodConfig()
-            )
-            out = jax.device_get(_eval(c, rngs, levels, state_dicts, weak_state_dicts))
-            for i in range(len(level_paths)):
-                for k, v in out.items():
-                    results[k].append(v[i])
-                results["delay"].append(inference_delay)
-                results["method"].append("bid")
-                results["level"].append(level_paths[i])
-                results["execute_horizon"].append(execute_horizon)
-
-            c = dataclasses.replace(
-                config,
-                inference_delay=inference_delay,
-                execute_horizon=execute_horizon,
-                method=RealtimeMethodConfig(prefix_attention_schedule="zeros"),
-            )
-            out = jax.device_get(_eval(c, rngs, levels, state_dicts, weak_state_dicts))
-            for i in range(len(level_paths)):
-                for k, v in out.items():
-                    results[k].append(v[i])
-                results["delay"].append(inference_delay)
-                results["method"].append("hard_masking")
-                results["level"].append(level_paths[i])
-                results["execute_horizon"].append(execute_horizon)
+    for seed in seeds:
+        rngs = jax.random.split(jax.random.key(seed), len(level_paths))
+        for inference_delay in delays:
+            for execute_horizon in horizons_for(inference_delay, config.model.action_chunk_size, horizons, minmax):
+                for name in methods:
+                    print(f"{seed=} {name=} {inference_delay=} {execute_horizon=}")
+                    c = dataclasses.replace(
+                        config, inference_delay=inference_delay, execute_horizon=execute_horizon, method=METHODS[name]
+                    )
+                    out = jax.device_get(_eval(c, rngs, levels, state_dicts, weak_state_dicts))
+                    for i in range(len(level_paths)):
+                        for k, v in out.items():
+                            results[k].append(v[i])
+                        results["seed"].append(seed)
+                        results["delay"].append(inference_delay)
+                        results["method"].append(name)
+                        results["level"].append(level_paths[i])
+                        results["execute_horizon"].append(execute_horizon)
     pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
-    df = pd.DataFrame(results)
-    df.to_csv(pathlib.Path(output_dir) / "results.csv", index=False)
+    pd.DataFrame(results).to_csv(pathlib.Path(output_dir) / "results.csv", index=False)
 
 
 if __name__ == "__main__":
