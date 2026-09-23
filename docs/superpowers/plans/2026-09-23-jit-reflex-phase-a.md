@@ -447,6 +447,13 @@ def test_correct_is_identity_at_zero_deviation_and_clips():
     np.testing.assert_allclose(reflex.correct(nom, gain, ref, ref, 0.5), nom)
     out = reflex.correct(nom, gain, ref, ref + jnp.array([1.0, 0.1]), 0.5)
     np.testing.assert_allclose(out, [0.1 + 0.5, -0.2 + 0.1], atol=1e-6)
+
+
+def test_forward_equivalents():
+    assert reflex.forward_equivalents("naive") == 5
+    assert reflex.forward_equivalents("realtime") == 15
+    assert reflex.forward_equivalents("pred") == 45
+    assert reflex.forward_equivalents("reflex") == reflex.forward_equivalents("reflex_chunk") == 525
 ```
 
 - [ ] **Step 2: Тесты падают**
@@ -516,12 +523,31 @@ def correct(nom, gain, ref, obs, max_correction):
     """a = nom + clip(gain @ (obs - ref), +-max_correction); broadcasts over leading dims."""
     delta = jnp.einsum("...ao,...o->...a", gain, obs - ref)
     return nom + jnp.clip(delta, -max_correction, max_correction)
+
+
+def forward_equivalents(method: str, num_steps: int = 5, chunk_size: int = 8, action_dim: int = 6) -> int:
+    """Network evaluations per policy call, one VJP counted as 2 (spec section 4, budget).
+
+    Not counted: the reflex's per-step correction (action_dim x obs_dim MACs, negligible) and the predictor
+    (a simulator fork here, a separate model in a real system).
+    """
+    S, H, A = num_steps, chunk_size, action_dim
+    return {
+        "naive": S,
+        "reflex_off": S,
+        "realtime": 3 * S,  # one guidance VJP per flow step
+        "hard_masking": 3 * S,
+        "bid": 16 * S,  # default n_samples=16, no weak policy
+        "pred": S + H * S,  # chunk + pi at H predicted states
+        "reflex": S + H * (S + 2 * A * S),  # + A VJPs through the whole flow at each predicted state
+        "reflex_chunk": S + H * (S + 2 * A * S),
+    }[method]
 ```
 
 - [ ] **Step 4: Тесты проходят**
 
 Run: `uv run pytest tests/test_reflex.py -q`
-Expected: `6 passed`.
+Expected: `7 passed`.
 
 - [ ] **Step 5: Commit**
 
@@ -644,7 +670,7 @@ def verdict(summary: pd.DataFrame) -> dict:
 - [ ] **Step 4: Тесты проходят**
 
 Run: `uv run pytest tests/test_reflex.py -q`
-Expected: `8 passed`.
+Expected: `9 passed`.
 
 - [ ] **Step 5: Commit**
 
@@ -884,35 +910,64 @@ def cost(
     level_path: str = LEVELS[0],
     batch: int = 1,
     num_flow_steps: int = 5,
+    delay: int = 2,
+    horizon: int = 6,
     repeats: int = 20,
+    out: str | None = None,
 ):
-    """Latency and FLOPs of one policy call: plain chunk vs chunk + reflex package (spec section 4, budget).
+    """Per-call cost of every E2 method: network evaluations (analytic), GFLOP and measured latency (spec section 4).
 
-    The predictor (a simulator fork here) is not included: in a real system it is a separate model.
+    GFLOP of one network evaluation comes from cost_analysis on a loop-free call: whole calls contain lax.scan loops,
+    whose bodies XLA may count only once. The predictor (a simulator fork here) is not included.
     """
     _, _, _, obs_dim, action_dim = setup([level_path])
     policy = make_policy(load_state_dict(run_path, level_path), obs_dim, action_dim)
     H = policy.action_chunk_size
-    noise = jax.random.normal(jax.random.key(0), (batch, H, action_dim))
-    obs, ref = jnp.zeros((batch, obs_dim)), jnp.zeros((batch, H, obs_dim))
+    key = jax.random.key(0)
+    noise = jax.random.normal(key, (batch, H, action_dim))
+    obs, ref, prev = jnp.zeros((batch, obs_dim)), jnp.zeros((batch, H, obs_dim)), jnp.zeros((batch, H, action_dim))
+    one_eval = jax.jit(lambda o, x: policy(o, x, jnp.zeros(())))
+    analysis = one_eval.lower(obs[:1], noise[:1]).compile().cost_analysis()
+    gflop_per_eval = (analysis[0] if isinstance(analysis, list) else analysis)["flops"] / 1e9
 
-    def chunk_only(noise, obs, ref):
-        return policy.action_from_noise(noise, obs, num_flow_steps)
+    def with_package(requery, feedback):
+        def call(noise, obs, ref, prev):
+            chunk = policy.action_from_noise(noise, obs, num_flow_steps)
+            return chunk, reflex.package(policy, noise, ref, chunk, num_flow_steps, requery, feedback)
 
-    def chunk_and_reflex(noise, obs, ref):
-        chunk = policy.action_from_noise(noise, obs, num_flow_steps)
-        return reflex.package(policy, noise, ref, chunk, num_flow_steps, requery=True, feedback=True)
+        return call
 
-    for name, fn in (("chunk", chunk_only), ("chunk+reflex", chunk_and_reflex)):
+    calls = {
+        "naive": lambda noise, obs, ref, prev: policy.action_from_noise(noise, obs, num_flow_steps),
+        "realtime": lambda noise, obs, ref, prev: policy.realtime_action(
+            key, obs, num_flow_steps, prev, delay, H - horizon, "exp", 5.0
+        ),
+        "pred": with_package(True, False),
+        "reflex": with_package(True, True),
+        "reflex_chunk": with_package(False, True),
+    }
+    rows = []
+    for name, fn in calls.items():
         f = jax.jit(fn)
-        analysis = f.lower(noise, obs, ref).compile().cost_analysis()
-        flops = (analysis[0] if isinstance(analysis, list) else analysis)["flops"]
-        jax.block_until_ready(f(noise, obs, ref))
+        jax.block_until_ready(f(noise, obs, ref, prev))
         start = time.perf_counter()
         for _ in range(repeats):
-            jax.block_until_ready(f(noise, obs, ref))
-        ms = (time.perf_counter() - start) / repeats * 1e3
-        print(f"{name}: {ms:.2f} ms, {flops / 1e9:.2f} GFLOP (batch {batch})")
+            jax.block_until_ready(f(noise, obs, ref, prev))
+        evals = reflex.forward_equivalents(name, num_flow_steps, H, action_dim)
+        rows.append({
+            "method": name,
+            "batch": batch,
+            "evals_per_call": evals,
+            "gflop_per_call": evals * gflop_per_eval * batch,
+            "ms_per_call": (time.perf_counter() - start) / repeats * 1e3,
+        })
+    df = pd.DataFrame(rows)
+    df["latency_vs_realtime"] = df["ms_per_call"] / df.loc[df["method"] == "realtime", "ms_per_call"].item()
+    print(f"one network evaluation (batch 1): {gflop_per_eval:.4f} GFLOP")
+    print(df.round(3).to_string(index=False))
+    if out:
+        pathlib.Path(out).parent.mkdir(parents=True, exist_ok=True)
+        df.to_csv(out, index=False)
 
 
 if __name__ == "__main__":
@@ -922,7 +977,7 @@ if __name__ == "__main__":
 - [ ] **Step 3: Тесты не сломались**
 
 Run: `uv run pytest tests/test_reflex.py -q`
-Expected: `8 passed`.
+Expected: `9 passed`.
 
 - [ ] **Step 4: Smoke-прогон зонда на одном уровне**
 
@@ -945,7 +1000,7 @@ print(df[['sigma', 'k', 'n', 'rho', 'rel']].to_string())"
 uv run src/probe.py cost
 ```
 
-Ожидаются две строки вида `chunk: … ms, … GFLOP (batch 1)` и `chunk+reflex: …`.
+Ожидается строка `one network evaluation (batch 1): … GFLOP` и таблица из 5 методов. `evals_per_call`: naive 5, realtime 15, pred 45, reflex и reflex_chunk 525.
 
 - [ ] **Step 6: Commit**
 
@@ -984,6 +1039,7 @@ def test_gate2_detects_go(tmp_path):
     out = plot.gate2(str(tmp_path / "main.csv"), str(tmp_path / "no-kicks*/results.csv"))
     assert out["a"] and out["b"] and out["pred_check"] and not out["c"]
     assert out["decision"] == "GO"
+    assert out["b_work_ratio"] > 1 and "fewer policy calls" in out["b_claim"]  # fewer calls != less compute
 ```
 
 - [ ] **Step 2: Тесты падают**
@@ -1008,6 +1064,8 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import tyro  # noqa: E402
+
+import reflex  # noqa: E402
 
 
 def probe(summary_csv: str = "results/probe/summary.csv", out: str = "results/probe/rho.png"):
@@ -1074,6 +1132,12 @@ def success(
     calls = df.drop_duplicates(["delay", "execute_horizon"])[["delay", "execute_horizon"]].copy()
     calls["calls_per_episode"] = np.ceil(256 / calls["execute_horizon"]).astype(int)
     print(calls.sort_values(["delay", "execute_horizon"]).to_string(index=False))
+    # work = calls x network evaluations per call: fewer calls must not hide more compute
+    df["work_per_episode"] = [
+        reflex.forward_equivalents(m) * math.ceil(256 / s) for m, s in zip(df["method"], df["execute_horizon"])
+    ]
+    print("network evaluations per episode:")
+    print(df.pivot_table(index=["delay", "execute_horizon"], columns="method", values="work_per_episode").to_string())
     print(f"saved {out}")
 
 
@@ -1099,6 +1163,13 @@ def gate2(
     short = t[t["execute_horizon"] == t["delay"].clip(lower=1)].set_index(["seed", "delay"])["realtime"]
     far = t[t["delay"].between(1, 3) & (t["execute_horizon"] == 8 - t["delay"])].set_index(["seed", "delay"])["reflex"]
     b_gap = float((far - short.reindex(far.index)).mean())
+    # (b) counts calls; report the work next to it (spec: fewer calls must not hide more compute)
+    calls_saved = float(np.mean([math.ceil(256 / max(1, d)) / math.ceil(256 / (8 - d)) for d in (1, 2, 3)]))
+    work_ratio = float(np.mean([
+        reflex.forward_equivalents("reflex") * math.ceil(256 / (8 - d))
+        / (reflex.forward_equivalents("realtime") * math.ceil(256 / max(1, d)))
+        for d in (1, 2, 3)
+    ]))
     total_gain = float((t["reflex"] - t["naive"]).mean())
     j_gain = float((t["reflex"] - t["pred"]).mean())
     pred_check = bool(total_gain > 0 and j_gain >= 0.5 * total_gain)
@@ -1111,10 +1182,12 @@ def gate2(
         c_gap = float((k["reflex"] - k[["naive", "realtime"]].max(axis=1)).mean())
     out = {
         "a": a, "a_gap": float(a_by_seed.mean()),
-        "b": bool(b_gap >= -0.02), "b_gap": b_gap,
+        "b": bool(b_gap >= -0.02), "b_gap": b_gap, "b_calls_saved": calls_saved, "b_work_ratio": work_ratio,
         "c": bool(c_gap >= 0.05), "c_gap": c_gap,
         "pred_check": pred_check, "total_gain": total_gain, "j_gain": j_gain,
     }
+    if out["b"]:
+        out["b_claim"] = f"{calls_saved:.1f}x fewer policy calls at {work_ratio:.1f}x the network evaluations of realtime"
     out["decision"] = "GO" if (out["a"] or out["b"] or out["c"]) and pred_check else "NEGATIVE"
     print(json.dumps(out, indent=2))
     return out
@@ -1127,7 +1200,7 @@ if __name__ == "__main__":
 - [ ] **Step 4: Тесты проходят**
 
 Run: `uv run pytest tests/test_reflex.py -q`
-Expected: `10 passed`.
+Expected: `11 passed`.
 
 - [ ] **Step 5: Commit**
 
@@ -1297,7 +1370,7 @@ def kick_speed(
 - [ ] **Step 5: Тесты проходят**
 
 Run: `uv run pytest tests/test_reflex.py -q`
-Expected: `11 passed`.
+Expected: `12 passed`.
 
 - [ ] **Step 6: Smoke `kick-speed` на одном уровне**
 
@@ -1540,7 +1613,7 @@ def eval(
 - [ ] **Step 4: Тесты не сломались**
 
 Run: `uv run pytest tests/test_reflex.py -q`
-Expected: `11 passed`.
+Expected: `12 passed`.
 
 - [ ] **Step 5: Sanity-проверка — `reflex_off` воспроизводит `naive`**
 
@@ -1639,8 +1712,8 @@ done
 - [ ] **Step 5: Стоимость вызова**
 
 ```bash
-uv run src/probe.py cost --batch 1 | tee results/eval/cost.txt
-uv run src/probe.py cost --batch 256 | tee -a results/eval/cost.txt
+uv run src/probe.py cost --batch 1 --out results/eval/cost_b1.csv | tee results/eval/cost.txt
+uv run src/probe.py cost --batch 256 --out results/eval/cost_b256.csv | tee -a results/eval/cost.txt
 ```
 
 - [ ] **Step 6: Вернуть результаты на Mac и построить графики**
@@ -1682,7 +1755,9 @@ git commit -m "results: E2 closed loop, max_correction ablation, kicks"
    - `reflex` против `reflex_chunk`;
    - где рефлекс вредит (уровни, большие `d`);
    - как `max_correction` влияет на результат;
-   - сколько стоит вызов по сравнению с обычным чанком.
+   - сколько стоит вызов по сравнению с обычным чанком;
+   - если выполнено (b): формулировка из `b_claim` дословно — во сколько раз меньше вызовов и во сколько раз больше работы на эпизод;
+   - `latency_vs_realtime` у reflex при batch 1 (из `cost_b1.csv`). Если `r > 1.5`, сравнение при одинаковом `d` подыгрывает reflex: честная задержка `⌈r·d⌉`. Предложи пользователю перепрогон на Gate 2.
 
 - [ ] **Step 2: Commit**
 
@@ -1816,7 +1891,7 @@ Expected: все тесты зелёные.
 | Task | Что | Время |
 |---|---|---|
 | 1–3 | окружение, чекпойнты, CLI и smoke (E0) | день 1 |
-| 4–8 | модель, рефлекс, зонд, графики (~450 строк кода, 11 тестов) | дни 2–3 |
+| 4–8 | модель, рефлекс, зонд, графики (~480 строк кода, 12 тестов) | дни 2–3 |
 | 9 | прогон E1 и Gate 1 | день 3–4 |
 | 10–11 | толчки и метод `reflex` в eval (~120 строк) | дни 5–6 |
 | 12–13 | GPU-прогоны (4–6 ч GPU) и Gate 2 | дни 7–9 |
