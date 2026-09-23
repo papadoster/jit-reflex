@@ -25,6 +25,8 @@
 - На **Gate 1** (Task 9) и **Gate 2** (Task 13) нужно остановиться, показать результат пользователю и дождаться решения.
 - Первая компиляция JAX на CPU занимает минуты. Это нормально.
 
+> **Поправка измерения E1** (спек, «Журнал изменений», 2026-09-23): для Tasks 5–7 источник истины — код в репозитории, а не листинги в этом плане (сдвинутый шум `reflex.shifted_noise`, пул `ρ` по `k`, сохранение `summary.csv` после каждого уровня, на 2 теста больше).
+
 ---
 
 ## Структура файлов
@@ -1247,6 +1249,7 @@ Expected: `saved results/probe/rho.png`.
    - как `ρ` меняется с ростом `k` и `σ`;
    - что показывает `rel` (важны ли вообще отклонения);
    - насколько велик `floor` по сравнению с `pred`;
+   - floor со сдвинутым шумом: насколько план спорит сам с собой;
    - итоговое решение по правилу из §5.
 
 - [ ] **Step 4: Commit**
@@ -1617,7 +1620,15 @@ def eval(
 Run: `uv run pytest tests/test_reflex.py -q`
 Expected: `12 passed`.
 
-- [ ] **Step 5: Sanity-проверка — `reflex_off` воспроизводит `naive`**
+- [ ] **Step 5: Upstream-методы побитно не изменились**
+
+```bash
+uv run --offline python scripts/check_upstream_bitwise.py
+```
+
+Expected: каждая строка `IDENTICAL`, код выхода 0. Скрипт сравнивает текущий `src/` с `upstream/main` (`naive`, `realtime`, `bid`, `hard_masking` на уровне policy и `eval()` для `naive` и `realtime`). Любое `DIFFERENT` — ошибка в новом `eval()`: чини её, а не скрипт.
+
+- [ ] **Step 6: Sanity-проверка — `reflex_off` воспроизводит `naive`**
 
 ```bash
 uv run src/eval_flow.py --run-path checkpoints/bc --level-paths worlds/l/grasp_easy.json \
@@ -1632,7 +1643,7 @@ assert abs(a - b) <= 2 / 64, 'reflex_off must reproduce naive: the package merge
 
 Ожидается, что оба числа совпадают или отличаются не больше чем на 2 эпизода. Если нет — ищи ошибку в склейке пакета (`exec_pkg` / `next_pkg`), а не подгоняй допуск.
 
-- [ ] **Step 6: Smoke — варианты рефлекса и толчки**
+- [ ] **Step 7: Smoke — варианты рефлекса и толчки**
 
 ```bash
 uv run src/eval_flow.py --run-path checkpoints/bc --level-paths worlds/l/grasp_easy.json \
@@ -1645,7 +1656,7 @@ cat results/smoke-reflex/results.csv results/smoke-kick/results.csv
 
 Expected: 3 строки и 2 строки. `returned_episode_solved` в `[0, 1]`, нет `nan` (кроме `max_correction` у `naive`).
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
 git add src/eval_flow.py
@@ -1851,7 +1862,7 @@ Expected: `saved results/video_kick.mp4`; слева `naive`, справа `refl
 
 1. **Гипотеза** — формула из §1 спека.
 2. **Метод** — схема из §4 и три варианта.
-3. **E1** — вердикт, картинка, 3 главных наблюдения.
+3. **E1** — вердикт, картинка, 3 главных наблюдения. Отдельно — находка про floor: даже со сдвинутым шумом «переспросить policy» и «продолжать старый план» различаются без всяких отклонений (на `grasp_easy` floor 0.2–0.7, а не ноль; спек, «Журнал изменений»).
 4. **E2** — если был: график, `gate2.json`, толчки, стоимость.
 5. **Ограничения**, строго так:
    - предсказатель — оракул (форк симулятора);
