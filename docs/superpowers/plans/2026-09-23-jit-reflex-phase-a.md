@@ -893,6 +893,7 @@ def run(
             probe_level(load_state_dict(run_path, level_path), level, jax.random.key(seed + i))
         )
         print(f"{level_path}: {int(n_alive)} alive boundary states")
+        assert n_alive >= num_states, "too few alive states: sample() would pick finished episodes; raise --num-envs"
         frames.append(summarize(level_path, res, sigmas))
     summary = pd.concat(frames, ignore_index=True)
     out = pathlib.Path(output_dir)
@@ -1173,7 +1174,7 @@ def gate2(
     total_gain = float((t["reflex"] - t["naive"]).mean())
     j_gain = float((t["reflex"] - t["pred"]).mean())
     pred_check = bool(total_gain > 0 and j_gain >= 0.5 * total_gain)
-    c_gap = float("nan")
+    c_gap = None  # no kick runs; None keeps gate2.json valid JSON
     kick_files = sorted(glob.glob(kick_glob))
     if kick_files:
         k = pd.concat([pd.read_csv(f) for f in kick_files]).pivot_table(
@@ -1183,7 +1184,7 @@ def gate2(
     out = {
         "a": a, "a_gap": float(a_by_seed.mean()),
         "b": bool(b_gap >= -0.02), "b_gap": b_gap, "b_calls_saved": calls_saved, "b_work_ratio": work_ratio,
-        "c": bool(c_gap >= 0.05), "c_gap": c_gap,
+        "c": bool(c_gap is not None and c_gap >= 0.05), "c_gap": c_gap,
         "pred_check": pred_check, "total_gain": total_gain, "j_gain": j_gain,
     }
     if out["b"]:
@@ -1455,6 +1456,7 @@ def eval(
     render_video = train_expert.make_render_video(renderer_pixels.make_render_pixels(env_params, static_env_params))
     assert config.execute_horizon >= config.inference_delay, f"{config.execute_horizon=} {config.inference_delay=}"
     d, s = config.inference_delay, config.execute_horizon
+    assert s + d <= policy.action_chunk_size, f"{s=} + {d=} > H: padded zero actions would be executed"
 
     def execute_chunk(carry, _):
         def step(carry, xs):
@@ -1757,7 +1759,7 @@ git commit -m "results: E2 closed loop, max_correction ablation, kicks"
    - как `max_correction` влияет на результат;
    - сколько стоит вызов по сравнению с обычным чанком;
    - если выполнено (b): формулировка из `b_claim` дословно — во сколько раз меньше вызовов и во сколько раз больше работы на эпизод;
-   - `latency_vs_realtime` у reflex при batch 1 (из `cost_b1.csv`). Если `r > 1.5`, сравнение при одинаковом `d` подыгрывает reflex: честная задержка `⌈r·d⌉`. Предложи пользователю перепрогон на Gate 2.
+   - `latency_vs_realtime` у reflex при batch 1 (из `cost_b1.csv`). Если `r > 1.5`, сравнение при одинаковом `d` подыгрывает reflex: честная задержка `d' = ⌈r·d⌉`. При ней допустимо только `s ≤ 8 − d'`, поэтому перепрогон — это reflex при `(d', 8 − d')`, и `b_calls_saved` пересчитывается. Предложи пользователю перепрогон на Gate 2.
 
 - [ ] **Step 2: Commit**
 
@@ -1891,7 +1893,7 @@ Expected: все тесты зелёные.
 | Task | Что | Время |
 |---|---|---|
 | 1–3 | окружение, чекпойнты, CLI и smoke (E0) | день 1 |
-| 4–8 | модель, рефлекс, зонд, графики (~480 строк кода, 12 тестов) | дни 2–3 |
+| 4–8 | модель, рефлекс, зонд, графики (~480 строк кода, 11 тестов) | дни 2–3 |
 | 9 | прогон E1 и Gate 1 | день 3–4 |
 | 10–11 | толчки и метод `reflex` в eval (~120 строк) | дни 5–6 |
 | 12–13 | GPU-прогоны (4–6 ч GPU) и Gate 2 | дни 7–9 |
