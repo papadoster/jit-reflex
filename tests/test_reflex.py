@@ -55,10 +55,10 @@ def test_first_action_and_jacobian_matches_finite_differences():
 
 def test_nominal_obs_rolls_forward():
     def step(state, action):
-        return state + action, state + action  # (obs, state)
+        return 10 * (state + action), state + action  # (obs, state); obs != state pins the unpack order
 
     obs = reflex.nominal_obs(step, jnp.zeros(2), jnp.ones((3, 2)))
-    np.testing.assert_allclose(obs, [[1, 1], [2, 2], [3, 3]])
+    np.testing.assert_allclose(obs, [[10, 10], [20, 20], [30, 30]])
 
 
 def test_package_flags():
@@ -85,10 +85,10 @@ def test_package_flags():
 
 def test_correct_is_identity_at_zero_deviation_and_clips():
     nom = jnp.array([0.1, -0.2])
-    gain = jnp.array([[10.0, 0.0], [0.0, 1.0]])
-    ref = jnp.array([1.0, 2.0])
+    gain = jnp.array([[0.0, 10.0, 0.0], [1.0, 0.0, 0.0]])  # [A=2, O=3], off-diagonal: pins the einsum orientation
+    ref = jnp.array([1.0, 2.0, 3.0])
     np.testing.assert_allclose(reflex.correct(nom, gain, ref, ref, 0.5), nom)
-    out = reflex.correct(nom, gain, ref, ref + jnp.array([1.0, 0.1]), 0.5)
+    out = reflex.correct(nom, gain, ref, ref + jnp.array([0.1, 1.0, 0.0]), 0.5)
     np.testing.assert_allclose(out, [0.1 + 0.5, -0.2 + 0.1], atol=1e-6)
 
 
