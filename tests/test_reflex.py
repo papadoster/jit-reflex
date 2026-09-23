@@ -156,3 +156,18 @@ def test_verdict_pools_over_k():
     df.loc[df["k"].between(2, 4), ["pred", "lin"]] = [1.0, 0.2]
     # pooled: 1 - 0.61 / 3.001 = 0.80 -> GO; the mean of per-k rho would be (-9 + 3 * 0.8) / 4 = -1.65 -> KILL
     assert probe.verdict(df)["verdict"] == "GO"
+
+
+def test_lin_clip_uses_the_e2_bound():
+    jac = jnp.array([[[10.0], [0.1]]])  # [K=1, A=2, O=1]
+    zeros_a, zeros_o = jnp.zeros((1, 2)), jnp.zeros((1, 1))
+    e = probe.errors(zeros_a, zeros_a, jac, zeros_o, jnp.ones((1, 1)), zeros_a)
+    np.testing.assert_allclose(e["lin"], [100.0 + 0.01], rtol=1e-6)
+    np.testing.assert_allclose(e["lin_clip"], [1.0 + 0.01], rtol=1e-6)  # 10 is clipped to max_correction = 1
+
+
+def test_verdict_on_clipped_correction():
+    s = _summary({f"l{i}": 0.1 for i in range(12)})
+    s["lin_clip"] = 0.2  # rho_clip = 0.8 with pred = 1
+    assert probe.verdict(s)["verdict"] == "KILL"
+    assert probe.verdict(s, "lin_clip")["verdict"] == "GO"

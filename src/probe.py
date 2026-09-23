@@ -42,11 +42,11 @@ LEVELS = (
     "worlds/l/car_launch.json",
 )
 
-ERRORS = ("chunk", "pred", "lin", "chunk_lin", "floor", "dev")
+ERRORS = ("chunk", "pred", "lin", "lin_clip", "chunk_lin", "floor", "dev")
 
 
-def errors(chunk, a_ref, jac, nom_obs, obs, a_star):
-    """Squared action errors against the oracle a* (spec E1).
+def errors(chunk, a_ref, jac, nom_obs, obs, a_star, max_correction: float = 1.0):
+    """Squared action errors against the oracle a* (spec E1). lin_clip clips J·delta like the E2 method (E1b).
 
     chunk, a_ref [K, A]; jac [K, A, O]; nom_obs [K, O]; obs [..., K, O]; a_star [..., K, A] -> dict of [..., K].
     """
@@ -60,22 +60,23 @@ def errors(chunk, a_ref, jac, nom_obs, obs, a_star):
         "chunk": sq(chunk - a_star),
         "pred": sq(a_ref - a_star),
         "lin": sq(a_ref + lin - a_star),
+        "lin_clip": sq(a_ref + jnp.clip(lin, -max_correction, max_correction) - a_star),
         "chunk_lin": sq(chunk + lin - a_star),
         "floor": jnp.broadcast_to(sq(chunk - a_ref), a_star.shape[:-1]),
         "dev": jnp.sqrt(sq(delta)),
     }
 
 
-def verdict(summary: pd.DataFrame) -> dict:
-    """Pre-registered E1 decision rule (spec section 5). summary needs columns level, sigma, k, lin, pred, rel.
+def verdict(summary: pd.DataFrame, on: str = "lin") -> dict:
+    """Pre-registered E1 decision rule (spec section 5). summary needs columns level, sigma, k, `on`, pred, rel.
 
-    Level rho is pooled over k = 1..4: 1 - sum_k mean e_lin / sum_k mean e_pred.
+    Level rho is pooled over k = 1..4: 1 - sum_k mean e_on / sum_k mean e_pred. E1: on="lin"; E1b: on="lin_clip".
     """
     near = summary[summary["k"].between(1, 4)]
     rel = float(near[near["sigma"] == 0.1]["rel"].mean())
     sigma = 0.1 if rel >= 0.1 else 0.2  # relevance check: deviations must actually change the policy's decisions
-    g = near[near["sigma"] == sigma].groupby("level")[["lin", "pred"]].sum()
-    per_level = 1 - g["lin"] / g["pred"]  # pooled over k = 1..4: one k with a tiny e_pred can't decide a level
+    g = near[near["sigma"] == sigma].groupby("level")[[on, "pred"]].sum()
+    per_level = 1 - g[on] / g["pred"]  # pooled over k = 1..4: one k with a tiny e_pred can't decide a level
     r, n_ok, n = float(per_level.median()), int((per_level >= 0.3).sum()), len(per_level)
     if r >= 0.5 and n_ok >= math.ceil(2 * n / 3):
         v = "GO"
@@ -83,7 +84,7 @@ def verdict(summary: pd.DataFrame) -> dict:
         v = "KILL"
     else:
         v = "GRAY"
-    return {"verdict": v, "sigma": sigma, "R": r, "levels_ok": n_ok, "levels": n, "rel": rel}
+    return {"verdict": v, "on": on, "sigma": sigma, "R": r, "levels_ok": n_ok, "levels": n, "rel": rel}
 
 
 def setup(level_paths: Sequence[str]):
@@ -203,6 +204,7 @@ def summarize(level: str, res: dict, sigmas: Sequence[float]) -> pd.DataFrame:
             rows.append({"level": level, "sigma": sigma, "k": k + 1, "n": int(v.sum()), **means})
     df = pd.DataFrame(rows)
     df["rho"] = 1 - df["lin"] / df["pred"]
+    df["rho_clip"] = 1 - df["lin_clip"] / df["pred"]
     df["rho_total"] = 1 - df["lin"] / df["chunk"]
     df["rel"] = df["pred"] / df["chunk"]
     return df
@@ -220,6 +222,7 @@ def run(
     batch_size: int = 16,  # states per vmapped batch; lower it if RAM runs out
     seed: int = 0,
     output_dir: str = "results/probe",
+    verdict_on: str = "lin",  # E1: "lin"; E1b: "lin_clip" (spec section 5, E1b)
 ):
     """E1 kill-test (spec section 5): writes summary.csv and verdict.json to output_dir."""
     env, env_params, levels, obs_dim, action_dim = setup(level_paths)
@@ -254,13 +257,14 @@ def run(
         frames.append(summarize(level_path, res, sigmas))
         summary = pd.concat(frames, ignore_index=True)
         summary.to_csv(out / "summary.csv", index=False)  # after every level: a crash keeps the finished ones
-    v = verdict(summary)
+    v = verdict(summary, verdict_on)
     (out / "verdict.json").write_text(json.dumps(v, indent=2))
     near = summary[(summary["sigma"] == v["sigma"]) & summary["k"].between(1, 4)]
     g = near.groupby("level")
     table = g[["rel", "floor"]].mean()
     table.insert(0, "rho", 1 - g["lin"].sum() / g["pred"].sum())  # pooled over k, as in verdict()
-    table.insert(1, "rho_total", 1 - g["lin"].sum() / g["chunk"].sum())
+    table.insert(1, "rho_clip", 1 - g["lin_clip"].sum() / g["pred"].sum())
+    table.insert(2, "rho_total", 1 - g["lin"].sum() / g["chunk"].sum())
     print(table.round(3).to_string())
     print(json.dumps(v))
 
