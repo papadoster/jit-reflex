@@ -156,6 +156,37 @@ class NoisyActionWrapper(wrappers.UnderspecifiedEnvWrapper):
         return self._env.action_space(params)
 
 
+class KickWrapper(wrappers.UnderspecifiedEnvWrapper):
+    """E2 perturbation: with probability `prob` per step, add N(0, std^2) velocity to every active dynamic body."""
+
+    def __init__(self, env, prob: float, std: float):
+        super().__init__(env)
+        self.prob = prob
+        self.std = std
+
+    def kick(self, key, state):
+        key_on, key_poly, key_circle = jax.random.split(key, 3)
+        on = jax.random.bernoulli(key_on, self.prob)
+
+        def push(body, k):
+            dynamic = (body.inverse_mass > 0) & body.active
+            dv = self.std * jax.random.normal(k, body.velocity.shape) * (on & dynamic)[..., None]
+            return body.replace(velocity=body.velocity + dv)
+
+        # ponytail: kicks the agent's own bodies too; restrict to non-agent bodies if "only objects move" matters
+        return state.replace(polygon=push(state.polygon, key_poly), circle=push(state.circle, key_circle))
+
+    def step_env(self, key, state, action, params):
+        key_kick, key_step = jax.random.split(key)
+        return self._env.step_env(key_step, self.kick(key_kick, state), action, params)
+
+    def reset_to_level(self, rng, level, params):
+        return self._env.reset_to_level(rng, level, params)
+
+    def action_space(self, params):
+        return self._env.action_space(params)
+
+
 @struct.dataclass
 class StickyActionState:
     env_state: kenv_state.EnvState

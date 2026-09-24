@@ -360,5 +360,34 @@ def cost(
         df.to_csv(out, index=False)
 
 
+def kick_speed(
+    run_path: str = "checkpoints/bc",
+    level_paths: Sequence[str] = LEVELS,
+    num_envs: int = 32,
+    num_flow_steps: int = 5,
+    seed: int = 0,
+):
+    """v_med: median speed of active dynamic bodies in naive d=0, s=1 rollouts (spec E2: kick_std = c * v_med)."""
+    env, env_params, levels, obs_dim, action_dim = setup(level_paths)
+
+    @jax.jit
+    def speeds(state_dict, level, key):
+        policy = make_policy(state_dict, obs_dim, action_dim)
+        _, state, alive = collect(
+            env, env_params, policy, level, key, num_envs, 1, train_expert.ACTION_NOISE_STD, num_flow_steps
+        )
+        bodies = (state.env_state.polygon, state.env_state.circle)
+        return [
+            (jnp.linalg.norm(b.velocity, axis=-1), (b.inverse_mass > 0) & b.active & alive[..., None]) for b in bodies
+        ]
+
+    samples = []
+    for i, level_path in enumerate(level_paths):
+        level = jax.tree.map(lambda x: x[i], levels)
+        out = jax.device_get(speeds(load_state_dict(run_path, level_path), level, jax.random.key(seed + i)))
+        samples += [speed[mask] for speed, mask in out]
+    print(f"v_med = {float(np.median(np.concatenate(samples))):.4f}")
+
+
 if __name__ == "__main__":
-    tyro.extras.subcommand_cli_from_dict({"run": run, "cost": cost})
+    tyro.extras.subcommand_cli_from_dict({"run": run, "cost": cost, "kick-speed": kick_speed})

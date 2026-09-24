@@ -9,6 +9,7 @@ import model as _model
 import plot
 import probe
 import reflex
+import train_expert
 
 
 def test_horizons_for():
@@ -202,3 +203,15 @@ def test_gate2_detects_go(tmp_path):
     assert out["a"] and out["b"] and out["pred_check"] and not out["c"]
     assert out["decision"] == "GO"
     assert out["b_work_ratio"] > 1 and "fewer policy calls" in out["b_claim"]  # fewer calls != less compute
+
+
+def test_kick_moves_only_active_dynamic_bodies():
+    env, env_params, levels, _, _ = probe.setup(["worlds/l/grasp_easy.json"])
+    _, state = env.reset_to_level(jax.random.key(0), jax.tree.map(lambda x: x[0], levels), env_params)
+    raw = state.env_state
+    kicked = train_expert.KickWrapper(env, prob=1.0, std=1.0).kick(jax.random.key(1), raw)
+    for before, after in ((raw.polygon, kicked.polygon), (raw.circle, kicked.circle)):
+        moved = np.any(np.asarray(after.velocity != before.velocity), axis=-1)
+        dynamic = np.asarray((before.inverse_mass > 0) & before.active)
+        np.testing.assert_array_equal(moved, dynamic)
+        assert dynamic.any() or before is raw.circle  # the level has at least one dynamic polygon
