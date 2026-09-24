@@ -221,3 +221,4 @@ checkpoints/
 eval_output/
 wandb/
 results/smoke*/
+.DS_Store
