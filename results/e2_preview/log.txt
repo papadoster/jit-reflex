@@ -1,0 +1,10 @@
+seed=0 name='naive' inference_delay=2 execute_horizon=6
+seed=0 name='realtime' inference_delay=2 execute_horizon=6
+seed=0 name='pred' inference_delay=2 execute_horizon=6
+seed=0 name='reflex' inference_delay=2 execute_horizon=6
+                                           returned_episode_solved  solved_length
+run        method   delay execute_horizon                                        
+e2_preview naive    2     6                                  0.651         91.241
+           pred     2     6                                  0.684         89.991
+           realtime 2     6                                  0.757         91.242
+           reflex   2     6                                  0.770         87.690
