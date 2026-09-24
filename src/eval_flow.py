@@ -79,10 +79,9 @@ def eval(
     env = train_expert.BatchEnvWrapper(
         wrappers.LogWrapper(wrappers.AutoReplayWrapper(train_expert.NoisyActionWrapper(env))), config.num_evals
     )
-    # noise- and kick-free twin with the same state structure: the reflex's (oracle) predictor
-    nominal_env = train_expert.BatchEnvWrapper(
-        wrappers.LogWrapper(wrappers.AutoReplayWrapper(base_env)), config.num_evals
-    )
+    # the reflex's (oracle) predictor: raw physics, no noise, no kicks, and no auto-reset, so a predicted solve
+    # doesn't turn the rest of the prediction into the level's initial observation
+    nominal_step = jax.vmap(base_env.step_env, in_axes=(None, 0, 0, None))
     is_reflex = isinstance(config.method, ReflexMethodConfig)
     render_video = train_expert.make_render_video(renderer_pixels.make_render_pixels(env_params, static_env_params))
     assert config.execute_horizon >= config.inference_delay, f"{config.execute_horizon=} {config.inference_delay=}"
@@ -143,7 +142,9 @@ def eval(
             # steps t..t+H-1 run the previous package's actions for d steps, then this chunk
             planned = jnp.concatenate([pkg["nom"][:, :d], next_action_chunk[:, d:]], axis=1)
             pred = reflex.nominal_obs(
-                lambda st, a: nominal_env.step(key, st, a, env_params)[:2], env_state, planned[:, :-1].swapaxes(0, 1)
+                lambda st, a: nominal_step(key, st, a, env_params)[:2],
+                env_state.env_state.env_state,  # BatchEnv/LogWrapper -> AutoReplay -> raw EnvState
+                planned[:, :-1].swapaxes(0, 1),
             )
             ref = jnp.concatenate([obs[:, None], pred.swapaxes(0, 1)], axis=1)  # predicted obs per chunk index
             nom, gain = reflex.package(
@@ -206,7 +207,9 @@ def eval(
         return_info[key] = infos[key][first_done_idx, jnp.arange(config.num_evals)].mean()
     solved = infos["returned_episode_solved"][first_done_idx, jnp.arange(config.num_evals)]
     lengths = infos["returned_episode_lengths"][first_done_idx, jnp.arange(config.num_evals)]
-    return_info["solved_length"] = jnp.sum(lengths * solved) / jnp.maximum(jnp.sum(solved), 1)
+    return_info["solved_length"] = jnp.where(  # nan, not 0, when nothing is solved: plot means skip it
+        jnp.sum(solved) > 0, jnp.sum(lengths * solved) / jnp.maximum(jnp.sum(solved), 1), jnp.nan
+    )
     for key in ["match"]:
         if key in infos:
             return_info[key] = jnp.mean(infos[key])
@@ -320,6 +323,7 @@ def main(
         eval_info, _ = eval(config, env, rng, level, policy, env_params, static_env_params, weak_policy)
         return eval_info
 
+    pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
     results = collections.defaultdict(list)
     for seed in seeds:
         rngs = jax.random.split(jax.random.key(seed), len(level_paths))
@@ -346,8 +350,8 @@ def main(
                             max_correction if isinstance(method, ReflexMethodConfig) else float("nan")
                         )
                         results["kick_std"].append(config.kick_std if config.kick_prob > 0 else 0.0)
-    pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
-    pd.DataFrame(results).to_csv(pathlib.Path(output_dir) / "results.csv", index=False)
+                    # after every config: a crash (or Ctrl-C) keeps the finished ones
+                    pd.DataFrame(results).to_csv(pathlib.Path(output_dir) / "results.csv", index=False)
 
 
 if __name__ == "__main__":
