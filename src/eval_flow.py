@@ -18,6 +18,7 @@ import pandas as pd
 import tyro
 
 import model as _model
+import reflex
 import train_expert
 
 
@@ -39,6 +40,14 @@ class BIDMethodConfig:
 
 
 @dataclasses.dataclass(frozen=True)
+class ReflexMethodConfig:
+    requery: bool = True  # nominal action = pi(z, predicted obs)[0] instead of the chunk's action
+    feedback: bool = True  # add clip(J @ (obs - predicted obs)) at every step
+    max_correction: float = 1.0
+    package_batch: int = 16  # envs per Jacobian batch (memory knob)
+
+
+@dataclasses.dataclass(frozen=True)
 class EvalConfig:
     step: int = -1
     weak_step: int | None = None
@@ -47,7 +56,9 @@ class EvalConfig:
 
     inference_delay: int = 0
     execute_horizon: int = 1
-    method: NaiveMethodConfig | RealtimeMethodConfig | BIDMethodConfig = NaiveMethodConfig()
+    method: NaiveMethodConfig | RealtimeMethodConfig | BIDMethodConfig | ReflexMethodConfig = NaiveMethodConfig()
+    kick_prob: float = 0.0  # E2 perturbations: per-step probability of a velocity kick to all dynamic bodies
+    kick_std: float = 0.0
 
     model: _model.ModelConfig = _model.ModelConfig()
 
@@ -62,20 +73,33 @@ def eval(
     static_env_params: kenv_state.EnvParams,
     weak_policy: _model.FlowPolicy | None = None,
 ):
+    base_env = env
+    if config.kick_prob > 0:
+        env = train_expert.KickWrapper(env, config.kick_prob, config.kick_std)
     env = train_expert.BatchEnvWrapper(
         wrappers.LogWrapper(wrappers.AutoReplayWrapper(train_expert.NoisyActionWrapper(env))), config.num_evals
     )
+    # noise- and kick-free twin with the same state structure: the reflex's (oracle) predictor
+    nominal_env = train_expert.BatchEnvWrapper(
+        wrappers.LogWrapper(wrappers.AutoReplayWrapper(base_env)), config.num_evals
+    )
+    is_reflex = isinstance(config.method, ReflexMethodConfig)
     render_video = train_expert.make_render_video(renderer_pixels.make_render_pixels(env_params, static_env_params))
     assert config.execute_horizon >= config.inference_delay, f"{config.execute_horizon=} {config.inference_delay=}"
+    d, s = config.inference_delay, config.execute_horizon
+    assert s + d <= policy.action_chunk_size, f"{s=} + {d=} > H: padded zero actions would be executed"
 
     def execute_chunk(carry, _):
-        def step(carry, action):
+        def step(carry, xs):
             rng, obs, env_state = carry
+            action, pkg_t = xs
+            if pkg_t is not None and "gain" in pkg_t:
+                action = reflex.correct(action, pkg_t["gain"], pkg_t["ref"], obs, config.method.max_correction)
             rng, key = jax.random.split(rng)
             next_obs, next_env_state, reward, done, info = env.step(key, env_state, action, env_params)
             return (rng, next_obs, next_env_state), (done, env_state, info)
 
-        rng, obs, env_state, action_chunk, n = carry
+        rng, obs, env_state, action_chunk, n, pkg = carry
         rng, key = jax.random.split(rng)
         if isinstance(config.method, NaiveMethodConfig):
             next_action_chunk = policy.action(key, obs, config.num_flow_steps)
@@ -113,54 +137,76 @@ def eval(
                 bid_k=config.method.bid_k,
                 bid_weak_policy=weak_policy if config.method.bid_k is not None else None,
             )
+        elif is_reflex:
+            noise = jax.random.normal(key, (obs.shape[0], policy.action_chunk_size, policy.action_dim))
+            next_action_chunk = policy.action_from_noise(noise, obs, config.num_flow_steps)  # == policy.action(key)
+            # steps t..t+H-1 run the previous package's actions for d steps, then this chunk
+            planned = jnp.concatenate([pkg["nom"][:, :d], next_action_chunk[:, d:]], axis=1)
+            pred = reflex.nominal_obs(
+                lambda st, a: nominal_env.step(key, st, a, env_params)[:2], env_state, planned[:, :-1].swapaxes(0, 1)
+            )
+            ref = jnp.concatenate([obs[:, None], pred.swapaxes(0, 1)], axis=1)  # predicted obs per chunk index
+            nom, gain = reflex.package(
+                policy,
+                noise,
+                ref,
+                next_action_chunk,
+                config.num_flow_steps,
+                config.method.requery,
+                config.method.feedback,
+                config.method.package_batch,
+            )
+            new_pkg = {"nom": nom, "ref": ref} | ({} if gain is None else {"gain": gain})
         else:
             raise ValueError(f"Unknown method: {config.method}")
 
         # we execute `inference_delay` actions from the *previously generated* action chunk, and then the remaining
         # `execute_horizon - inference_delay` actions from the newly generated action chunk
-        action_chunk_to_execute = jnp.concatenate(
-            [
-                action_chunk[:, : config.inference_delay],
-                next_action_chunk[:, config.inference_delay : config.execute_horizon],
-            ],
-            axis=1,
-        )
+        action_chunk_to_execute = jnp.concatenate([action_chunk[:, :d], next_action_chunk[:, d:s]], axis=1)
+        xs_pkg, next_pkg = None, None
+        if is_reflex:
+            # the package lives in chunk frame and is merged and shifted exactly like the action chunk
+            exec_pkg = jax.tree.map(lambda old, new: jnp.concatenate([old[:, :d], new[:, d:s]], axis=1), pkg, new_pkg)
+            action_chunk_to_execute = exec_pkg.pop("nom")
+            xs_pkg = jax.tree.map(lambda x: x.swapaxes(0, 1), exec_pkg)
+            next_pkg = jax.tree.map(lambda x: jnp.concatenate([x[:, s:], jnp.zeros_like(x[:, :s])], axis=1), new_pkg)
         # throw away the first `execute_horizon` actions from the newly generated action chunk, to align it with the
         # correct frame of reference for the next scan iteration
         next_action_chunk = jnp.concatenate(
-            [
-                next_action_chunk[:, config.execute_horizon :],
-                jnp.zeros((obs.shape[0], config.execute_horizon, policy.action_dim)),
-            ],
-            axis=1,
+            [next_action_chunk[:, s:], jnp.zeros((obs.shape[0], s, policy.action_dim))], axis=1
         )
-        next_n = jnp.concatenate([n[config.execute_horizon :], jnp.zeros(config.execute_horizon, dtype=jnp.int32)])
+        next_n = jnp.concatenate([n[s:], jnp.zeros(s, dtype=jnp.int32)])
         (rng, next_obs, next_env_state), (dones, env_states, infos) = jax.lax.scan(
-            step, (rng, obs, env_state), action_chunk_to_execute.transpose(1, 0, 2)
+            step, (rng, obs, env_state), (action_chunk_to_execute.transpose(1, 0, 2), xs_pkg)
         )
-        # if config.inference_delay > 0:
-        #     infos["match"] = jnp.mean(jnp.abs(fixed_prefix - action_chunk_to_execute))
-        return (rng, next_obs, next_env_state, next_action_chunk, next_n), (dones, env_states, infos)
+        return (rng, next_obs, next_env_state, next_action_chunk, next_n, next_pkg), (dones, env_states, infos)
 
     rng, key = jax.random.split(rng)
     obs, env_state = env.reset_to_level(key, level, env_params)
     rng, key = jax.random.split(rng)
     action_chunk = policy.action(key, obs, config.num_flow_steps)  # [batch, horizon, action_dim]
     n = jnp.ones(action_chunk.shape[1], dtype=jnp.int32)
+    pkg = None
+    if is_reflex:  # the first d steps of the first chunk run open-loop
+        pkg = {"nom": action_chunk, "ref": jnp.repeat(obs[:, None], action_chunk.shape[1], axis=1)}
+        if config.method.feedback:
+            pkg["gain"] = jnp.zeros((*action_chunk.shape, obs.shape[-1]))
     scan_length = math.ceil(env_params.max_timesteps / config.execute_horizon)
     _, (dones, env_states, infos) = jax.lax.scan(
         execute_chunk,
-        (rng, obs, env_state, action_chunk, n),
+        (rng, obs, env_state, action_chunk, n, pkg),
         None,
         length=scan_length,
     )
     dones, env_states, infos = jax.tree.map(lambda x: x.reshape(-1, *x.shape[2:]), (dones, env_states, infos))
     assert dones.shape[0] >= env_params.max_timesteps, f"{dones.shape=}"
     return_info = {}
+    first_done_idx = jnp.argmax(dones, axis=0)  # only consider the first episode of each rollout
     for key in ["returned_episode_returns", "returned_episode_lengths", "returned_episode_solved"]:
-        # only consider the first episode of each rollout
-        first_done_idx = jnp.argmax(dones, axis=0)
         return_info[key] = infos[key][first_done_idx, jnp.arange(config.num_evals)].mean()
+    solved = infos["returned_episode_solved"][first_done_idx, jnp.arange(config.num_evals)]
+    lengths = infos["returned_episode_lengths"][first_done_idx, jnp.arange(config.num_evals)]
+    return_info["solved_length"] = jnp.sum(lengths * solved) / jnp.maximum(jnp.sum(solved), 1)
     for key in ["match"]:
         if key in infos:
             return_info[key] = jnp.mean(infos[key])
@@ -173,6 +219,10 @@ METHODS = {
     "realtime": RealtimeMethodConfig(),
     "bid": BIDMethodConfig(),
     "hard_masking": RealtimeMethodConfig(prefix_attention_schedule="zeros"),
+    "pred": ReflexMethodConfig(feedback=False),
+    "reflex": ReflexMethodConfig(),
+    "reflex_chunk": ReflexMethodConfig(requery=False),
+    "reflex_off": ReflexMethodConfig(requery=False, feedback=False),  # sanity check: must reproduce naive
 }
 
 
@@ -210,6 +260,8 @@ def main(
     delays: Sequence[int] = (0, 1, 2, 3, 4),
     horizons: Sequence[int] = (),
     minmax: bool = False,
+    max_correction: float = 1.0,
+    package_batch: int = 16,
 ):
     static_env_params = kenv_state.StaticEnvParams(**train_expert.LARGE_ENV_PARAMS, frame_skip=train_expert.FRAME_SKIP)
     env_params = kenv_state.EnvParams()
@@ -275,8 +327,11 @@ def main(
             for execute_horizon in horizons_for(inference_delay, config.model.action_chunk_size, horizons, minmax):
                 for name in methods:
                     print(f"{seed=} {name=} {inference_delay=} {execute_horizon=}")
+                    method = METHODS[name]
+                    if isinstance(method, ReflexMethodConfig):
+                        method = dataclasses.replace(method, max_correction=max_correction, package_batch=package_batch)
                     c = dataclasses.replace(
-                        config, inference_delay=inference_delay, execute_horizon=execute_horizon, method=METHODS[name]
+                        config, inference_delay=inference_delay, execute_horizon=execute_horizon, method=method
                     )
                     out = jax.device_get(_eval(c, rngs, levels, state_dicts, weak_state_dicts))
                     for i in range(len(level_paths)):
@@ -287,6 +342,10 @@ def main(
                         results["method"].append(name)
                         results["level"].append(level_paths[i])
                         results["execute_horizon"].append(execute_horizon)
+                        results["max_correction"].append(
+                            max_correction if isinstance(method, ReflexMethodConfig) else float("nan")
+                        )
+                        results["kick_std"].append(config.kick_std if config.kick_prob > 0 else 0.0)
     pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
     pd.DataFrame(results).to_csv(pathlib.Path(output_dir) / "results.csv", index=False)
 
