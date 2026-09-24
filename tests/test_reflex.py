@@ -6,6 +6,7 @@ import pandas as pd
 
 import eval_flow
 import model as _model
+import plot
 import probe
 import reflex
 
@@ -181,3 +182,23 @@ def test_executed_action_is_what_kinetix_applies():
     b = a.at[0].set(1.5).at[4].set(-0.1)  # motor 3.0 vs 1.5 -> both 1; thruster -0.5 vs -0.1 -> both 0 (off)
     np.testing.assert_array_equal(probe.executed(a, s), probe.executed(b, s))
     assert probe.executed(jnp.ones((3, 7, action_dim)), s).shape[:2] == (3, 7)
+
+
+def test_wilson_interval():
+    lo, hi = plot.wilson(np.array([0.5]), np.array([100]))
+    assert 0.40 < lo[0] < 0.41 and 0.59 < hi[0] < 0.60
+
+
+def test_gate2_detects_go(tmp_path):
+    rows = []
+    for seed in (0, 1, 2):
+        for d in (1, 2, 3, 4):
+            for s in sorted({max(1, d), 8 - d}):
+                for method, rate in (("naive", 0.5), ("realtime", 0.6), ("pred", 0.55), ("reflex", 0.75)):
+                    rows.append({"seed": seed, "delay": d, "execute_horizon": s, "method": method,
+                                 "level": "l", "returned_episode_solved": rate})
+    pd.DataFrame(rows).to_csv(tmp_path / "main.csv", index=False)
+    out = plot.gate2(str(tmp_path / "main.csv"), str(tmp_path / "no-kicks*/results.csv"))
+    assert out["a"] and out["b"] and out["pred_check"] and not out["c"]
+    assert out["decision"] == "GO"
+    assert out["b_work_ratio"] > 1 and "fewer policy calls" in out["b_claim"]  # fewer calls != less compute
