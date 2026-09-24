@@ -25,10 +25,10 @@ run() {  # run <dir> <eval_flow args...>; on failure (e.g. out of memory) retry 
   local dir=$1; shift
   echo "[$(date +%T)] $dir"
   uv run src/eval_flow.py --run-path checkpoints/bc --config.num-evals 256 --seeds 0 1 2 --package-batch $PB \
-    --output-dir $E/$dir "$@" 2>&1 | grep -v prefix_attention_horizon | tail -2 && return
+    --output-dir $E/$dir "$@" 2>&1 | grep --line-buffered -v prefix_attention_horizon && return
   echo "[$(date +%T)] $dir failed, retrying with --package-batch 4"
   uv run src/eval_flow.py --run-path checkpoints/bc --config.num-evals 256 --seeds 0 1 2 --package-batch 4 \
-    --output-dir $E/$dir "$@" 2>&1 | grep -v prefix_attention_horizon | tail -2 || echo "FAILED $dir"
+    --output-dir $E/$dir "$@" 2>&1 | grep --line-buffered -v prefix_attention_horizon || echo "FAILED $dir"
 }
 METHODS="naive realtime pred reflex reflex_chunk rtc_reflex"
 run main --methods $METHODS --delays 1 2 3 4 --minmax
