@@ -335,6 +335,10 @@ def cost(
         "pred": with_package(True, False),
         "reflex": with_package(True, True),
         "reflex_chunk": with_package(False, True),
+        "rtc_reflex": lambda noise, obs, ref, prev: reflex.package(  # E2b: RTC chunk + the same package
+            policy, noise, ref, policy.realtime_action(key, obs, num_flow_steps, prev, delay, H - horizon, "exp", 5.0),
+            num_flow_steps, False, True,
+        ),
     }
     rows = []
     for name, fn in calls.items():

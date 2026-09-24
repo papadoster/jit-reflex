@@ -114,6 +114,7 @@ def test_forward_equivalents():
     assert reflex.forward_equivalents("realtime") == 15
     assert reflex.forward_equivalents("pred") == 45
     assert reflex.forward_equivalents("reflex") == reflex.forward_equivalents("reflex_chunk") == 525
+    assert reflex.forward_equivalents("rtc_reflex") == 535
 
 
 def test_errors_exact_for_linear_oracle():

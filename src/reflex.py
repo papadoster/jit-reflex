@@ -86,4 +86,6 @@ def forward_equivalents(method: str, num_steps: int = 5, chunk_size: int = 8, ac
         "pred": S + H * S,  # chunk + pi at H predicted states
         "reflex": S + H * (S + 2 * A * S),  # + A VJPs through the whole flow at each predicted state
         "reflex_chunk": S + H * (S + 2 * A * S),
+        "rtc_reflex": 3 * S + H * (S + 2 * A * S),  # E2b: RTC chunk + the same package
+        "rtc_reflex_off": 3 * S,
     }[method]

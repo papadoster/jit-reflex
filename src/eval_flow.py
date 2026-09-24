@@ -45,6 +45,7 @@ class ReflexMethodConfig:
     feedback: bool = True  # add clip(J @ (obs - predicted obs)) at every step
     max_correction: float = 1.0
     package_batch: int = 16  # envs per Jacobian batch (memory knob)
+    rtc: bool = False  # E2b: the chunk comes from RTC (realtime_action) instead of plain sampling
 
 
 @dataclasses.dataclass(frozen=True)
@@ -138,7 +139,12 @@ def eval(
             )
         elif is_reflex:
             noise = jax.random.normal(key, (obs.shape[0], policy.action_chunk_size, policy.action_dim))
-            next_action_chunk = policy.action_from_noise(noise, obs, config.num_flow_steps)  # == policy.action(key)
+            if config.method.rtc:  # E2b: RTC chunk (its initial noise is this same `noise`), reflex feedback on top
+                next_action_chunk = policy.realtime_action(
+                    key, obs, config.num_flow_steps, action_chunk, d, policy.action_chunk_size - s, "exp", 5.0
+                )
+            else:
+                next_action_chunk = policy.action_from_noise(noise, obs, config.num_flow_steps)  # == policy.action(key)
             # steps t..t+H-1 run the previous package's actions for d steps, then this chunk
             planned = jnp.concatenate([pkg["nom"][:, :d], next_action_chunk[:, d:]], axis=1)
             pred = reflex.nominal_obs(
@@ -226,6 +232,8 @@ METHODS = {
     "reflex": ReflexMethodConfig(),
     "reflex_chunk": ReflexMethodConfig(requery=False),
     "reflex_off": ReflexMethodConfig(requery=False, feedback=False),  # sanity check: must reproduce naive
+    "rtc_reflex": ReflexMethodConfig(requery=False, rtc=True),  # E2b: RTC chunk + J feedback
+    "rtc_reflex_off": ReflexMethodConfig(requery=False, feedback=False, rtc=True),  # sanity: must reproduce realtime
 }
 
 
