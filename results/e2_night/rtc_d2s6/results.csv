@@ -1,0 +1,13 @@
+returned_episode_lengths,returned_episode_returns,returned_episode_solved,solved_length,seed,delay,method,level,execute_horizon,max_correction,kick_std
+37.515625,0.90625,0.921875,38.101696,0,2,rtc_reflex,worlds/l/grasp_easy.json,6,1.0,0.0
+143.8125,0.546875,0.546875,50.857143,0,2,rtc_reflex,worlds/l/catapult.json,6,1.0,0.0
+59.90625,0.65625,0.765625,52.7551,0,2,rtc_reflex,worlds/l/cartpole_thrust.json,6,1.0,0.0
+50.140625,0.9375,0.921875,49.508476,0,2,rtc_reflex,worlds/l/hard_lunar_lander.json,6,1.0,0.0
+81.71875,1.0,0.84375,80.37037,0,2,rtc_reflex,worlds/l/mjc_half_cheetah.json,6,1.0,0.0
+209.09375,0.796875,0.6875,197.11363,0,2,rtc_reflex,worlds/l/mjc_swimmer.json,6,1.0,0.0
+211.65625,0.421875,0.359375,181.39131,0,2,rtc_reflex,worlds/l/mjc_walker.json,6,1.0,0.0
+101.203125,0.65625,0.75,84.791664,0,2,rtc_reflex,worlds/l/h17_unicycle.json,6,1.0,0.0
+47.640625,1.0,0.921875,47.847458,0,2,rtc_reflex,worlds/l/chain_lander.json,6,1.0,0.0
+68.296875,0.453125,0.609375,69.23077,0,2,rtc_reflex,worlds/l/catcher_v3.json,6,1.0,0.0
+175.48438,0.78125,0.8125,164.71153,0,2,rtc_reflex,worlds/l/trampoline.json,6,1.0,0.0
+74.203125,0.828125,0.8125,49.28846,0,2,rtc_reflex,worlds/l/car_launch.json,6,1.0,0.0
