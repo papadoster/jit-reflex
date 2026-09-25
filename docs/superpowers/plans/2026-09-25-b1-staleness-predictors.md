@@ -1382,7 +1382,7 @@ Expected: в конце `B1 rehearsal done in … min`. До этого:
 
 Медиана по уровням `ratio_4(phys0.2)` = <число>. Правило §4.2: <меньше 1 → уровни 0.2/0.4/0.6, p_mid = 0.4 | не меньше 1 → уровни 0.1/0.2/0.3, p_mid = 0.2>. Точность моделей мира (val_nmse по уровням): <мин…макс>, `ratio_4(learned)` = <число>. Репетиция (seed 99, поисковая) прошла без ошибок.
 ```
-Если уровни удваиваются, в `scripts/gpu_b1.sh` заменить `PHYS=${PHYS:-"0.1 0.2 0.3"}` на `PHYS=${PHYS:-"0.2 0.4 0.6"}`.
+Скрипт `scripts/gpu_b1.sh` не имеет уровней по умолчанию (исправление после финального ревью): откалиброванные уровни передаются через `PHYS` при запуске (задача 11).
 
 - [ ] **Step 3: Commit (контроллер)**
 
@@ -1401,9 +1401,9 @@ git commit -m "results: B1 calibration and rehearsal (dev seed 99, exploratory);
 ```bash
 git archive --format=tar.gz -o /tmp/m2r.tgz HEAD
 ```
-Залить на под, как в фазе A (`scp -P <port> /tmp/m2r.tgz root@<host>:`). На поде:
+Залить на под, как в фазе A (`scp -P <port> /tmp/m2r.tgz root@<host>:`). На поде (`PHYS` обязателен: уровни из калибровки, задача 10; при удвоении — `"0.2 0.4 0.6"`):
 ```bash
-mkdir m2r && tar xzf m2r.tgz -C m2r && cd m2r && tmux new -s b1 './scripts/gpu_b1.sh 2>&1 | tee b1.log'
+mkdir m2r && tar xzf m2r.tgz -C m2r && cd m2r && tmux new -s b1 'PHYS="0.1 0.2 0.3" ./scripts/gpu_b1.sh 2>&1 | tee b1.log'
 ```
 
 - [ ] **Step 2: Замер скорости** (через ~20 мин после старта сетки)
@@ -1415,7 +1415,7 @@ mkdir m2r && tar xzf m2r.tgz -C m2r && cd m2r && tmux new -s b1 './scripts/gpu_b
 ```bash
 scp -P <port> root@<host>:m2r/b1_results.tgz . && tar xzf b1_results.tgz
 ```
-Под удалить. Контроллер проверяет `results/b1/gpu/b1.json` и коммитит:
+Под удалить. Если в `b1.txt` есть `!!! some eval runs FAILED` или `b1` отказался считать неполную сетку, недостающие конфигурации досчитываются, прежде чем читать вердикт. Если вердикт GRAY, по §5 спека выполняется расширение на seed'ы 13–15; перед ним `b1` дополняется подсчётом seed'ов по срезам (журнал спека). Контроллер проверяет `results/b1/gpu/b1.json` и коммитит:
 ```bash
 git add results/b1/gpu
 git commit -m "results: B1 on GPU (RTX 4090, seeds 10-12 x 256 x 12 levels): predictors x s = 1..7, errors, cost"
