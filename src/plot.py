@@ -144,32 +144,49 @@ def gate2(
 
 
 B1_SLICES = {"d1": (1, (5, 6, 7)), "d3": (3, (5,))}  # spec B1 section 5: the rare-call slices behind the verdict
+B1_SEEDS = (10, 11, 12)  # spec B1 section 4.4
 
 
-def _slice_status(G: pd.DataFrame, delay: int, horizons, predictor: str, n_seeds: int):
+def _slice_status(G: pd.DataFrame, delay: int, horizons, predictor: str, seeds):
     """PASS / FAIL / GRAY / MISSING of one slice for one predictor (spec B1 section 5), with per-method details.
 
-    G: reflex-type methods' G, index (delay, seed, predictor, execute_horizon). PASS needs pooled >= +1 pp and > 0 in
-    every seed for the same method; FAIL needs pooled <= 0 for every method that ran. A method counts as run only
-    with all n_seeds seeds: a slice short of seeds is MISSING, never PASS.
+    G: reflex-type methods' G, index (delay, seed, predictor, execute_horizon). A method counts only with every
+    (seed, s) cell of the slice. PASS: some complete method has pooled >= +1 pp and > 0 in every seed. FAIL: reflex
+    and rtc_reflex both complete with pooled <= 0. Otherwise an incomplete method makes the slice MISSING, never FAIL.
     """
     try:
         g = G.xs((delay, predictor), level=("delay", "predictor"))
     except KeyError:
         return "MISSING", {}
-    g = g[g.index.get_level_values("execute_horizon").isin(horizons)].groupby(level="seed").mean()
-    detail = {
-        m: {"pooled": float(g[m].mean()), "min_seed": float(g[m].min())}
-        for m in ("reflex", "rtc_reflex")
-        if m in g and len(g) == n_seeds and g[m].notna().all()
-    }
-    if not detail:
-        return "MISSING", {}
+    full = pd.MultiIndex.from_product([seeds, horizons], names=["seed", "execute_horizon"])
+    g = g.reindex(index=full, columns=["reflex", "rtc_reflex"])
+    detail = {}
+    for m in g:
+        if g[m].notna().all():
+            per_seed = g[m].groupby(level="seed").mean()
+            detail[m] = {"pooled": float(per_seed.mean()), "min_seed": float(per_seed.min())}
     if any(v["pooled"] >= 0.01 - 1e-9 and v["min_seed"] > 0 for v in detail.values()):
         return "PASS", detail
+    if len(detail) < 2:
+        return "MISSING", detail
     if all(v["pooled"] <= 0 for v in detail.values()):
         return "FAIL", detail
     return "GRAY", detail
+
+
+def _missing_cells(lv: pd.Series, phys, p_mid: str):
+    """Cells of the spec B1 4.4 GPU grid with no solve rate, as (delay, seed, method, predictor, s)."""
+    d1, mid = ["oracle", *phys, "learned"], ["oracle", p_mid, "learned"]
+    cells = [(1, s, m, "-") for s in range(1, 8) for m in ("naive", "realtime")]
+    cells += [(1, s, m, pr) for s in range(1, 8) for m in ("pred", "reflex") for pr in d1]
+    cells += [(1, s, "rtc_reflex", pr) for s in range(1, 8) for pr in mid]
+    cells += [(3, 5, m, "-") for m in ("naive", "realtime")]
+    cells += [(3, 5, m, pr) for m in ("pred", "reflex", "rtc_reflex") for pr in mid]
+    idx = pd.MultiIndex.from_tuples(
+        [(d, seed, m, pr, s) for d, s, m, pr in cells for seed in B1_SEEDS], names=lv.index.names
+    )
+    got = lv.reindex(idx)
+    return got[got.isna()].index.tolist()
 
 
 def b1(
@@ -177,12 +194,15 @@ def b1(
     errors_csv: str = "results/b1/gpu/errors.csv",
     out_dir: str = "results/b1/gpu",
     p_mid: str | None = None,
+    strict: bool = True,
 ) -> dict:
     """B1 verdict and rules R1-R4 (spec B1 section 5), b1.json and b1.png. Solve rates are means over levels.
 
     G = method - max(naive, realtime) at the same (delay, seed, s); J = reflex - pred at d = 1. p_mid: the middle phys
     level, pass it explicitly (e.g. "phys0.4" after calibration); None = the middle of an odd number of phys levels.
-    Refuses a grid where naive / realtime are missing next to a reflex-type row.
+    Refuses a grid where naive / realtime are missing next to a reflex-type row. strict: also refuse any hole in the
+    spec B1 4.4 GPU grid (seeds 10-12); --no-strict is for the rehearsal's tiny grid, where holes give MISSING slices.
+    A MISSING slice never turns into a verdict: SURVIVES / ENOUGH still stand on a PASS, anything else is INCOMPLETE.
     """
     df = pd.concat([pd.read_csv(f) for f in sorted(glob.glob(results_glob))])
     lv = df.groupby(["delay", "seed", "method", "predictor", "execute_horizon"])["returned_episode_solved"].mean()
@@ -190,18 +210,24 @@ def b1(
     t = lv.drop("-", level="predictor").unstack("method")  # (delay, seed, predictor, s) x {pred, reflex, rtc_reflex}
     need = base[["naive", "realtime"]].reindex(t.index.droplevel("predictor").unique())
     assert need.notna().all().all(), "incomplete baseline: naive/realtime missing for some (delay, seed, s)"
-    n_seeds = df["seed"].nunique()
-    best = base[["naive", "realtime"]].max(axis=1).reindex(t.index.droplevel("predictor")).to_numpy()
-    G = t.sub(pd.Series(best, index=t.index), axis=0)
-    t1 = t.xs(1, level="delay")
-    J = t1["reflex"] - t1["pred"]  # (seed, predictor, s)
     phys = sorted(
-        (p for p in J.index.get_level_values("predictor").unique() if p.startswith("phys")), key=lambda p: float(p[4:])
+        (p for p in lv.index.get_level_values("predictor").unique() if p.startswith("phys")), key=lambda p: float(p[4:])
     )
     if p_mid is None:
         assert len(phys) % 2 == 1, f"p_mid is ambiguous for phys levels {phys}: pass --p-mid"
         p_mid = phys[len(phys) // 2]
     assert p_mid in phys, f"p_mid {p_mid} not among phys levels {phys}"
+    if strict:  # a lost run must stop here, not become a verdict
+        missing = _missing_cells(lv, phys, p_mid)
+        assert not missing, (
+            f"incomplete B1 grid: {len(missing)} missing (delay, seed, method, predictor, s) cells, "
+            f"e.g. {missing[:10]}; rerun them or pass --no-strict"
+        )
+    seeds = sorted(df["seed"].unique())
+    best = base[["naive", "realtime"]].max(axis=1).reindex(t.index.droplevel("predictor")).to_numpy()
+    G = t.sub(pd.Series(best, index=t.index), axis=0)
+    t1 = t.xs(1, level="delay")
+    J = t1["reflex"] - t1["pred"]  # (seed, predictor, s)
     jo = J.xs("oracle", level="predictor").unstack("execute_horizon")  # seed x s
     stale = jo.loc[:, jo.columns >= 5].mean(axis=1) - jo.loc[:, jo.columns <= 3].mean(axis=1)
     jbar = J.groupby(level=["predictor", "seed"]).mean()
@@ -211,24 +237,24 @@ def b1(
     for name, (d, horizons) in B1_SLICES.items():
         out["slices"][name] = {}
         for pr in ("oracle", p_mid, "learned"):
-            status, detail = _slice_status(G, d, horizons, pr, n_seeds)
+            status, detail = _slice_status(G, d, horizons, pr, seeds)
             out["slices"][name][pr] = {"status": status, **detail}
     informative = [n for n in B1_SLICES if out["slices"][n]["oracle"]["status"] == "PASS"]
-    mids = [out["slices"][n][p_mid]["status"] for n in informative]
-    learned = [out["slices"][n]["learned"]["status"] for n in informative]
+    oracle_missing = any(out["slices"][n]["oracle"]["status"] == "MISSING" for n in B1_SLICES)
+
+    def rule(pr, passed, failed, no_edge):  # R1 / R4; missing data gives INCOMPLETE, never a negative outcome
+        st = [out["slices"][n][pr]["status"] for n in informative]
+        if "PASS" in st:
+            return passed
+        if oracle_missing or "MISSING" in st:
+            return "INCOMPLETE"
+        if not informative:
+            return no_edge
+        return failed if all(x == "FAIL" for x in st) else "GRAY"
+
     out["informative_slices"] = informative
-    out["verdict"] = (
-        "NO-EDGE" if not informative
-        else "SURVIVES" if "PASS" in mids
-        else "ORACLE-BOUND" if all(m == "FAIL" for m in mids)
-        else "GRAY"
-    )
-    out["R4_learned"] = (
-        "n/a" if not informative
-        else "ENOUGH" if "PASS" in learned
-        else "TOO-WEAK" if all(m == "FAIL" for m in learned)
-        else "GRAY"
-    )
+    out["verdict"] = rule(p_mid, "SURVIVES", "ORACLE-BOUND", "NO-EDGE")
+    out["R4_learned"] = rule("learned", "ENOUGH", "TOO-WEAK", "n/a")
     out |= {
         "R2_staleness": bool(stale.mean() >= 0.03 - 1e-9 and (stale > 0).all()),
         "R2_gap": float(stale.mean()),

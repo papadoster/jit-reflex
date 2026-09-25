@@ -21,31 +21,40 @@ uv run python -c "import jax; d = jax.devices(); print(d); assert d[0].platform 
 export JAX_COMPILATION_CACHE_DIR=$HOME/.cache/jax CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0} PYTHONUNBUFFERED=1
 G=results/b1/gpu
 PB=${PB:-16}
-PHYS=${PHYS:-"0.1 0.2 0.3"}
+PHYS=${PHYS:?set PHYS to the calibrated phys levels, e.g. PHYS="0.1 0.2 0.3" ./scripts/gpu_b1.sh}
 PMID=$(echo $PHYS | awk '{print $2}')
 PREDS="oracle $(for p in $PHYS; do printf 'phys%s ' "$p"; done)learned"
 MID="oracle phys$PMID learned"
+echo "PHYS=$PHYS PMID=$PMID PREDS=$PREDS"
 mkdir -p $G
 echo "[$(date +%T)] world models"
-uv run src/predictors.py train --out-dir $G/world_models 2>&1 | tee $G/train.txt
+uv run src/predictors.py train --out-dir $G/world_models 2>&1 | tee $G/train.txt || exit 1
 echo "[$(date +%T)] prediction errors"
-uv run src/predictors.py errors --phys $PHYS --world-model-dir $G/world_models --out $G/errors.csv 2>&1 | tee $G/errors.txt
+uv run src/predictors.py errors --phys $PHYS --world-model-dir $G/world_models --out $G/errors.csv 2>&1 \
+  | tee $G/errors.txt || exit 1
 run() {  # run <dir> <eval_flow args...>; on failure (e.g. out of memory) retry once with a smaller Jacobian batch
   local dir=$1; shift
   echo "[$(date +%T)] $dir"
   uv run src/eval_flow.py --run-path checkpoints/bc --config.num-evals 256 --seeds 10 11 12 --package-batch $PB \
-    --world-model-dir $G/world_models --output-dir $G/$dir "$@" 2>&1 | grep --line-buffered -v prefix_attention_horizon && return
+    --world-model-dir $G/world_models --output-dir $G/$dir "$@" 2>&1 | grep --line-buffered -v prefix_attention_horizon \
+    | tee -a $G/$dir.log && return
   echo "[$(date +%T)] $dir failed, retrying with --package-batch 4"
+  mv $G/$dir/results.csv $G/$dir/results.try1.csv 2>/dev/null
   uv run src/eval_flow.py --run-path checkpoints/bc --config.num-evals 256 --seeds 10 11 12 --package-batch 4 \
     --world-model-dir $G/world_models --output-dir $G/$dir "$@" 2>&1 | grep --line-buffered -v prefix_attention_horizon \
-    || echo "FAILED $dir"
+    | tee -a $G/$dir.log || { echo "FAILED $dir"; failed=1; }
 }
+failed=0
 run eval_d3 --methods naive realtime pred reflex rtc_reflex --predictors $MID --delays 3 --horizons 5
 run eval_d1 --methods naive realtime pred reflex --predictors $PREDS --delays 1
 run eval_d1_rtc --methods rtc_reflex --predictors $MID --delays 1
 for s in 1 4 7; do
   uv run src/probe.py cost --batch 1 --delay 1 --horizon $s --out $G/cost_b1_s$s.csv 2>&1 | tee -a $G/cost.txt
 done
-uv run src/plot.py b1 --results-glob "$G/eval*/results.csv" --errors-csv $G/errors.csv --out-dir $G --p-mid phys$PMID \
-  2>&1 | tee $G/b1.txt
+if [ $failed = 1 ]; then
+  echo "!!! some eval runs FAILED — the verdict is not computed; rerun the failed dirs" | tee $G/b1.txt
+else
+  uv run src/plot.py b1 --results-glob "$G/eval*/results.csv" --errors-csv $G/errors.csv --out-dir $G --p-mid phys$PMID \
+    2>&1 | tee $G/b1.txt
+fi
 tar czf b1_results.tgz --exclude='*.pkl' $G && echo "[$(date +%T)] done: b1_results.tgz"

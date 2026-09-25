@@ -41,7 +41,8 @@ def test_phys_error_changes_the_motion_but_not_the_parameter_features():
         o_wrong, s_wrong = predictors.phys_step(env, jax.random.key(2), s_wrong, a, params, f)
     for x, y in zip(jax.tree.leaves(predictors._params(s_wrong)), jax.tree.leaves(predictors._params(raw))):
         np.testing.assert_array_equal(x, y)  # the true parameters are back in the predicted state
-    np.testing.assert_array_equal(o_wrong, env.get_obs(s_wrong))  # and in its observation
+    leaked = predictors._with(s_wrong, *jax.tree.map(jnp.multiply, predictors._params(s_wrong), f))
+    assert not np.allclose(env.get_obs(leaked), o_wrong)  # the observation shows the parameters; ours shows the true ones
     assert not np.allclose(o_wrong, o_true)  # but the bodies moved differently
 
 

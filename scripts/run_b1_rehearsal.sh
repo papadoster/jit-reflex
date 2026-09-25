@@ -22,5 +22,5 @@ eval_run eval_d3 --methods naive realtime pred reflex rtc_reflex --predictors or
 eval_run eval_d1 --methods naive realtime pred reflex --predictors oracle phys0.2 learned --delays 1 --horizons 1 7
 eval_run eval_d1_rtc --methods rtc_reflex --predictors oracle phys0.2 learned --delays 1 --horizons 7
 uv run src/plot.py b1 --results-glob "$OUT/eval*/results.csv" --errors-csv $B/errors.csv --out-dir "$OUT" \
-  --p-mid phys0.2 2>&1 | tee "$OUT/b1.txt"
+  --p-mid phys0.2 --no-strict 2>&1 | tee "$OUT/b1.txt"
 echo "B1 rehearsal done in $(( ($(date +%s) - start) / 60 )) min"

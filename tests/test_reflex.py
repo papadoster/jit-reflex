@@ -317,16 +317,33 @@ def test_b1_refuses_incomplete_grid(tmp_path):
     hole = (df["method"] == "realtime") & (df["delay"] == 1) & (df["seed"] == 11) & (df["execute_horizon"] == 6)
     with pytest.raises(AssertionError, match="incomplete baseline"):
         _b1_run(tmp_path, df[~hole])
+    lost_rtc = (df["method"] == "rtc_reflex") & (df["delay"] == 1)  # eval_d1_rtc lost
+    lost_d3 = df["method"].isin(["pred", "reflex", "rtc_reflex"]) & (df["delay"] == 3) & (df["seed"] == 12)
+    for lost in (lost_rtc, lost_d3):
+        with pytest.raises(AssertionError, match="incomplete B1 grid"):
+            _b1_run(tmp_path, df[~lost])
+
+
+def test_b1_missing_data_is_never_a_verdict(tmp_path):
+    df = _b1_rows(mid_pred=0.5, mid_extra=-0.2, mid_rtc=0.55, mid_d3=0.45)  # ORACLE-BOUND on the full grid
+    out = _b1_run(tmp_path, df[~((df["method"] == "rtc_reflex") & (df["delay"] == 1))], strict=False)
+    assert out["slices"]["d1"]["oracle"]["status"] == "PASS"  # reflex alone passes
+    assert out["slices"]["d1"]["phys0.2"]["status"] == "MISSING" and out["verdict"] == "INCOMPLETE"
 
     df = _b1_rows()
     lost = df["method"].isin(["pred", "reflex", "rtc_reflex"]) & (df["delay"] == 3) & (df["seed"] == 12)
-    out = _b1_run(tmp_path, df[~lost])  # d3 has 2 of 3 seeds: MISSING, never PASS
+    out = _b1_run(tmp_path, df[~lost], strict=False)  # d3 has 2 of 3 seeds: MISSING, never PASS
     assert out["slices"]["d3"]["oracle"]["status"] == "MISSING"
-    assert out["informative_slices"] == ["d1"] and out["verdict"] == "SURVIVES"
+    assert out["verdict"] == "SURVIVES"  # D1 passes on its own
+    assert out["R4_learned"] == "INCOMPLETE"  # learned FAILs D1, but D3 might be informative
+
+    df = _b1_rows(base=(0.9, 0.95))  # NO-EDGE on the full grid
+    out = _b1_run(tmp_path, df[df["delay"] == 1], strict=False)
+    assert out["slices"]["d3"]["oracle"]["status"] == "MISSING" and out["verdict"] == "INCOMPLETE"
 
 
 def test_b1_explicit_p_mid(tmp_path):
-    out = _b1_run(tmp_path, _b1_rows(), p_mid="phys0.3")
+    out = _b1_run(tmp_path, _b1_rows(), p_mid="phys0.3", strict=False)  # phys0.3 has no rtc_reflex rows
     assert out["p_mid"] == "phys0.3" and not out["R3_j_grows_with_error"]  # J(phys0.3) == J(oracle)
     assert out["slices"]["d3"]["phys0.3"]["status"] == "MISSING" and out["verdict"] == "SURVIVES"  # d1 via reflex
     with pytest.raises(AssertionError):
