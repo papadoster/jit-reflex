@@ -7,6 +7,8 @@ authors:
     given-names: Aleksandr
     email: karpovalex.dev@gmail.com
 version: "0.1-phase-a"
+doi: 10.5281/zenodo.22962312
+repository-code: "https://github.com/papadoster/jit-reflex"
 date-released: 2026-09-25
 license: MIT
 keywords: [robotics, action chunking, flow matching, real-time chunking, feedback control, Kinetix]

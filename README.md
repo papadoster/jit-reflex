@@ -1,5 +1,7 @@
 # JIT Reflex: a frozen chunking policy's own Jacobian as a feedback controller between its calls
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22962312.svg)](https://doi.org/10.5281/zenodo.22962312)
+
 Large robot policies are too slow to call at control rate, so they emit **action chunks** and the robot replays a stale plan until the next call arrives. This project asks a narrow question: between two calls, can a frozen flow-matching chunking policy be replaced by **its own local linearization** along the predicted trajectory? No training is involved: the gain is the policy's Jacobian, obtained with a few reverse-mode VJPs.
 
 ```
