@@ -222,3 +222,5 @@ eval_output/
 wandb/
 results/smoke*/
 .DS_Store
+results/**/*.pkl
+*.tgz
