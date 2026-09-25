@@ -1,7 +1,7 @@
-"""Bitwise check that upstream methods are untouched: current src/ vs pristine upstream/main.
+"""Bitwise check that upstream methods are untouched: current src/ vs pristine upstream (UPSTREAM_REF).
 
 Runs the same computation in two subprocesses, one importing model / eval_flow / train_expert from
-`git show upstream/main:src/...`, one from src/, and compares every output exactly (np.array_equal).
+`git show UPSTREAM_REF:src/...`, one from src/, and compares every output exactly (np.array_equal).
 Rerun after any change to src/model.py or src/eval_flow.py. From the repo root:
 
     uv run --offline python scripts/check_upstream_bitwise.py
@@ -19,6 +19,8 @@ import numpy as np
 LEVEL = "worlds/l/grasp_easy.json"
 CHECKPOINT = "checkpoints/bc/31/policies/worlds_l_grasp_easy.pkl"
 UPSTREAM_FILES = ("model", "eval_flow", "train_expert")
+# the last Physical Intelligence commit in this repository's history (the fork point): works without any remote
+UPSTREAM_REF = "23e8e2f3da35571ea1385f687d38b711a4d7ad96"
 NUM_STEPS, DELAY, HORIZON, BATCH = 5, 2, 4, 16
 
 
@@ -81,7 +83,7 @@ def main():
         (tmp / "upstream").mkdir()
         for name in UPSTREAM_FILES:
             code = subprocess.run(
-                ["git", "show", f"upstream/main:src/{name}.py"], cwd=root, check=True, capture_output=True, text=True
+                ["git", "show", f"{UPSTREAM_REF}:src/{name}.py"], cwd=root, check=True, capture_output=True, text=True
             ).stdout
             (tmp / "upstream" / f"{name}.py").write_text(code)
         results = {}
