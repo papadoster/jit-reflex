@@ -3,6 +3,7 @@
 See docs/superpowers/specs/2026-09-25-b1-staleness-predictors-design.md (sections 3 and 4.2).
 """
 
+import json
 import pathlib
 import pickle
 from typing import Sequence
@@ -14,6 +15,7 @@ import pandas as pd
 import tyro
 
 import probe
+import reflex
 import train_expert
 
 WM_DIR = "results/b1/world_models"
@@ -216,5 +218,101 @@ def train(
         pd.DataFrame(rows).to_csv(out / "train_log.csv", index=False)  # after every level
 
 
+def normalized_error(pred, truth, std):
+    """L2 distance over the dims that move (std > 1e-6), each in units of its std: [..., O] -> [...]."""
+    moving = std > 1e-6
+    z = jnp.where(moving, (pred - truth) / jnp.where(moving, std, 1.0), 0.0)
+    return jnp.sqrt(jnp.sum(z**2, axis=-1))
+
+
+def errors(
+    run_path: str = "checkpoints/bc",
+    level_paths: Sequence[str] = probe.LEVELS,
+    phys: Sequence[float] = (0.1, 0.2, 0.3),
+    world_model_dir: str = WM_DIR,
+    num_envs: int = 64,
+    num_states: int = 128,
+    num_draws: int = 4,
+    num_flow_steps: int = 5,
+    seed: int = 2000,  # level i uses seed + i: disjoint from world-model data and every eval seed
+    out: str = "results/b1/errors.csv",
+):
+    """Offline prediction error of every predictor vs the noise-free truth (spec B1 4.2).
+
+    err = normalized_error(o^_k, o*_k) for k = 1..H-1 after one policy call; 'noise' is the deviation that action noise
+    sigma = 0.1 causes, and ratio = err / noise. Prints the median ratio over levels and the calibration decision.
+    """
+    env, env_params, levels, obs_dim, action_dim = probe.setup(level_paths)
+    base = env._env  # raw Kinetix env: no auto-reset, as in eval's predictor
+    sigma = train_expert.ACTION_NOISE_STD
+
+    @jax.jit
+    def level_errors(state_dict, level, key, wm):
+        policy = probe.make_policy(state_dict, obs_dim, action_dim)
+        H = policy.action_chunk_size
+        k_c, k_s, k_p = jax.random.split(key, 3)
+        boundaries = probe.collect(env, env_params, policy, level, k_c, num_envs, 4, sigma, num_flow_steps)
+        all_obs, alive = boundaries[0].reshape(-1, obs_dim), boundaries[2].reshape(-1, 1)
+        mean = (all_obs * alive).sum(0) / alive.sum()
+        std = jnp.sqrt((jnp.square(all_obs - mean) * alive).sum(0) / alive.sum())
+        obs, state = probe.sample(boundaries, k_s, num_states)
+
+        def one(x):
+            o, st, k = x
+            k_z, k_f, k_n = jax.random.split(k, 3)
+            z = jax.random.normal(k_z, (1, H, action_dim))
+            acts = policy.action_from_noise(z, o[None], num_flow_steps)[0, : H - 1]
+            raw = st.env_state
+
+            def true_step(s, a):
+                return base.step_env(k, s, a, env_params)[:2]
+
+            truth = reflex.nominal_obs(true_step, raw, acts)  # [K, O]
+            preds = {"oracle": truth, "hold": jnp.broadcast_to(o, truth.shape)}
+            for p in phys:
+                f = phys_factors(k_f, raw, p)  # same key: same signs for every p
+                preds[f"phys{p}"] = reflex.nominal_obs(
+                    lambda s, a, f=f: phys_step(base, k, s, a, env_params, f), raw, acts
+                )
+            if wm is not None:
+                preds["learned"] = wm_rollout(wm, o, acts)
+            noisy = acts + sigma * jax.random.normal(k_n, (num_draws, *acts.shape))
+            dev = jax.vmap(lambda a: reflex.nominal_obs(true_step, raw, a))(noisy)  # [M, K, O]
+            e = {name: normalized_error(v, truth, std) for name, v in preds.items()}
+            e["noise"] = normalized_error(dev, truth, std).mean(0)
+            return e
+
+        return jax.lax.map(one, (obs, state, jax.random.split(k_p, num_states)), batch_size=16)
+
+    rows = []
+    out_path = pathlib.Path(out)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    for i, level_path in enumerate(level_paths):
+        f = pathlib.Path(world_model_dir) / f"{level_name(level_path)}.pkl"
+        wm = None
+        if f.exists():
+            with f.open("rb") as fh:
+                wm = pickle.load(fh)
+        e = jax.device_get(level_errors(
+            probe.load_state_dict(run_path, level_path), jax.tree.map(lambda x: x[i], levels),
+            jax.random.key(seed + i), wm,
+        ))
+        for name, v in e.items():  # v [num_states, K]
+            rows += [{"level": level_path, "predictor": name, "k": k + 1, "err": float(v[:, k].mean())}
+                     for k in range(v.shape[1])]
+        print(f"{level_path}: done")
+        pd.DataFrame(rows).to_csv(out_path, index=False)  # after every level
+    df = pd.DataFrame(rows)
+    noise = df[df["predictor"] == "noise"].set_index(["level", "k"])["err"]
+    df["ratio"] = df["err"].to_numpy() / noise.reindex(pd.MultiIndex.from_frame(df[["level", "k"]])).to_numpy()
+    df.to_csv(out_path, index=False)
+    table = df.groupby(["predictor", "k"])["ratio"].median().unstack("k")
+    print("median over levels of err / noise:")
+    print(table.round(2).to_string())
+    mid = sorted(phys)[len(phys) // 2]
+    ratio = float(table.loc[f"phys{mid}", 4])
+    print(json.dumps({"calibration": {"phys_mid": mid, "ratio_k4": ratio, "double_levels": ratio < 1.0}}))
+
+
 if __name__ == "__main__":
-    tyro.extras.subcommand_cli_from_dict({"train": train})
+    tyro.extras.subcommand_cli_from_dict({"train": train, "errors": errors})

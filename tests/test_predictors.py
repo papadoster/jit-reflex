@@ -57,3 +57,10 @@ def test_world_model_learns_linear_dynamics_and_copies_static_dims():
     roll = predictors.wm_rollout(wm, obs[0], act[:5])
     assert roll.shape == (5, O)
     np.testing.assert_array_equal(np.asarray(roll[:, 3]), 5.0)  # static dims are copied exactly
+
+
+def test_normalized_error_counts_only_moving_dims():
+    truth = jnp.zeros((2, 3))
+    std = jnp.array([2.0, 1.0, 0.0])  # dim 2 never moves
+    pred = truth.at[:, 0].set(2.0).at[:, 2].set(100.0)
+    np.testing.assert_allclose(predictors.normalized_error(pred, truth, std), [1.0, 1.0])
