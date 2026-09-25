@@ -3,6 +3,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import pandas as pd
+import pytest
 
 import eval_flow
 import model as _model
@@ -302,3 +303,31 @@ def test_b1_rules(tmp_path):
 
     out = run(base=(0.9, 0.95))  # nothing beats the baseline even with the oracle
     assert out["informative_slices"] == [] and out["verdict"] == "NO-EDGE" and out["R4_learned"] == "n/a"
+
+
+def _b1_run(tmp_path, df, **kw):
+    d = tmp_path / str(len(list(tmp_path.iterdir())))
+    d.mkdir()
+    df.to_csv(d / "results.csv", index=False)
+    return plot.b1(str(d / "*.csv"), errors_csv=str(tmp_path / "missing.csv"), out_dir=str(d), **kw)
+
+
+def test_b1_refuses_incomplete_grid(tmp_path):
+    df = _b1_rows()
+    hole = (df["method"] == "realtime") & (df["delay"] == 1) & (df["seed"] == 11) & (df["execute_horizon"] == 6)
+    with pytest.raises(AssertionError, match="incomplete baseline"):
+        _b1_run(tmp_path, df[~hole])
+
+    df = _b1_rows()
+    lost = df["method"].isin(["pred", "reflex", "rtc_reflex"]) & (df["delay"] == 3) & (df["seed"] == 12)
+    out = _b1_run(tmp_path, df[~lost])  # d3 has 2 of 3 seeds: MISSING, never PASS
+    assert out["slices"]["d3"]["oracle"]["status"] == "MISSING"
+    assert out["informative_slices"] == ["d1"] and out["verdict"] == "SURVIVES"
+
+
+def test_b1_explicit_p_mid(tmp_path):
+    out = _b1_run(tmp_path, _b1_rows(), p_mid="phys0.3")
+    assert out["p_mid"] == "phys0.3" and not out["R3_j_grows_with_error"]  # J(phys0.3) == J(oracle)
+    assert out["slices"]["d3"]["phys0.3"]["status"] == "MISSING" and out["verdict"] == "SURVIVES"  # d1 via reflex
+    with pytest.raises(AssertionError):
+        _b1_run(tmp_path, _b1_rows(), p_mid="phys0.5")

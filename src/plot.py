@@ -146,11 +146,12 @@ def gate2(
 B1_SLICES = {"d1": (1, (5, 6, 7)), "d3": (3, (5,))}  # spec B1 section 5: the rare-call slices behind the verdict
 
 
-def _slice_status(G: pd.DataFrame, delay: int, horizons, predictor: str):
+def _slice_status(G: pd.DataFrame, delay: int, horizons, predictor: str, n_seeds: int):
     """PASS / FAIL / GRAY / MISSING of one slice for one predictor (spec B1 section 5), with per-method details.
 
     G: reflex-type methods' G, index (delay, seed, predictor, execute_horizon). PASS needs pooled >= +1 pp and > 0 in
-    every seed for the same method; FAIL needs pooled <= 0 for every method that ran.
+    every seed for the same method; FAIL needs pooled <= 0 for every method that ran. A method counts as run only
+    with all n_seeds seeds: a slice short of seeds is MISSING, never PASS.
     """
     try:
         g = G.xs((delay, predictor), level=("delay", "predictor"))
@@ -160,11 +161,11 @@ def _slice_status(G: pd.DataFrame, delay: int, horizons, predictor: str):
     detail = {
         m: {"pooled": float(g[m].mean()), "min_seed": float(g[m].min())}
         for m in ("reflex", "rtc_reflex")
-        if m in g and len(g) and g[m].notna().all()
+        if m in g and len(g) == n_seeds and g[m].notna().all()
     }
     if not detail:
         return "MISSING", {}
-    if any(v["pooled"] >= 0.01 and v["min_seed"] > 0 for v in detail.values()):
+    if any(v["pooled"] >= 0.01 - 1e-9 and v["min_seed"] > 0 for v in detail.values()):
         return "PASS", detail
     if all(v["pooled"] <= 0 for v in detail.values()):
         return "FAIL", detail
@@ -175,15 +176,21 @@ def b1(
     results_glob: str = "results/b1/gpu/eval*/results.csv",
     errors_csv: str = "results/b1/gpu/errors.csv",
     out_dir: str = "results/b1/gpu",
+    p_mid: str | None = None,
 ) -> dict:
     """B1 verdict and rules R1-R4 (spec B1 section 5), b1.json and b1.png. Solve rates are means over levels.
 
-    G = method - max(naive, realtime) at the same (delay, seed, s); J = reflex - pred at d = 1; p_mid = middle phys.
+    G = method - max(naive, realtime) at the same (delay, seed, s); J = reflex - pred at d = 1. p_mid: the middle phys
+    level, pass it explicitly (e.g. "phys0.4" after calibration); None = the middle of an odd number of phys levels.
+    Refuses a grid where naive / realtime are missing next to a reflex-type row.
     """
     df = pd.concat([pd.read_csv(f) for f in sorted(glob.glob(results_glob))])
     lv = df.groupby(["delay", "seed", "method", "predictor", "execute_horizon"])["returned_episode_solved"].mean()
     base = lv.xs("-", level="predictor").unstack("method")  # (delay, seed, s) x {naive, realtime}
     t = lv.drop("-", level="predictor").unstack("method")  # (delay, seed, predictor, s) x {pred, reflex, rtc_reflex}
+    need = base[["naive", "realtime"]].reindex(t.index.droplevel("predictor").unique())
+    assert need.notna().all().all(), "incomplete baseline: naive/realtime missing for some (delay, seed, s)"
+    n_seeds = df["seed"].nunique()
     best = base[["naive", "realtime"]].max(axis=1).reindex(t.index.droplevel("predictor")).to_numpy()
     G = t.sub(pd.Series(best, index=t.index), axis=0)
     t1 = t.xs(1, level="delay")
@@ -191,7 +198,10 @@ def b1(
     phys = sorted(
         (p for p in J.index.get_level_values("predictor").unique() if p.startswith("phys")), key=lambda p: float(p[4:])
     )
-    p_mid = phys[len(phys) // 2]
+    if p_mid is None:
+        assert len(phys) % 2 == 1, f"p_mid is ambiguous for phys levels {phys}: pass --p-mid"
+        p_mid = phys[len(phys) // 2]
+    assert p_mid in phys, f"p_mid {p_mid} not among phys levels {phys}"
     jo = J.xs("oracle", level="predictor").unstack("execute_horizon")  # seed x s
     stale = jo.loc[:, jo.columns >= 5].mean(axis=1) - jo.loc[:, jo.columns <= 3].mean(axis=1)
     jbar = J.groupby(level=["predictor", "seed"]).mean()
@@ -201,7 +211,7 @@ def b1(
     for name, (d, horizons) in B1_SLICES.items():
         out["slices"][name] = {}
         for pr in ("oracle", p_mid, "learned"):
-            status, detail = _slice_status(G, d, horizons, pr)
+            status, detail = _slice_status(G, d, horizons, pr, n_seeds)
             out["slices"][name][pr] = {"status": status, **detail}
     informative = [n for n in B1_SLICES if out["slices"][n]["oracle"]["status"] == "PASS"]
     mids = [out["slices"][n][p_mid]["status"] for n in informative]
@@ -220,9 +230,9 @@ def b1(
         else "GRAY"
     )
     out |= {
-        "R2_staleness": bool(stale.mean() >= 0.03 and (stale > 0).all()),
+        "R2_staleness": bool(stale.mean() >= 0.03 - 1e-9 and (stale > 0).all()),
         "R2_gap": float(stale.mean()),
-        "R3_j_grows_with_error": bool(grow.mean() >= 0.01 and (grow > 0).all()),
+        "R3_j_grows_with_error": bool(grow.mean() >= 0.01 - 1e-9 and (grow > 0).all()),
         "R3_gap": float(grow.mean()),
     }
     out["drop_oracle_to_p_mid"] = {  # report only: the spec's prediction is that rtc_reflex drops more than reflex
