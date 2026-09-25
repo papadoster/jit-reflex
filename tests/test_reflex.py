@@ -240,3 +240,9 @@ def test_forward_equivalents_counts_only_computed_positions():
     assert reflex.forward_equivalents("pred", positions=7) == 5 + 7 * 5  # 40
     assert reflex.forward_equivalents("reflex", positions=None) == 525  # phase A: all H positions
     assert reflex.forward_equivalents("naive", positions=3) == 5  # no package: positions don't matter
+
+
+def test_parse_predictor():
+    assert eval_flow.parse_predictor("oracle") == {"predictor": "oracle"}
+    assert eval_flow.parse_predictor("learned") == {"predictor": "learned"}
+    assert eval_flow.parse_predictor("phys0.2") == {"predictor": "phys", "phys_error": 0.2}

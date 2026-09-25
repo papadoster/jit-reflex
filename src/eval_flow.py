@@ -4,6 +4,7 @@ import functools
 import math
 import pathlib
 import pickle
+import time
 from typing import Sequence
 
 import flax.nnx as nnx
@@ -18,6 +19,7 @@ import pandas as pd
 import tyro
 
 import model as _model
+import predictors as _predictors
 import reflex
 import train_expert
 
@@ -46,6 +48,8 @@ class ReflexMethodConfig:
     max_correction: float = 1.0
     package_batch: int = 16  # envs per Jacobian batch (memory knob)
     rtc: bool = False  # E2b: the chunk comes from RTC (realtime_action) instead of plain sampling
+    predictor: str = "oracle"  # B1: "oracle" | "phys" (wrong physics) | "learned" (world model), spec B1 3.1
+    phys_error: float = 0.0  # B1: relative parameter error of the "phys" predictor
 
 
 @dataclasses.dataclass(frozen=True)
@@ -73,6 +77,7 @@ def eval(
     env_params: kenv_state.EnvParams,
     static_env_params: kenv_state.EnvParams,
     weak_policy: _model.FlowPolicy | None = None,
+    world_model=None,
 ):
     base_env = env
     if config.kick_prob > 0:
@@ -88,6 +93,27 @@ def eval(
     assert config.execute_horizon >= config.inference_delay, f"{config.execute_horizon=} {config.inference_delay=}"
     d, s = config.inference_delay, config.execute_horizon
     assert s + d <= policy.action_chunk_size, f"{s=} + {d=} > H: padded zero actions would be executed"
+    phys_key = jax.random.fold_in(rng, 1)  # B1: the same parameter-error signs for every method (paired comparison)
+
+    def predict(key, raw_state, obs, actions):
+        """Predicted obs after each planned action [B, T, A] -> [B, T, O] (spec B1 3.1)."""
+        m = config.method
+        if m.predictor == "learned":
+            assert world_model is not None, "predictor 'learned' needs world models: src/predictors.py train"
+            return jax.vmap(_predictors.wm_rollout, in_axes=(None, 0, 0))(world_model, obs, actions)
+        if m.predictor == "phys":
+            factors = _predictors.phys_factors(phys_key, raw_state, m.phys_error)
+            step = jax.vmap(functools.partial(_predictors.phys_step, base_env), in_axes=(None, 0, 0, None, 0))
+
+            def fn(st, a):
+                return step(key, st, a, env_params, factors)
+        else:
+            assert m.predictor == "oracle", m.predictor
+
+            def fn(st, a):
+                return nominal_step(key, st, a, env_params)[:2]
+
+        return reflex.nominal_obs(fn, raw_state, actions.swapaxes(0, 1)).swapaxes(0, 1)
 
     def execute_chunk(carry, _):
         def step(carry, xs):
@@ -148,12 +174,9 @@ def eval(
             # steps t..t+H-1 run the previous package's actions for d steps, then this chunk
             planned = jnp.concatenate([pkg["nom"][:, :d], next_action_chunk[:, d:]], axis=1)
             n_pred = max(d + s - 1, 1)  # the package reads only chunk indices d..d+s-1 (spec B1 3.4)
-            pred = reflex.nominal_obs(
-                lambda st, a: nominal_step(key, st, a, env_params)[:2],
-                env_state.env_state.env_state,  # BatchEnv/LogWrapper -> AutoReplay -> raw EnvState
-                planned[:, :n_pred].swapaxes(0, 1),
-            )
-            ref = jnp.concatenate([obs[:, None], pred.swapaxes(0, 1)], axis=1)  # predicted obs per chunk index
+            # BatchEnv/LogWrapper -> AutoReplay -> raw EnvState
+            pred = predict(key, env_state.env_state.env_state, obs, planned[:, :n_pred])  # [B, n_pred, O]
+            ref = jnp.concatenate([obs[:, None], pred], axis=1)  # predicted obs per chunk index
             ref = jnp.pad(ref, ((0, 0), (0, policy.action_chunk_size - ref.shape[1]), (0, 0)))  # never read past d+s-1
             nom, gain = reflex.package(
                 policy,
@@ -251,6 +274,14 @@ def horizons_for(delay: int, chunk_size: int, horizons: Sequence[int], minmax: b
     return sorted({lo, hi}) if minmax else list(range(lo, hi + 1))
 
 
+def parse_predictor(name: str) -> dict:
+    """CLI predictor name -> ReflexMethodConfig fields: 'oracle', 'learned' or 'phys<p>' (e.g. 'phys0.2')."""
+    if name.startswith("phys"):
+        return {"predictor": "phys", "phys_error": float(name[4:])}
+    assert name in ("oracle", "learned"), f"unknown predictor {name!r}"
+    return {"predictor": name}
+
+
 def main(
     run_path: str,
     config: EvalConfig = EvalConfig(),
@@ -276,6 +307,8 @@ def main(
     minmax: bool = False,
     max_correction: float = 1.0,
     package_batch: int = 16,
+    predictors: Sequence[str] = ("oracle",),  # B1: predictors for the reflex methods, see parse_predictor
+    world_model_dir: str = _predictors.WM_DIR,
 ):
     static_env_params = kenv_state.StaticEnvParams(**train_expert.LARGE_ENV_PARAMS, frame_skip=train_expert.FRAME_SKIP)
     env_params = kenv_state.EnvParams()
@@ -302,6 +335,13 @@ def main(
         weak_state_dicts = jax.device_put(jax.tree.map(lambda *x: jnp.array(x), *weak_state_dicts))
     else:
         weak_state_dicts = None
+    world_models = None
+    if "learned" in predictors:
+        wms = []
+        for level_path in level_paths:
+            with (pathlib.Path(world_model_dir) / f"{_predictors.level_name(level_path)}.pkl").open("rb") as f:
+                wms.append(pickle.load(f))
+        world_models = jax.device_put(jax.tree.map(lambda *x: jnp.array(x), *wms))
 
     obs_dim = jax.eval_shape(env.reset_to_level, jax.random.key(0), jax.tree.map(lambda x: x[0], levels), env_params)[
         0
@@ -313,9 +353,11 @@ def main(
     sharding = jax.sharding.NamedSharding(mesh, pspec)
 
     @functools.partial(jax.jit, static_argnums=(0,), in_shardings=sharding, out_shardings=sharding)
-    @functools.partial(shard_map.shard_map, mesh=mesh, in_specs=(None, pspec, pspec, pspec, pspec), out_specs=pspec)
-    @functools.partial(jax.vmap, in_axes=(None, 0, 0, 0, 0))
-    def _eval(config: EvalConfig, rng: jax.Array, level: kenv_state.EnvState, state_dict, weak_state_dict):
+    @functools.partial(
+        shard_map.shard_map, mesh=mesh, in_specs=(None, pspec, pspec, pspec, pspec, pspec), out_specs=pspec
+    )
+    @functools.partial(jax.vmap, in_axes=(None, 0, 0, 0, 0, 0))
+    def _eval(config: EvalConfig, rng: jax.Array, level: kenv_state.EnvState, state_dict, weak_state_dict, world_model):
         policy = _model.FlowPolicy(
             obs_dim=obs_dim,
             action_dim=action_dim,
@@ -331,7 +373,7 @@ def main(
             weak_policy = nnx.merge(graphdef, state)
         else:
             weak_policy = None
-        eval_info, _ = eval(config, env, rng, level, policy, env_params, static_env_params, weak_policy)
+        eval_info, _ = eval(config, env, rng, level, policy, env_params, static_env_params, weak_policy, world_model)
         return eval_info
 
     pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
@@ -341,28 +383,34 @@ def main(
         for inference_delay in delays:
             for execute_horizon in horizons_for(inference_delay, config.model.action_chunk_size, horizons, minmax):
                 for name in methods:
-                    print(f"{seed=} {name=} {inference_delay=} {execute_horizon=}")
                     method = METHODS[name]
-                    if isinstance(method, ReflexMethodConfig):
-                        method = dataclasses.replace(method, max_correction=max_correction, package_batch=package_batch)
-                    c = dataclasses.replace(
-                        config, inference_delay=inference_delay, execute_horizon=execute_horizon, method=method
-                    )
-                    out = jax.device_get(_eval(c, rngs, levels, state_dicts, weak_state_dicts))
-                    for i in range(len(level_paths)):
-                        for k, v in out.items():
-                            results[k].append(v[i])
-                        results["seed"].append(seed)
-                        results["delay"].append(inference_delay)
-                        results["method"].append(name)
-                        results["level"].append(level_paths[i])
-                        results["execute_horizon"].append(execute_horizon)
-                        results["max_correction"].append(
-                            max_correction if isinstance(method, ReflexMethodConfig) else float("nan")
+                    is_reflex = isinstance(method, ReflexMethodConfig)
+                    for predictor in predictors if is_reflex else ("-",):
+                        print(f"{time.strftime('%H:%M:%S')} {seed=} {name=} {predictor=} {inference_delay=} "
+                              f"{execute_horizon=}")
+                        m = method
+                        if is_reflex:
+                            m = dataclasses.replace(
+                                method, max_correction=max_correction, package_batch=package_batch,
+                                **parse_predictor(predictor),
+                            )
+                        c = dataclasses.replace(
+                            config, inference_delay=inference_delay, execute_horizon=execute_horizon, method=m
                         )
-                        results["kick_std"].append(config.kick_std if config.kick_prob > 0 else 0.0)
-                    # after every config: a crash (or Ctrl-C) keeps the finished ones
-                    pd.DataFrame(results).to_csv(pathlib.Path(output_dir) / "results.csv", index=False)
+                        out = jax.device_get(_eval(c, rngs, levels, state_dicts, weak_state_dicts, world_models))
+                        for i in range(len(level_paths)):
+                            for k, v in out.items():
+                                results[k].append(v[i])
+                            results["seed"].append(seed)
+                            results["delay"].append(inference_delay)
+                            results["method"].append(name)
+                            results["predictor"].append(predictor)
+                            results["level"].append(level_paths[i])
+                            results["execute_horizon"].append(execute_horizon)
+                            results["max_correction"].append(max_correction if is_reflex else float("nan"))
+                            results["kick_std"].append(config.kick_std if config.kick_prob > 0 else 0.0)
+                        # after every config: a crash (or Ctrl-C) keeps the finished ones
+                        pd.DataFrame(results).to_csv(pathlib.Path(output_dir) / "results.csv", index=False)
 
 
 if __name__ == "__main__":
