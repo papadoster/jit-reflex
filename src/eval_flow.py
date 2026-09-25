@@ -147,12 +147,14 @@ def eval(
                 next_action_chunk = policy.action_from_noise(noise, obs, config.num_flow_steps)  # == policy.action(key)
             # steps t..t+H-1 run the previous package's actions for d steps, then this chunk
             planned = jnp.concatenate([pkg["nom"][:, :d], next_action_chunk[:, d:]], axis=1)
+            n_pred = max(d + s - 1, 1)  # the package reads only chunk indices d..d+s-1 (spec B1 3.4)
             pred = reflex.nominal_obs(
                 lambda st, a: nominal_step(key, st, a, env_params)[:2],
                 env_state.env_state.env_state,  # BatchEnv/LogWrapper -> AutoReplay -> raw EnvState
-                planned[:, :-1].swapaxes(0, 1),
+                planned[:, :n_pred].swapaxes(0, 1),
             )
             ref = jnp.concatenate([obs[:, None], pred.swapaxes(0, 1)], axis=1)  # predicted obs per chunk index
+            ref = jnp.pad(ref, ((0, 0), (0, policy.action_chunk_size - ref.shape[1]), (0, 0)))  # never read past d+s-1
             nom, gain = reflex.package(
                 policy,
                 noise,
@@ -162,6 +164,7 @@ def eval(
                 config.method.requery,
                 config.method.feedback,
                 config.method.package_batch,
+                used=(d, d + s),
             )
             new_pkg = {"nom": nom, "ref": ref} | ({} if gain is None else {"gain": gain})
         else:

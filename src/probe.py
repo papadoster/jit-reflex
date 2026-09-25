@@ -305,11 +305,12 @@ def cost(
     repeats: int = 20,
     out: str | None = None,
 ):
-    """Per-call cost of every E2 method: network evaluations (analytic), GFLOP and measured latency (spec section 4).
+    """Per-call cost of every E2/B1 method: network evaluations (analytic), GFLOP and measured latency.
 
     GFLOP of one network evaluation comes from cost_analysis on a loop-free call: whole calls contain lax.scan loops,
     whose bodies XLA may count only once. The predictor (a simulator fork here) is not included.
     """
+    used = (delay, delay + horizon)  # the package covers only the executed chunk indices (spec B1 3.4)
     _, _, _, obs_dim, action_dim = setup([level_path])
     policy = make_policy(load_state_dict(run_path, level_path), obs_dim, action_dim)
     H = policy.action_chunk_size
@@ -323,7 +324,7 @@ def cost(
     def with_package(requery, feedback):
         def call(noise, obs, ref, prev):
             chunk = policy.action_from_noise(noise, obs, num_flow_steps)
-            return chunk, reflex.package(policy, noise, ref, chunk, num_flow_steps, requery, feedback)
+            return chunk, reflex.package(policy, noise, ref, chunk, num_flow_steps, requery, feedback, used=used)
 
         return call
 
@@ -337,7 +338,7 @@ def cost(
         "reflex_chunk": with_package(False, True),
         "rtc_reflex": lambda noise, obs, ref, prev: reflex.package(  # E2b: RTC chunk + the same package
             policy, noise, ref, policy.realtime_action(key, obs, num_flow_steps, prev, delay, H - horizon, "exp", 5.0),
-            num_flow_steps, False, True,
+            num_flow_steps, False, True, used=used,
         ),
     }
     rows = []
@@ -347,7 +348,7 @@ def cost(
         start = time.perf_counter()
         for _ in range(repeats):
             jax.block_until_ready(f(noise, obs, ref, prev))
-        evals = reflex.forward_equivalents(name, num_flow_steps, H, action_dim)
+        evals = reflex.forward_equivalents(name, num_flow_steps, H, action_dim, positions=horizon)
         rows.append({
             "method": name,
             "batch": batch,
