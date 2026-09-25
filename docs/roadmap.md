@@ -8,6 +8,8 @@ Phase A in one line: the reflex pays off when the policy is called rarely (s ≥
 
 **Question.** Does `J`'s contribution grow as the plan gets staler, and does it survive prediction error?
 
+**Pre-registered spec:** [B1 design and decision rules](superpowers/specs/2026-09-25-b1-staleness-predictors-design.md) (Russian). It moves the learned model into B1 and makes the absolute `J` contribution the main metric.
+
 **Design.** Fixed delay d = 1, execute horizon s = 1…7. Predictors:
 - the oracle;
 - the same simulator with physical parameters (masses, friction, motor and thruster strength) off by 10 / 20 / 30%;
