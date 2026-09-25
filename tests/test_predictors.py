@@ -43,3 +43,17 @@ def test_phys_error_changes_the_motion_but_not_the_parameter_features():
         np.testing.assert_array_equal(x, y)  # the true parameters are back in the predicted state
     np.testing.assert_array_equal(o_wrong, env.get_obs(s_wrong))  # and in its observation
     assert not np.allclose(o_wrong, o_true)  # but the bodies moved differently
+
+
+def test_world_model_learns_linear_dynamics_and_copies_static_dims():
+    N, O, A = 2048, 4, 2
+    obs = jax.random.normal(jax.random.key(0), (N, O)).at[:, 3].set(5.0)  # dim 3 never moves
+    act = jax.random.normal(jax.random.key(1), (N, A))
+    B = jnp.array([[1.0, 0.0], [0.0, -1.0], [0.5, 0.5], [0.0, 0.0]])
+    nxt = obs + 0.1 * act @ B.T
+    wm = predictors.fit(obs, act, nxt, jax.random.key(2), hidden=32, steps=3000, batch=256, lr=3e-3)
+    np.testing.assert_array_equal(np.asarray(wm["mask"]), [1, 1, 1, 0])
+    assert float(predictors.one_step_nmse(wm, obs, act, nxt)) < 0.05
+    roll = predictors.wm_rollout(wm, obs[0], act[:5])
+    assert roll.shape == (5, O)
+    np.testing.assert_array_equal(np.asarray(roll[:, 3]), 5.0)  # static dims are copied exactly
