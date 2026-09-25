@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Прогнать заранее записанный эксперимент B1 (спек `docs/superpowers/specs/2026-09-25-b1-staleness-predictors-design.md`): рефлекс с оракулом, «кривой физикой» и обученной моделью мира при d = 1, s = 1…7, и принять решения по правилам R1–R4.
+**Goal:** Прогнать заранее записанный эксперимент B1 (спек `docs/superpowers/specs/2026-09-25-b1-staleness-predictors-design.md`): `reflex` и `rtc_reflex` с оракулом, «кривой физикой» и обученной моделью мира при d = 1 (s = 1…7) и на срезе d = 3 (s = 5), и принять решения по правилам R1–R4.
 
 **Architecture:**
 - Пакет рефлекса считается только для исполняемых позиций `d…d+s−1`. Это точное ускорение.
@@ -283,23 +283,24 @@ Expected: all `IDENTICAL`.
 Run: `UV_OFFLINE=1 JAX_PLATFORMS=cpu uv run --offline src/probe.py cost --batch 1 --delay 1 --horizon 1 --repeats 3`
 Expected: таблица, в которой `evals_per_call` для `reflex` = 70, для `pred` = 10, для `realtime` = 15.
 
-- [ ] **Step 4: Проверка в замкнутом цикле (~40 мин; запускает контроллер в фоне)**
+- [ ] **Step 4: Проверка в замкнутом цикле (~50 мин; запускает контроллер в фоне)**
 
-Повторить мини-E2 фазы A (`results/e2_preview`: d = 2, s = 6, 64 эпизода × 12 уровней, seed 0) для `pred` и `reflex`:
+Повторить прогоны фазы A на Mac (d = 2, s = 6, 64 эпизода × 12 уровней, seed 0) для `pred`, `reflex`, `rtc_reflex`:
 ```bash
 UV_OFFLINE=1 JAX_PLATFORMS=cpu PYTHONUNBUFFERED=1 uv run --offline src/eval_flow.py --run-path checkpoints/bc \
-  --config.num-evals 64 --seeds 0 --methods pred reflex --delays 2 --horizons 6 --output-dir results/smoke_b1_speedup
+  --config.num-evals 64 --seeds 0 --methods pred reflex rtc_reflex --delays 2 --horizons 6 \
+  --output-dir results/smoke_b1_speedup
 ```
-Потом сравнить:
+Потом сравнить со старыми результатами: `pred` и `reflex` — с `results/e2_preview`, `rtc_reflex` — с `results/e2_night/rtc_d2s6`:
 ```bash
 uv run --offline python - <<'EOF'
 import pandas as pd
-old = pd.read_csv("results/e2_preview/results.csv")
+old = pd.concat([pd.read_csv("results/e2_preview/results.csv"), pd.read_csv("results/e2_night/rtc_d2s6/results.csv")])
 new = pd.read_csv("results/smoke_b1_speedup/results.csv")
-m = old[old["method"].isin(["pred", "reflex"])].merge(new, on=["method", "level"], suffixes=("_old", "_new"))
+m = old[old["method"].isin(["pred", "reflex", "rtc_reflex"])].merge(new, on=["method", "level"], suffixes=("_old", "_new"))
 m["diff"] = ((m["returned_episode_solved_new"] - m["returned_episode_solved_old"]) * 64).round().astype(int)
 print(m[["method", "level", "diff"]].to_string(index=False))
-assert len(m) == 24 and m["diff"].abs().max() <= 2, "the speedup changed closed-loop outcomes"
+assert len(m) == 36 and m["diff"].abs().max() <= 2, "the speedup changed closed-loop outcomes"
 print("OK: within +-2 episodes per level")
 EOF
 ```
@@ -987,7 +988,7 @@ Expected: all `IDENTICAL`.
 Модель мира для `mjc_walker` лежит в `results/smoke_b1/wm` (задача 5). Run:
 ```bash
 UV_OFFLINE=1 JAX_PLATFORMS=cpu PYTHONUNBUFFERED=1 uv run --offline src/eval_flow.py --run-path checkpoints/bc \
-  --level-paths worlds/l/mjc_walker.json --config.num-evals 4 --seeds 99 --methods naive reflex \
+  --level-paths worlds/l/mjc_walker.json --config.num-evals 4 --seeds 99 --methods naive reflex rtc_reflex \
   --predictors oracle phys0.0 phys0.3 learned --world-model-dir results/smoke_b1/wm --delays 1 --horizons 2 \
   --output-dir results/smoke_b1/eval
 ```
@@ -998,13 +999,14 @@ import pandas as pd
 df = pd.read_csv("results/smoke_b1/eval/results.csv")
 print(df[["method", "predictor", "execute_horizon", "returned_episode_solved", "returned_episode_returns"]])
 assert set(df["predictor"]) == {"-", "oracle", "phys0.0", "phys0.3", "learned"}
-r = df[df["method"] == "reflex"].set_index("predictor")
-assert r.loc["phys0.0", "returned_episode_returns"] == r.loc["oracle", "returned_episode_returns"], "phys0 != oracle"
+for m in ("reflex", "rtc_reflex"):
+    r = df[df["method"] == m].set_index("predictor")
+    assert r.loc["phys0.0", "returned_episode_returns"] == r.loc["oracle", "returned_episode_returns"], f"{m}: phys0 != oracle"
 assert df["returned_episode_returns"].notna().all()
 print("OK")
 EOF
 ```
-Expected: 5 строк (`naive` с `-` и `reflex` с четырьмя предсказателями), а в конце `OK`. `phys0.0` совпадает с `oracle` точно.
+Expected: 9 строк (`naive` с `-`, `reflex` и `rtc_reflex` с четырьмя предсказателями каждый), а в конце `OK`. `phys0.0` совпадает с `oracle` точно у обоих методов.
 
 - [ ] **Step 8: Commit**
 
@@ -1025,44 +1027,60 @@ git commit -m "feat(eval): B1 predictors for the reflex (oracle / phys<p> / lear
 
 Добавить в конец `tests/test_reflex.py`:
 ```python
-def _b1_rows(phys_mid_reflex_gain=0.02, phys_mid_pred=0.62):
+def _b1_rows(mid_pred=0.62, mid_extra=0.02, mid_rtc=0.62, mid_d3=0.6, base=(0.5, 0.6)):
+    """Synthetic B1 results: d = 1, s = 1..7 (5 predictors for pred / reflex, 3 for rtc_reflex) and d = 3, s = 5."""
     rows = []
 
-    def add(seed, s, method, predictor, rate):
-        rows.append({"seed": seed, "delay": 1, "execute_horizon": s, "method": method, "predictor": predictor,
+    def add(d, seed, s, method, predictor, rate):
+        rows.append({"delay": d, "seed": seed, "execute_horizon": s, "method": method, "predictor": predictor,
                      "level": "l", "returned_episode_solved": rate})
 
     for seed in (10, 11, 12):
         for s in range(1, 8):
-            add(seed, s, "naive", "-", 0.5)
-            add(seed, s, "realtime", "-", 0.6)
+            add(1, seed, s, "naive", "-", base[0])
+            add(1, seed, s, "realtime", "-", base[1])
             for pr, pred, j in (
                 ("oracle", 0.62, 0.01 * s),
                 ("phys0.1", 0.62, 0.01 * s + 0.01),
-                ("phys0.2", phys_mid_pred, 0.01 * s + phys_mid_reflex_gain),
+                ("phys0.2", mid_pred, 0.01 * s + mid_extra),
                 ("phys0.3", 0.62, 0.01 * s),
                 ("learned", 0.4, 0.0),
             ):
-                add(seed, s, "pred", pr, pred)
-                add(seed, s, "reflex", pr, pred + j)
+                add(1, seed, s, "pred", pr, pred)
+                add(1, seed, s, "reflex", pr, pred + j)
+            for pr, rate in (("oracle", 0.62), ("phys0.2", mid_rtc), ("learned", 0.55)):
+                add(1, seed, s, "rtc_reflex", pr, rate)
+        add(3, seed, 5, "naive", "-", base[0] - 0.1)
+        add(3, seed, 5, "realtime", "-", base[1] - 0.1)
+        for pr, reflex_rate in (("oracle", 0.6), ("phys0.2", mid_d3), ("learned", 0.45)):
+            add(3, seed, 5, "pred", pr, 0.5)
+            add(3, seed, 5, "reflex", pr, reflex_rate)
+            add(3, seed, 5, "rtc_reflex", pr, 0.45)
     return pd.DataFrame(rows)
 
 
 def test_b1_rules(tmp_path):
-    csv = tmp_path / "results.csv"
-    _b1_rows().to_csv(csv, index=False)
-    out = plot.b1(str(csv), errors_csv=str(tmp_path / "missing.csv"), out_dir=str(tmp_path))
-    assert out["p_mid"] == "phys0.2"
-    assert not out["R1_oracle_bound"]  # reflex(phys0.2) = 0.64 + 0.01 s > 0.6
+    def run(**kw):
+        d = tmp_path / str(len(list(tmp_path.iterdir())))
+        d.mkdir()
+        _b1_rows(**kw).to_csv(d / "results.csv", index=False)
+        return plot.b1(str(d / "*.csv"), errors_csv=str(tmp_path / "missing.csv"), out_dir=str(d))
+
+    out = run()  # the oracle passes both slices; phys0.2 passes D1 through reflex; learned fails everywhere
+    assert out["p_mid"] == "phys0.2" and out["informative_slices"] == ["d1", "d3"]
+    assert out["slices"]["d1"]["phys0.2"]["status"] == "PASS"
+    assert out["verdict"] == "SURVIVES" and out["R4_learned"] == "TOO-WEAK"
     assert out["R2_staleness"] and abs(out["R2_gap"] - 0.04) < 1e-9  # J(oracle): s>=5 -> 0.06, s<=3 -> 0.02
     assert out["R3_j_grows_with_error"] and abs(out["R3_gap"] - 0.02) < 1e-9
-    assert out["R4_learned_too_weak"] and out["learned_positive_s"] == []
-    assert out["verdict"] == "SURVIVES"
-    assert (tmp_path / "b1.json").exists() and (tmp_path / "b1.png").exists()
 
-    _b1_rows(phys_mid_reflex_gain=-0.2, phys_mid_pred=0.5).to_csv(csv, index=False)
-    out = plot.b1(str(csv), errors_csv=str(tmp_path / "missing.csv"), out_dir=str(tmp_path))
-    assert out["R1_oracle_bound"] and out["verdict"] == "ORACLE-BOUND"  # reflex(phys0.2) = 0.3 + 0.01 s <= 0.6
+    out = run(mid_pred=0.5, mid_extra=-0.2, mid_rtc=0.55, mid_d3=0.45)  # phys0.2 below the baseline everywhere
+    assert out["verdict"] == "ORACLE-BOUND"
+
+    out = run(mid_rtc=0.605, mid_pred=0.5, mid_extra=0.0, mid_d3=0.45)  # D1: rtc +0.5 pp (<1 pp), reflex < 0
+    assert out["slices"]["d1"]["phys0.2"]["status"] == "GRAY" and out["verdict"] == "GRAY"
+
+    out = run(base=(0.9, 0.95))  # nothing beats the baseline even with the oracle
+    assert out["informative_slices"] == [] and out["verdict"] == "NO-EDGE" and out["R4_learned"] == "n/a"
 ```
 
 - [ ] **Step 2: Убедиться, что тест падает**
@@ -1072,75 +1090,135 @@ Expected: FAIL with `AttributeError: module 'plot' has no attribute 'b1'`.
 
 - [ ] **Step 3: Реализация**
 
-В `src/plot.py`: первую строку docstring модуля заменить на `"""Figures and tables for E1 (probe), E2 (closed loop) and B1, and the Gate 2 / B1 decision rules."""`. Перед `if __name__ == "__main__":` добавить:
+В `src/plot.py` первую строку docstring модуля заменить на `"""Figures and tables for E1 (probe), E2 (closed loop) and B1, and the Gate 2 / B1 decision rules."""`. Перед `if __name__ == "__main__":` добавить:
 ```python
+B1_SLICES = {"d1": (1, (5, 6, 7)), "d3": (3, (5,))}  # spec B1 section 5: the rare-call slices behind the verdict
+
+
+def _slice_status(G: pd.DataFrame, delay: int, horizons, predictor: str):
+    """PASS / FAIL / GRAY / MISSING of one slice for one predictor (spec B1 section 5), with per-method details.
+
+    G: reflex-type methods' G, index (delay, seed, predictor, execute_horizon). PASS needs pooled >= +1 pp and > 0 in
+    every seed for the same method; FAIL needs pooled <= 0 for every method that ran.
+    """
+    try:
+        g = G.xs((delay, predictor), level=("delay", "predictor"))
+    except KeyError:
+        return "MISSING", {}
+    g = g[g.index.get_level_values("execute_horizon").isin(horizons)].groupby(level="seed").mean()
+    detail = {
+        m: {"pooled": float(g[m].mean()), "min_seed": float(g[m].min())}
+        for m in ("reflex", "rtc_reflex")
+        if m in g and len(g) and g[m].notna().all()
+    }
+    if not detail:
+        return "MISSING", {}
+    if any(v["pooled"] >= 0.01 and v["min_seed"] > 0 for v in detail.values()):
+        return "PASS", detail
+    if all(v["pooled"] <= 0 for v in detail.values()):
+        return "FAIL", detail
+    return "GRAY", detail
+
+
 def b1(
-    results_csv: str = "results/b1/gpu/eval/results.csv",
+    results_glob: str = "results/b1/gpu/eval*/results.csv",
     errors_csv: str = "results/b1/gpu/errors.csv",
     out_dir: str = "results/b1/gpu",
 ) -> dict:
-    """B1 decision rules R1-R4 (spec B1 section 5) and the figure. Solve rates are means over levels; pooled = over seeds.
+    """B1 verdict and rules R1-R4 (spec B1 section 5), b1.json and b1.png. Solve rates are means over levels.
 
-    J = reflex - pred, G = reflex - max(naive, realtime), p_mid = the middle phys level.
+    G = method - max(naive, realtime) at the same (delay, seed, s); J = reflex - pred at d = 1; p_mid = middle phys.
     """
-    df = pd.read_csv(results_csv)
-    lv = df.groupby(["seed", "method", "predictor", "execute_horizon"])["returned_episode_solved"].mean()
-    base = lv.xs("-", level="predictor").unstack("method")  # (seed, s) x {naive, realtime}
-    t = lv.drop("-", level="predictor").unstack("method")  # (seed, predictor, s) x {pred, reflex}
-    idx = t.index.droplevel("predictor")
-    t["J"] = t["reflex"] - t["pred"]
-    t["G"] = t["reflex"].to_numpy() - base[["naive", "realtime"]].max(axis=1).reindex(idx).to_numpy()
-    t["share"] = t["J"].to_numpy() / (t["reflex"].to_numpy() - base["naive"].reindex(idx).to_numpy())
-    pooled = t.groupby(level=["predictor", "execute_horizon"])[["J", "G", "share"]].mean()
-    phys = sorted((p for p in pooled.index.get_level_values(0).unique() if p.startswith("phys")), key=lambda p: float(p[4:]))
+    df = pd.concat([pd.read_csv(f) for f in sorted(glob.glob(results_glob))])
+    lv = df.groupby(["delay", "seed", "method", "predictor", "execute_horizon"])["returned_episode_solved"].mean()
+    base = lv.xs("-", level="predictor").unstack("method")  # (delay, seed, s) x {naive, realtime}
+    t = lv.drop("-", level="predictor").unstack("method")  # (delay, seed, predictor, s) x {pred, reflex, rtc_reflex}
+    best = base[["naive", "realtime"]].max(axis=1).reindex(t.index.droplevel("predictor")).to_numpy()
+    G = t.sub(pd.Series(best, index=t.index), axis=0)
+    t1 = t.xs(1, level="delay")
+    J = t1["reflex"] - t1["pred"]  # (seed, predictor, s)
+    phys = sorted(
+        (p for p in J.index.get_level_values("predictor").unique() if p.startswith("phys")), key=lambda p: float(p[4:])
+    )
     p_mid = phys[len(phys) // 2]
-    jo = t.xs("oracle", level="predictor")["J"].unstack("execute_horizon")  # seed x s
+    jo = J.xs("oracle", level="predictor").unstack("execute_horizon")  # seed x s
     stale = jo.loc[:, jo.columns >= 5].mean(axis=1) - jo.loc[:, jo.columns <= 3].mean(axis=1)
-    jbar = t["J"].groupby(level=["predictor", "seed"]).mean()
+    jbar = J.groupby(level=["predictor", "seed"]).mean()
     grow = jbar[p_mid] - jbar["oracle"]
-    out = {
-        "p_mid": p_mid,
-        "R1_oracle_bound": bool((pooled.loc[p_mid, "G"] <= 0).all()),
+
+    out = {"p_mid": p_mid, "slices": {}}
+    for name, (d, horizons) in B1_SLICES.items():
+        out["slices"][name] = {}
+        for pr in ("oracle", p_mid, "learned"):
+            status, detail = _slice_status(G, d, horizons, pr)
+            out["slices"][name][pr] = {"status": status, **detail}
+    informative = [n for n in B1_SLICES if out["slices"][n]["oracle"]["status"] == "PASS"]
+    mids = [out["slices"][n][p_mid]["status"] for n in informative]
+    learned = [out["slices"][n]["learned"]["status"] for n in informative]
+    out["informative_slices"] = informative
+    out["verdict"] = (
+        "NO-EDGE" if not informative
+        else "SURVIVES" if "PASS" in mids
+        else "ORACLE-BOUND" if all(m == "FAIL" for m in mids)
+        else "GRAY"
+    )
+    out["R4_learned"] = (
+        "n/a" if not informative
+        else "ENOUGH" if "PASS" in learned
+        else "TOO-WEAK" if all(m == "FAIL" for m in learned)
+        else "GRAY"
+    )
+    out |= {
         "R2_staleness": bool(stale.mean() >= 0.03 and (stale > 0).all()),
         "R2_gap": float(stale.mean()),
         "R3_j_grows_with_error": bool(grow.mean() >= 0.01 and (grow > 0).all()),
         "R3_gap": float(grow.mean()),
     }
-    if "learned" in pooled.index.get_level_values(0):
-        g = pooled.loc["learned", "G"]
-        out["R4_learned_too_weak"] = bool((g <= 0).all())
-        out["learned_positive_s"] = [int(s) for s, v in g.items() if v > 0]
-    out["verdict"] = "ORACLE-BOUND" if out["R1_oracle_bound"] else "SURVIVES"
+    out["drop_oracle_to_p_mid"] = {  # report only: the spec's prediction is that rtc_reflex drops more than reflex
+        n: {
+            m: out["slices"][n]["oracle"][m]["pooled"] - out["slices"][n][p_mid][m]["pooled"]
+            for m in ("reflex", "rtc_reflex")
+            if m in out["slices"][n]["oracle"] and m in out["slices"][n][p_mid]
+        }
+        for n in B1_SLICES
+    }
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 4))
-    for pr, g in pooled.groupby(level=0):
-        s = g.index.get_level_values(1)
-        axes[0].plot(s, g["J"] * 100, marker="o", label=pr)
-        axes[1].plot(s, g["G"] * 100, marker="o", label=pr)
-    for ax, title in zip(axes[:2], ("J = reflex − pred (pp)", "G = reflex − max(naive, RTC) (pp)")):
+    for pr, g in J.groupby(level="predictor"):
+        g = g.groupby(level="execute_horizon").mean()
+        axes[0].plot(g.index, g * 100, marker="o", label=pr)
+    g1 = G.xs(1, level="delay").groupby(level=["predictor", "execute_horizon"]).mean()
+    for pr, g in g1.groupby(level="predictor"):
+        s = g.index.get_level_values("execute_horizon")
+        line = axes[1].plot(s, g["reflex"] * 100, marker="o", label=pr)[0]
+        if "rtc_reflex" in g and g["rtc_reflex"].notna().any():
+            axes[1].plot(s, g["rtc_reflex"] * 100, ls="--", c=line.get_color())
+    axes[0].set_title("d = 1: J = reflex − pred (pp)")
+    axes[1].set_title("d = 1: G = method − max(naive, RTC) (pp); dashed: rtc_reflex")
+    for ax in axes[:2]:
         ax.axhline(0, c="gray", lw=0.8)
-        ax.set_title(title)
-        ax.set_xlabel("execute horizon s (d = 1)")
+        ax.set_xlabel("execute horizon s")
     axes[0].legend(fontsize=8)
     if pathlib.Path(errors_csv).exists():
         e = pd.read_csv(errors_csv)
         ratio = e[e["k"] == 4].groupby("predictor")["ratio"].median()
-        jb = pooled["J"].groupby(level=0).mean()
+        jb = J.groupby(level="predictor").mean()
         common = [p for p in jb.index if p in ratio.index]
         axes[2].scatter(ratio[common], jb[common] * 100)
         for p in common:
             axes[2].annotate(p, (ratio[p], jb[p] * 100), fontsize=8)
         axes[2].set_xlabel("prediction error at k = 4 (units of action-noise deviation)")
-    axes[2].set_title("mean J over s vs predictor error (pp)")
+    axes[2].set_title("d = 1: mean J over s vs predictor error (pp)")
     fig.suptitle(f"B1: {out['verdict']}")
     fig.tight_layout()
     out_path = pathlib.Path(out_dir)
     out_path.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path / "b1.png", dpi=150)
-    print((pooled * 100).round(1).to_string())
+    plt.close(fig)
+    print((G.groupby(level=["delay", "predictor", "execute_horizon"]).mean() * 100).round(1).to_string())
     print("network evaluations per step:", {
         m: [round(reflex.forward_equivalents(m, positions=s) / s, 1) for s in range(1, 8)]
-        for m in ("naive", "realtime", "pred", "reflex")
+        for m in ("naive", "realtime", "pred", "reflex", "rtc_reflex")
     })
     (out_path / "b1.json").write_text(json.dumps(out, indent=2))
     print(json.dumps(out, indent=2))
@@ -1190,12 +1268,17 @@ start=$(date +%s)
 caffeinate -i uv run src/predictors.py train --out-dir $B/world_models 2>&1 | tee "$OUT/train.txt"
 caffeinate -i uv run src/predictors.py errors --world-model-dir $B/world_models --out $B/errors.csv 2>&1 \
   | tee "$OUT/errors.txt"
-caffeinate -i uv run src/eval_flow.py --run-path checkpoints/bc --config.num-evals 16 --seeds 99 \
-  --methods naive realtime pred reflex --predictors oracle phys0.2 learned --world-model-dir $B/world_models \
-  --delays 1 --horizons 1 7 --output-dir "$OUT" 2>&1 | grep --line-buffered -v prefix_attention_horizon \
-  | tee "$OUT/log.txt"
-uv run src/plot.py b1 --results-csv "$OUT/results.csv" --errors-csv $B/errors.csv --out-dir "$OUT" 2>&1 \
-  | tee -a "$OUT/log.txt"
+eval_run() {  # eval_run <dir> <eval_flow args...>
+  local dir=$1; shift
+  caffeinate -i uv run src/eval_flow.py --run-path checkpoints/bc --config.num-evals 8 --seeds 99 \
+    --world-model-dir $B/world_models --output-dir "$OUT/$dir" "$@" 2>&1 \
+    | grep --line-buffered -v prefix_attention_horizon | tee "$OUT/$dir.log"
+}
+eval_run eval_d3 --methods naive realtime pred reflex rtc_reflex --predictors oracle phys0.2 learned --delays 3 --horizons 5
+eval_run eval_d1 --methods naive realtime pred reflex --predictors oracle phys0.2 learned --delays 1 --horizons 1 7
+eval_run eval_d1_rtc --methods rtc_reflex --predictors oracle phys0.2 learned --delays 1 --horizons 7
+uv run src/plot.py b1 --results-glob "$OUT/eval*/results.csv" --errors-csv $B/errors.csv --out-dir "$OUT" 2>&1 \
+  | tee "$OUT/b1.txt"
 echo "B1 rehearsal done in $(( ($(date +%s) - start) / 60 )) min"
 ```
 
@@ -1207,7 +1290,7 @@ echo "B1 rehearsal done in $(( ($(date +%s) - start) / 60 )) min"
 # B1 on a Linux NVIDIA GPU host (spec 2026-09-25-b1-staleness-predictors-design.md, section 4.4). Run from the unpacked
 # repo root: ./scripts/gpu_b1.sh. The host downloads Kinetix, packages and checkpoints itself and trains its own world
 # models (same seeds as on the Mac). Writes results/b1/gpu/** and packs it (without model weights) into b1_results.tgz.
-# PHYS = the calibrated phys levels (spec B1 4.2); PB = the Jacobian batch (4 if memory is tight).
+# PHYS = the three calibrated phys levels, middle one = p_mid (spec B1 4.2); PB = the Jacobian batch (4 if tight).
 set -uo pipefail
 cd "$(dirname "$0")/.."
 KINETIX_SHA=cf7453ea103fa0b77348af1a39f689c658161613
@@ -1227,25 +1310,31 @@ export JAX_COMPILATION_CACHE_DIR=$HOME/.cache/jax CUDA_VISIBLE_DEVICES=${CUDA_VI
 G=results/b1/gpu
 PB=${PB:-16}
 PHYS=${PHYS:-"0.1 0.2 0.3"}
+PMID=$(echo $PHYS | awk '{print $2}')
 PREDS="oracle $(for p in $PHYS; do printf 'phys%s ' "$p"; done)learned"
+MID="oracle phys$PMID learned"
 mkdir -p $G
 echo "[$(date +%T)] world models"
 uv run src/predictors.py train --out-dir $G/world_models 2>&1 | tee $G/train.txt
 echo "[$(date +%T)] prediction errors"
 uv run src/predictors.py errors --phys $PHYS --world-model-dir $G/world_models --out $G/errors.csv 2>&1 | tee $G/errors.txt
-run() {  # run <eval_flow args...>; on failure (e.g. out of memory) retry once with a smaller Jacobian batch
-  echo "[$(date +%T)] eval"
+run() {  # run <dir> <eval_flow args...>; on failure (e.g. out of memory) retry once with a smaller Jacobian batch
+  local dir=$1; shift
+  echo "[$(date +%T)] $dir"
   uv run src/eval_flow.py --run-path checkpoints/bc --config.num-evals 256 --seeds 10 11 12 --package-batch $PB \
-    --output-dir $G/eval "$@" 2>&1 | grep --line-buffered -v prefix_attention_horizon && return
-  echo "[$(date +%T)] eval failed, retrying with --package-batch 4"
+    --world-model-dir $G/world_models --output-dir $G/$dir "$@" 2>&1 | grep --line-buffered -v prefix_attention_horizon && return
+  echo "[$(date +%T)] $dir failed, retrying with --package-batch 4"
   uv run src/eval_flow.py --run-path checkpoints/bc --config.num-evals 256 --seeds 10 11 12 --package-batch 4 \
-    --output-dir $G/eval "$@" 2>&1 | grep --line-buffered -v prefix_attention_horizon || echo "FAILED eval"
+    --world-model-dir $G/world_models --output-dir $G/$dir "$@" 2>&1 | grep --line-buffered -v prefix_attention_horizon \
+    || echo "FAILED $dir"
 }
-run --methods naive realtime pred reflex --predictors $PREDS --world-model-dir $G/world_models --delays 1
+run eval_d3 --methods naive realtime pred reflex rtc_reflex --predictors $MID --delays 3 --horizons 5
+run eval_d1 --methods naive realtime pred reflex --predictors $PREDS --delays 1
+run eval_d1_rtc --methods rtc_reflex --predictors $MID --delays 1
 for s in 1 4 7; do
   uv run src/probe.py cost --batch 1 --delay 1 --horizon $s --out $G/cost_b1_s$s.csv 2>&1 | tee -a $G/cost.txt
 done
-uv run src/plot.py b1 --results-csv $G/eval/results.csv --errors-csv $G/errors.csv --out-dir $G 2>&1 | tee $G/b1.txt
+uv run src/plot.py b1 --results-glob "$G/eval*/results.csv" --errors-csv $G/errors.csv --out-dir $G 2>&1 | tee $G/b1.txt
 tar czf b1_results.tgz --exclude='*.pkl' $G && echo "[$(date +%T)] done: b1_results.tgz"
 ```
 
@@ -1282,7 +1371,8 @@ git commit -m "feat(scripts): B1 rehearsal on the Mac and the B1 GPU runner"
 ```
 Expected: в конце `B1 rehearsal done in … min`. До этого:
 - в `errors.txt` — таблица и JSON `calibration`;
-- в `log.txt` — таблица `b1` и `b1.json`, без NaN в решённых долях.
+- в `b1.txt` — таблица G, JSON с вердиктом и статусами срезов, без NaN в решённых долях;
+- в `results/b1/rehearsal/eval_d3`, `eval_d1`, `eval_d1_rtc` лежат `results.csv`.
 
 - [ ] **Step 2: Калибровка в журнал спека (контроллер)**
 
@@ -1318,7 +1408,7 @@ mkdir m2r && tar xzf m2r.tgz -C m2r && cd m2r && tmux new -s b1 './scripts/gpu_b
 
 - [ ] **Step 2: Замер скорости** (через ~20 мин после старта сетки)
 
-Прислать контроллеру строки с метками времени из `b1.log`. Контроллер оценивает полный срок по первым конфигурациям `reflex` (их 35 на seed) и `pred`. Процесс не останавливать.
+Прислать контроллеру строки с метками времени из `b1.log`. Контроллер оценивает полный срок по первым конфигурациям. Первым идёт срез d = 3 (11 конфигураций на seed), потом d = 1: 84 конфигурации `naive`/`realtime`/`pred`/`reflex` и 21 конфигурация `rtc_reflex` на seed. Процесс не останавливать.
 
 - [ ] **Step 3: Забрать результаты** (после `done: b1_results.tgz`)
 
@@ -1340,7 +1430,7 @@ git commit -m "results: B1 on GPU (RTX 4090, seeds 10-12 x 256 x 12 levels): pre
 - Modify: спек B1 (строка «Статус» и журнал), `docs/roadmap.md` (статус B1), `docs/results/report.md` и `README.md` (раздел B1 на английском)
 
 - [ ] **Step 1: Записка.** Разделы:
-  1. вердикт B1 и R1–R4 с числами из `b1.json`;
+  1. вердикт B1 (срезы D1 и D3, статусы по предсказателям, контроль оракулом) и R1–R4 с числами из `b1.json`; при GRAY — расширение на seed'ы 13–15 по §5 спека до записки;
   2. кривые `J(s)` и `G(s)` по предсказателям (`b1.png`);
   3. таблица ошибок прогноза в единицах «шума» (`errors.csv`, k = 4);
   4. `P(pred)` по предсказателям;
