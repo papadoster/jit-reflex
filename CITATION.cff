@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "JIT Reflex: a frozen chunking policy's own Jacobian as a feedback controller between its calls"
+abstract: "Phase A: linearizing a frozen flow-matching action-chunking policy between its calls, tested on 12 Kinetix levels against Real-Time Chunking. Pre-registered offline kill-test (E1/E1b), closed-loop evaluation (E2) and a research agenda."
+authors:
+  - family-names: Karpov
+    given-names: Aleksandr
+    email: karpovalex.dev@gmail.com
+version: "0.1-phase-a"
+date-released: 2026-09-25
+license: MIT
+keywords: [robotics, action chunking, flow matching, real-time chunking, feedback control, Kinetix]
