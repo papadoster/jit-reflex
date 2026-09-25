@@ -127,3 +127,5 @@ Phase B is the natural next step, before any hardware (phase C). It has three pa
 3. Make the package cheap: only the `s` used positions, and a trust-region gate that falls back to re-planning near contacts, where the tangent breaks down.
 
 The measured niche (rare calls, disturbances, smooth dynamics) says where such a reflex could pay off. Two examples: a cloud-hosted VLA called a few times per second, or a slow model on a fast, smooth manipulator.
+
+The full agenda, with predictions and kill criteria written before any of it was run, is in [roadmap.md](../roadmap.md).
