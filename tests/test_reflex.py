@@ -216,3 +216,27 @@ def test_kick_moves_only_active_dynamic_bodies():
         dynamic = np.asarray((before.inverse_mass > 0) & before.active)
         np.testing.assert_array_equal(moved, dynamic)
         assert dynamic.any() or before is raw.circle  # the level has at least one dynamic polygon
+
+
+def test_package_computes_only_used_positions():
+    policy = small_policy()
+    B, H, A, O = 2, policy.action_chunk_size, policy.action_dim, 5
+    noise = jax.random.normal(jax.random.key(10), (B, H, A))
+    ref = jax.random.normal(jax.random.key(11), (B, H, O))
+    chunk = jnp.ones((B, H, A))
+    nom, gain = reflex.package(policy, noise, ref, chunk, 5, requery=True, feedback=True)
+    nom_u, gain_u = reflex.package(policy, noise, ref, chunk, 5, requery=True, feedback=True, used=(2, 5))
+    assert nom_u.shape == nom.shape and gain_u.shape == gain.shape
+    np.testing.assert_allclose(nom_u[:, 2:5], nom[:, 2:5], atol=1e-5)
+    np.testing.assert_allclose(gain_u[:, 2:5], gain[:, 2:5], atol=1e-5)
+    assert not np.any(nom_u[:, :2]) and not np.any(nom_u[:, 5:]) and not np.any(gain_u[:, 5:])
+    nom_c, gain_c = reflex.package(policy, noise, ref, chunk, 5, requery=False, feedback=True, used=(2, 5))
+    np.testing.assert_array_equal(nom_c, chunk)  # reflex_chunk keeps the chunk
+    np.testing.assert_allclose(gain_c[:, 2:5], gain[:, 2:5], atol=1e-5)
+
+
+def test_forward_equivalents_counts_only_computed_positions():
+    assert reflex.forward_equivalents("reflex", positions=1) == 5 + 1 * (5 + 2 * 6 * 5)  # 70
+    assert reflex.forward_equivalents("pred", positions=7) == 5 + 7 * 5  # 40
+    assert reflex.forward_equivalents("reflex", positions=None) == 525  # phase A: all H positions
+    assert reflex.forward_equivalents("naive", positions=3) == 5  # no package: positions don't matter
