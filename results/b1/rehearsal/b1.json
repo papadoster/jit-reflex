@@ -1,0 +1,67 @@
+{
+  "p_mid": "phys0.2",
+  "slices": {
+    "d1": {
+      "oracle": {
+        "status": "MISSING"
+      },
+      "phys0.2": {
+        "status": "MISSING"
+      },
+      "learned": {
+        "status": "MISSING"
+      }
+    },
+    "d3": {
+      "oracle": {
+        "status": "PASS",
+        "reflex": {
+          "pooled": 0.09375,
+          "min_seed": 0.09375
+        },
+        "rtc_reflex": {
+          "pooled": 0.03125,
+          "min_seed": 0.03125
+        }
+      },
+      "phys0.2": {
+        "status": "PASS",
+        "reflex": {
+          "pooled": -0.02083333333333337,
+          "min_seed": -0.02083333333333337
+        },
+        "rtc_reflex": {
+          "pooled": 0.01041666666666663,
+          "min_seed": 0.01041666666666663
+        }
+      },
+      "learned": {
+        "status": "PASS",
+        "reflex": {
+          "pooled": 0.04166666666666663,
+          "min_seed": 0.04166666666666663
+        },
+        "rtc_reflex": {
+          "pooled": -0.01041666666666674,
+          "min_seed": -0.01041666666666674
+        }
+      }
+    }
+  },
+  "informative_slices": [
+    "d3"
+  ],
+  "verdict": "SURVIVES",
+  "R4_learned": "ENOUGH",
+  "R2_staleness": true,
+  "R2_gap": 0.1874999999999999,
+  "R3_j_grows_with_error": true,
+  "R3_gap": 0.015625,
+  "drop_oracle_to_p_mid": {
+    "d1": {},
+    "d3": {
+      "reflex": 0.11458333333333337,
+      "rtc_reflex": 0.02083333333333337
+    }
+  }
+}

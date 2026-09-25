@@ -1,0 +1,12 @@
+{'level': 'worlds/l/grasp_easy.json', 'train': 3936, 'val': 345, 'moving_dims': 49, 'val_nmse': 0.05871470272541046}
+{'level': 'worlds/l/catapult.json', 'train': 17183, 'val': 1200, 'moving_dims': 35, 'val_nmse': 0.09940959513187408}
+{'level': 'worlds/l/cartpole_thrust.json', 'train': 5572, 'val': 554, 'moving_dims': 13, 'val_nmse': 0.0009287511347793043}
+{'level': 'worlds/l/hard_lunar_lander.json', 'train': 5670, 'val': 589, 'moving_dims': 21, 'val_nmse': 0.11975404620170593}
+{'level': 'worlds/l/mjc_half_cheetah.json', 'train': 8591, 'val': 1024, 'moving_dims': 49, 'val_nmse': 0.04149686545133591}
+{'level': 'worlds/l/mjc_swimmer.json', 'train': 18923, 'val': 1912, 'moving_dims': 21, 'val_nmse': 0.08602821081876755}
+{'level': 'worlds/l/mjc_walker.json', 'train': 21496, 'val': 2224, 'moving_dims': 49, 'val_nmse': 0.059836890548467636}
+{'level': 'worlds/l/h17_unicycle.json', 'train': 8993, 'val': 937, 'moving_dims': 21, 'val_nmse': 0.0005384096293710172}
+{'level': 'worlds/l/chain_lander.json', 'train': 5879, 'val': 549, 'moving_dims': 42, 'val_nmse': 0.11395826190710068}
+{'level': 'worlds/l/catcher_v3.json', 'train': 7722, 'val': 794, 'moving_dims': 42, 'val_nmse': 0.12693224847316742}
+{'level': 'worlds/l/trampoline.json', 'train': 19934, 'val': 2146, 'moving_dims': 28, 'val_nmse': 0.09949061274528503}
+{'level': 'worlds/l/car_launch.json', 'train': 5508, 'val': 580, 'moving_dims': 34, 'val_nmse': 0.06413722038269043}
