@@ -246,3 +246,59 @@ def test_parse_predictor():
     assert eval_flow.parse_predictor("oracle") == {"predictor": "oracle"}
     assert eval_flow.parse_predictor("learned") == {"predictor": "learned"}
     assert eval_flow.parse_predictor("phys0.2") == {"predictor": "phys", "phys_error": 0.2}
+
+
+def _b1_rows(mid_pred=0.62, mid_extra=0.02, mid_rtc=0.62, mid_d3=0.6, base=(0.5, 0.6)):
+    """Synthetic B1 results: d = 1, s = 1..7 (5 predictors for pred / reflex, 3 for rtc_reflex) and d = 3, s = 5."""
+    rows = []
+
+    def add(d, seed, s, method, predictor, rate):
+        rows.append({"delay": d, "seed": seed, "execute_horizon": s, "method": method, "predictor": predictor,
+                     "level": "l", "returned_episode_solved": rate})
+
+    for seed in (10, 11, 12):
+        for s in range(1, 8):
+            add(1, seed, s, "naive", "-", base[0])
+            add(1, seed, s, "realtime", "-", base[1])
+            for pr, pred, j in (
+                ("oracle", 0.62, 0.01 * s),
+                ("phys0.1", 0.62, 0.01 * s + 0.01),
+                ("phys0.2", mid_pred, 0.01 * s + mid_extra),
+                ("phys0.3", 0.62, 0.01 * s),
+                ("learned", 0.4, 0.0),
+            ):
+                add(1, seed, s, "pred", pr, pred)
+                add(1, seed, s, "reflex", pr, pred + j)
+            for pr, rate in (("oracle", 0.62), ("phys0.2", mid_rtc), ("learned", 0.55)):
+                add(1, seed, s, "rtc_reflex", pr, rate)
+        add(3, seed, 5, "naive", "-", base[0] - 0.1)
+        add(3, seed, 5, "realtime", "-", base[1] - 0.1)
+        for pr, reflex_rate in (("oracle", 0.6), ("phys0.2", mid_d3), ("learned", 0.45)):
+            add(3, seed, 5, "pred", pr, 0.5)
+            add(3, seed, 5, "reflex", pr, reflex_rate)
+            add(3, seed, 5, "rtc_reflex", pr, 0.45)
+    return pd.DataFrame(rows)
+
+
+def test_b1_rules(tmp_path):
+    def run(**kw):
+        d = tmp_path / str(len(list(tmp_path.iterdir())))
+        d.mkdir()
+        _b1_rows(**kw).to_csv(d / "results.csv", index=False)
+        return plot.b1(str(d / "*.csv"), errors_csv=str(tmp_path / "missing.csv"), out_dir=str(d))
+
+    out = run()  # the oracle passes both slices; phys0.2 passes D1 through reflex; learned fails everywhere
+    assert out["p_mid"] == "phys0.2" and out["informative_slices"] == ["d1", "d3"]
+    assert out["slices"]["d1"]["phys0.2"]["status"] == "PASS"
+    assert out["verdict"] == "SURVIVES" and out["R4_learned"] == "TOO-WEAK"
+    assert out["R2_staleness"] and abs(out["R2_gap"] - 0.04) < 1e-9  # J(oracle): s>=5 -> 0.06, s<=3 -> 0.02
+    assert out["R3_j_grows_with_error"] and abs(out["R3_gap"] - 0.02) < 1e-9
+
+    out = run(mid_pred=0.5, mid_extra=-0.2, mid_rtc=0.55, mid_d3=0.45)  # phys0.2 below the baseline everywhere
+    assert out["verdict"] == "ORACLE-BOUND"
+
+    out = run(mid_rtc=0.605, mid_pred=0.5, mid_extra=0.0, mid_d3=0.45)  # D1: rtc +0.5 pp (<1 pp), reflex < 0
+    assert out["slices"]["d1"]["phys0.2"]["status"] == "GRAY" and out["verdict"] == "GRAY"
+
+    out = run(base=(0.9, 0.95))  # nothing beats the baseline even with the oracle
+    assert out["informative_slices"] == [] and out["verdict"] == "NO-EDGE" and out["R4_learned"] == "n/a"

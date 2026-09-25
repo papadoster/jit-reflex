@@ -1,4 +1,4 @@
-"""Figures and tables for E1 (probe) and E2 (closed loop), and the Gate 2 check (spec section 5)."""
+"""Figures and tables for E1 (probe), E2 (closed loop) and B1, and the Gate 2 / B1 decision rules."""
 
 import glob
 import json
@@ -143,5 +143,138 @@ def gate2(
     return out
 
 
+B1_SLICES = {"d1": (1, (5, 6, 7)), "d3": (3, (5,))}  # spec B1 section 5: the rare-call slices behind the verdict
+
+
+def _slice_status(G: pd.DataFrame, delay: int, horizons, predictor: str):
+    """PASS / FAIL / GRAY / MISSING of one slice for one predictor (spec B1 section 5), with per-method details.
+
+    G: reflex-type methods' G, index (delay, seed, predictor, execute_horizon). PASS needs pooled >= +1 pp and > 0 in
+    every seed for the same method; FAIL needs pooled <= 0 for every method that ran.
+    """
+    try:
+        g = G.xs((delay, predictor), level=("delay", "predictor"))
+    except KeyError:
+        return "MISSING", {}
+    g = g[g.index.get_level_values("execute_horizon").isin(horizons)].groupby(level="seed").mean()
+    detail = {
+        m: {"pooled": float(g[m].mean()), "min_seed": float(g[m].min())}
+        for m in ("reflex", "rtc_reflex")
+        if m in g and len(g) and g[m].notna().all()
+    }
+    if not detail:
+        return "MISSING", {}
+    if any(v["pooled"] >= 0.01 and v["min_seed"] > 0 for v in detail.values()):
+        return "PASS", detail
+    if all(v["pooled"] <= 0 for v in detail.values()):
+        return "FAIL", detail
+    return "GRAY", detail
+
+
+def b1(
+    results_glob: str = "results/b1/gpu/eval*/results.csv",
+    errors_csv: str = "results/b1/gpu/errors.csv",
+    out_dir: str = "results/b1/gpu",
+) -> dict:
+    """B1 verdict and rules R1-R4 (spec B1 section 5), b1.json and b1.png. Solve rates are means over levels.
+
+    G = method - max(naive, realtime) at the same (delay, seed, s); J = reflex - pred at d = 1; p_mid = middle phys.
+    """
+    df = pd.concat([pd.read_csv(f) for f in sorted(glob.glob(results_glob))])
+    lv = df.groupby(["delay", "seed", "method", "predictor", "execute_horizon"])["returned_episode_solved"].mean()
+    base = lv.xs("-", level="predictor").unstack("method")  # (delay, seed, s) x {naive, realtime}
+    t = lv.drop("-", level="predictor").unstack("method")  # (delay, seed, predictor, s) x {pred, reflex, rtc_reflex}
+    best = base[["naive", "realtime"]].max(axis=1).reindex(t.index.droplevel("predictor")).to_numpy()
+    G = t.sub(pd.Series(best, index=t.index), axis=0)
+    t1 = t.xs(1, level="delay")
+    J = t1["reflex"] - t1["pred"]  # (seed, predictor, s)
+    phys = sorted(
+        (p for p in J.index.get_level_values("predictor").unique() if p.startswith("phys")), key=lambda p: float(p[4:])
+    )
+    p_mid = phys[len(phys) // 2]
+    jo = J.xs("oracle", level="predictor").unstack("execute_horizon")  # seed x s
+    stale = jo.loc[:, jo.columns >= 5].mean(axis=1) - jo.loc[:, jo.columns <= 3].mean(axis=1)
+    jbar = J.groupby(level=["predictor", "seed"]).mean()
+    grow = jbar[p_mid] - jbar["oracle"]
+
+    out = {"p_mid": p_mid, "slices": {}}
+    for name, (d, horizons) in B1_SLICES.items():
+        out["slices"][name] = {}
+        for pr in ("oracle", p_mid, "learned"):
+            status, detail = _slice_status(G, d, horizons, pr)
+            out["slices"][name][pr] = {"status": status, **detail}
+    informative = [n for n in B1_SLICES if out["slices"][n]["oracle"]["status"] == "PASS"]
+    mids = [out["slices"][n][p_mid]["status"] for n in informative]
+    learned = [out["slices"][n]["learned"]["status"] for n in informative]
+    out["informative_slices"] = informative
+    out["verdict"] = (
+        "NO-EDGE" if not informative
+        else "SURVIVES" if "PASS" in mids
+        else "ORACLE-BOUND" if all(m == "FAIL" for m in mids)
+        else "GRAY"
+    )
+    out["R4_learned"] = (
+        "n/a" if not informative
+        else "ENOUGH" if "PASS" in learned
+        else "TOO-WEAK" if all(m == "FAIL" for m in learned)
+        else "GRAY"
+    )
+    out |= {
+        "R2_staleness": bool(stale.mean() >= 0.03 and (stale > 0).all()),
+        "R2_gap": float(stale.mean()),
+        "R3_j_grows_with_error": bool(grow.mean() >= 0.01 and (grow > 0).all()),
+        "R3_gap": float(grow.mean()),
+    }
+    out["drop_oracle_to_p_mid"] = {  # report only: the spec's prediction is that rtc_reflex drops more than reflex
+        n: {
+            m: out["slices"][n]["oracle"][m]["pooled"] - out["slices"][n][p_mid][m]["pooled"]
+            for m in ("reflex", "rtc_reflex")
+            if m in out["slices"][n]["oracle"] and m in out["slices"][n][p_mid]
+        }
+        for n in B1_SLICES
+    }
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+    for pr, g in J.groupby(level="predictor"):
+        g = g.groupby(level="execute_horizon").mean()
+        axes[0].plot(g.index, g * 100, marker="o", label=pr)
+    g1 = G.xs(1, level="delay").groupby(level=["predictor", "execute_horizon"]).mean()
+    for pr, g in g1.groupby(level="predictor"):
+        s = g.index.get_level_values("execute_horizon")
+        line = axes[1].plot(s, g["reflex"] * 100, marker="o", label=pr)[0]
+        if "rtc_reflex" in g and g["rtc_reflex"].notna().any():
+            axes[1].plot(s, g["rtc_reflex"] * 100, ls="--", c=line.get_color())
+    axes[0].set_title("d = 1: J = reflex − pred (pp)")
+    axes[1].set_title("d = 1: G = method − max(naive, RTC) (pp); dashed: rtc_reflex")
+    for ax in axes[:2]:
+        ax.axhline(0, c="gray", lw=0.8)
+        ax.set_xlabel("execute horizon s")
+    axes[0].legend(fontsize=8)
+    if pathlib.Path(errors_csv).exists():
+        e = pd.read_csv(errors_csv)
+        ratio = e[e["k"] == 4].groupby("predictor")["ratio"].median()
+        jb = J.groupby(level="predictor").mean()
+        common = [p for p in jb.index if p in ratio.index]
+        axes[2].scatter(ratio[common], jb[common] * 100)
+        for p in common:
+            axes[2].annotate(p, (ratio[p], jb[p] * 100), fontsize=8)
+        axes[2].set_xlabel("prediction error at k = 4 (units of action-noise deviation)")
+    axes[2].set_title("d = 1: mean J over s vs predictor error (pp)")
+    fig.suptitle(f"B1: {out['verdict']}")
+    fig.tight_layout()
+    out_path = pathlib.Path(out_dir)
+    out_path.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_path / "b1.png", dpi=150)
+    plt.close(fig)
+    print((G.groupby(level=["delay", "predictor", "execute_horizon"]).mean() * 100).round(1).to_string())
+    print("network evaluations per step:", {
+        m: [round(reflex.forward_equivalents(m, positions=s) / s, 1) for s in range(1, 8)]
+        for m in ("naive", "realtime", "pred", "reflex", "rtc_reflex")
+    })
+    (out_path / "b1.json").write_text(json.dumps(out, indent=2))
+    print(json.dumps(out, indent=2))
+    return out
+
+
 if __name__ == "__main__":
-    tyro.extras.subcommand_cli_from_dict({"probe": probe, "success": success, "table": table, "gate2": gate2})
+    tyro.extras.subcommand_cli_from_dict({"probe": probe, "success": success, "table": table, "gate2": gate2, "b1": b1})
