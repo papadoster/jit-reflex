@@ -1,6 +1,9 @@
+import json
+
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pandas as pd
 
 import diag
 import predictors
@@ -44,6 +47,7 @@ def test_probe_state_oracle_invariants():
     P, M, K = 3, 2, 15  # oracle, phys0.2, learned; draws; k = 1..2*8-1
     assert out["e"].shape == (P, M, K) and out["valid"].shape == (M, K) and out["a_ref"].shape == (P, K, A)
     assert set(diag.SUMS + diag.MEANS) <= set(out)
+    assert out["used"].tolist() == [True] * 4 + [False] * 2  # grasp_easy: 4 dims bound to motors, 2 drive nothing
     np.testing.assert_array_equal(out["e_pred"][0], 0)  # the oracle's prediction is the noise-free truth
     np.testing.assert_allclose(out["e"][0], out["e_noise"][0], rtol=1e-6)
     # chunk 1 was queried at o*_8 with zs[1]: at k = 8 the oracle's re-query must be the plan's own action.
@@ -82,3 +86,43 @@ def test_chain_carries_the_end_of_episode():
     plan, truth, ended = diag.chain(policy, step, jnp.int32(0), jnp.zeros(3), zs, 2)
     assert ended.tolist() == [False, False] + [True] * 14  # once ended, ended across the chunk boundary too
     np.testing.assert_allclose(plan[8:], policy.action_from_noise(zs[1][None], truth[7][None], 2)[0], atol=1e-6)
+
+
+def _raw(N=20, M=2, K=3, dead_k=None):
+    """Synthetic probe_state output stacked over N states: rho_clip = 0.75 everywhere."""
+    ones = np.ones((N, 2, M, K))
+    r = {x: ones.copy() for x in diag.SUMS + diag.MEANS}
+    r["lin_clip"] = 0.25 * ones
+    r["rs_pred"][:, 0] = r["top_pred"][:, 0] = r["d_pred"][:, 0] = 0  # the oracle: 0/0 shares (NaN), as on real data
+    r["e"] = np.random.default_rng(0).uniform(0.1, 5.0, (N, 2, M, K))
+    valid = np.ones((N, M, K), bool)
+    if dead_k is not None:
+        valid[..., dead_k] = False  # every episode ended before this k: the level drops out there
+    return r | {"valid": valid, "predictors": np.array(["oracle", "learned"])}
+
+
+def test_summaries_pool_and_track_level_composition(tmp_path, monkeypatch):
+    raws = {"a": _raw(), "b": _raw(dead_k=2)}
+    t = pd.concat([diag.level_table(r, lv) for lv, r in raws.items()], ignore_index=True)
+    np.testing.assert_allclose(t.loc[t["n"] > 0, "rho_clip"], 0.75)
+    cv = diag.curves(t)
+    al = cv[(cv["variant"] == "all") & (cv["predictor"] == "oracle")].set_index("k")["levels"]
+    assert al.to_dict() == {1: 2, 2: 2, 3: 1}  # level b is gone at k = 3
+    sv = cv[(cv["variant"] == "survivors") & (cv["predictor"] == "oracle")]
+    assert len(sv) == 3 and (sv["levels"] == 1).all()  # only level a lives to the last k
+    np.testing.assert_allclose(diag.near(t, k_max=2).loc["oracle", "rho_clip"], 0.75)
+    assert np.isnan(diag.near(t, k_max=2).loc["oracle", "share_pred"])  # NaN stays NaN, summarize must cope
+    assert diag.first_below([1, 2, 3], [0.5, 0.2, -0.1], 0.3) == 2.0
+    assert diag.first_below([1, 2, 3], [0.5, 0.2, -0.1], 0.0) == 3.0
+    assert diag.first_below([1, 2], [0.5, 0.4], 0.3) is None
+    monkeypatch.setattr(diag, "MIN_BIN", 1)
+    bn = diag.bins(raws, t)
+    assert len(bn) == 10 and (bn["levels"] == 2).all()
+    np.testing.assert_allclose(bn["rho_clip"], 0.75)
+    (tmp_path / "raw").mkdir()
+    for lv, r in raws.items():
+        np.savez_compressed(tmp_path / "raw" / f"{lv}.npz", **r)
+    diag.summarize(str(tmp_path))
+    for f in ("summary.csv", "curves.csv", "near.csv", "bins.csv", "check.json", "thresholds.json", "diag.png"):
+        assert (tmp_path / f).exists(), f
+    assert json.loads((tmp_path / "check.json").read_text())["oracle_rho_clip_k1_4"] == 0.75

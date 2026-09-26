@@ -223,4 +223,5 @@ wandb/
 results/smoke*/
 .DS_Store
 results/**/*.pkl
+results/**/*.npz
 *.tgz

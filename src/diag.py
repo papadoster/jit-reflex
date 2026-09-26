@@ -5,20 +5,35 @@ action noise; every predictor rolls the same plan. At step k the reflex's pi(ô_
 fresh call pi(o_k), as in E1b. See docs/superpowers/specs/2026-09-26-b1-diagnostic-design.md.
 """
 
+import json
+import pathlib
+import pickle
+import time
 from typing import Sequence
 
 import jax
 import jax.numpy as jnp
+import matplotlib
+import numpy as np
+import pandas as pd
+import tyro
 
 import predictors
 import probe
 import reflex
 import train_expert
 
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+
 # per-pair quantities summed within a level (pooled ratios) and averaged (means); spec section 4
 SUMS = ("pred", "lin", "lin_clip", "chunk", "chunk_lin_clip",
         "rs_pred", "top_pred", "d_pred", "rs_noise", "top_noise", "d_noise")
 MEANS = ("e", "e_pred", "e_noise", "je", "je_pred", "je_noise", "cos_fix", "cos_spur", "clip")
+OUT = "results/b1/diag"
+MIN_FRAC = 0.3  # spec section 8: a level's point at k counts if >= 30% of its (state, draw) pairs are still valid
+MIN_BIN = 30  # spec measure 9: pairs a level needs in an |e| bin
+MEASURES = ("rho_clip", "res", "rho_chunk", "share_pred", "top1_pred", "share_noise", "top1_noise", *MEANS)
 
 
 def row_space_share(jac, e):
@@ -74,8 +89,9 @@ def probe_state(
     """Diagnostic of one state (spec sections 3-4).
 
     Returns SUMS + MEANS, each [P, M, K] (predictors oracle, phys..., learned; draws; k = 1..T-1), plus valid [M, K]
-    (common to all predictors), a_ref [P, K, A] and plan [T, A] for the invariant checks. base is the raw Kinetix env
-    (no auto-reset), raw its state. Actions are compared as executed (probe.executed), as in E1b.
+    (common to all predictors), used [A] (bound action dims), a_ref [P, K, A] and plan [T, A] for the invariant
+    checks. base is the raw Kinetix env (no auto-reset), raw its state. Actions are compared as executed
+    (probe.executed), as in E1b.
     """
     H, A = policy.action_chunk_size, policy.action_dim
     k_z, k_f, k_n, k_env = jax.random.split(key, 4)
@@ -142,4 +158,216 @@ def probe_state(
         return jax.tree.map(lambda x: jnp.broadcast_to(x, valid.shape), out), a_ref
 
     stats, a_ref = jax.vmap(per_predictor)(nom)
-    return stats | {"valid": valid, "a_ref": a_ref, "plan": plan}
+    return stats | {"valid": valid, "used": used, "a_ref": a_ref, "plan": plan}
+
+
+def run(
+    run_path: str = "checkpoints/bc",
+    level_paths: Sequence[str] = probe.LEVELS,
+    phys: Sequence[float] = (0.1, 0.2, 0.3),
+    world_model_dir: str = predictors.WM_DIR,
+    num_envs: int = 64,
+    num_states: int = 128,
+    num_draws: int = 4,
+    num_chunks: int = 4,
+    num_flow_steps: int = 5,
+    batch_size: int = 8,  # states per vmapped batch; lower it if RAM runs out
+    seed: int = 3000,  # level i uses seed + i: disjoint from phase A and B1
+    out_dir: str = OUT,
+):
+    """Spec section 3: raw arrays per level to out_dir/raw/<level>.npz (a finished level is skipped), then summarize."""
+    env, env_params, levels, obs_dim, action_dim = probe.setup(level_paths)
+    base = env._env  # raw Kinetix env: no auto-reset, as the B1 predictors
+    phys = tuple(phys)
+    names = np.array(["oracle", *(f"phys{p}" for p in phys), "learned"])
+    raw_dir = pathlib.Path(out_dir) / "raw"
+    raw_dir.mkdir(parents=True, exist_ok=True)
+
+    @jax.jit
+    def level_diag(state_dict, level, key, wm):
+        policy = probe.make_policy(state_dict, obs_dim, action_dim)
+        k_c, k_s, k_p = jax.random.split(key, 3)
+        boundaries = probe.collect(
+            env, env_params, policy, level, k_c, num_envs, 4, train_expert.ACTION_NOISE_STD, num_flow_steps
+        )
+        std = predictors.alive_std(boundaries)
+        obs, state = probe.sample(boundaries, k_s, num_states)
+
+        def one(x):
+            return probe_state(
+                policy, base, env_params, wm, phys, x[1].env_state, x[0], x[2], std,
+                num_draws, num_chunks, num_flow_steps,
+            )
+
+        res = jax.lax.map(one, (obs, state, jax.random.split(k_p, num_states)), batch_size=batch_size)
+        return res, boundaries[2].sum()
+
+    for i, level_path in enumerate(level_paths):
+        name = predictors.level_name(level_path)
+        f = raw_dir / f"{name}.npz"
+        if f.exists():
+            print(f"{level_path}: {f} exists, skipped", flush=True)
+            continue
+        with (pathlib.Path(world_model_dir) / f"{name}.pkl").open("rb") as fh:
+            wm = pickle.load(fh)
+        start = time.time()
+        res, n_alive = jax.device_get(level_diag(
+            probe.load_state_dict(run_path, level_path), jax.tree.map(lambda x: x[i], levels),
+            jax.random.key(seed + i), wm,
+        ))
+        assert n_alive >= num_states, "too few alive states: raise --num-envs"
+        np.savez_compressed(f, predictors=names, **res)
+        print(f"{level_path}: done in {time.time() - start:.0f} s", flush=True)
+    summarize(out_dir)
+
+
+def add_ratios(t: pd.DataFrame) -> pd.DataFrame:
+    """Pooled ratios of spec section 4 from the SUMS columns (a row may pool one k or several)."""
+
+    def r(a, b):
+        return t[a] / t[b].where(t[b] > 0)
+
+    return t.assign(
+        rho_clip=1 - r("lin_clip", "pred"), res=r("lin", "pred"), rho_chunk=1 - r("chunk_lin_clip", "chunk"),
+        share_pred=r("rs_pred", "d_pred"), top1_pred=r("top_pred", "d_pred"),
+        share_noise=r("rs_noise", "d_noise"), top1_noise=r("top_noise", "d_noise"),
+    )
+
+
+def level_table(res: dict, level: str) -> pd.DataFrame:
+    """One level per (predictor, k): n and frac of valid pairs, SUMS pooled over them, MEANS averaged, ratios."""
+    valid = res["valid"]  # [N, M, K]
+    rows = []
+    for p, name in enumerate(res["predictors"]):
+        for k in range(valid.shape[-1]):
+            v = valid[:, :, k]
+            row = {"level": level, "predictor": str(name), "k": k + 1, "n": int(v.sum()), "frac": float(v.mean())}
+            row |= {x: float(res[x][:, p, :, k][v].sum()) for x in SUMS}
+            row |= {x: float(res[x][:, p, :, k][v].mean()) if v.any() else float("nan") for x in MEANS}
+            rows.append(row)
+    t = add_ratios(pd.DataFrame(rows))
+    if "used" in res:  # rank of the masked J; the row-space share of a random error is about rank / O
+        t["bound_dims"] = int(np.asarray(res["used"]).any(0).sum())
+    return t
+
+
+def curves(t: pd.DataFrame) -> pd.DataFrame:
+    """Median over levels per (predictor, k) in two variants (spec section 4): 'all' = levels kept at this k,
+    'survivors' = levels kept at every k. 'levels' = how many levels a median is over."""
+    K = t["k"].max()
+    kept = t[t["frac"] >= MIN_FRAC]
+    n_kept = kept[kept["predictor"] == "oracle"].groupby("level")["k"].nunique()  # the mask is common to predictors
+    survivors = n_kept[n_kept == K].index
+    out = []
+    for variant, d in (("all", kept), ("survivors", kept[kept["level"].isin(survivors)])):
+        g = d.groupby(["predictor", "k"])
+        c = g[list(MEASURES)].median()
+        c["levels"] = g["level"].nunique()
+        out.append(c.reset_index().assign(variant=variant))
+    return pd.concat(out, ignore_index=True)
+
+
+def near(t: pd.DataFrame, k_max: int = 7) -> pd.DataFrame:
+    """Q1/Q2 table (spec section 5): per predictor, median over levels of values pooled over k = 1..k_max."""
+    d = t[(t["k"] <= k_max) & (t["frac"] >= MIN_FRAC)]
+    by = d.groupby(["level", "predictor"])
+    lv = add_ratios(by[list(SUMS)].sum().join(by[list(MEANS)].mean()).reset_index())
+    return lv.groupby("predictor")[list(MEASURES)].median()
+
+
+def bins(raws: dict, t: pd.DataFrame, n_bins: int = 10) -> pd.DataFrame:
+    """Spec measure 9: rho_clip against |e| in deciles of |e| over the pairs of all levels, predictors and kept k."""
+    kept = t[(t["predictor"] == "oracle") & (t["frac"] >= MIN_FRAC)].groupby("level")["k"].apply(list)
+    pairs = []
+    for level, res in raws.items():
+        ks = np.asarray(kept.get(level, []), int) - 1
+        v = np.broadcast_to(res["valid"][..., ks][:, None], res["e"][..., ks].shape)
+        pairs.append(tuple(res[x][..., ks][v] for x in ("e", "lin_clip", "pred")))
+    edges = np.quantile(np.concatenate([p[0] for p in pairs]), np.linspace(0, 1, n_bins + 1))
+    rows = []
+    for b in range(n_bins):
+        lo, hi = edges[b], edges[b + 1]
+        rhos = []
+        for e, lin_clip, pred in pairs:
+            m = (e >= lo) & ((e < hi) if b < n_bins - 1 else (e <= hi))
+            if m.sum() >= MIN_BIN and pred[m].sum() > 0:
+                rhos.append(1 - lin_clip[m].sum() / pred[m].sum())
+        rows.append({"bin": b, "e_lo": lo, "e_hi": hi, "rho_clip": float(np.median(rhos)) if rhos else np.nan,
+                     "levels": len(rhos)})
+    return pd.DataFrame(rows)
+
+
+def first_below(x, y, thr: float):
+    """The first x where y < thr (NaN never counts), or None."""
+    below = np.asarray(y, float) < thr
+    return float(np.asarray(x)[below.argmax()]) if below.any() else None
+
+
+def figure(cv: pd.DataFrame, bn: pd.DataFrame, path: pathlib.Path):
+    fig, (a, b, c) = plt.subplots(1, 3, figsize=(17, 4.5))
+    colors = dict(zip(sorted(cv["predictor"].unique()), plt.rcParams["axes.prop_cycle"].by_key()["color"]))
+    for (pred, variant), d in cv.groupby(["predictor", "variant"]):
+        d = d.sort_values("k")
+        a.plot(d["k"], d["rho_clip"], ls="-" if variant == "all" else "--", color=colors[pred],
+               label=pred if variant == "all" else None)
+        if variant == "all" and pred != "oracle":
+            c.plot(d["e_pred"], d["je_pred"], marker=".", color=colors[pred], label=pred)
+    lv = cv[(cv["predictor"] == "oracle") & (cv["variant"] == "all")].sort_values("k")
+    a2 = a.twinx()
+    a2.step(lv["k"], lv["levels"], where="mid", color="gray", lw=0.8)
+    a2.set_ylabel("levels at k (solid curves)")
+    surv = cv.loc[cv["variant"] == "survivors", "levels"]
+    for y in (0.3, 0.0):
+        a.axhline(y, c="gray", lw=0.6, ls=":")
+        b.axhline(y, c="gray", lw=0.6, ls=":")
+    a.set_title(f"ρ_clip vs k (dashed: the {int(surv.max()) if len(surv) else 0} levels alive to k = {cv['k'].max()})")
+    a.set_xlabel("k, steps after the call (chunk boundaries at 8, 16, 24)")
+    a.legend(fontsize=7)
+    mid = (bn["e_lo"] + bn["e_hi"]) / 2
+    b.plot(mid, bn["rho_clip"], marker="o")
+    for x, y, n in zip(mid, bn["rho_clip"], bn["levels"]):
+        b.annotate(str(n), (x, y), fontsize=7)
+    b.set_xscale("log")
+    b.set_xlabel("|o − ô| (normalized), decile bins; labels = levels")
+    b.set_title("ρ_clip vs deviation (all predictors and k)")
+    c.set_xlabel("|o* − ô| (normalized)")
+    c.set_ylabel("|J·(o* − ô)|")
+    c.set_title("prediction error J sees, k = 1…31")
+    c.legend(fontsize=7)
+    fig.tight_layout()
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+
+
+def summarize(out_dir: str = OUT):
+    """Tables, thresholds and figure from out_dir/raw/*.npz (spec sections 4-5)."""
+    out = pathlib.Path(out_dir)
+    raws = {f.stem: dict(np.load(f)) for f in sorted((out / "raw").glob("*.npz"))}
+    t = pd.concat([level_table(r, lv) for lv, r in raws.items()], ignore_index=True)
+    cv, nr, bn = curves(t), near(t), bins(raws, t)
+    o = t[(t["predictor"] == "oracle") & t["k"].between(1, 4) & (t["frac"] >= MIN_FRAC)].groupby("level")
+    rho = float((1 - o["lin_clip"].sum() / o["pred"].sum()).median())
+    e_pred = float(t.loc[t["predictor"] == "oracle", "e_pred"].abs().max())
+    check = {"oracle_rho_clip_k1_4": rho, "e1b": 0.54, "oracle_e_pred_max": e_pred,
+             "ok": abs(rho - 0.54) <= 0.1 and e_pred == 0}
+    th = {"k": {}, "e": {f"<{thr}": first_below(bn["e_lo"], bn["rho_clip"], thr) for thr in (0.3, 0.0)}}
+    for (variant, pred), d in cv.groupby(["variant", "predictor"]):
+        d = d.sort_values("k")
+        th["k"][f"{variant}/{pred}"] = {f"<{thr}": first_below(d["k"], d["rho_clip"], thr) for thr in (0.3, 0.0)}
+    t.to_csv(out / "summary.csv", index=False)
+    cv.to_csv(out / "curves.csv", index=False)
+    nr.to_csv(out / "near.csv")
+    bn.to_csv(out / "bins.csv", index=False)
+    (out / "check.json").write_text(json.dumps(check, indent=2))
+    (out / "thresholds.json").write_text(json.dumps(th, indent=2))
+    figure(cv, bn, out / "diag.png")
+    print(nr.round(3).to_string())
+    print(bn.round(3).to_string(index=False))
+    print(json.dumps(check))
+    print(json.dumps(th))
+    if not check["ok"]:
+        print("!!! sanity check failed (spec section 5): look for a bug before reading anything")
+
+
+if __name__ == "__main__":
+    tyro.extras.subcommand_cli_from_dict({"run": run, "summarize": summarize})
