@@ -1,6 +1,7 @@
 import json
 import time
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -101,7 +102,7 @@ def _lat(pred=1.15, t3=1.55, m3=1.30, reflex=1.85):
 
 
 INFO = {"realtime_ms": 1.0, "kappa": 1.0, "kappa_j": 1.0, "head_ms_cpu": 0.01, "head_ms_gpu": 0.05,
-        "gflop_per_eval": 0.001, "head_gflop": 0.0006}
+        "gflop_per_eval": 0.001, "head_gflop": 0.0006, "level": probe.LEVELS[0]}
 
 
 def test_placement_at_base_3():
@@ -167,6 +168,17 @@ def _write_results(tmp_path, value, seeds=b2b5.SEEDS):
     (tmp_path / "latency.json").write_text(json.dumps(INFO))
 
 
+def test_dominated_flags():
+    rows = [("v", "naive", 2, 4, 0.60, 1.0),  # realtime costs as much and solves more: dominated
+            ("v", "realtime", 3, 3, 0.70, 1.0),
+            ("v", "t3", 4, 4, 0.80, 5.0),
+            ("v", "t3", 4, 4, 0.80, 5.0),  # the same config again (a late row): not a rival of its twin
+            ("v", "pred", 4, 4, np.nan, 0.5),  # no data: no flag
+            ("w", "naive", 1, 1, 0.99, 0.1)]  # another view: would dominate everything above
+    fr = pd.DataFrame(rows, columns=["view", "method", "delay", "execute_horizon", "P", "fe_step"]).assign(base=3)
+    assert b2b5.dominated(fr, "fe_step") == [True, False, False, False, None, False]
+
+
 def test_summarize_rules(tmp_path):
     def value(m, p, d, s, sd):
         if m == "late1" and (d, s) == (4, 4):
@@ -178,13 +190,37 @@ def test_summarize_rules(tmp_path):
         return 0.75 if m == "realtime" else 0.60
 
     _write_results(tmp_path, value)
+    hist = [{"seed": sd, "delay": 3, "execute_horizon": 5, "method": "t3", "predictor": "learned", "level": "x", "k": 3,
+             "bin": 9, "count": 10} for sd in (20, 99)]  # seed 99 is not a main seed: left out
+    (tmp_path / "eval_B").mkdir()
+    pd.DataFrame(hist).to_csv(tmp_path / "eval_B" / "hist.csv", index=False)
+    (tmp_path / "a2c2_distill").mkdir()
+    pd.DataFrame([{"level": "x", "transitions": t, "steps": 10} for t in (1, 1000)]).to_csv(  # a rerun: last row
+        tmp_path / "a2c2_distill" / "train_log.csv", index=False)
     v = b2b5.summarize(out_dir=str(tmp_path))
-    assert v["B2-R1 t3"]["verdict"] == "KEEPS"
+    assert v["B2-R1 t3"]["verdict"] == v["B2-R1 t3"]["final"] == "KEEPS"
     assert v["B5-R1 late"]["verdict"] == "WIN" and abs(v["B5-R1 late"]["pooled_pp"] - 5.0) < 1e-6
     assert v["B5-R2 m3"]["verdict"] == "LOSE"  # m3 0.60 vs realtime 0.75
     assert v["B5-R2 m3"]["edge"]["other_d"] == 5 and v["B5-R2 m3"]["edge"]["verdict_other_d"] == "NOT-FEASIBLE"
     assert v["B5-R3 t3 (3,5)"]["verdict"] == "FAIL"
     assert (tmp_path / "extension.txt").read_text() == ""
+    res = json.loads((tmp_path / "b2b5.json").read_text())
+    a = res["a2c2"]["A2C2 (вариант bt-kinetix) − t3"]["D3 (3,5)"]  # a2c2 0.60, t3 0.72 / 0.68 / 0.68
+    assert a["per_seed_pp"] == pytest.approx([-12, -8, -8]) and res["hypotheses"]["E1 A2C2-t3 D3 pp"] == a["pooled_pp"]
+    assert res["a2c2_flag"] == "реализация под сомнением"  # a2c2 0.60 < realtime 0.75 at D3
+    assert res["hypotheses"]["E2 late1-pred (4,4) pp"] == pytest.approx(20)
+    assert res["hypotheses"]["E2 late2-pred (4,4) pp"] == pytest.approx(0)
+    assert res["edges base 3 (report)"]["realtime10"]["other_d"] == 7  # r 2.0 x 3 = 6.0
+    fr = pd.read_csv(tmp_path / "frontier.csv")
+    assert {"A2C2 (bt-kinetix variant)", "A2C2-distill"} <= set(fr.label) and fr.dominated_fe_step.any()
+    wm = 2 * (685 * 256 + 256 * 256 + 256 * 679) / 1e9 / INFO["gflop_per_eval"]  # one world-model step in FE
+    assert fr[fr.method == "t3"].query("delay == 3 and execute_horizon == 5").wm_fe_step.iloc[0] == pytest.approx(
+        7 / 5 * wm)
+    assert fr[fr.method == "naive"].wm_fe_step.isna().all()
+    assert pd.read_csv(tmp_path / "hist_summary.csv")["count"].tolist() == [10]
+    tc = pd.read_csv(tmp_path / "training_compute.csv").query("method == 'a2c2_distill'")
+    g = INFO["gflop_per_eval"]
+    assert tc.train_gflop.tolist() == pytest.approx([10 * 512 * 3 * INFO["head_gflop"] + 5 * g * 1000 * 9 / 8 * 1.1])
 
 
 def test_summarize_gray_writes_the_extension(tmp_path):
@@ -195,10 +231,14 @@ def test_summarize_gray_writes_the_extension(tmp_path):
 
     _write_results(tmp_path, value)
     v = b2b5.summarize(out_dir=str(tmp_path))
-    assert v["B5-R1 late"]["verdict"] == "GRAY"
+    assert v["B5-R1 late"]["verdict"] == v["B5-R1 late"]["final"] == "GRAY"
     ext = (tmp_path / "extension.txt").read_text().splitlines()
     assert any(ln.startswith("B --methods late1") and "--seeds 23 24 25" in ln for ln in ext)
     assert any(ln.startswith("A --methods realtime ") for ln in ext)
+    _write_results(tmp_path, value, seeds=(*b2b5.SEEDS, *b2b5.EXT_SEEDS))  # the extension ran: GRAY again
+    r = b2b5.summarize(out_dir=str(tmp_path))["B5-R1 late"]
+    assert r["verdict_6_seeds"] == "GRAY" and r["final"] == "не определён"
+    assert len(r["ci95_pp"]) == len(r["ci95_6_pp"]) == 2 and (tmp_path / "extension.txt").read_text() == ""
 
 
 def test_summarize_strict_stops_on_a_missing_seed(tmp_path):
@@ -217,5 +257,9 @@ def test_summarize_partial_grid_without_strict(tmp_path):
     assert v["B2-R1 t3"]["verdict"] == "MISSING" and v["B5-R1 late"]["verdict"] == "MISSING"
     assert v["B5-R2 m3"]["verdict"] == "NOT-FEASIBLE"
     assert v["B5-R2 m3"]["edge"]["other_d"] == 4 and v["B5-R2 m3"]["edge"]["verdict_other_d"] == "LOSE"
-    res = json.loads((tmp_path / "b2b5.json").read_text())
+    res = json.loads((tmp_path / "b2b5.json").read_text(), parse_constant=pytest.fail)  # strict JSON: no NaN
     assert res["missing"] == 3 * (135 - 53) and res["hypotheses"]["H2 spearman"] is None
+    assert res["a2c2"]["A2C2-distill − t3"]["D1 (s 5-7)"]["pooled_pp"] is None and res["a2c2_flag"] is None
+    _lat(m3=1.0).to_csv(tmp_path / "latency.csv", index=False)  # x = 3.0: m3's rule cell is (4,4) either way
+    e = b2b5.summarize(out_dir=str(tmp_path), strict=False)["B5-R2 m3"]["edge"]
+    assert e["other_d"] == 4 and "verdict_other_d" not in e

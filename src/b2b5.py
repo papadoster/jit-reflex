@@ -407,11 +407,31 @@ def gpu_ms_step(method: str, d: int, s: int, lat: pd.DataFrame, info: dict, seco
     return ms + (info["head_ms_gpu"] if method.startswith("a2c2") else 0.0)
 
 
+def wm_gflop(level_path: str) -> float:
+    """Spec §5.4: one world-model step, analytic from the committed model's layer shapes (2 FLOPs per multiply-add)."""
+    with open(f"{predictors.WM_DIR}/{predictors.level_name(level_path)}.pkl", "rb") as f:
+        return 2 * sum(w.shape[0] * w.shape[1] for w, _ in pickle.load(f)["layers"]) / 1e9
+
+
+def dominated(fr: pd.DataFrame, price: str) -> list:
+    """Spec §6.6: a config is dominated if another config of its view and base costs <= and has pooled P >=. The same
+    config twice (a late row equal to a t3 or pred row) is not another; None without data."""
+    cfg, out = ["method", "delay", "execute_horizon"], []
+    for _, r in fr.iterrows():
+        g = fr[(fr["view"] == r["view"]) & (fr["base"] == r["base"]) & (fr[cfg] != r[cfg]).any(axis=1)]
+        out.append(None if pd.isna(r["P"]) else bool(((g[price] <= r[price]) & (g["P"] >= r["P"])).any()))
+    return out
+
+
+LABELS = {"a2c2": "A2C2 (bt-kinetix variant)", "a2c2_distill": "A2C2-distill"}  # spec §9: frontier.csv and figure
+
+
 def summarize(out_dir: str = OUT, strict: bool = True, seeds: Sequence[int] = SEEDS,
               diag_summary: str = "results/b1/diag/summary.csv") -> dict:
-    """Spec §6-7: rules (with the GRAY extension), predictions and hypotheses, prices, |e| shares, training compute.
-    Writes b2b5.json, frontier.csv, hist_summary.csv, training_compute.csv, b2b5.png and extension.txt (empty unless a
-    rule is GRAY). strict: stop if a grid config misses a seed; without it a missing config gives MISSING."""
+    """Spec §6-7: rules (with the GRAY extension and the final verdict), predictions and hypotheses, A2C2 - t3, prices,
+    |e| shares, training compute. Writes b2b5.json (strict JSON, NaN -> null), frontier.csv, hist_summary.csv,
+    training_compute.csv, b2b5.png and extension.txt (empty unless a rule is GRAY). strict: stop if a grid config misses
+    a seed; without it a missing config gives MISSING."""
     out = pathlib.Path(out_dir)
     df = pd.concat([pd.read_csv(f) for f in sorted(out.glob("eval_*/results.csv"))]).drop_duplicates(
         ["seed", "delay", "execute_horizon", "method", "predictor", "level"]
@@ -436,9 +456,9 @@ def summarize(out_dir: str = OUT, strict: bool = True, seeds: Sequence[int] = SE
         return ([(m, "-", d, s) for m in ("naive", "realtime", "realtime10") for d, s in pl[m]]
                 + [("pred", "learned", d, s) for d, s in pl["pred"]])
 
-    def ci(cand, rivals):  # report only: 95% bootstrap over level x seed cells, the best rival chosen per seed
+    def ci(cand, rivals, sd=seeds):  # report only: 95% bootstrap over level x seed cells, the best rival per seed
         diffs = []
-        for x in seeds:
+        for x in sd:
             r = max(rivals, key=lambda c: P.get((*c, x), -1.0))
             diffs.append((cell.xs((*cand, x)) - cell.xs((*r, x))).to_numpy())
         m, lo, hi = plot._boot(np.concatenate(diffs), 10_000, np.random.default_rng(0))
@@ -462,7 +482,7 @@ def summarize(out_dir: str = OUT, strict: bool = True, seeds: Sequence[int] = SE
     verdicts, ext = {}, set()
     for name, (kind, cand, rivals) in rules.items():
         if cand is None:
-            verdicts[name] = {"verdict": "NOT-FEASIBLE"}
+            verdicts[name] = {"verdict": "NOT-FEASIBLE", "final": "NOT-FEASIBLE"}
             continue
         g = ps(cand) - best(rivals)
         v = {"verdict": decide(kind, g), "pooled_pp": 100 * float(g.mean()), "per_seed_pp": (100 * g).tolist(),
@@ -473,14 +493,17 @@ def summarize(out_dir: str = OUT, strict: bool = True, seeds: Sequence[int] = SE
             all_sd = (*seeds, *EXT_SEEDS)
             g6 = ps(cand, all_sd) - best(rivals, all_sd)
             if g6.notna().all():
-                v |= {"verdict_6_seeds": decide(kind, g6), "pooled_6_pp": 100 * float(g6.mean())}
+                v |= {"verdict_6_seeds": decide(kind, g6), "pooled_6_pp": 100 * float(g6.mean()),
+                      "ci95_6_pp": ci(cand, rivals, all_sd)}
             else:
                 ext |= {cand, *rivals}
+        v6 = v.get("verdict_6_seeds")  # spec §6.5: the 6-seed verdict decides; GRAY again is "not determined"
+        v["final"] = v["verdict"] if v6 is None else "не определён" if v6 == "GRAY" else v6
         verdicts[name] = v
     for c in ("t3", "m3"):  # spec §6.1: B2's goal is met if c KEEPS and r_c(3,5) <= 1.2
         v = verdicts[f"B2-R1 {c}"]
         v |= {"r(3,5)": float(ratio[(c, *D3)]),
-              "B2 goal": v.get("verdict_6_seeds", v["verdict"]) == "KEEPS" and bool(ratio[(c, *D3)] <= 1.2)}
+              "B2 goal": v["final"] == "KEEPS" and bool(ratio[(c, *D3)] <= 1.2)}
     late = [c for c in pl3["late"] if c["s"] == 8 - c["d"]]
     k, kj = (info["kappa"], info["kappa_j"]) if info["kappa"] > 1.10 else (1.0, 1.0)  # spec §5.2
     x_nom, x_j = ((late[0]["x_nom"], late[0]["x_j"]) if late  # none (NOT-FEASIBLE): §6.2's (4,4) measurement
@@ -488,12 +511,18 @@ def summarize(out_dir: str = OUT, strict: bool = True, seeds: Sequence[int] = SE
     for name, x in (("B5-R1 late", float(x_nom)), ("B5-R2 m3", x_m3)):
         n = other_side(x)  # spec §5.1: within ±3% of a d' edge, the verdict at the other d' goes next to it
         e = {"x": x, "other_d": n}
-        if n is not None:
+        if n is not None and (name == "B5-R1 late" or round(x) == 4):  # m3: only its 4/5 feasibility edge (§6.3)
             dl = _ceil(x_j) - n  # late: the same J latency, delta counted from the other d'
             m = "m3" if name.endswith("m3") else "t3" if dl <= 0 else "pred" if dl >= 8 - n else f"late{dl}"
             ve = decide("win", ps((m, "learned", n, 8 - n)) - best(rivals_at(pl3))) if n <= 4 else "NOT-FEASIBLE"
             e["verdict_other_d"] = "no data" if ve == "MISSING" else ve
         verdicts[name]["edge"] = e
+    edges3 = {"late J": {"x": float(x_j), "other_d": other_side(float(x_j))}}  # report only: borderline placements
+    edges3 |= {m: {"x": x, "other_d": other_side(x)} for m in ("naive", "realtime10")
+               for x in [3 * float(ratio.xs(m).median())]}  # realtime is the base itself
+    edges3["pred"] = [{"d": d, "s": s, "x": x, "other_d": n} for (d, s), r in ratio.xs("pred").items()
+                      for x in [3 * float(r)] for n in [other_side(x)]
+                      if n is not None and ("pred", "learned", d, s) in grid and d in (_ceil(x), n)]
     lines = [
         f"{worker_of(m)} " + _args((m,), (p,), [(d, s)], EXT_SEEDS, f"{out_dir}/eval_ext_{worker_of(m)}")
         for m, p, d, s in sorted(ext) if any((m, p, d, s, x) not in P.index for x in EXT_SEEDS)
@@ -510,8 +539,19 @@ def summarize(out_dir: str = OUT, strict: bool = True, seeds: Sequence[int] = SE
         "H1 D1 pp": 100 * float(np.mean([pooled(("rtc_reflex", "learned", *c)) - pooled(("rtc_reflex", "oracle", *c))
                                          for c in D1])),
         "H1 D3 pp": 100 * (pooled(("rtc_reflex", "learned", *D3)) - pooled(("rtc_reflex", "oracle", *D3))),
-        "E2 late1-pred (4,4) pp": 100 * (pooled(("late1", "learned", *D4)) - pooled(("pred", "learned", *D4))),
+        **{f"E2 late{k}-pred (4,4) pp": 100 * (pooled((f"late{k}", "learned", *D4)) - pooled(("pred", "learned", *D4)))
+           for k in (1, 2)},
     }
+    a2c2_rows = {}  # spec §6.6, report only: P(A2C2) - P(t3) in t3's cells
+    for m, label in (("a2c2", "A2C2 (вариант bt-kinetix)"), ("a2c2_distill", "A2C2-distill")):
+        g = {c: ps((m, "-", *c)) - ps(("t3", "learned", *c)) for c in R9}
+        g = {"D1 (s 5-7)": sum(g[c] for c in D1) / len(D1),
+             **{{D3: "D3 (3,5)", D4: "D4 (4,4)"}.get(c, f"({c[0]},{c[1]})"): x for c, x in g.items()}}
+        a2c2_rows[f"{label} − t3"] = {k: {"pooled_pp": 100 * float(x.mean()), "per_seed_pp": (100 * x).tolist()}
+                                      for k, x in g.items()}
+    hyp["E1 A2C2-t3 D3 pp"] = a2c2_rows["A2C2 (вариант bt-kinetix) − t3"]["D3 (3,5)"]["pooled_pp"]
+    doubt = pooled(("a2c2", "-", *D3)) < pooled(("realtime", "-", *D3))  # §9: the strawman guard
+    flag = "реализация под сомнением" if doubt else None
     hyp["P1 held"] = abs(hyp["P1 m3-t3 D3 pp"]) <= 1 and hyp["P1 m3-t3 D1 pp"] <= -1
     lv = df[df.seed.isin(seeds)].groupby(["method", "predictor", "delay", "execute_horizon", "level"])[
         "returned_episode_solved"].mean()
@@ -538,6 +578,12 @@ def summarize(out_dir: str = OUT, strict: bool = True, seeds: Sequence[int] = SE
     except KeyError:
         hyp["H2 spearman"] = hyp["H2 levels with both > 0"] = None
 
+    wm_fe = wm_gflop(info["level"]) / info["gflop_per_eval"]
+
+    def prices(m, d, s, second_gpu=False):  # spec §5.4: the world model's d + s - 1 step rollout is its own column
+        return {"gpu_ms_step": gpu_ms_step(m, d, s, lat, info, second_gpu), "fe_step": fe_step(m, s, info),
+                "wm_fe_step": max(d + s - 1, 1) / s * wm_fe if m in REFLEX else np.nan}
+
     rows = []
     for (b, sc), pl in pls.items():
         for m, cells in pl.items():
@@ -548,36 +594,36 @@ def summarize(out_dir: str = OUT, strict: bool = True, seeds: Sequence[int] = SE
                 if (em, pr, d, s) in grid:
                     rows.append({"view": f"latency-fair {sc}", "base": b, "label": label, "method": em, "delay": d,
                                  "execute_horizon": s, "P": pooled((em, pr, d, s)),
-                                 "gpu_ms_step": gpu_ms_step(em, d, s, lat, info, sc == "second_gpu"),
-                                 "fe_step": fe_step(em, s, info)})
+                                 **prices(em, d, s, sc == "second_gpu")})
     for d, s in [*D1, (3, 3), (3, 4), D3, D4]:
         for m, pr, dd, ss in sorted(grid):
             if (dd, ss) == (d, s) and pr in ("-", "learned"):
                 rows.append({"view": "same-delay", "base": d, "label": m, "method": m, "delay": d,
-                             "execute_horizon": s, "P": pooled((m, pr, d, s)),
-                             "gpu_ms_step": gpu_ms_step(m, d, s, lat, info), "fe_step": fe_step(m, s, info)})
+                             "execute_horizon": s, "P": pooled((m, pr, d, s)), **prices(m, d, s)})
     fr = pd.DataFrame(rows)
+    fr["label"] = fr["label"].replace(LABELS)
     for price in ("gpu_ms_step", "fe_step"):
-        fr[f"dominated_{price}"] = [
-            bool(((g[price] <= r[price]) & (g["P"] >= r["P"]) & (g.index != i)).any())
-            for i, r in fr.iterrows() for g in [fr[(fr.view == r.view) & (fr.base == r.base)]]
-        ]
+        fr[f"dominated_{price}"] = dominated(fr, price)
     fr.to_csv(out / "frontier.csv", index=False)
     _figure(fr, out / "b2b5.png")
 
     hs = [pd.read_csv(f) for f in sorted(out.glob("eval_*/hist.csv"))]
     if hs:
         h = pd.concat(hs)
+        h = h[h.seed.isin(seeds)]  # the main seeds only, as the rules
         edges = pd.read_csv(E_BINS).query("predictor == 'all'").sort_values("bin")["e_lo"].to_numpy()
         h["far"] = h["bin"] >= int(np.argmin(np.abs(edges - E_FAR)))
         g = h.assign(far_count=h["count"] * h["far"]).groupby(["method", "delay", "execute_horizon", "k"])[
             ["count", "far_count"]].sum()
         g.assign(share_far=g.far_count / g["count"]).to_csv(out / "hist_summary.csv")
     _training_compute(out, info).to_csv(out / "training_compute.csv", index=False)
-    res = {"verdicts": verdicts, "hypotheses": hyp, "latency": info, "missing": len(missing)}
-    (out / "b2b5.json").write_text(json.dumps(res, indent=1, default=str))
-    print(json.dumps(res, indent=1, default=str))
-    return verdicts
+    res = {"verdicts": verdicts, "hypotheses": hyp, "a2c2": a2c2_rows, "a2c2_flag": flag,
+           "edges base 3 (report)": edges3, "latency": info, "missing": len(missing)}
+    res = json.loads(json.dumps(res, default=str), parse_constant=lambda _: None)  # strict JSON: NaN -> null
+    text = json.dumps(res, indent=1, ensure_ascii=False, allow_nan=False)
+    (out / "b2b5.json").write_text(text, encoding="utf-8")
+    print(text)
+    return res["verdicts"]
 
 
 def _figure(fr: pd.DataFrame, path):
@@ -617,9 +663,10 @@ def _training_compute(out: pathlib.Path, info: dict) -> pd.DataFrame:
         f = out / name / "train_log.csv"
         if not f.exists():
             continue
-        for r in pd.read_csv(f).to_dict("records"):
+        for r in pd.read_csv(f).drop_duplicates("level", keep="last").to_dict("records"):  # a rerun appends a row
             per_item = 3 * head_gflop + (5 * info["gflop_per_eval"] if name == "a2c2" else 0.0)
-            collect = 5 * info["gflop_per_eval"] * r["transitions"] * (1 + 1 / 8) if name == "a2c2_distill" else 0.0
+            # distill: a chunk per 8 transitions and a fresh call per transition, + the held-out 10% windows
+            collect = 5 * info["gflop_per_eval"] * r["transitions"] * (1 + 1 / 8) * 1.1 if "distill" in name else 0.0
             rows.append({"method": name, "level": r["level"], "transitions": r["transitions"],
                          "train_gflop": r["steps"] * 512 * per_item + collect})
     return pd.DataFrame(rows)
