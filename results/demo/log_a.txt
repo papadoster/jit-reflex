@@ -1,0 +1,10 @@
+/opt/homebrew/Cellar/python@3.11/3.11.9/Frameworks/Python.framework/Versions/3.11/lib/python3.11/subprocess.py:1885: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = _fork_exec(
+config.execute_horizon=5 config.inference_delay=3 prefix_attention_horizon=3 policy.action_chunk_size=8
+mjc_swimmer, learned world model (retrained locally); d = 3, s = 5; every panel has the same start and action noise.
+Goal: the front link of the swimmer (green in Kinetix, too thin to show at this resolution) must touch the blue post.
+Illustration, not evidence. Episode rule, fixed before viewing: the first of seeds 0-15 where reflex (learned) solves and pred (learned) fails: seed 2.
+Solved over seeds 0-15: RTC 5/16, pred (learned) 12/16, reflex (learned) 11/16. B1 on this level (768 episodes): RTC 41%, pred 42%, reflex 71%.
+Level picked as B1's strongest for J (reflex - pred, learned model). Mean over all 12 levels: reflex +7.7 pp over RTC.
+The counts use a world model retrained locally, not B1's; with it pred is stronger on this level (B1's seed 10, 256 episodes: pred 57% vs 43% with B1's model, reflex 76% vs 71%; wm_check_swimmer.csv).
+saved results/demo/a.*
