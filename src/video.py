@@ -34,6 +34,8 @@ PRESETS = {  # fixed before viewing any episode (see the plan); the last panel i
     "a": dict(
         level="mjc_swimmer", title="mjc_swimmer, learned world model (retrained locally)",
         panels=("realtime", "pred:learned", "reflex:learned"), hero="reflex:learned", rival="pred:learned",
+        goal="Goal: the front link of the swimmer (green in Kinetix, too thin to show at this resolution) must touch "
+        "the blue post.",
         why="Level picked as B1's strongest for J (reflex - pred, learned model).",
         note="The counts use a world model retrained locally, not B1's; with it pred is stronger on this level "
         "(B1's seed 10, 256 episodes: pred 57% vs 43% with B1's model, reflex 76% vs 71%; wm_check_swimmer.csv).",
@@ -41,11 +43,15 @@ PRESETS = {  # fixed before viewing any episode (see the plan); the last panel i
     "b": dict(
         level="mjc_swimmer", title="mjc_swimmer, physics with 20% parameter errors",
         panels=("pred:phys0.2", "reflex:phys0.2"), hero="reflex:phys0.2", rival="pred:phys0.2",
+        goal="Goal: the front link of the swimmer (green in Kinetix, too thin to show at this resolution) must touch "
+        "the blue post.",
         why="Same level as video A; with 20% wrong physics it ranks 4th of 12 for J in B1.",
     ),
     "c": dict(
         level="catapult", title="catapult, learned world model (retrained locally)",
         panels=("realtime", "reflex:learned"), hero="realtime", rival="reflex:learned",
+        goal="Goal: knock the small crossbar (green in Kinetix, too thin to show at this resolution) off its two "
+        "posts onto the blue floor.",
         why="Level picked as B1's worst for the reflex against RTC.",
     ),
 }
@@ -121,6 +127,7 @@ def demo(
     specs = ("realtime", f"pred:{pred}", f"reflex:{pred}")
     lines = [
         f"{p['title']}; d = {D}, s = {S}; every panel has the same start and action noise.",
+        p["goal"],
         f"Illustration, not evidence. Episode rule, fixed before viewing: {rule}.",
         f"Solved over seeds 0-{seeds - 1}: " + ", ".join(f"{_name(s)} {solved[s].sum()}/{seeds}" for s in p["panels"])
         + ". B1 on this level (768 episodes): "
