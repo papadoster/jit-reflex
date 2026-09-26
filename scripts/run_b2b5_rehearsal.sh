@@ -25,8 +25,7 @@ ev() {  # the status is eval_flow's (pipefail); grep filtering every line exits 
     | tee -a $R/eval.log
 }
 ev --methods naive realtime realtime10 --cells 3,5 --output-dir $R/eval_A
-# the heads exist for catapult only: their own dir, as eval_flow's resume keeps only the configs with as many level
-# rows as this call has levels (1 here), so sharing eval_A would drop the 12-level rows
+# the heads exist for catapult only: a one-level call (eval_flow's resume keeps the rows of other level sets)
 ev --methods a2c2 a2c2_distill --cells 3,5 --heads-root $R --level-paths $L --output-dir $R/eval_heads
 ev --methods rtc_reflex --predictors learned --cells 3,5 --output-dir $R/eval_A
 ev --methods pred reflex t3 m3 --predictors learned --cells 3,5 --output-dir $R/eval_B

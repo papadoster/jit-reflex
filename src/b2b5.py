@@ -38,8 +38,9 @@ REFLEX = (*PRED, "rtc_reflex", *(f"late{k}" for k in range(1, 5)))  # methods wi
 ALL16 = [(d, s) for d in range(1, 5) for s in range(d, 9 - d)]  # s >= d, d + s <= 8
 R9 = [(1, 5), (1, 6), (1, 7), (2, 2), (2, 6), (3, 3), (3, 4), (3, 5), (4, 4)]
 D1, D3, D4 = [(1, 5), (1, 6), (1, 7)], (3, 5), (4, 4)
-BLOCKS = [  # (worker, methods, predictors, cells): spec §4
-    ("A", CHEAP, ("-",), ALL16),
+BLOCKS = [  # (worker, methods, predictors, cells): spec §4. A2C2 alone: a missing head fails only its block (§14)
+    ("A", ("naive", "realtime", "realtime10"), ("-",), ALL16),
+    ("A", ("a2c2", "a2c2_distill"), ("-",), ALL16),
     ("A", ("rtc_reflex",), ("learned", "oracle"), [*D1, D3]),
     ("B", PRED, ("learned",), R9),
     ("B", ("late1",), ("learned",), [D4, (3, 3), (3, 4), (3, 5)]),

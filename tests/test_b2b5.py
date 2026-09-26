@@ -27,9 +27,19 @@ def test_resume_keeps_only_complete_configs(tmp_path):
     cols = ["seed", "delay", "execute_horizon", "method", "predictor", "level"]
     rows = [(0, 1, 1, "naive", "-", lv) for lv in ("a", "b")] + [(0, 2, 2, "t3", "oracle", "a")]  # 2nd: partial
     pd.DataFrame(rows, columns=cols).to_csv(tmp_path / "results.csv", index=False)
-    old, done = eval_flow.load_done(tmp_path, 2)
+    old, done = eval_flow.load_done(tmp_path, ["a", "b"])
     assert done == {(0, 1, 1, "naive", "-")} and list(old["level"]) == ["a", "b"]
-    assert eval_flow.load_done(tmp_path / "missing", 2)[1] == set()
+    assert eval_flow.load_done(tmp_path / "missing", ["a", "b"])[1] == set()
+
+
+def test_resume_keeps_the_rows_of_other_level_sets(tmp_path):
+    cols = ["seed", "delay", "execute_horizon", "method", "predictor", "level"]
+    rows = [(0, 3, 5, "naive", "-", lv) for lv in probe.LEVELS] + [(0, 3, 5, "a2c2", "-", probe.LEVELS[1])]
+    pd.DataFrame(rows, columns=cols).to_csv(tmp_path / "results.csv", index=False)
+    old, done = eval_flow.load_done(tmp_path, [probe.LEVELS[1]])  # a one-level call keeps the 12-level config
+    assert done == {(0, 3, 5, "naive", "-"), (0, 3, 5, "a2c2", "-")} and len(old) == 13
+    old, done = eval_flow.load_done(tmp_path, list(probe.LEVELS))  # the 12-level call reruns a2c2: its row goes
+    assert done == {(0, 3, 5, "naive", "-")} and len(old) == 12 and set(old["method"]) == {"naive"}
 
 
 def test_grid_has_the_spec_configs():
@@ -46,6 +56,9 @@ def test_commands_cover_every_block_of_a_worker():
     assert all("--output-dir x/eval_B" in ln for ln in lines)
     assert any("--methods late2" in ln and "--cells 4,4" in ln for ln in lines)
     assert all("--seeds 20 21 22" in ln for ln in lines)
+    a = b2b5.command_lines("A", out_dir="x")  # a missing A2C2 head fails only its own eval_flow call (spec §14)
+    assert [ln.split(" --predictors")[0] for ln in a[:2]] == ["--methods naive realtime realtime10",
+                                                              "--methods a2c2 a2c2_distill"]
 
 
 def test_lock_detects_a_changed_input(tmp_path, monkeypatch):

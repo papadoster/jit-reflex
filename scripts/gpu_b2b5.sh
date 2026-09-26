@@ -28,8 +28,9 @@ git rev-parse HEAD > $O/COMMIT
 uv run src/b2b5.py lock --check || exit 1
 [ -f $O/latency.json ] || { uv run src/b2b5.py latency 2>&1 | tee $O/latency.txt || exit 1; }
 uv run src/b2b5.py place 2>&1 | tee -a $O/latency.txt || exit 1
-# A missing head of any level stops eval_flow's whole block (naive and realtime too: heads load up front), so a failed
-# download or training stops the run here; rerun the script and the finished levels are skipped.
+# Spec §14: an A2C2 failure does not stop the pod. A missing head fails only the a2c2 block of eval_flow (a2c2 and
+# a2c2_distill; naive and realtime run in their own block); strict summarize then lists the missing a2c2 configs. Rerun
+# the script to retry a failed level: the finished levels are skipped.
 echo "[$(date +%T)] A2C2 (expert data, one level at a time)"
 mkdir -p $O/expert
 for L in $LEVELS; do
@@ -37,20 +38,24 @@ for L in $LEVELS; do
   f=$O/expert/worlds_l_$L.npz
   if [ ! -f $f ]; then  # kept by a failed training: no second download
     curl -fsSL --retry 3 -o $f.part "https://storage.googleapis.com/rtc-assets/expert/data/worlds_l_$L.npz" \
-      && mv $f.part $f || { echo "!!! expert data for $L FAILED" | tee -a $O/a2c2_train.txt; exit 1; }
-    sha256sum $f | tee -a $O/expert_data.sha256
+      && mv $f.part $f && sha256sum $f | tee -a $O/expert_data.sha256
   fi
-  uv run src/a2c2.py expert --data-dir $O/expert --level-paths worlds/l/$L.json 2>&1 | tee -a $O/a2c2_train.txt \
-    || { echo "!!! A2C2 training on $L FAILED"; exit 1; }
-  rm -f $f
-  uv run src/b2b5.py lock --add $O/a2c2 || exit 1
+  if [ -f $f ] && uv run src/a2c2.py expert --data-dir $O/expert --level-paths worlds/l/$L.json 2>&1 \
+      | tee -a $O/a2c2_train.txt; then
+    rm -f $f
+    uv run src/b2b5.py lock --add $O/a2c2 || exit 1
+  else
+    echo "!!! A2C2 for $L failed: the a2c2 configs will fail, the rest runs" | tee -a $O/a2c2_train.txt
+  fi
 done
 echo "[$(date +%T)] A2C2-distill"
 for L in $LEVELS; do
   [ -f $O/a2c2_distill/worlds_l_$L.pkl ] && continue
-  uv run src/a2c2.py distill --level-paths worlds/l/$L.json 2>&1 | tee -a $O/distill_train.txt \
-    || { echo "!!! A2C2-distill on $L FAILED"; exit 1; }
-  uv run src/b2b5.py lock --add $O/a2c2_distill || exit 1
+  if uv run src/a2c2.py distill --level-paths worlds/l/$L.json 2>&1 | tee -a $O/distill_train.txt; then
+    uv run src/b2b5.py lock --add $O/a2c2_distill || exit 1
+  else
+    echo "!!! A2C2-distill for $L failed: the a2c2 configs will fail, the rest runs" | tee -a $O/distill_train.txt
+  fi
 done
 uv run src/b2b5.py lock --add $O/a2c2 $O/a2c2_distill || exit 1  # a head saved right before a crash, unrecorded
 EVAL="src/eval_flow.py --run-path checkpoints/bc --config.num-evals 256 --world-model-dir results/b1/world_models
@@ -74,12 +79,17 @@ echo "[$(date +%T)] grid: two workers, logs $O/eval_A.log and eval_B.log (hours 
 echo "[$(date +%T)] second pass, one process: fills whatever failed"
 worker A; worker B
 uv run src/b2b5.py lock --check || exit 1
-uv run src/b2b5.py summarize 2>&1 | tee $O/b2b5.txt \
-  || echo "!!! strict summarize FAILED (see $O/b2b5.txt): rerun the script, finished configs are skipped"
+analyze() {  # strict; if configs are missing (e.g. a failed A2C2 head, spec §14) b2b5.txt lists them and the analysis
+  # runs again without strict (they give MISSING), so the rules and the GRAY extension still come
+  uv run src/b2b5.py summarize 2>&1 | tee $O/b2b5.txt && return
+  echo "!!! strict summarize FAILED (see above): rerun the script, finished configs are skipped" | tee -a $O/b2b5.txt
+  uv run src/b2b5.py summarize --no-strict 2>&1 | tee -a $O/b2b5.txt
+}
+analyze
 if [ -s $O/extension.txt ]; then  # spec §6.5: a GRAY rule gets seeds 23-25 for its configs, then the verdict again
   echo "[$(date +%T)] GRAY extension"
-  while read -r w args; do run_line $w $args; done < $O/extension.txt
-  uv run src/b2b5.py summarize 2>&1 | tee $O/b2b5.txt
+  while read -r w args; do run_line $w $args; done < $O/extension.txt  # EVAL, worker cache, </dev/null
+  analyze
 fi
 rm -rf $O/expert
 (cd $O && find . -type f ! -name MANIFEST.sha256 -print0 | sort -z | xargs -0 sha256sum > MANIFEST.sha256)

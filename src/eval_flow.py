@@ -324,13 +324,22 @@ def parse_cells(cells: Sequence[str]) -> list[tuple[int, int]]:
     return [tuple(int(x) for x in c.split(",")) for c in cells]
 
 
-def load_done(out_dir: pathlib.Path, n_levels: int) -> tuple[pd.DataFrame, set]:
-    """Resume (B2+B5 §10): old rows of the configs with all n_levels level rows, and their keys; partial ones rerun."""
+def stale(df: pd.DataFrame, level_paths: Sequence[str], done: set) -> np.ndarray:
+    """Rows of this call's levels whose config is not done: it reruns, so they would be written twice."""
+    keys = df[KEYS].itertuples(index=False, name=None)
+    return df["level"].isin(level_paths).to_numpy() & np.array([k not in done for k in keys], bool)
+
+
+def load_done(out_dir: pathlib.Path, level_paths: Sequence[str]) -> tuple[pd.DataFrame, set]:
+    """Resume (B2+B5 §10): (old rows to keep, keys of the configs with a row for every level of this call). A config
+    with only some of them reruns, so its rows of these levels go; every other row (other levels, other configs) stays,
+    so a call with another level set in the same folder deletes nothing of the others."""
     if not (out_dir / "results.csv").exists():
         return pd.DataFrame(), set()
     old = pd.read_csv(out_dir / "results.csv")
-    old = old[old.groupby(KEYS)["level"].transform("size") == n_levels]
-    return old, set(old[KEYS].itertuples(index=False, name=None))
+    n = old[old["level"].isin(level_paths)].groupby(KEYS)["level"].nunique()
+    done = set(n.index[n == len(set(level_paths))])
+    return old[~stale(old, level_paths, done)], done
 
 
 def horizons_for(delay: int, chunk_size: int, horizons: Sequence[int], minmax: bool) -> list[int]:
@@ -467,14 +476,14 @@ def main(
 
     out_dir = pathlib.Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    old, done = load_done(out_dir, len(level_paths))  # old rows are kept as they are, even with other columns
+    old, done = load_done(out_dir, level_paths)  # old rows are kept as they are, even with other columns
     if (out_dir / "results.csv").exists():
         print(f"resume: {len(done)} configs already done in {out_dir}")
     results = collections.defaultdict(list)  # this run's rows
-    hist_old, hist_rows = pd.DataFrame(), []  # |e| histograms (B2+B5 §8): rows of the done configs, this run's rows
+    hist_old, hist_rows = pd.DataFrame(), []  # |e| histograms (B2+B5 §8): old rows as in load_done, this run's rows
     if (out_dir / "hist.csv").exists():
         hist_old = pd.read_csv(out_dir / "hist.csv")
-        hist_old = hist_old[[k in done for k in hist_old[KEYS].itertuples(index=False, name=None)]]
+        hist_old = hist_old[~stale(hist_old, level_paths, done)]
     grid = parse_cells(cells) or [
         (d, s) for d in delays for s in horizons_for(d, config.model.action_chunk_size, horizons, minmax)
     ]
