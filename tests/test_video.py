@@ -21,3 +21,22 @@ def test_footer_numbers_and_level_claims_match_b1():
     assert j["learned"].idxmax() == "mjc_swimmer"  # a: strongest for J
     assert j["phys0.2"].rank(ascending=False)["mjc_swimmer"] == 4  # b: 4th of 12
     assert (t["reflex:learned"] - t["realtime"]).idxmin() == "catapult"  # c: worst against RTC
+
+
+def test_presets_are_consistent_with_demo_and_b1():
+    levels = video.b1_table().index
+    for p in video.PRESETS.values():
+        assert p["hero"] in p["panels"] and p["rival"] in p["panels"] and p["hero"] != p["rival"]
+        assert p["panels"][-1].startswith("reflex:")  # the footer takes the predictor from the last panel
+        assert p["level"] in levels
+
+
+def test_panel_freezes_after_the_episode_and_keeps_its_input():
+    from PIL import ImageFont
+
+    video_in = np.arange(6 * 4 * 4 * 3, dtype=np.uint8).reshape(6, 4, 4, 3)
+    before = video_in.copy()
+    out = video._panel(video_in, "x", False, 3, ImageFont.load_default(size=8))
+    assert out.shape == (6, 512, 512, 3)
+    assert (out[3:] == out[3]).all() and not (out[3] == out[2]).all()  # frozen on frame 2, with the outcome caption
+    assert (video_in == before).all()

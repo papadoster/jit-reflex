@@ -32,7 +32,7 @@ D, S = 3, 5  # the demos use B1's d = 3 slice
 B1_CSV = "results/b1/gpu/eval_d3/results.csv"  # B1 at d = 3, s = 5: RTX 4090, seeds 10-12 x 256 episodes
 PRESETS = {  # fixed before viewing any episode (see the plan); the last panel is the reflex
     "a": dict(
-        level="mjc_swimmer", title="mjc_swimmer, learned world model",
+        level="mjc_swimmer", title="mjc_swimmer, learned world model (retrained locally)",
         panels=("realtime", "pred:learned", "reflex:learned"), hero="reflex:learned", rival="pred:learned",
         why="Level picked as B1's strongest for J (reflex - pred, learned model).",
     ),
@@ -42,7 +42,7 @@ PRESETS = {  # fixed before viewing any episode (see the plan); the last panel i
         why="Same level as video A; with 20% wrong physics it ranks 4th of 12 for J in B1.",
     ),
     "c": dict(
-        level="catapult", title="catapult, learned world model",
+        level="catapult", title="catapult, learned world model (retrained locally)",
         panels=("realtime", "reflex:learned"), hero="realtime", rival="reflex:learned",
         why="Level picked as B1's worst for the reflex against RTC.",
     ),
@@ -111,7 +111,8 @@ def demo(
     for spec, fn in fns.items():  # pass 2: render the picked seed
         info, video = fn(jax.random.key(seed))
         assert _outcome(info) == outcome[spec, seed], f"{spec}: the rerun of seed {seed} differs from pass 1"
-        panels.append(_panel(np.array(video), _name(spec), *outcome[spec, seed], font)[:end])
+        panel = _panel(np.array(video), _name(spec), *outcome[spec, seed], font)
+        panels.append(panel[np.minimum(np.arange(end), len(panel) - 1)])  # holds the last frame even after a timeout
     frames = np.concatenate(panels, axis=2)
     t = b1_table()
     pred = p["panels"][-1].partition(":")[2]
@@ -210,7 +211,7 @@ def _caption(frame, text, font):
 def _footer(lines, width, size=20):
     """Dark strip under the panels: the lines wrapped to `width`, height a multiple of 16 for the video encoder."""
     font = ImageFont.load_default(size=size)
-    lines = [w for line in lines for w in textwrap.wrap(line, width=int(width / (0.6 * size)))]
+    lines = [w for line in lines for w in textwrap.wrap(line, width=int(width / (0.5 * size)))]
     height = -(-(len(lines) * (size + 6) + 16) // 16) * 16
     img = Image.new("RGB", (width, height), (24, 24, 24))
     draw = ImageDraw.Draw(img)
