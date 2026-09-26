@@ -185,10 +185,6 @@ def run(
     out_dir: str = OUT,
 ):
     """Spec section 3: raw arrays per level to out_dir/raw/<level>.npz (a finished level is skipped), then summarize."""
-    env, env_params, levels, obs_dim, action_dim = probe.setup(level_paths)
-    base = env._env  # raw Kinetix env: no auto-reset, as the B1 predictors
-    phys = tuple(phys)
-    names = np.array(["oracle", *(f"phys{p}" for p in phys), "learned"])
     raw_dir = pathlib.Path(out_dir) / "raw"
     raw_dir.mkdir(parents=True, exist_ok=True)
     config = {  # saved with every level: a resumed run must not mix files of other settings
@@ -196,6 +192,17 @@ def run(
         "num_chunks": num_chunks, "num_flow_steps": num_flow_steps, "phys": list(phys),
         "world_model_dir": world_model_dir,
     }
+    for level_path in level_paths:  # all files before any level is computed under this config
+        f = raw_dir / f"{predictors.level_name(level_path)}.npz"
+        if f.exists():
+            with np.load(f) as z:
+                old = stored_config(z)
+            if old != config:
+                raise ValueError(f"{f} was made with {old}, this run has {config}: use another --out-dir")
+    env, env_params, levels, obs_dim, action_dim = probe.setup(level_paths)
+    base = env._env  # raw Kinetix env: no auto-reset, as the B1 predictors
+    phys = tuple(phys)
+    names = np.array(["oracle", *(f"phys{p}" for p in phys), "learned"])
 
     @jax.jit
     def level_diag(state_dict, level, key, wm):
@@ -221,10 +228,6 @@ def run(
         f = raw_dir / f"{name}.npz"
         level_seed = seed + probe.LEVELS.index(level_path)  # position in the full list: a subset keeps its seeds
         if f.exists():
-            with np.load(f) as z:
-                old = stored_config(z)
-            if old != config:
-                raise ValueError(f"{f} was made with {old}, this run has {config}: use another --out-dir")
             print(f"{level_path}: {f} exists, skipped", flush=True)
             continue
         with (pathlib.Path(world_model_dir) / f"{name}.pkl").open("rb") as fh:
@@ -382,8 +385,8 @@ def summarize(out_dir: str = OUT):
     """Tables, thresholds and figure from out_dir/raw/*.npz (spec sections 4-5)."""
     out = pathlib.Path(out_dir)
     raws = {f.stem: dict(np.load(f)) for f in sorted((out / "raw").glob("*.npz"))}
-    configs = {json.dumps(c, sort_keys=True) for r in raws.values() if (c := stored_config(r)) is not None}
-    assert len(configs) <= 1, f"raw files of different runs in {out / 'raw'}: {configs}"
+    configs = {json.dumps(stored_config(r), sort_keys=True) for r in raws.values()}  # no config ("null") counts too
+    assert len(configs) == 1, f"raw files of different runs in {out / 'raw'}: {configs}"
     t = pd.concat([level_table(r, lv) for lv, r in raws.items()], ignore_index=True)
     cv, nr, pooled = curves(t), near(t), bins(raws, t)
     edges = [*pooled["e_lo"], pooled["e_hi"].iloc[-1]]  # every predictor on the pooled bins (spec measure 9)
