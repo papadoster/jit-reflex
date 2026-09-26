@@ -63,6 +63,20 @@ def test_lock_detects_a_changed_input(tmp_path, monkeypatch):
         b2b5.lock(check=True, path=str(lock))
 
 
+def test_lock_refuses_to_rerecord_a_changed_created_file(tmp_path, monkeypatch):
+    monkeypatch.setattr(b2b5, "inputs", lambda: [])
+    lock = str(tmp_path / "lock.json")
+    b2b5.lock(write=True, path=lock)
+    (tmp_path / "x.pkl").write_bytes(b"w")
+    b2b5.lock(add=[str(tmp_path)], path=lock)
+    b2b5.lock(add=[str(tmp_path)], path=lock)  # the same bytes: a no-op
+    (tmp_path / "x.pkl").write_bytes(b"v")
+    with pytest.raises(SystemExit):
+        b2b5.lock(add=[str(tmp_path)], path=lock)
+    with pytest.raises(SystemExit):
+        b2b5.lock(check=True, path=lock)
+
+
 def _lat(pred=1.15, t3=1.55, m3=1.30, reflex=1.85):
     rows = [("realtime", 1, s, 1.0) for s in (1, 4, 7)] + [("naive", 1, s, 0.63) for s in (1, 4, 7)]
     rows += [("realtime10", 1, s, 2.0) for s in (1, 4, 7)]

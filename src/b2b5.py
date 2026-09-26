@@ -42,8 +42,8 @@ BLOCKS = [  # (worker, methods, predictors, cells): spec §4
     ("A", CHEAP, ("-",), ALL16),
     ("A", ("rtc_reflex",), ("learned", "oracle"), [*D1, D3]),
     ("B", PRED, ("learned",), R9),
-    ("B", ("late1",), ("learned",), [(4, 4), (3, 3), (3, 4), (3, 5)]),
-    ("B", ("late2",), ("learned",), [(4, 4)]),
+    ("B", ("late1",), ("learned",), [D4, (3, 3), (3, 4), (3, 5)]),
+    ("B", ("late2",), ("learned",), [D4]),
     ("B", PRED, ("oracle",), [D3]),
     ("B", ("pred", "reflex"), ("phys0.2",), [D3]),
 ]
@@ -111,13 +111,16 @@ def lock(write: bool = False, check: bool = False, add: Sequence[str] = (), path
     lk = json.loads(p.read_text())
     if check:
         bad = [f for f, h in {**lk["inputs"], **lk["created"]}.items() if not pathlib.Path(f).exists() or _sha(f) != h]
-        bad += ["grid"] * (lk["grid"] != grid_sha()) + ["input list"] * (sorted(lk["inputs"]) != inputs())
+        bad += ["grid"] * (lk["grid"] != grid_sha()) + ["input list"] * (sorted(lk["inputs"]) != sorted(inputs()))
         if bad:
             raise SystemExit(f"lock mismatch: {bad}")
         print("lock OK")
     if add:
-        for d in add:
-            lk["created"].update({f: _sha(f) for f in sorted(glob.glob(f"{d}/*.pkl"))})
+        new = {f: _sha(f) for d in add for f in sorted(glob.glob(f"{d}/*.pkl"))}
+        bad = [f for f, h in new.items() if lk["created"].get(f, h) != h]
+        if bad:
+            raise SystemExit(f"created file changed since it was recorded: {bad}")
+        lk["created"].update(new)
         p.write_text(json.dumps(lk, indent=1))
 
 
