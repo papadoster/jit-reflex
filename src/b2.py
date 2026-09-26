@@ -245,3 +245,138 @@ def run(
         os.replace(part, f)  # a killed run leaves no half-written level that a resume would skip
         print(f"{level_path}: done in {time.time() - start:.0f} s", flush=True)
     summarize(out_dir)
+
+
+def level_table(res: dict, level: str) -> pd.DataFrame:
+    """One row per predictor: SUMS pooled over the valid pairs with |e| <= E_MAX at k = 1..7 and their number n."""
+    rows = []
+    for p, name in enumerate(res["predictors"]):
+        m = res["valid"] & (res["e"][:, p] <= E_MAX)  # [N, M, K]
+        rows.append({"level": level, "predictor": str(name), "n": int(m.sum())}
+                    | {x: float(res[x][:, p][m].sum()) for x in SUMS})
+    return pd.DataFrame(rows)
+
+
+def ratios(t: pd.DataFrame) -> pd.DataFrame:
+    """Per level, predictor and row (spec section 5): res per pair, R = (pred - row) / (pred - reflex), the exact
+    reflex's gain over pred (pred - reflex) / pred, and whether the row beats pred."""
+    gain = (t["pred"] - t["reflex"]) / t["pred"]
+    return pd.concat([
+        t[["level", "predictor"]].assign(
+            row=row, res=t[row] / t["n"], R=(t["pred"] - t[row]) / (t["pred"] - t["reflex"]), gain=gain,
+            beats_pred=t[row] <= t["pred"],
+        ) for row in ROWS[1:]
+    ], ignore_index=True)
+
+
+def rule(r: pd.DataFrame, predictor: str = "learned") -> pd.DataFrame:
+    """Spec section 6 per row: the median R over levels with gain >= MIN_GAIN (the others listed in left_out),
+    levels where the row beats pred, pass at PASS_R and strict at STRICT_R (both need MIN_LEVELS), depth and FE."""
+    out = []
+    for row, g in r[r["predictor"] == predictor].groupby("row", sort=False):
+        kept = g[g["gain"] >= MIN_GAIN]
+        med, beats = float(kept["R"].median()), int(g["beats_pred"].sum())
+        out.append({"row": row, "R": med, "levels_in_median": len(kept), "beats_pred": beats,
+                    "left_out": " ".join(g.loc[~(g["gain"] >= MIN_GAIN), "level"]),  # NaN gain (no pairs) too
+                    "pass": bool(med >= PASS_R and beats >= MIN_LEVELS),
+                    "strict": bool(med >= STRICT_R and beats >= MIN_LEVELS), "depth": depth(row), "fe": fe(row)})
+    return pd.DataFrame(out).set_index("row")
+
+
+def select(rt: pd.DataFrame) -> dict:
+    """Spec section 6: the candidates for the B2+B5 GPU run (the reference rows go anyway). Order: depth, then FE,
+    then the larger R (W_k and M_k tie on both)."""
+    c = rt.loc[list(CANDIDATES)].sort_values(["depth", "fe", "R"], ascending=[True, True, False])
+    passed = c[c["pass"]]
+    if passed.empty:
+        return {"passed": [], "gpu": [str(c["R"].idxmax())], "fallback": True}
+    gpu = [passed.index[0]]  # 1: the shallowest pass
+    t = passed[passed.index.str.startswith("T")]
+    if len(t):
+        gpu.append(t["R"].idxmax())  # 2: the best passing T_k
+    strict = c[c["strict"]]
+    if len(strict):
+        gpu.append(strict.index[0])  # 3: the shallowest at R >= 0.9
+    return {"passed": [str(x) for x in passed.index], "gpu": [str(x) for x in dict.fromkeys(gpu)], "fallback": False}
+
+
+def _rho(res, nom) -> float:
+    return float(1 - res / nom) if nom > 0 else float("nan")
+
+
+def bins(raws: dict, edges, p: int) -> pd.DataFrame:
+    """Spec section 5 for predictor index p: res per pair of every row in |e| bins (median over levels with
+    >= diag.MIN_BIN pairs in the bin) and its rho_clip against its own nominal. The last bin is open."""
+    out = []
+    for b in range(len(edges) - 1):
+        lo, hi = edges[b], edges[b + 1]
+        per = []
+        for res in raws.values():
+            e = res["e"][:, p]
+            m = res["valid"] & (e >= lo) & ((e < hi) if b < len(edges) - 2 else (e <= hi))
+            if m.sum() >= diag.MIN_BIN:
+                per.append({row: (res[row][:, p][m].mean(),
+                                  _rho(res[row][:, p][m].sum(), res[NOM[row]][:, p][m].sum()) if row in NOM else np.nan)
+                            for row in ROWS})
+        for row in ROWS:
+            out.append({"bin": b, "e_lo": lo, "e_hi": hi, "row": row, "levels": len(per),
+                        "res": float(np.median([x[row][0] for x in per])) if per else np.nan,
+                        "rho_clip": float(np.median([x[row][1] for x in per])) if per else np.nan})
+    return pd.DataFrame(out)
+
+
+def figure(bn: pd.DataFrame, path: pathlib.Path):
+    """Residual against the fresh call per |e| bin, one panel per predictor; pred dashed, the exact reflex bold."""
+    preds = list(dict.fromkeys(bn["predictor"]))
+    fig, axes = plt.subplots(1, len(preds), figsize=(6 * len(preds), 4.5), sharey=True, squeeze=False)
+    for ax, pred in zip(axes[0], preds):
+        d = bn[bn["predictor"] == pred]
+        for row, g in d.groupby("row", sort=False):
+            ax.plot(g["bin"], g["res"], "k--" if row == "pred" else ("k-" if row == "reflex" else "-"),
+                    lw=2 if row in ("pred", "reflex") else 1, label=row)
+        g = d[d["row"] == "pred"]
+        ax.set_xticks(g["bin"], [f"{x:.2g}" for x in g["e_lo"]], rotation=45)
+        ax.set(title=pred, xlabel="|e| bin, lower edge", yscale="log")
+    axes[0][0].set_ylabel("residual vs fresh call, per pair")
+    axes[0][-1].legend(ncol=2, fontsize=7)
+    fig.tight_layout()
+    fig.savefig(path, dpi=120)
+    plt.close(fig)
+
+
+def summarize(out_dir: str = OUT):
+    """Tables, the rule, the selection and the figure from out_dir/raw/*.npz (spec sections 5-6)."""
+    out = pathlib.Path(out_dir)
+    raws = {f.stem: dict(np.load(f)) for f in sorted((out / "raw").glob("*.npz"))}
+    configs = {json.dumps(diag.stored_config(r), sort_keys=True) for r in raws.values()}  # no config ("null") counts
+    assert len(configs) == 1, f"raw files of different runs in {out / 'raw'}: {configs}"
+    names = [str(x) for x in next(iter(raws.values()))["predictors"]]
+    t = pd.concat([level_table(r, lv) for lv, r in raws.items()], ignore_index=True)
+    r = ratios(t)
+    rt = pd.concat({p: rule(r, p) for p in names}, names=["predictor"])
+    sel = select(rule(r, "learned"))
+    d = pd.read_csv(DIAG_BINS)
+    edges = [*d.loc[d["predictor"] == "all", "e_lo"], np.inf]
+    bn = pd.concat([bins(raws, edges, p).assign(predictor=n) for p, n in enumerate(names)], ignore_index=True)
+    rho = []  # sanity (spec section 8): the oracle's exact reflex at k = 1..4, as in E1b and the diagnostic
+    for res in raws.values():
+        m = res["valid"][..., :4]
+        rho.append(_rho(res["reflex"][:, 0][..., :4][m].sum(), res["pred"][:, 0][..., :4][m].sum()))
+    check = {"oracle_reflex_rho_clip_k1_4": float(np.median(rho)), "diag": 0.578}
+    check["ok"] = abs(check["oracle_reflex_rho_clip_k1_4"] - check["diag"]) <= 0.1
+    t.to_csv(out / "summary.csv", index=False)
+    r.to_csv(out / "ratios.csv", index=False)
+    rt.to_csv(out / "rule.csv")
+    bn.to_csv(out / "bins.csv", index=False)
+    (out / "selection.json").write_text(json.dumps(sel, indent=2))
+    (out / "check.json").write_text(json.dumps(check, indent=2))
+    figure(bn, out / "b2.png")
+    print(rt.round(3).to_string())
+    print(json.dumps(sel))
+    print(json.dumps(check))
+    if not check["ok"]:
+        print("!!! sanity check failed: look for a bug before reading anything")
+
+
+if __name__ == "__main__":
+    tyro.extras.subcommand_cli_from_dict({"run": run, "summarize": summarize})

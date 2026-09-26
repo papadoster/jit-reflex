@@ -1,8 +1,12 @@
+import json
+
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pandas as pd
 
 import b2
+import diag
 import predictors
 import probe
 import reflex
@@ -124,3 +128,80 @@ def test_probe_state_shared_and_full_depth(monkeypatch):
     for c in b2.CANDIDATES:  # full depth = the exact reflex; W5 starts from warm[0] = roll(z, -k) = zk
         np.testing.assert_allclose(out[f"nom_{c}"], out["pred"], rtol=1e-4, atol=1e-6, err_msg=c)
         np.testing.assert_allclose(out[c], out["reflex"], rtol=1e-4, atol=1e-6, err_msg=c)
+
+
+def _ratios(rows: dict) -> pd.DataFrame:
+    """A ratios() table of 12 levels for 'learned': rows = {row: [(R, gain, beats_pred), ...12]}."""
+    out = []
+    for row, vals in rows.items():
+        for i, (R, gain, beats) in enumerate(vals):
+            out.append({"level": f"l{i}", "predictor": "learned", "row": row, "res": 0.0, "R": R, "gain": gain,
+                        "beats_pred": beats})
+    return pd.DataFrame(out)
+
+
+def _rows(**over):
+    base = {c: [(0.5, 0.5, True)] * 12 for c in b2.CANDIDATES}  # everything fails at R = 0.5
+    base |= {"reflex": [(1.0, 0.5, True)] * 12, "chunk_j": [(0.5, 0.5, True)] * 12, "shared": [(0.5, 0.5, True)] * 12}
+    base["T1"] = [(0.85, 0.5, True)] * 12  # passes, not strict; depth 6, FE 90
+    base["T2"] = [(0.9, 0.5, True)] * 12  # strict; depth 7, FE 150
+    base["W3"] = [(0.99, 0.5, True)] * 12  # strict; depth 6, FE 200
+    # W1: 6 levels with R 0.95, 6 with a tiny gain and R -1. The guard leaves the 6 out: median 0.95, not -0.025
+    base["W1"] = [(0.95, 0.5, True)] * 6 + [(-1.0, 0.05, True)] * 6
+    base["M1"] = [(0.97, 0.5, True)] * 9 + [(0.97, 0.5, False)] * 3  # R 0.97 but beats pred on 9 < 10 levels
+    return base | over
+
+
+def test_rule_guard_and_selection():
+    rt = b2.rule(_ratios(_rows()))
+    assert rt.loc["W1", "levels_in_median"] == 6 and rt.loc["W1", "R"] == 0.95
+    assert rt.loc["W1", "left_out"] == " ".join(f"l{i}" for i in range(6, 12))
+    assert not rt.loc["M1", "pass"] and rt.loc["T1", "pass"] and not rt.loc["T1", "strict"]
+    assert rt.loc["T1", "depth"] == 6 and rt.loc["W3", "fe"] == 200
+    # 1: the shallowest pass is W1 (depth 2); 2: the best passing T_k is T2; 3: the shallowest strict is W1 again
+    assert b2.select(rt) == {"passed": ["W1", "T1", "W3", "T2"], "gpu": ["W1", "T2"], "fallback": False}
+    # a full tie of depth and FE (W1 and M1) goes to the larger R
+    rt = b2.rule(_ratios(_rows(M1=[(0.97, 0.5, True)] * 12)))
+    assert b2.select(rt)["gpu"] == ["M1", "T2"]
+    # the shallowest pass is not strict: point 3 adds the shallowest strict one (W3: depth 6 < T2's 7)
+    rt = b2.rule(_ratios(_rows(W1=[(0.85, 0.5, True)] * 12)))
+    assert b2.select(rt)["gpu"] == ["W1", "T2", "W3"]
+    # nothing passes: the best R goes as an exploratory row
+    rt = b2.rule(_ratios(_rows(T1=[(0.6, 0.5, True)] * 12, T2=[(0.7, 0.5, True)] * 12, W3=[(0.5, 0.5, True)] * 12,
+                               W1=[(0.5, 0.5, True)] * 12)))
+    assert b2.select(rt) == {"passed": [], "gpu": ["M1"], "fallback": True}
+
+
+def _raw(N=40, M=2, K=7):
+    """Synthetic probe_state output over N states, alike for both predictors. Pairs with |e| <= E_MAX: pred 1,
+    reflex 0.5, every candidate 0.55 (R = 0.9). Pairs above it: candidates 5 (R would be negative if they counted)."""
+    r = {x: np.ones((N, 2, M, K)) for x in b2.SUMS}
+    r["reflex"] *= 0.5
+    for c in b2.CANDIDATES:
+        r[c] = np.full((N, 2, M, K), 0.55)
+        r[c][N // 2:] = 5.0
+    e = np.random.default_rng(0).uniform(0.1, 2.0, (N, 2, M, K))
+    e[N // 2:] += 10.0
+    return r | {"e": e, "valid": np.ones((N, M, K), bool), "predictors": np.array(["oracle", "learned"])}
+
+
+def test_summarize_cuts_at_e_max_and_writes_everything(tmp_path, monkeypatch):
+    raws = {"a": _raw(), "b": _raw()}
+    t = pd.concat([b2.level_table(r, lv) for lv, r in raws.items()], ignore_index=True)
+    assert (t["n"] == 20 * 2 * 7).all()  # only the half with |e| <= E_MAX
+    r = b2.ratios(t)
+    np.testing.assert_allclose(r.loc[r["row"] == "T1", "R"], 0.9)
+    np.testing.assert_allclose(r.loc[r["row"] == "T1", "res"], 0.55)  # per pair
+    monkeypatch.setattr(diag, "MIN_BIN", 1)
+    (tmp_path / "raw").mkdir()
+    for lv, x in raws.items():
+        np.savez_compressed(tmp_path / "raw" / f"{lv}.npz", **x)
+    b2.summarize(str(tmp_path))
+    for f in ("summary.csv", "ratios.csv", "rule.csv", "selection.json", "bins.csv", "check.json", "b2.png"):
+        assert (tmp_path / f).exists(), f
+    assert json.loads((tmp_path / "check.json").read_text())["oracle_reflex_rho_clip_k1_4"] == 0.5
+    assert json.loads((tmp_path / "selection.json").read_text())["fallback"]  # 2 levels < MIN_LEVELS
+    bn = pd.read_csv(tmp_path / "bins.csv")
+    assert set(bn["predictor"]) == {"oracle", "learned"} and set(bn["row"]) == set(b2.ROWS)
+    top = bn[(bn["bin"] == bn["bin"].max()) & (bn["row"] == "T1")]
+    np.testing.assert_allclose(top["res"], 5.0)  # the open last bin holds the |e| > 10 pairs
