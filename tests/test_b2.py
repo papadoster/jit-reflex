@@ -197,7 +197,8 @@ def test_summarize_cuts_at_e_max_and_writes_everything(tmp_path, monkeypatch):
     for lv, x in raws.items():
         np.savez_compressed(tmp_path / "raw" / f"{lv}.npz", **x)
     b2.summarize(str(tmp_path))
-    for f in ("summary.csv", "ratios.csv", "rule.csv", "selection.json", "bins.csv", "check.json", "b2.png"):
+    for f in ("summary.csv", "ratios.csv", "rule.csv", "selection.json", "bins.csv", "check.json", "b2.png",
+              "rule_trimmed.csv", "selection_trimmed.json"):
         assert (tmp_path / f).exists(), f
     assert json.loads((tmp_path / "check.json").read_text())["oracle_reflex_rho_clip_k1_4"] == 0.5
     assert json.loads((tmp_path / "selection.json").read_text())["fallback"]  # 2 levels < MIN_LEVELS
@@ -216,3 +217,13 @@ def test_a_level_without_pairs_does_not_beat_pred():
     assert r.loc[r["row"] == "T1", "beats_pred"].tolist() == [True, False]
     rt = b2.rule(r)
     assert rt.loc["T1", "left_out"] == "b" and rt.loc["T1", "levels_in_median"] == 1
+
+
+def test_trim_drops_the_states_with_the_largest_learned_pred():
+    r = _raw()  # N = 40: ceil(0.05 * 40) = 2 states go
+    r["pred"][:, 1][[3, 7]] = 9.0  # learned; states 3 and 7 carry the tail (their |e| <= E_MAX: N // 2 = 20)
+    r["pred"][:, 0][[5]] = 99.0  # the oracle's tail must not decide
+    out = b2.trim(r)
+    assert out["valid"].shape[0] == 38 and all(out[x].shape[0] == 38 for x in (*b2.SUMS, "e"))
+    assert (out["pred"][:, 1] < 9.0).all() and (out["pred"][:, 0] == 99.0).any()
+    assert list(out["predictors"]) == ["oracle", "learned"]

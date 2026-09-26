@@ -314,6 +314,16 @@ def by_k(raws: dict) -> pd.DataFrame:
     return res.join(R).fillna({"levels_in_median": 0}).astype({"levels_in_median": int}).reset_index()
 
 
+def trim(res: dict, frac: float = 0.05) -> dict:
+    """Descriptive (spec changelog): res without the frac of states with the largest learned pred over the pairs
+    with |e| <= E_MAX, the ones the rule pools. The heavy tails of pred sit in a few states."""
+    p = [str(x) for x in res["predictors"]].index("learned")
+    m = res["valid"] & (res["e"][:, p] <= E_MAX)
+    per_state = np.where(m, res["pred"][:, p], 0).sum((1, 2))
+    keep = np.sort(np.argsort(per_state, kind="stable")[: len(per_state) - int(np.ceil(frac * len(per_state)))])
+    return {x: res[x][keep] if x in (*SUMS, "e", "valid") else res[x] for x in res}
+
+
 def _rho(res, nom) -> float:
     return float(1 - res / nom) if nom > 0 else float("nan")
 
@@ -378,6 +388,8 @@ def summarize(out_dir: str = OUT):
     r = ratios(t)
     rt = pd.concat({p: rule(r, p) for p in names}, names=["predictor"])
     sel = select(rule(r, "learned")) | {"levels": len(raws)}
+    rt_trim = rule(ratios(pd.concat([level_table(trim(x), lv) for lv, x in raws.items()], ignore_index=True)))
+    sel_trim = select(rt_trim)  # descriptive: does the pick survive without the top-5% pred states?
     d = pd.read_csv(DIAG_BINS)
     edges = [*d.loc[d["predictor"] == "all", "e_lo"], np.inf]
     bn = pd.concat([bins(raws, edges, p).assign(predictor=n) for p, n in enumerate(names)], ignore_index=True)
@@ -392,11 +404,14 @@ def summarize(out_dir: str = OUT):
     rt.to_csv(out / "rule.csv")
     bn.to_csv(out / "bins.csv", index=False)
     by_k(raws).to_csv(out / "by_k.csv", index=False)
+    rt_trim.to_csv(out / "rule_trimmed.csv")
+    (out / "selection_trimmed.json").write_text(json.dumps(sel_trim, indent=2))
     (out / "selection.json").write_text(json.dumps(sel, indent=2))
     (out / "check.json").write_text(json.dumps(check, indent=2))
     figure(bn, out / "b2.png")
     print(rt.round(3).to_string())
     print(json.dumps(sel))
+    print("without the top-5% pred states:", json.dumps(sel_trim))
     if len(raws) != len(probe.LEVELS):
         print(f"!!! rule applied to {len(raws)} levels, not {len(probe.LEVELS)}")
     print(json.dumps(check))
