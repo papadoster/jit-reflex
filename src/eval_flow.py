@@ -16,9 +16,11 @@ import kinetix.environment.env as kenv
 import kinetix.environment.env_state as kenv_state
 import kinetix.environment.wrappers as wrappers
 import kinetix.render.renderer_pixels as renderer_pixels
+import numpy as np
 import pandas as pd
 import tyro
 
+import a2c2
 import model as _model
 import predictors as _predictors
 import reflex
@@ -56,6 +58,11 @@ class ReflexMethodConfig:
 
 
 @dataclasses.dataclass(frozen=True)
+class HeadMethodConfig:
+    head: str = "a2c2"  # B2+B5 §9: naive chunk + a per-step residual head (a2c2.Head) from <heads_root>/<head>/
+
+
+@dataclasses.dataclass(frozen=True)
 class EvalConfig:
     step: int = -1
     weak_step: int | None = None
@@ -64,7 +71,9 @@ class EvalConfig:
 
     inference_delay: int = 0
     execute_horizon: int = 1
-    method: NaiveMethodConfig | RealtimeMethodConfig | BIDMethodConfig | ReflexMethodConfig = NaiveMethodConfig()
+    method: NaiveMethodConfig | RealtimeMethodConfig | BIDMethodConfig | ReflexMethodConfig | HeadMethodConfig = (
+        NaiveMethodConfig()
+    )
     kick_prob: float = 0.0  # E2 perturbations: per-step probability of a velocity kick to all dynamic bodies
     kick_std: float = 0.0
 
@@ -81,6 +90,9 @@ def eval(
     static_env_params: kenv_state.EnvParams,
     weak_policy: _model.FlowPolicy | None = None,
     world_model=None,
+    head=None,
+    e_std=None,
+    e_edges=None,
 ):
     base_env = env
     if config.kick_prob > 0:
@@ -96,6 +108,9 @@ def eval(
     assert config.execute_horizon >= config.inference_delay, f"{config.execute_horizon=} {config.inference_delay=}"
     d, s = config.inference_delay, config.execute_horizon
     assert s + d <= policy.action_chunk_size, f"{s=} + {d=} > H: padded zero actions would be executed"
+    H = policy.action_chunk_size
+    # B2+B5: chunk index of each executed step (the first d come from the previous chunk), for the head and |e|
+    ks = jnp.concatenate([jnp.arange(d) + s, jnp.arange(d, s)]) if (head is not None or e_std is not None) else None
     phys_key = jax.random.fold_in(rng, 1)  # B1: the same parameter-error signs for every method (paired comparison)
 
     def predict(key, raw_state, obs, actions):
@@ -120,15 +135,23 @@ def eval(
 
     def execute_chunk(carry, _):
         def step(carry, xs):
-            rng, obs, env_state = carry
-            action, pkg_t = xs
+            rng, obs, env_state, alive, hist = carry
+            action, pkg_t, k = xs
             if pkg_t is not None and "gain" in pkg_t:
                 action = reflex.correct(action, pkg_t["gain"], pkg_t["ref"], obs, config.method.max_correction)
+            if head is not None:  # B2+B5 §9: the residual on the chunk's action at chunk index k
+                action = head.apply_residual(obs, action, jnp.broadcast_to(a2c2.time_feature(k, H), (obs.shape[0], 2)))
+            if hist is not None:  # B2+B5 §8: |o - o^| of this step in the diagnostic's units, first episode only
+                e = _predictors.normalized_error(pkg_t["ref"], obs, e_std)
+                b = jnp.searchsorted(e_edges, e, side="right")
+                hist = hist.at[k].add(jnp.zeros(hist.shape[1], hist.dtype).at[b].add(alive.astype(hist.dtype)))
             rng, key = jax.random.split(rng)
             next_obs, next_env_state, reward, done, info = env.step(key, env_state, action, env_params)
-            return (rng, next_obs, next_env_state), (done, env_state, info)
+            if alive is not None:
+                alive = alive & ~done
+            return (rng, next_obs, next_env_state, alive, hist), (done, env_state, info)
 
-        rng, obs, env_state, action_chunk, n, pkg = carry
+        rng, obs, env_state, action_chunk, n, pkg, alive, hist = carry
         rng, key = jax.random.split(rng)
         if isinstance(config.method, NaiveMethodConfig):
             next_action_chunk = policy.action(key, obs, config.num_flow_steps)
@@ -195,6 +218,8 @@ def eval(
                 j_from=d + config.method.j_delay if config.method.j_delay else 0,
             )
             new_pkg = {"nom": nom, "ref": ref} | ({} if gain is None else {"gain": gain})
+        elif isinstance(config.method, HeadMethodConfig):  # the base chunk is naive's (same key, same chunk)
+            next_action_chunk = policy.action(key, obs, config.num_flow_steps)
         else:
             raise ValueError(f"Unknown method: {config.method}")
 
@@ -214,10 +239,12 @@ def eval(
             [next_action_chunk[:, s:], jnp.zeros((obs.shape[0], s, policy.action_dim))], axis=1
         )
         next_n = jnp.concatenate([n[s:], jnp.zeros(s, dtype=jnp.int32)])
-        (rng, next_obs, next_env_state), (dones, env_states, infos) = jax.lax.scan(
-            step, (rng, obs, env_state), (action_chunk_to_execute.transpose(1, 0, 2), xs_pkg)
+        (rng, next_obs, next_env_state, alive, hist), (dones, env_states, infos) = jax.lax.scan(
+            step, (rng, obs, env_state, alive, hist), (action_chunk_to_execute.transpose(1, 0, 2), xs_pkg, ks)
         )
-        return (rng, next_obs, next_env_state, next_action_chunk, next_n, next_pkg), (dones, env_states, infos)
+        return (rng, next_obs, next_env_state, next_action_chunk, next_n, next_pkg, alive, hist), (
+            dones, env_states, infos,
+        )
 
     rng, key = jax.random.split(rng)
     obs, env_state = env.reset_to_level(key, level, env_params)
@@ -229,10 +256,12 @@ def eval(
         pkg = {"nom": action_chunk, "ref": jnp.repeat(obs[:, None], action_chunk.shape[1], axis=1)}
         if config.method.feedback:
             pkg["gain"] = jnp.zeros((*action_chunk.shape, obs.shape[-1]))
+    alive = jnp.ones(config.num_evals, bool) if e_std is not None else None
+    hist = jnp.zeros((H, len(e_edges) + 1), jnp.float32) if e_std is not None else None
     scan_length = math.ceil(env_params.max_timesteps / config.execute_horizon)
-    _, (dones, env_states, infos) = jax.lax.scan(
+    (*_, hist), (dones, env_states, infos) = jax.lax.scan(
         execute_chunk,
-        (rng, obs, env_state, action_chunk, n, pkg),
+        (rng, obs, env_state, action_chunk, n, pkg, alive, hist),
         None,
         length=scan_length,
     )
@@ -250,6 +279,8 @@ def eval(
     for key in ["match"]:
         if key in infos:
             return_info[key] = jnp.mean(infos[key])
+    if hist is not None:
+        return_info["e_hist"] = hist
     video = render_video(jax.tree.map(lambda x: x[:, 0], env_states))
     return return_info, video
 
@@ -269,9 +300,19 @@ METHODS = {
     "m3": ReflexMethodConfig(cand="M3"),
     **{f"late{k}": ReflexMethodConfig(cand="T3", j_delay=k) for k in range(1, 5)},
     "realtime10": RealtimeMethodConfig(),  # RTC with 10 flow steps, see FLOW_STEPS
+    "a2c2": HeadMethodConfig("a2c2"),
+    "a2c2_distill": HeadMethodConfig("a2c2_distill"),
 }
 
 FLOW_STEPS = {"realtime10": 10}  # B2+B5: methods whose chunk (and first chunk) use more flow steps
+HIST = ("pred", "reflex", "t3", "m3", *(f"late{k}" for k in range(1, 5)))  # B2+B5 §8: |e| histograms, learned only
+KEYS = ["seed", "delay", "execute_horizon", "method", "predictor"]  # one config of a run (resume, hist.csv)
+
+
+def e_edges(bins_csv: str) -> np.ndarray:
+    """Inner edges of the diagnostic's 10 |e| bins (predictor "all"): searchsorted(side="right") gives the bin."""
+    b = pd.read_csv(bins_csv).query("predictor == 'all'").sort_values("bin")
+    return b["e_lo"].to_numpy(np.float32)[1:]
 
 
 def parse_cells(cells: Sequence[str]) -> list[tuple[int, int]]:
@@ -284,9 +325,8 @@ def load_done(out_dir: pathlib.Path, n_levels: int) -> tuple[pd.DataFrame, set]:
     if not (out_dir / "results.csv").exists():
         return pd.DataFrame(), set()
     old = pd.read_csv(out_dir / "results.csv")
-    keys = ["seed", "delay", "execute_horizon", "method", "predictor"]
-    old = old[old.groupby(keys)["level"].transform("size") == n_levels]
-    return old, set(old[keys].itertuples(index=False, name=None))
+    old = old[old.groupby(KEYS)["level"].transform("size") == n_levels]
+    return old, set(old[KEYS].itertuples(index=False, name=None))
 
 
 def horizons_for(delay: int, chunk_size: int, horizons: Sequence[int], minmax: bool) -> list[int]:
@@ -336,6 +376,9 @@ def main(
     predictors: Sequence[str] = ("oracle",),  # B1: predictors for the reflex methods, see parse_predictor
     world_model_dir: str = _predictors.WM_DIR,
     cells: Sequence[str] = (),  # B2+B5: explicit "d,s" cells instead of delays x horizons
+    heads_root: str = "results/b2b5",  # B2+B5 §9: <heads_root>/<a2c2|a2c2_distill>/<level>.pkl
+    e_std: str | None = None,  # B2+B5 §8: results/b2b5/e_std.npz switches the |e| histograms on (HIST, learned)
+    e_bins: str = "results/b1/diag/bins.csv",
 ):
     static_env_params = kenv_state.StaticEnvParams(**train_expert.LARGE_ENV_PARAMS, frame_skip=train_expert.FRAME_SKIP)
     env_params = kenv_state.EnvParams()
@@ -369,6 +412,15 @@ def main(
             with (pathlib.Path(world_model_dir) / f"{_predictors.level_name(level_path)}.pkl").open("rb") as f:
                 wms.append(pickle.load(f))
         world_models = jax.device_put(jax.tree.map(lambda *x: jnp.array(x), *wms))
+    heads = {
+        m: jax.device_put(a2c2.load_heads(heads_root, METHODS[m].head, level_paths))
+        for m in methods
+        if isinstance(METHODS[m], HeadMethodConfig)
+    }
+    e_stds, edges = None, e_edges(e_bins)
+    if e_std is not None:
+        with np.load(e_std) as z:
+            e_stds = jax.device_put(jnp.stack([jnp.asarray(z[_predictors.level_name(p)]) for p in level_paths]))
 
     obs_dim = jax.eval_shape(env.reset_to_level, jax.random.key(0), jax.tree.map(lambda x: x[0], levels), env_params)[
         0
@@ -381,10 +433,13 @@ def main(
 
     @functools.partial(jax.jit, static_argnums=(0,), in_shardings=sharding, out_shardings=sharding)
     @functools.partial(
-        shard_map.shard_map, mesh=mesh, in_specs=(None, pspec, pspec, pspec, pspec, pspec), out_specs=pspec
+        shard_map.shard_map,
+        mesh=mesh,
+        in_specs=(None, pspec, pspec, pspec, pspec, pspec, pspec, pspec),
+        out_specs=pspec,
     )
-    @functools.partial(jax.vmap, in_axes=(None, 0, 0, 0, 0, 0))
-    def _eval(config: EvalConfig, rng: jax.Array, level: kenv_state.EnvState, state_dict, weak_state_dict, world_model):
+    @functools.partial(jax.vmap, in_axes=(None, 0, 0, 0, 0, 0, 0, 0))
+    def _eval(config, rng, level, state_dict, weak_state_dict, world_model, head_state, e_std):
         policy = _model.FlowPolicy(
             obs_dim=obs_dim,
             action_dim=action_dim,
@@ -400,7 +455,10 @@ def main(
             weak_policy = nnx.merge(graphdef, state)
         else:
             weak_policy = None
-        eval_info, _ = eval(config, env, rng, level, policy, env_params, static_env_params, weak_policy, world_model)
+        head = None if head_state is None else a2c2.make_head(head_state, obs_dim, action_dim)
+        eval_info, _ = eval(
+            config, env, rng, level, policy, env_params, static_env_params, weak_policy, world_model, head, e_std, edges
+        )
         return eval_info
 
     out_dir = pathlib.Path(output_dir)
@@ -409,6 +467,10 @@ def main(
     if (out_dir / "results.csv").exists():
         print(f"resume: {len(done)} configs already done in {out_dir}")
     results = collections.defaultdict(list)  # this run's rows
+    hist_old, hist_rows = pd.DataFrame(), []  # |e| histograms (B2+B5 §8): rows of the done configs, this run's rows
+    if (out_dir / "hist.csv").exists():
+        hist_old = pd.read_csv(out_dir / "hist.csv")
+        hist_old = hist_old[[k in done for k in hist_old[KEYS].itertuples(index=False, name=None)]]
     grid = parse_cells(cells) or [
         (d, s) for d in delays for s in horizons_for(d, config.model.action_chunk_size, horizons, minmax)
     ]
@@ -434,7 +496,20 @@ def main(
                         num_flow_steps=FLOW_STEPS.get(name, config.num_flow_steps),
                     )
                     start = time.time()
-                    out = jax.device_get(_eval(c, rngs, levels, state_dicts, weak_state_dicts, world_models))
+                    hist_on = e_stds is not None and name in HIST and predictor == "learned"
+                    out = jax.device_get(_eval(
+                        c, rngs, levels, state_dicts, weak_state_dicts, world_models, heads.get(name),
+                        e_stds if hist_on else None,
+                    ))
+                    hist = out.pop("e_hist", None)
+                    if hist is not None:
+                        for i, level_path in enumerate(level_paths):
+                            for k, b in zip(*np.nonzero(hist[i])):
+                                hist_rows.append({
+                                    "seed": seed, "delay": inference_delay, "execute_horizon": execute_horizon,
+                                    "method": name, "predictor": predictor, "level": level_path, "k": int(k),
+                                    "bin": int(b), "count": int(hist[i][k, b]),
+                                })
                     for i in range(len(level_paths)):
                         for k, v in out.items():
                             results[k].append(v[i])
@@ -448,7 +523,12 @@ def main(
                         results["kick_std"].append(config.kick_std if config.kick_prob > 0 else 0.0)
                         results["seconds"].append(time.time() - start)
                     # after every config: a crash (or Ctrl-C) keeps the finished ones; written aside and renamed,
-                    # so a kill mid-write never truncates results.csv
+                    # so a kill mid-write never truncates results.csv; hist.csv first, so a config done in results.csv
+                    # always has its |e| rows
+                    if len(hist_old) or hist_rows:
+                        part = out_dir / "hist.csv.part"
+                        pd.concat([hist_old, pd.DataFrame(hist_rows)], ignore_index=True).to_csv(part, index=False)
+                        os.replace(part, out_dir / "hist.csv")
                     part = out_dir / "results.csv.part"
                     pd.concat([old, pd.DataFrame(results)], ignore_index=True).to_csv(part, index=False)
                     os.replace(part, out_dir / "results.csv")
