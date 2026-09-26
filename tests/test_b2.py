@@ -3,7 +3,10 @@ import jax.numpy as jnp
 import numpy as np
 
 import b2
+import predictors
+import probe
 import reflex
+import train_expert
 from test_reflex import small_policy
 
 S = b2.S
@@ -76,3 +79,38 @@ def test_warm_start_starts_from_the_chunks_state():
         np.testing.assert_allclose(a_w, xs[-1][0], atol=1e-6, err_msg=f"W{n}")
     a_w, _ = b2.action_and_jacobian(b2.first_action_fn(policy, "W1", z, xs, S), o)
     assert not np.allclose(a_w, xs[-1][0], atol=1e-4)  # at another obs it moves
+
+
+def _probe(seed: int = 2):
+    """probe_state at grasp_easy's start with the small policy and a world model that holds the observation."""
+    env, params, levels, O, A_ = probe.setup(["worlds/l/grasp_easy.json"])
+    obs, state = env.reset_to_level(jax.random.key(0), jax.tree.map(lambda x: x[0], levels), params)
+    wm = {  # mask 0: this "model" holds the observation
+        "layers": predictors.init(jax.random.key(1), O, A_, 8), "x_mean": jnp.zeros(O), "x_std": jnp.ones(O),
+        "d_mean": jnp.zeros(O), "d_std": jnp.ones(O), "mask": jnp.zeros(O),
+    }
+    return b2.probe_state(
+        small_policy(O, A_), env._env, params, wm, state.env_state, obs, jax.random.key(seed), jnp.ones(O),
+        num_draws=2, num_steps=S,
+    )
+
+
+def test_probe_state_shapes_and_exact_nominals():
+    out = _probe()
+    P_, M, K = 2, 2, 7  # oracle, learned; draws; k = 1..H-1
+    assert out["valid"].shape == (M, K)
+    for name in (*b2.SUMS, "e"):
+        assert out[name].shape == (P_, M, K), name
+        assert np.isfinite(np.asarray(out[name])).all(), name
+    for k in (1, 2, 3):  # T_k's forward pass is exact: its nominal error is pred's
+        np.testing.assert_allclose(out[f"nom_T{k}"], out["pred"], rtol=1e-4, atol=1e-7)
+    assert float(out["e"][1].max()) > 0  # the holding model errs
+
+
+def test_probe_state_without_noise(monkeypatch):
+    monkeypatch.setattr(train_expert, "ACTION_NOISE_STD", 0.0)
+    out = _probe(seed=3)
+    np.testing.assert_allclose(out["e"][0], 0, atol=1e-3)  # the oracle predicts the noise-free truth
+    for name in ("pred", "reflex", "shared", "T1", "T2", "T3"):  # a* is the exact nominal, the correction ~0
+        np.testing.assert_allclose(out[name][0], 0, atol=1e-6, err_msg=name)
+    assert float(out["nom_W1"][0].max()) > 0 and float(out["nom_M1"][0].max()) > 0  # approximate nominals

@@ -119,3 +119,129 @@ def action_and_jacobian(f, o):
     a0, vjp = jax.vjp(f, o)
     (jac,) = jax.vmap(vjp)(jnp.eye(a0.shape[0], dtype=a0.dtype))
     return a0, jac
+
+
+def probe_state(policy, base, params, wm, raw, obs, key, std, num_draws: int, num_steps: int):
+    """One state (spec sections 4-5). Returns SUMS and e, each [P, M, K] (predictors oracle, learned; draws; chunk
+    index k = 1..H-1), and valid [M, K]. SUMS are squared executed-action errors against the fresh call: res of every
+    row of ROWS and nom_<row> (the row's nominal alone). base is the raw Kinetix env (no auto-reset), raw its state.
+    """
+    H, A_ = policy.action_chunk_size, policy.action_dim
+    k_z, k_n, k_env = jax.random.split(key, 3)
+    z = jax.random.normal(k_z, (H, A_))
+
+    def true_step(s, a):
+        o, s, _, done, _ = base.step_env(k_env, s, a, params)
+        return o, s, done
+
+    xs = flow_states(policy, z, obs, num_steps)
+    chunk = xs[-1]
+    truth, truth_ended, _ = diag.roll(true_step, raw, chunk)
+    K = H - 1
+    noisy = chunk + train_expert.ACTION_NOISE_STD * jax.random.normal(k_n, (num_draws, H, A_))
+    real, real_ended, _ = jax.vmap(lambda a: diag.roll(true_step, raw, a))(noisy)
+    nom = jnp.stack([truth, predictors.wm_rollout(wm, obs, chunk)])[:, :K]  # [P, K, O]: ô_k after k actions
+    o = real[:, :K]
+    zk = reflex.shifted_noise(z)[1:]  # [K, H, A]: row 0 is the noise chunk[k] came from
+    warm = jax.vmap(lambda k: jnp.roll(xs, -k, axis=1))(jnp.arange(1, H))  # [K, S + 1, H, A], rolled like zk
+    plan_k = chunk[1:]
+    a_star = policy.action_from_noise(
+        jnp.broadcast_to(zk, (num_draws, K, H, A_)).reshape(-1, H, A_), o.reshape(num_draws * K, -1), num_steps
+    )[:, 0].reshape(num_draws, K, A_)
+    valid = ~(real_ended[:, :K] | truth_ended[:K])
+
+    def act(a):
+        return probe.executed(a, raw)
+
+    def per_predictor(n):
+        a_ref, jac = jax.vmap(lambda zj, oj: reflex.first_action_and_jacobian(policy, zj, oj, num_steps))(zk, n)
+        err = probe.errors(plan_k, a_ref, jac, n, o, a_star, act=act)
+        shared = jnp.broadcast_to(jac[SHARED_K - 1], jac.shape)
+        out = {
+            "pred": err["pred"], "reflex": err["lin_clip"], "nom_chunk_j": err["chunk"],
+            "chunk_j": err["chunk_lin_clip"],
+            "shared": probe.errors(plan_k, a_ref, shared, n, o, a_star, act=act)["lin_clip"],
+            "e": predictors.normalized_error(n, o, std),
+        }
+        for c in CANDIDATES:  # static loop: each vmap traces at once, so c is bound correctly
+            a_c, jac_c = jax.vmap(
+                lambda zj, wj, oj, c=c: action_and_jacobian(first_action_fn(policy, c, zj, wj, num_steps), oj)
+            )(zk, warm, n)
+            err_c = probe.errors(plan_k, a_c, jac_c, n, o, a_star, act=act)
+            out[c], out[f"nom_{c}"] = err_c["lin_clip"], err_c["pred"]
+        return jax.tree.map(lambda x: jnp.broadcast_to(x, valid.shape), out)
+
+    return jax.vmap(per_predictor)(nom) | {"valid": valid}
+
+
+def sha256(path) -> str:
+    return hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
+
+
+def run(
+    run_path: str = "checkpoints/bc",
+    level_paths: Sequence[str] = probe.LEVELS,
+    world_model_dir: str = predictors.WM_DIR,
+    num_envs: int = 64,
+    num_states: int = 128,
+    num_draws: int = 4,
+    batch_size: int = 8,  # states per vmapped batch; lower it if RAM runs out
+    seed: int = 4000,  # level probe.LEVELS[i] uses seed + i: disjoint from phase A, B1 and the diagnostic
+    out_dir: str = OUT,
+):
+    """Spec section 4: raw arrays per level to out_dir/raw/<level>.npz (a finished level is skipped), then summarize."""
+    raw_dir = pathlib.Path(out_dir) / "raw"
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    wm_dir = pathlib.Path(world_model_dir)
+    config = {  # saved with every level: a resumed run must not mix files of other settings or world models
+        "run_path": run_path, "num_envs": num_envs, "num_states": num_states, "num_draws": num_draws,
+        "num_flow_steps": S, "candidates": list(CANDIDATES), "shared_k": SHARED_K,
+        "world_models": {predictors.level_name(p): sha256(wm_dir / f"{predictors.level_name(p)}.pkl")
+                         for p in probe.LEVELS},
+    }
+    for level_path in level_paths:  # all files before any level is computed under this config
+        f = raw_dir / f"{predictors.level_name(level_path)}.npz"
+        if f.exists():
+            with np.load(f) as zf:
+                old = diag.stored_config(zf)
+            if old != config:
+                raise ValueError(f"{f} was made with {old}, this run has {config}: use another --out-dir")
+    env, env_params, levels, obs_dim, action_dim = probe.setup(level_paths)
+    base = env._env  # raw Kinetix env: no auto-reset, as the B1 predictors
+    names = np.array(["oracle", "learned"])
+
+    @jax.jit
+    def level_run(state_dict, level, key, wm):
+        policy = probe.make_policy(state_dict, obs_dim, action_dim)
+        k_c, k_s, k_p = jax.random.split(key, 3)
+        boundaries = probe.collect(env, env_params, policy, level, k_c, num_envs, 4, train_expert.ACTION_NOISE_STD, S)
+        std = predictors.alive_std(boundaries)
+        obs, state = probe.sample(boundaries, k_s, num_states)
+
+        def one(x):
+            return probe_state(policy, base, env_params, wm, x[1].env_state, x[0], x[2], std, num_draws, S)
+
+        res = jax.lax.map(one, (obs, state, jax.random.split(k_p, num_states)), batch_size=batch_size)
+        return res, boundaries[2].sum()
+
+    for i, level_path in enumerate(level_paths):
+        name = predictors.level_name(level_path)
+        f = raw_dir / f"{name}.npz"
+        level_seed = seed + probe.LEVELS.index(level_path)  # position in the full list: a subset keeps its seeds
+        if f.exists():
+            print(f"{level_path}: {f} exists, skipped", flush=True)
+            continue
+        with (wm_dir / f"{name}.pkl").open("rb") as fh:
+            wm = pickle.load(fh)
+        start = time.time()
+        res, n_alive = jax.device_get(level_run(
+            probe.load_state_dict(run_path, level_path), jax.tree.map(lambda x: x[i], levels),
+            jax.random.key(level_seed), wm,
+        ))
+        assert n_alive >= num_states, "too few alive states: raise --num-envs"
+        part = f.with_suffix(".part")
+        with part.open("wb") as fh:  # np.savez adds .npz to a path, not to a file handle
+            np.savez_compressed(fh, predictors=names, config=np.array(json.dumps(config | {"seed": level_seed})), **res)
+        os.replace(part, f)  # a killed run leaves no half-written level that a resume would skip
+        print(f"{level_path}: done in {time.time() - start:.0f} s", flush=True)
+    summarize(out_dir)
