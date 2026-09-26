@@ -1,0 +1,8 @@
+/opt/homebrew/Cellar/python@3.11/3.11.9/Frameworks/Python.framework/Versions/3.11/lib/python3.11/subprocess.py:1885: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = _fork_exec(
+mjc_swimmer, physics with 20% parameter errors; d = 3, s = 5; every panel has the same start and action noise.
+Goal: the front link of the swimmer (green in Kinetix, too thin to show at this resolution) must touch the blue post.
+Illustration, not evidence. Episode rule, fixed before viewing: the first of seeds 0-15 where reflex (phys0.2) solves and pred (phys0.2) fails: seed 1.
+Solved over seeds 0-15: pred (phys0.2) 7/16, reflex (phys0.2) 10/16. B1 on this level (768 episodes): RTC 41%, pred 44%, reflex 68%.
+Same level as video A; with 20% wrong physics it ranks 4th of 12 for J in B1. Mean over all 12 levels: reflex +3.3 pp over RTC.
+saved results/demo/b.*
