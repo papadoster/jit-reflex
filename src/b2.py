@@ -264,7 +264,7 @@ def ratios(t: pd.DataFrame) -> pd.DataFrame:
     return pd.concat([
         t[["level", "predictor"]].assign(
             row=row, res=t[row] / t["n"], R=(t["pred"] - t[row]) / (t["pred"] - t["reflex"]), gain=gain,
-            beats_pred=t[row] <= t["pred"],
+            beats_pred=(t[row] <= t["pred"]) & (t["n"] > 0),  # a level without pairs beats nothing
         ) for row in ROWS[1:]
     ], ignore_index=True)
 

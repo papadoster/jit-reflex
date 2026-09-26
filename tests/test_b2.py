@@ -205,3 +205,11 @@ def test_summarize_cuts_at_e_max_and_writes_everything(tmp_path, monkeypatch):
     assert set(bn["predictor"]) == {"oracle", "learned"} and set(bn["row"]) == set(b2.ROWS)
     top = bn[(bn["bin"] == bn["bin"].max()) & (bn["row"] == "T1")]
     np.testing.assert_allclose(top["res"], 5.0)  # the open last bin holds the |e| > 10 pairs
+
+
+def test_a_level_without_pairs_does_not_beat_pred():
+    row = {x: 0.0 for x in b2.SUMS}
+    t = pd.DataFrame([{"level": "a", "predictor": "learned", "n": 10} | row | {"pred": 1.0, "reflex": 0.5, "T1": 0.6},
+                      {"level": "b", "predictor": "learned", "n": 0} | row])
+    r = b2.ratios(t)
+    assert r.loc[r["row"] == "T1", "beats_pred"].tolist() == [True, False]
