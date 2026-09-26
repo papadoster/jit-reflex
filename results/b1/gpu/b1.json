@@ -1,0 +1,95 @@
+{
+  "p_mid": "phys0.2",
+  "slices": {
+    "d1": {
+      "oracle": {
+        "status": "PASS",
+        "reflex": {
+          "pooled": -0.0005063657407407616,
+          "min_seed": -0.008138020833333334
+        },
+        "rtc_reflex": {
+          "pooled": 0.011971932870370376,
+          "min_seed": 0.008897569444444494
+        }
+      },
+      "phys0.2": {
+        "status": "FAIL",
+        "reflex": {
+          "pooled": -0.04437934027777779,
+          "min_seed": -0.054361979166666664
+        },
+        "rtc_reflex": {
+          "pooled": -0.0007957175925926091,
+          "min_seed": -0.01030815972222221
+        }
+      },
+      "learned": {
+        "status": "PASS",
+        "reflex": {
+          "pooled": -0.007703993055555569,
+          "min_seed": -0.014648437499999964
+        },
+        "rtc_reflex": {
+          "pooled": 0.029152199074074084,
+          "min_seed": 0.026367187500000038
+        }
+      }
+    },
+    "d3": {
+      "oracle": {
+        "status": "PASS",
+        "reflex": {
+          "pooled": 0.09266493055555554,
+          "min_seed": 0.08430989583333326
+        },
+        "rtc_reflex": {
+          "pooled": 0.037543402777777755,
+          "min_seed": 0.033203125
+        }
+      },
+      "phys0.2": {
+        "status": "PASS",
+        "reflex": {
+          "pooled": 0.033094618055555504,
+          "min_seed": 0.02766927083333326
+        },
+        "rtc_reflex": {
+          "pooled": 0.00401475694444442,
+          "min_seed": -0.0068359375
+        }
+      },
+      "learned": {
+        "status": "PASS",
+        "reflex": {
+          "pooled": 0.07725694444444438,
+          "min_seed": 0.06998697916666663
+        },
+        "rtc_reflex": {
+          "pooled": 0.061414930555555504,
+          "min_seed": 0.04752604166666663
+        }
+      }
+    }
+  },
+  "informative_slices": [
+    "d1",
+    "d3"
+  ],
+  "verdict": "SURVIVES",
+  "R4_learned": "ENOUGH",
+  "R2_staleness": true,
+  "R2_gap": 0.059787326388888874,
+  "R3_j_grows_with_error": true,
+  "R3_gap": 0.04279823908730159,
+  "drop_oracle_to_p_mid": {
+    "d1": {
+      "reflex": 0.04387297453703703,
+      "rtc_reflex": 0.012767650462962986
+    },
+    "d3": {
+      "reflex": 0.059570312500000035,
+      "rtc_reflex": 0.033528645833333336
+    }
+  }
+}

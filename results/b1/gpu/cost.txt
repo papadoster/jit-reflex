@@ -1,0 +1,24 @@
+one network evaluation (batch 1): 0.0010 GFLOP
+      method  batch  evals_per_call  gflop_per_call  ms_per_call  latency_vs_realtime
+       naive      1               5           0.005        1.159                0.625
+    realtime      1              15           0.016        1.853                1.000
+        pred      1              10           0.010        2.211                1.193
+      reflex      1              70           0.073        3.400                1.835
+reflex_chunk      1              70           0.073        3.395                1.832
+  rtc_reflex      1              80           0.083        4.083                2.203
+one network evaluation (batch 1): 0.0010 GFLOP
+      method  batch  evals_per_call  gflop_per_call  ms_per_call  latency_vs_realtime
+       naive      1               5           0.005        1.163                0.630
+    realtime      1              15           0.016        1.848                1.000
+        pred      1              25           0.026        1.960                1.061
+      reflex      1             265           0.275        3.280                1.775
+reflex_chunk      1             265           0.275        3.294                1.782
+  rtc_reflex      1             275           0.285        3.944                2.134
+one network evaluation (batch 1): 0.0010 GFLOP
+      method  batch  evals_per_call  gflop_per_call  ms_per_call  latency_vs_realtime
+       naive      1               5           0.005        1.194                0.643
+    realtime      1              15           0.016        1.858                1.000
+        pred      1              40           0.042        2.002                1.077
+      reflex      1             460           0.477        3.517                1.893
+reflex_chunk      1             460           0.477        3.585                1.929
+  rtc_reflex      1             470           0.488        4.205                2.263

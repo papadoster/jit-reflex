@@ -1,0 +1,13 @@
+level,train,val,moving_dims,val_nmse
+worlds/l/grasp_easy.json,3949,347,49,0.0634128674864769
+worlds/l/catapult.json,17202,1200,35,0.10027030110359192
+worlds/l/cartpole_thrust.json,5591,555,13,0.0012074252590537071
+worlds/l/hard_lunar_lander.json,5667,589,21,0.08847352862358093
+worlds/l/mjc_half_cheetah.json,8607,1087,49,0.045833952724933624
+worlds/l/mjc_swimmer.json,19083,2025,21,0.08750751614570618
+worlds/l/mjc_walker.json,21390,2166,49,0.06493967026472092
+worlds/l/h17_unicycle.json,9029,958,21,0.000819761713501066
+worlds/l/chain_lander.json,5700,549,42,0.1169818788766861
+worlds/l/catcher_v3.json,7718,793,42,0.10835038870573044
+worlds/l/trampoline.json,19761,2059,28,0.06171273812651634
+worlds/l/car_launch.json,5507,566,34,0.04707378149032593

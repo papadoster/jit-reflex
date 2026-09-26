@@ -1,0 +1,23 @@
+worlds/l/grasp_easy.json: done
+worlds/l/catapult.json: done
+worlds/l/cartpole_thrust.json: done
+worlds/l/hard_lunar_lander.json: done
+worlds/l/mjc_half_cheetah.json: done
+worlds/l/mjc_swimmer.json: done
+worlds/l/mjc_walker.json: done
+worlds/l/h17_unicycle.json: done
+worlds/l/chain_lander.json: done
+worlds/l/catcher_v3.json: done
+worlds/l/trampoline.json: done
+worlds/l/car_launch.json: done
+median over levels of err / noise:
+k              1      2      3      4      5      6     7
+predictor                                                
+hold       14.49  13.86  13.64  10.48  10.72  10.15  9.25
+learned     3.51   3.50   3.56   3.05   3.52   3.57  4.04
+noise       1.00   1.00   1.00   1.00   1.00   1.00  1.00
+oracle      0.00   0.00   0.00   0.00   0.00   0.00  0.00
+phys0.1     1.39   1.33   1.45   1.39   1.35   1.37  1.32
+phys0.2     2.68   2.47   2.31   2.15   2.26   2.19  2.31
+phys0.3     3.90   3.62   3.28   3.08   3.26   3.11  3.18
+{"calibration": {"phys_mid": 0.2, "ratio_k4": 2.145904076082763, "double_levels": false}}
