@@ -6,6 +6,7 @@ fresh call pi(o_k), as in E1b. See docs/superpowers/specs/2026-09-26-b1-diagnost
 """
 
 import json
+import os
 import pathlib
 import pickle
 import time
@@ -33,6 +34,7 @@ MEANS = ("e", "e_pred", "e_noise", "je", "je_pred", "je_noise", "cos_fix", "cos_
 OUT = "results/b1/diag"
 MIN_FRAC = 0.3  # spec section 8: a level's point at k counts if >= 30% of its (state, draw) pairs are still valid
 MIN_BIN = 30  # spec measure 9: pairs a level needs in an |e| bin
+CHUNK = 8  # action chunk size of these policies: chunk boundaries on the figure's k axis
 MEASURES = ("rho_clip", "res", "rho_chunk", "share_pred", "top1_pred", "share_noise", "top1_noise", *MEANS)
 
 
@@ -161,6 +163,13 @@ def probe_state(
     return stats | {"valid": valid, "used": used, "a_ref": a_ref, "plan": plan}
 
 
+def stored_config(res) -> dict | None:
+    """The run settings saved with a level's raw arrays, without the level's own seed; None if none were saved."""
+    if "config" not in res:
+        return None
+    return {k: v for k, v in json.loads(str(res["config"])).items() if k != "seed"}
+
+
 def run(
     run_path: str = "checkpoints/bc",
     level_paths: Sequence[str] = probe.LEVELS,
@@ -172,7 +181,7 @@ def run(
     num_chunks: int = 4,
     num_flow_steps: int = 5,
     batch_size: int = 8,  # states per vmapped batch; lower it if RAM runs out
-    seed: int = 3000,  # level i uses seed + i: disjoint from phase A and B1
+    seed: int = 3000,  # level probe.LEVELS[i] uses seed + i: disjoint from phase A and B1
     out_dir: str = OUT,
 ):
     """Spec section 3: raw arrays per level to out_dir/raw/<level>.npz (a finished level is skipped), then summarize."""
@@ -182,6 +191,11 @@ def run(
     names = np.array(["oracle", *(f"phys{p}" for p in phys), "learned"])
     raw_dir = pathlib.Path(out_dir) / "raw"
     raw_dir.mkdir(parents=True, exist_ok=True)
+    config = {  # saved with every level: a resumed run must not mix files of other settings
+        "run_path": run_path, "num_envs": num_envs, "num_states": num_states, "num_draws": num_draws,
+        "num_chunks": num_chunks, "num_flow_steps": num_flow_steps, "phys": list(phys),
+        "world_model_dir": world_model_dir,
+    }
 
     @jax.jit
     def level_diag(state_dict, level, key, wm):
@@ -205,7 +219,12 @@ def run(
     for i, level_path in enumerate(level_paths):
         name = predictors.level_name(level_path)
         f = raw_dir / f"{name}.npz"
+        level_seed = seed + probe.LEVELS.index(level_path)  # position in the full list: a subset keeps its seeds
         if f.exists():
+            with np.load(f) as z:
+                old = stored_config(z)
+            if old != config:
+                raise ValueError(f"{f} was made with {old}, this run has {config}: use another --out-dir")
             print(f"{level_path}: {f} exists, skipped", flush=True)
             continue
         with (pathlib.Path(world_model_dir) / f"{name}.pkl").open("rb") as fh:
@@ -213,10 +232,13 @@ def run(
         start = time.time()
         res, n_alive = jax.device_get(level_diag(
             probe.load_state_dict(run_path, level_path), jax.tree.map(lambda x: x[i], levels),
-            jax.random.key(seed + i), wm,
+            jax.random.key(level_seed), wm,
         ))
         assert n_alive >= num_states, "too few alive states: raise --num-envs"
-        np.savez_compressed(f, predictors=names, **res)
+        part = f.with_suffix(".part")
+        with part.open("wb") as fh:  # np.savez adds .npz to a path, not to a file handle
+            np.savez_compressed(fh, predictors=names, config=np.array(json.dumps(config | {"seed": level_seed})), **res)
+        os.replace(part, f)  # a killed run leaves no half-written level that a resume would skip
         print(f"{level_path}: done in {time.time() - start:.0f} s", flush=True)
     summarize(out_dir)
 
@@ -275,25 +297,35 @@ def near(t: pd.DataFrame, k_max: int = 7) -> pd.DataFrame:
     return lv.groupby("predictor")[list(MEASURES)].median()
 
 
-def bins(raws: dict, t: pd.DataFrame, n_bins: int = 10) -> pd.DataFrame:
-    """Spec measure 9: rho_clip against |e| in deciles of |e| over the pairs of all levels, predictors and kept k."""
+def bins(raws: dict, t: pd.DataFrame, n_bins: int = 10, p: int | None = None, edges=None) -> pd.DataFrame:
+    """Spec measure 9: rho_clip against |e| over the pairs of all levels and kept k, of predictor index p (None: all).
+
+    Bins are deciles of |e| over these pairs unless edges are given. levels = levels with >= MIN_BIN pairs in a bin
+    (rho_clip is the median over them), pairs = the bin's pairs over all levels, k_med = their median k.
+    """
     kept = t[(t["predictor"] == "oracle") & (t["frac"] >= MIN_FRAC)].groupby("level")["k"].apply(list)
+    sel = slice(None) if p is None else slice(p, p + 1)
     pairs = []
     for level, res in raws.items():
         ks = np.asarray(kept.get(level, []), int) - 1
-        v = np.broadcast_to(res["valid"][..., ks][:, None], res["e"][..., ks].shape)
-        pairs.append(tuple(res[x][..., ks][v] for x in ("e", "lin_clip", "pred")))
-    edges = np.quantile(np.concatenate([p[0] for p in pairs]), np.linspace(0, 1, n_bins + 1))
+        e, lin_clip, pred = (res[x][:, sel][..., ks] for x in ("e", "lin_clip", "pred"))
+        v = np.broadcast_to(res["valid"][..., ks][:, None], e.shape)
+        pairs.append((e[v], lin_clip[v], pred[v], np.broadcast_to(ks + 1, e.shape)[v]))
+    if edges is None:
+        edges = np.quantile(np.concatenate([x[0] for x in pairs]), np.linspace(0, 1, n_bins + 1))
     rows = []
-    for b in range(n_bins):
+    for b in range(len(edges) - 1):
         lo, hi = edges[b], edges[b + 1]
-        rhos = []
-        for e, lin_clip, pred in pairs:
-            m = (e >= lo) & ((e < hi) if b < n_bins - 1 else (e <= hi))
+        rhos, ks_in = [], []
+        for e, lin_clip, pred, k in pairs:
+            m = (e >= lo) & ((e < hi) if b < len(edges) - 2 else (e <= hi))
+            ks_in.append(k[m])
             if m.sum() >= MIN_BIN and pred[m].sum() > 0:
                 rhos.append(1 - lin_clip[m].sum() / pred[m].sum())
+        ks_in = np.concatenate(ks_in)
         rows.append({"bin": b, "e_lo": lo, "e_hi": hi, "rho_clip": float(np.median(rhos)) if rhos else np.nan,
-                     "levels": len(rhos)})
+                     "levels": len(rhos), "pairs": len(ks_in),
+                     "k_med": float(np.median(ks_in)) if len(ks_in) else np.nan})
     return pd.DataFrame(rows)
 
 
@@ -304,6 +336,7 @@ def first_below(x, y, thr: float):
 
 
 def figure(cv: pd.DataFrame, bn: pd.DataFrame, path: pathlib.Path):
+    K = int(cv["k"].max())
     fig, (a, b, c) = plt.subplots(1, 3, figsize=(17, 4.5))
     colors = dict(zip(sorted(cv["predictor"].unique()), plt.rcParams["axes.prop_cycle"].by_key()["color"]))
     for (pred, variant), d in cv.groupby(["predictor", "variant"]):
@@ -320,19 +353,25 @@ def figure(cv: pd.DataFrame, bn: pd.DataFrame, path: pathlib.Path):
     for y in (0.3, 0.0):
         a.axhline(y, c="gray", lw=0.6, ls=":")
         b.axhline(y, c="gray", lw=0.6, ls=":")
-    a.set_title(f"ρ_clip vs k (dashed: the {int(surv.max()) if len(surv) else 0} levels alive to k = {cv['k'].max()})")
-    a.set_xlabel("k, steps after the call (chunk boundaries at 8, 16, 24)")
+    a.set_title(f"ρ_clip vs k (dashed: the {int(surv.max()) if len(surv) else 0} levels alive to k = {K})")
+    bounds = ", ".join(map(str, range(CHUNK, K + 1, CHUNK)))
+    a.set_xlabel("k, steps after the call" + (f" (chunk boundaries at {bounds})" if bounds else ""))
     a.legend(fontsize=7)
-    mid = (bn["e_lo"] + bn["e_hi"]) / 2
-    b.plot(mid, bn["rho_clip"], marker="o")
-    for x, y, n in zip(mid, bn["rho_clip"], bn["levels"]):
-        b.annotate(str(n), (x, y), fontsize=7)
+    for pred, d in bn.groupby("predictor"):
+        mid = (d["e_lo"] + d["e_hi"]) / 2
+        if pred == "all":
+            b.plot(mid, d["rho_clip"], marker="o", color="black", lw=2, label="all predictors")
+            for x, y, n in zip(mid, d["rho_clip"], d["levels"]):
+                b.annotate(str(n), (x, y), fontsize=7)
+        else:
+            b.plot(mid, d["rho_clip"], marker=".", lw=1, color=colors[pred], label=pred)
     b.set_xscale("log")
-    b.set_xlabel("|o − ô| (normalized), decile bins; labels = levels")
-    b.set_title("ρ_clip vs deviation (all predictors and k)")
+    b.set_xlabel("|o − ô| (normalized), decile bins of all pairs; labels = levels (black)")
+    b.set_title("ρ_clip vs deviation (all k)")
+    b.legend(fontsize=7)
     c.set_xlabel("|o* − ô| (normalized)")
     c.set_ylabel("|J·(o* − ô)|")
-    c.set_title("prediction error J sees, k = 1…31")
+    c.set_title(f"prediction error J sees, k = 1…{K}")
     c.legend(fontsize=7)
     fig.tight_layout()
     fig.savefig(path, dpi=150)
@@ -343,14 +382,25 @@ def summarize(out_dir: str = OUT):
     """Tables, thresholds and figure from out_dir/raw/*.npz (spec sections 4-5)."""
     out = pathlib.Path(out_dir)
     raws = {f.stem: dict(np.load(f)) for f in sorted((out / "raw").glob("*.npz"))}
+    configs = {json.dumps(c, sort_keys=True) for r in raws.values() if (c := stored_config(r)) is not None}
+    assert len(configs) <= 1, f"raw files of different runs in {out / 'raw'}: {configs}"
     t = pd.concat([level_table(r, lv) for lv, r in raws.items()], ignore_index=True)
-    cv, nr, bn = curves(t), near(t), bins(raws, t)
+    cv, nr, pooled = curves(t), near(t), bins(raws, t)
+    edges = [*pooled["e_lo"], pooled["e_hi"].iloc[-1]]  # every predictor on the pooled bins (spec measure 9)
+    names = [str(x) for x in next(iter(raws.values()))["predictors"]]  # one config: the same predictors everywhere
+    bn = pd.concat([pooled.assign(predictor="all")]
+                   + [bins(raws, t, p=p, edges=edges).assign(predictor=n) for p, n in enumerate(names)],
+                   ignore_index=True)
     o = t[(t["predictor"] == "oracle") & t["k"].between(1, 4) & (t["frac"] >= MIN_FRAC)].groupby("level")
     rho = float((1 - o["lin_clip"].sum() / o["pred"].sum()).median())
     e_pred = float(t.loc[t["predictor"] == "oracle", "e_pred"].abs().max())
     check = {"oracle_rho_clip_k1_4": rho, "e1b": 0.54, "oracle_e_pred_max": e_pred,
              "ok": abs(rho - 0.54) <= 0.1 and e_pred == 0}
-    th = {"k": {}, "e": {f"<{thr}": first_below(bn["e_lo"], bn["rho_clip"], thr) for thr in (0.3, 0.0)}}
+    th = {"k": {}, "e": {}}
+    for pred, d in bn.groupby("predictor", sort=False):  # spec section 5 Q3: per predictor; "all" = pooled
+        below = {thr: d[d["rho_clip"] < thr] for thr in (0.3, 0.0)}  # NaN is never below
+        th["e"][pred] = {f"<{thr}": {"e": float(b["e_lo"].iloc[0]), "levels": int(b["levels"].iloc[0])}
+                         if len(b) else None for thr, b in below.items()}
     for (variant, pred), d in cv.groupby(["variant", "predictor"]):
         d = d.sort_values("k")
         th["k"][f"{variant}/{pred}"] = {f"<{thr}": first_below(d["k"], d["rho_clip"], thr) for thr in (0.3, 0.0)}

@@ -89,40 +89,55 @@ def test_chain_carries_the_end_of_episode():
 
 
 def _raw(N=20, M=2, K=3, dead_k=None):
-    """Synthetic probe_state output stacked over N states: rho_clip = 0.75 everywhere."""
+    """Synthetic probe_state output stacked over N states. Half the states have pred 1 and rho 0.75, half pred 3 and
+    rho 0.5: pooled rho_clip = 1 - (0.25 + 1.5) / (1 + 3) = 0.5625, the mean of per-pair ratios would be 0.625."""
     ones = np.ones((N, 2, M, K))
     r = {x: ones.copy() for x in diag.SUMS + diag.MEANS}
-    r["lin_clip"] = 0.25 * ones
+    r["pred"][N // 2:] = 3.0
+    r["lin_clip"] = np.where(r["pred"] == 1.0, 0.25, 1.5)
     r["rs_pred"][:, 0] = r["top_pred"][:, 0] = r["d_pred"][:, 0] = 0  # the oracle: 0/0 shares (NaN), as on real data
-    r["e"] = np.random.default_rng(0).uniform(0.1, 5.0, (N, 2, M, K))
+    e = np.random.default_rng(0).uniform(0.1, 5.0, (N // 2, 2, M, K))
+    r["e"] = np.concatenate([e, e])  # states i and i + N/2 share |e|: every |e| bin pools the two halves equally
     valid = np.ones((N, M, K), bool)
-    if dead_k is not None:
-        valid[..., dead_k] = False  # every episode ended before this k: the level drops out there
+    if dead_k is not None:  # only 4 states still valid at this k (frac 0.2 < MIN_FRAC), with rho 0: they must not count
+        valid[4:, :, dead_k] = False
+        r["lin_clip"][:4, ..., dead_k] = r["pred"][:4, ..., dead_k]
     return r | {"valid": valid, "predictors": np.array(["oracle", "learned"])}
 
 
 def test_summaries_pool_and_track_level_composition(tmp_path, monkeypatch):
     raws = {"a": _raw(), "b": _raw(dead_k=2)}
     t = pd.concat([diag.level_table(r, lv) for lv, r in raws.items()], ignore_index=True)
-    np.testing.assert_allclose(t.loc[t["n"] > 0, "rho_clip"], 0.75)
+    rho = 1 - (0.25 + 1.5) / (1 + 3)  # a ratio of sums over the pairs
+    np.testing.assert_allclose(t.loc[t["frac"] >= diag.MIN_FRAC, "rho_clip"], rho)
+    dead = t[(t["level"] == "b") & (t["k"] == 3)]
+    np.testing.assert_allclose(dead[["frac", "rho_clip"]], [[0.2, 0.0]] * 2)
     cv = diag.curves(t)
     al = cv[(cv["variant"] == "all") & (cv["predictor"] == "oracle")].set_index("k")["levels"]
     assert al.to_dict() == {1: 2, 2: 2, 3: 1}  # level b is gone at k = 3
     sv = cv[(cv["variant"] == "survivors") & (cv["predictor"] == "oracle")]
     assert len(sv) == 3 and (sv["levels"] == 1).all()  # only level a lives to the last k
-    np.testing.assert_allclose(diag.near(t, k_max=2).loc["oracle", "rho_clip"], 0.75)
-    assert np.isnan(diag.near(t, k_max=2).loc["oracle", "share_pred"])  # NaN stays NaN, summarize must cope
+    np.testing.assert_allclose(sv["rho_clip"], rho)
+    nr = diag.near(t, k_max=3)
+    np.testing.assert_allclose(nr.loc["oracle", "rho_clip"], rho)
+    assert np.isnan(nr.loc["oracle", "share_pred"])  # NaN stays NaN, summarize must cope
     assert diag.first_below([1, 2, 3], [0.5, 0.2, -0.1], 0.3) == 2.0
     assert diag.first_below([1, 2, 3], [0.5, 0.2, -0.1], 0.0) == 3.0
     assert diag.first_below([1, 2], [0.5, 0.4], 0.3) is None
     monkeypatch.setattr(diag, "MIN_BIN", 1)
     bn = diag.bins(raws, t)
     assert len(bn) == 10 and (bn["levels"] == 2).all()
-    np.testing.assert_allclose(bn["rho_clip"], 0.75)
+    np.testing.assert_allclose(bn["rho_clip"], rho)
     (tmp_path / "raw").mkdir()
     for lv, r in raws.items():
         np.savez_compressed(tmp_path / "raw" / f"{lv}.npz", **r)
     diag.summarize(str(tmp_path))
     for f in ("summary.csv", "curves.csv", "near.csv", "bins.csv", "check.json", "thresholds.json", "diag.png"):
         assert (tmp_path / f).exists(), f
-    assert json.loads((tmp_path / "check.json").read_text())["oracle_rho_clip_k1_4"] == 0.75
+    np.testing.assert_allclose(json.loads((tmp_path / "check.json").read_text())["oracle_rho_clip_k1_4"], rho)
+    bn = pd.read_csv(tmp_path / "bins.csv")  # pooled ("all") and per predictor, on the pooled edges
+    per = bn[bn["predictor"] != "all"]
+    assert per["predictor"].value_counts().to_dict() == {"oracle": 10, "learned": 10}
+    np.testing.assert_array_equal(per.groupby("bin")["pairs"].sum(), bn.loc[bn["predictor"] == "all", "pairs"])
+    np.testing.assert_allclose(bn["rho_clip"], rho)
+    assert set(json.loads((tmp_path / "thresholds.json").read_text())["e"]) == {"all", "oracle", "learned"}
