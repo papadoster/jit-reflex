@@ -63,6 +63,7 @@ def executed(action, env_state):
 
 def errors(chunk, a_ref, jac, nom_obs, obs, a_star, max_correction: float = 1.0, act=lambda a: a):
     """Squared action errors against the oracle a* (spec E1). lin_clip clips J·delta like the E2 method (E1b).
+    chunk_lin_clip is the clipped correction on top of the chunk (rtc_reflex-like).
 
     chunk, a_ref [K, A]; jac [K, A, O]; nom_obs [K, O]; obs [..., K, O]; a_star [..., K, A] -> dict of [..., K].
     act maps an action to the space it is compared in: identity (E1) or `executed` (E1b).
@@ -80,6 +81,7 @@ def errors(chunk, a_ref, jac, nom_obs, obs, a_star, max_correction: float = 1.0,
         "lin": sq(act(a_ref + lin) - a_star),
         "lin_clip": sq(act(a_ref + jnp.clip(lin, -max_correction, max_correction)) - a_star),
         "chunk_lin": sq(act(chunk + lin) - a_star),
+        "chunk_lin_clip": sq(act(chunk + jnp.clip(lin, -max_correction, max_correction)) - a_star),
         "floor": jnp.broadcast_to(sq(act(chunk) - act(a_ref)), a_star.shape[:-1]),
         "dev": jnp.sqrt(sq(delta)),
     }

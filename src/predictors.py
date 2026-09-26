@@ -225,6 +225,14 @@ def normalized_error(pred, truth, std):
     return jnp.sqrt(jnp.sum(z**2, axis=-1))
 
 
+def alive_std(boundaries):
+    """Per-dim std of obs over the alive chunk-boundary states of probe.collect output: [O]."""
+    obs = boundaries[0].reshape(-1, boundaries[0].shape[-1])
+    alive = boundaries[2].reshape(-1, 1)
+    mean = (obs * alive).sum(0) / alive.sum()
+    return jnp.sqrt((jnp.square(obs - mean) * alive).sum(0) / alive.sum())
+
+
 def errors(
     run_path: str = "checkpoints/bc",
     level_paths: Sequence[str] = probe.LEVELS,
@@ -252,9 +260,7 @@ def errors(
         H = policy.action_chunk_size
         k_c, k_s, k_p = jax.random.split(key, 3)
         boundaries = probe.collect(env, env_params, policy, level, k_c, num_envs, 4, sigma, num_flow_steps)
-        all_obs, alive = boundaries[0].reshape(-1, obs_dim), boundaries[2].reshape(-1, 1)
-        mean = (all_obs * alive).sum(0) / alive.sum()
-        std = jnp.sqrt((jnp.square(all_obs - mean) * alive).sum(0) / alive.sum())
+        std = alive_std(boundaries)
         obs, state = probe.sample(boundaries, k_s, num_states)
 
         def one(x):
