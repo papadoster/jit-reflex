@@ -1,0 +1,13 @@
+row,R,levels_in_median,beats_pred,left_out,pass,strict,depth,fe
+reflex,1.0,11,11,worlds_l_cartpole_thrust,True,True,10,330
+chunk_j,-2.258915972238899,11,0,worlds_l_cartpole_thrust,False,False,10,330
+shared,-0.22821982040688463,11,3,worlds_l_cartpole_thrust,False,False,10,90
+T1,0.29597058626337786,11,12,worlds_l_cartpole_thrust,False,False,6,90
+T2,0.754757086109957,11,12,worlds_l_cartpole_thrust,False,False,7,150
+T3,0.9653370099228566,11,12,worlds_l_cartpole_thrust,True,True,8,210
+W1,-2.2763041289591044,11,0,worlds_l_cartpole_thrust,False,False,2,70
+W2,-1.024911781231947,11,2,worlds_l_cartpole_thrust,False,False,4,135
+W3,0.35052648012220533,11,7,worlds_l_cartpole_thrust,False,False,6,200
+M1,-9.41040684100607,11,0,worlds_l_cartpole_thrust,False,False,2,70
+M2,-0.6724628908589269,11,4,worlds_l_cartpole_thrust,False,False,4,135
+M3,0.7468708694408007,11,9,worlds_l_cartpole_thrust,False,False,6,200

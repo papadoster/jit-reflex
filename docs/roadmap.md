@@ -42,6 +42,12 @@ Phase A computes `J` at all 8 chunk positions, through all 5 flow steps. That is
 
 **Target:** latency ratio r ≤ 1.2 with ≤ 1 pp loss in solve rate. That would make the latency-fair comparison possible at d = 2…4.
 
+**Status: offline selection done 2026-09-26** ([Russian memo](results/b2-offline.md), [spec](superpowers/specs/2026-09-26-b2-offline-design.md)). The pre-registered rule sends **T3** and **M3** to the B2+B5 GPU run:
+- **T3:** `J` through the last 3 of 5 flow steps, exact nominal, depth 8 against 10. It keeps 94% of the exact `J`'s offline gain over pred on 12 of 12 levels, and still holds without the top-5% states and with the oracle.
+- **M3:** a 3-step flow, depth 6. It passes narrowly and fails both of those checks.
+
+One `J` shared across positions hurts. A rough latency estimate for T3 is r ≈ 1.4–1.6, above the 1.2 target, which rules out a latency-fair grid at d = 3. Taking `J` off the critical path is the first question for the B2+B5 spec.
+
 ## B3. Trust region: when to use the reflex
 
 E1 shows ρ falling as the deviation grows, with the mean dominated by rare contact events. In closed loop the reflex loses on catapult and unicycle.

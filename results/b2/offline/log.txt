@@ -1,0 +1,41 @@
+worlds/l/grasp_easy.json: done in 316 s
+worlds/l/catapult.json: done in 258 s
+worlds/l/cartpole_thrust.json: done in 260 s
+worlds/l/hard_lunar_lander.json: done in 256 s
+worlds/l/mjc_half_cheetah.json: done in 259 s
+worlds/l/mjc_swimmer.json: done in 257 s
+worlds/l/mjc_walker.json: done in 261 s
+worlds/l/h17_unicycle.json: done in 258 s
+worlds/l/chain_lander.json: done in 261 s
+worlds/l/catcher_v3.json: done in 258 s
+worlds/l/trampoline.json: done in 259 s
+worlds/l/car_launch.json: done in 260 s
+                        R  levels_in_median  beats_pred left_out   pass  strict  depth   fe
+predictor row                                                                              
+oracle    reflex    1.000                12          12            True    True     10  330
+          chunk_j  -4.353                12           0           False   False     10  330
+          shared    0.047                12           6           False   False     10   90
+          T1        0.251                12          12           False   False      6   90
+          T2        0.658                12          12           False   False      7  150
+          T3        0.901                12          12            True    True      8  210
+          W1       -4.295                12           1           False   False      2   70
+          W2       -2.286                12           1           False   False      4  135
+          W3       -0.107                12           6           False   False      6  200
+          M1      -12.582                12           0           False   False      2   70
+          M2       -1.727                12           2           False   False      4  135
+          M3        0.589                12           9           False   False      6  200
+learned   reflex    1.000                12          12            True    True     10  330
+          chunk_j  -1.057                12           1           False   False     10  330
+          shared   -0.109                12           5           False   False     10   90
+          T1        0.290                12          12           False   False      6   90
+          T2        0.712                12          12           False   False      7  150
+          T3        0.943                12          12            True    True      8  210
+          W1       -0.962                12           2           False   False      2   70
+          W2       -0.065                12           5           False   False      4  135
+          W3        0.802                12          10            True   False      6  200
+          M1       -5.830                12           1           False   False      2   70
+          M2       -0.343                12           5           False   False      4  135
+          M3        0.850                12          11            True   False      6  200
+{"passed": ["M3", "W3", "T3"], "gpu": ["M3", "T3"], "fallback": false, "levels": 12}
+{"oracle_reflex_rho_clip_k1_4": 0.47836315631866455, "diag": 0.578, "ok": true}
+caffeinate -i env UV_OFFLINE=1 JAX_PLATFORMS=cpu uv run --offline src/b2.py   10572.32s user 269.71s system 341% cpu 52:54.57 total

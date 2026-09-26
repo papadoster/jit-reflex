@@ -1,0 +1,13 @@
+{
+  "passed": [
+    "M3",
+    "W3",
+    "T3"
+  ],
+  "gpu": [
+    "M3",
+    "T3"
+  ],
+  "fallback": false,
+  "levels": 12
+}
