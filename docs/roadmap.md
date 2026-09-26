@@ -10,7 +10,7 @@ Phase A in one line: the reflex pays off when the policy is called rarely (s ≥
 
 **Pre-registered spec:** [B1 design and decision rules](superpowers/specs/2026-09-25-b1-staleness-predictors-design.md) (Russian). It moves the learned model into B1 and makes the absolute `J` contribution the main metric.
 
-**Status: done 2026-09-26.** The verdict is SURVIVES, narrowly, with R4 = ENOUGH. Predictions 1 and 2 held, and `J`'s absolute effect grew with the predictor error (R3). Results: [report §8](results/report.md#8-phase-b1-stale-plans-and-imperfect-predictors) and the [Russian memo](results/b1.md). By §5, the next step is B2 with the learned model.
+**Status: done 2026-09-26.** The verdict is SURVIVES, narrowly, with R4 = ENOUGH. Predictions 1 and 2 held, and `J`'s absolute effect grew with the predictor error (R3). Results: [report §8](results/report.md#8-phase-b1-stale-plans-and-imperfect-predictors) and the [Russian memo](results/b1.md). By §5, the next step is B2 with the learned model. An offline diagnostic followed ([report §8.8](results/report.md#88-offline-diagnostic-exploratory), [Russian note](results/b1-diag.md)): `J` sees less of the learned model's error than of wrong physics, and the tangent's quality depends on the deviation size alone (ρ_clip < 0.3 beyond ‖e‖ ≈ 2.3), which sets B3's thresholds.
 
 **Design.** Fixed delay d = 1, execute horizon s = 1…7. Predictors:
 - the oracle;

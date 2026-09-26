@@ -239,6 +239,23 @@ The exact speedup removed network evaluations but barely moved latency. Latency 
 - **The world model was trained on the same levels.** Transfer to new levels was not tested.
 - **Other regimes were not tested:** observations are symbolic, there are no kicks, and only d = 1 and d = 3 were run.
 
-### 8.8 Next
+### 8.8 Offline diagnostic (exploratory)
 
-Spec §5 maps SURVIVES with R4 = ENOUGH to B2, a cheaper package used with the learned model. Before that comes the offline diagnostic from §8.5. It should explain §8.5 and set the thresholds for B3's trust region.
+To explain §8.5, E1b was rerun offline on fresh seeds with every predictor ([spec](../superpowers/specs/2026-09-26-b1-diagnostic-design.md), [Russian note](b1-diag.md), data in `results/b1/diag/`). The plan was chained over four chunks, so k runs up to 31. As a check, the oracle reproduces E1b: ρ_clip = 0.58 at k = 1–4, against 0.54.
+
+- **Why the learned model hurts less than wrong physics.**
+  - Per unit of observation error, `J` sees less of the learned model's error: ‖J·(o* − ô)‖ / ‖o* − ô‖ = 0.13, against 0.16–0.18 for wrong physics, lower on 11 of 12 levels.
+  - Half as much of it lies along `J`'s top direction.
+  - So the policy's action at the learned prediction is closer to a fresh call. At about the same error norm, the action error left after the correction is 0.050, against 0.075 for phys0.2.
+  - `J` does not recover a larger fraction: ρ_clip is 0.34 against 0.38 for phys0.2. There is simply less to correct.
+- **The `rtc_reflex` puzzle is only partly explained.** Offline, the learned model's correction on top of the plan's own action is slightly better than the oracle's on the median, but only on 4 of 12 levels. Three of them (walker, swimmer, catapult) are among the levels that carried the effect in closed loop. It becomes a hypothesis for B2+B5, stated before the data.
+- **Where the tangent breaks.**
+  - The quality of the tangent depends on the size of the deviation alone: one curve fits every predictor.
+  - ρ_clip falls from 0.79 at ‖e‖ < 0.17 to 0.3 at ‖e‖ ≈ 2.3 and to 0.06 beyond 7. Its median never turns negative, except for the learned model in the last bin (‖e‖ > 7: −0.02). Units are normalized; action noise alone gives about 0.55 by k = 4.
+  - In open loop, the oracle's median ρ_clip stays above 0.3 for 15–19 steps. The realistic predictors cross it after 4–14 steps, depending on the predictor and the set of levels. These are first crossings of noisy, non-monotonic curves, so they are rough.
+  - On long horizons, then, the limit is how fast the prediction error grows, not the tangent itself.
+  - This curve sets the trust-region thresholds for B3.
+
+### 8.9 Next
+
+Spec §5 maps SURVIVES with R4 = ENOUGH to B2, a cheaper package used with the learned model. The offline diagnostic (§8.8) is done. It also gives B2 an offline yardstick for a cheaper `J`: ρ_clip in the same ‖e‖ bins.
