@@ -182,8 +182,8 @@ def run(
     run_path: str = "checkpoints/bc",
     level_paths: Sequence[str] = probe.LEVELS,
     world_model_dir: str = predictors.WM_DIR,
-    num_envs: int = 64,
-    num_states: int = 128,
+    num_envs: int = 256,  # 4 chunk boundaries each: a pool of up to 1024 states
+    num_states: int = 512,  # 128 was too few for the heavy tails: spec changelog, the failed oracle check
     num_draws: int = 4,
     batch_size: int = 8,  # states per vmapped batch; lower it if RAM runs out
     seed: int = 4000,  # level probe.LEVELS[i] uses seed + i: disjoint from phase A, B1 and the diagnostic
