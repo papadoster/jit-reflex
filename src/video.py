@@ -35,6 +35,8 @@ PRESETS = {  # fixed before viewing any episode (see the plan); the last panel i
         level="mjc_swimmer", title="mjc_swimmer, learned world model (retrained locally)",
         panels=("realtime", "pred:learned", "reflex:learned"), hero="reflex:learned", rival="pred:learned",
         why="Level picked as B1's strongest for J (reflex - pred, learned model).",
+        note="The counts use a world model retrained locally, not B1's; with it pred is stronger on this level "
+        "(B1's seed 10, 256 episodes: pred 57% vs 43% with B1's model, reflex 76% vs 71%; wm_check_swimmer.csv).",
     ),
     "b": dict(
         level="mjc_swimmer", title="mjc_swimmer, physics with 20% parameter errors",
@@ -124,7 +126,7 @@ def demo(
         + ". B1 on this level (768 episodes): "
         + ", ".join(f"{_name(s.partition(':')[0])} {t.at[p['level'], s]:.0f}%" for s in specs) + ".",
         f"{p['why']} Mean over all 12 levels: reflex {(t[specs[2]] - t['realtime']).mean():+.1f} pp over RTC.",
-    ]
+    ] + ([p["note"]] if "note" in p else [])
     footer = _footer(lines, frames.shape[2])
     out = pathlib.Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)

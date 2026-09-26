@@ -1,0 +1,3 @@
+returned_episode_lengths,returned_episode_returns,returned_episode_solved,solved_length,seed,delay,method,predictor,level,execute_horizon,max_correction,kick_std
+230.71875,0.625,0.57421875,215.0272,10,3,pred,learned,worlds/l/mjc_swimmer.json,5,1.0,0.0
+206.78125,0.8515625,0.76171875,197.86667,10,3,reflex,learned,worlds/l/mjc_swimmer.json,5,1.0,0.0
