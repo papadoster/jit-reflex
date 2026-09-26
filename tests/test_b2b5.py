@@ -6,6 +6,7 @@ import pytest
 
 import b2b5
 import eval_flow
+import probe
 
 
 def test_b2b5_methods_are_registered():
@@ -138,3 +139,70 @@ def test_concurrent_fails_loudly_when_the_load_dies():
 
     with pytest.raises(RuntimeError, match="background load died"):
         b2b5._concurrent(lambda: time.sleep(0.01), fb, (), 3, 0)
+
+
+def _write_results(tmp_path, value, seeds=b2b5.SEEDS):
+    """results.csv for every grid config and seed; value(method, predictor, d, s, seed) -> solve rate."""
+    rows = [
+        {"method": m, "predictor": p, "delay": d, "execute_horizon": s, "seed": sd, "level": lv,
+         "returned_episode_solved": value(m, p, d, s, sd), "seconds": 1.0}
+        for m, p, d, s in b2b5.configs() for sd in seeds for lv in probe.LEVELS
+    ]
+    (tmp_path / "eval_A").mkdir(exist_ok=True)
+    pd.DataFrame(rows).to_csv(tmp_path / "eval_A" / "results.csv", index=False)
+    _lat().to_csv(tmp_path / "latency.csv", index=False)
+    (tmp_path / "latency.json").write_text(json.dumps(INFO))
+
+
+def test_summarize_rules(tmp_path):
+    def value(m, p, d, s, sd):
+        if m == "late1" and (d, s) == (4, 4):
+            return 0.80  # +5 pp over the best rival in every seed
+        if m == "t3" and (d, s) == (3, 5):
+            return 0.70 + (0.02 if sd == 20 else -0.02)  # pooled -0.67 pp against reflex's 0.70 -> KEEPS
+        if m == "reflex":
+            return 0.70
+        return 0.75 if m == "realtime" else 0.60
+
+    _write_results(tmp_path, value)
+    v = b2b5.summarize(out_dir=str(tmp_path))
+    assert v["B2-R1 t3"]["verdict"] == "KEEPS"
+    assert v["B5-R1 late"]["verdict"] == "WIN" and abs(v["B5-R1 late"]["pooled_pp"] - 5.0) < 1e-6
+    assert v["B5-R2 m3"]["verdict"] == "LOSE"  # m3 0.60 vs realtime 0.75
+    assert v["B5-R2 m3"]["edge"]["other_d"] == 5 and v["B5-R2 m3"]["edge"]["verdict_other_d"] == "NOT-FEASIBLE"
+    assert v["B5-R3 t3 (3,5)"]["verdict"] == "FAIL"
+    assert (tmp_path / "extension.txt").read_text() == ""
+
+
+def test_summarize_gray_writes_the_extension(tmp_path):
+    def value(m, p, d, s, sd):
+        if m == "late1" and (d, s) == (4, 4):
+            return 0.75 + (0.02 if sd == 20 else 0.0)  # pooled +0.67 pp, not > 0 in every seed -> GRAY
+        return 0.75 if m == "realtime" else 0.60
+
+    _write_results(tmp_path, value)
+    v = b2b5.summarize(out_dir=str(tmp_path))
+    assert v["B5-R1 late"]["verdict"] == "GRAY"
+    ext = (tmp_path / "extension.txt").read_text().splitlines()
+    assert any(ln.startswith("B --methods late1") and "--seeds 23 24 25" in ln for ln in ext)
+    assert any(ln.startswith("A --methods realtime ") for ln in ext)
+
+
+def test_summarize_strict_stops_on_a_missing_seed(tmp_path):
+    _write_results(tmp_path, lambda *a: 0.5, seeds=(20, 21))
+    with pytest.raises(SystemExit):
+        b2b5.summarize(out_dir=str(tmp_path))
+
+
+def test_summarize_partial_grid_without_strict(tmp_path):
+    _write_results(tmp_path, lambda m, *a: 0.75 if m == "realtime" else 0.60)
+    f = tmp_path / "eval_A" / "results.csv"
+    df = pd.read_csv(f)
+    df[df.method.isin(["naive", "realtime", "pred", "m3"])].to_csv(f, index=False)  # 53 of the 135 configs
+    _lat(m3=1.36).to_csv(tmp_path / "latency.csv", index=False)  # r_m3 x 3 = 4.08: d' = 5, but 4 within 3%
+    v = b2b5.summarize(out_dir=str(tmp_path), strict=False)
+    assert v["B2-R1 t3"]["verdict"] == "MISSING" and v["B5-R1 late"]["verdict"] == "MISSING"
+    assert v["B5-R2 m3"]["verdict"] == "NOT-FEASIBLE"
+    assert v["B5-R2 m3"]["edge"]["other_d"] == 4 and v["B5-R2 m3"]["edge"]["verdict_other_d"] == "LOSE"
+    res = json.loads((tmp_path / "b2b5.json").read_text())
+    assert res["missing"] == 3 * (135 - 53) and res["hypotheses"]["H2 spearman"] is None

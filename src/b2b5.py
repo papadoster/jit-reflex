@@ -373,7 +373,259 @@ def forecast(out_dir: str = OUT):
         print(f"worker {w}: {done} of {len(todo)} configs done, ~{hours:.1f} h left")
 
 
+E_BINS, E_FAR = "results/b1/diag/bins.csv", 2.3  # spec §8: rho_clip < 0.3 beyond |e| ~ 2.3 (diagnostic)
+H1_LEVELS = ("worlds/l/mjc_walker.json", "worlds/l/mjc_swimmer.json", "worlds/l/catapult.json",
+             "worlds/l/catcher_v3.json")
+
+
+def decide(kind: str, g: pd.Series) -> str:
+    """Spec §6 statuses from per-seed differences g (fractions)."""
+    if g.isna().any():
+        return "MISSING"
+    m = g.mean()
+    if kind == "keep":
+        return "KEEPS" if m >= -0.01 - 1e-9 else "LOSES" if (g < 0).all() else "GRAY"
+    hi, lo = {"win": ("WIN", "LOSE"), "pass": ("PASS", "FAIL")}[kind]
+    return hi if m >= 0.01 - 1e-9 and (g > 0).all() else lo if m <= 1e-9 else "GRAY"
+
+
+def fe_step(method: str, s: int, info: dict) -> float:
+    """Spec §5.4: network evaluations per env step (VJP = 2); A2C2 adds its head at every step."""
+    base = {"a2c2": "naive", "a2c2_distill": "naive", "realtime10": "realtime"}.get(method, method)
+    base = "late" if method.startswith("late") else base
+    fe = reflex.forward_equivalents(base, num_steps=10 if method == "realtime10" else 5, positions=s) / s
+    return fe + (info["head_gflop"] / info["gflop_per_eval"] if method.startswith("a2c2") else 0.0)
+
+
+def gpu_ms_step(method: str, d: int, s: int, lat: pd.DataFrame, info: dict, second_gpu: bool = False) -> float:
+    """Spec §5.4: GPU-ms per env step at batch 1; late J pays t3's call (doubled in the second-GPU scenario)."""
+    by = lat.set_index(["method", "delay", "execute_horizon"])["ms"]
+    m = "t3" if method.startswith("late") else "naive" if method.startswith("a2c2") else method
+    ms = float(by.xs(m).median()) if m in ("naive", "realtime", "realtime10") else float(by[(m, d, s)])
+    ms = ms * (2 if second_gpu and method.startswith("late") else 1) / s
+    return ms + (info["head_ms_gpu"] if method.startswith("a2c2") else 0.0)
+
+
+def summarize(out_dir: str = OUT, strict: bool = True, seeds: Sequence[int] = SEEDS,
+              diag_summary: str = "results/b1/diag/summary.csv") -> dict:
+    """Spec §6-7: rules (with the GRAY extension), predictions and hypotheses, prices, |e| shares, training compute.
+    Writes b2b5.json, frontier.csv, hist_summary.csv, training_compute.csv, b2b5.png and extension.txt (empty unless a
+    rule is GRAY). strict: stop if a grid config misses a seed; without it a missing config gives MISSING."""
+    out = pathlib.Path(out_dir)
+    df = pd.concat([pd.read_csv(f) for f in sorted(out.glob("eval_*/results.csv"))]).drop_duplicates(
+        ["seed", "delay", "execute_horizon", "method", "predictor", "level"]
+    )
+    P = df.groupby(["method", "predictor", "delay", "execute_horizon", "seed"])["returned_episode_solved"].mean()
+    cell = df.set_index(["method", "predictor", "delay", "execute_horizon", "seed", "level"])[
+        "returned_episode_solved"].sort_index()
+    lat, info = pd.read_csv(out / "latency.csv"), json.loads((out / "latency.json").read_text())
+    ratio = lat.set_index(["method", "delay", "execute_horizon"])["ms"] / info["realtime_ms"]
+    grid = configs(BLOCKS + extra_blocks(out_dir))
+    missing = [(*c, sd) for c in sorted(grid) for sd in seeds if (*c, sd) not in P.index]
+    if missing and strict:
+        raise SystemExit(f"{len(missing)} (config, seed) cells missing, rerun the workers: {missing[:10]}")
+
+    def ps(cfg, sd=seeds):
+        return pd.Series([P.get((*cfg, x), np.nan) for x in sd], index=list(sd))
+
+    def best(rivals, sd=seeds):
+        return pd.concat([ps(r, sd) for r in rivals], axis=1).max(axis=1, skipna=False)
+
+    def rivals_at(pl):
+        return ([(m, "-", d, s) for m in ("naive", "realtime", "realtime10") for d, s in pl[m]]
+                + [("pred", "learned", d, s) for d, s in pl["pred"]])
+
+    def ci(cand, rivals):  # report only: 95% bootstrap over level x seed cells, the best rival chosen per seed
+        diffs = []
+        for x in seeds:
+            r = max(rivals, key=lambda c: P.get((*c, x), -1.0))
+            diffs.append((cell.xs((*cand, x)) - cell.xs((*r, x))).to_numpy())
+        m, lo, hi = plot._boot(np.concatenate(diffs), 10_000, np.random.default_rng(0))
+        return [100 * lo, 100 * hi]
+
+    pls = {(b, sc): placement(lat, info, b, *((None, None) if sc == "measured" else (1.0, 1.0)), grid=grid)
+           for b in (1, 2, 3, 4) for sc in ("measured", "second_gpu")}
+    pl3, pl3_2 = pls[(3, "measured")], pls[(3, "second_gpu")]
+    rules = {f"B2-R1 {c}{sfx}": ("keep", (c, "learned", *cl), [("reflex", "learned", *cl)])  # §6.1: D4 shown only
+             for c in ("t3", "m3") for cl, sfx in ((D3, ""), (D4, " D4 (report)"))}
+    for name, pl in (("B5-R1 late", pl3), ("B5-R1 late, second GPU (report)", pl3_2)):
+        cand = [c for c in pl["late"] if c["s"] == 8 - c["d"]]
+        rules[name] = ("win", (cand[0]["method"], "learned", cand[0]["d"], cand[0]["s"]) if cand else None,
+                       rivals_at(pl))
+    x_m3 = float(ratio[("m3", *D4)] * 3)
+    rules["B5-R2 m3"] = ("win", ("m3", "learned", *D4) if _ceil(x_m3) <= 4 else None, rivals_at(pl3))  # §6.3
+    for d, s in (D3, D4):
+        rules[f"B5-R3 t3 ({d},{s})"] = ("pass", ("t3", "learned", d, s),
+                                         [(m, "-", d, s) for m in ("naive", "realtime", "realtime10")]
+                                         + [("pred", "learned", d, s)])
+    verdicts, ext = {}, set()
+    for name, (kind, cand, rivals) in rules.items():
+        if cand is None:
+            verdicts[name] = {"verdict": "NOT-FEASIBLE"}
+            continue
+        g = ps(cand) - best(rivals)
+        v = {"verdict": decide(kind, g), "pooled_pp": 100 * float(g.mean()), "per_seed_pp": (100 * g).tolist(),
+             "cand": list(cand), "rivals": [list(r) for r in rivals]}
+        if v["verdict"] != "MISSING":
+            v["ci95_pp"] = ci(cand, rivals)
+        if v["verdict"] == "GRAY" and "report" not in name:
+            all_sd = (*seeds, *EXT_SEEDS)
+            g6 = ps(cand, all_sd) - best(rivals, all_sd)
+            if g6.notna().all():
+                v |= {"verdict_6_seeds": decide(kind, g6), "pooled_6_pp": 100 * float(g6.mean())}
+            else:
+                ext |= {cand, *rivals}
+        verdicts[name] = v
+    for c in ("t3", "m3"):  # spec §6.1: B2's goal is met if c KEEPS and r_c(3,5) <= 1.2
+        v = verdicts[f"B2-R1 {c}"]
+        v |= {"r(3,5)": float(ratio[(c, *D3)]),
+              "B2 goal": v.get("verdict_6_seeds", v["verdict"]) == "KEEPS" and bool(ratio[(c, *D3)] <= 1.2)}
+    late = [c for c in pl3["late"] if c["s"] == 8 - c["d"]]
+    k, kj = (info["kappa"], info["kappa_j"]) if info["kappa"] > 1.10 else (1.0, 1.0)  # spec §5.2
+    x_nom, x_j = ((late[0]["x_nom"], late[0]["x_j"]) if late  # none (NOT-FEASIBLE): §6.2's (4,4) measurement
+                  else (k * ratio[("pred", *D4)] * 3, kj * ratio[("t3", *D4)] * 3))
+    for name, x in (("B5-R1 late", float(x_nom)), ("B5-R2 m3", x_m3)):
+        n = other_side(x)  # spec §5.1: within ±3% of a d' edge, the verdict at the other d' goes next to it
+        e = {"x": x, "other_d": n}
+        if n is not None:
+            dl = _ceil(x_j) - n  # late: the same J latency, delta counted from the other d'
+            m = "m3" if name.endswith("m3") else "t3" if dl <= 0 else "pred" if dl >= 8 - n else f"late{dl}"
+            ve = decide("win", ps((m, "learned", n, 8 - n)) - best(rivals_at(pl3))) if n <= 4 else "NOT-FEASIBLE"
+            e["verdict_other_d"] = "no data" if ve == "MISSING" else ve
+        verdicts[name]["edge"] = e
+    lines = [
+        f"{worker_of(m)} " + _args((m,), (p,), [(d, s)], EXT_SEEDS, f"{out_dir}/eval_ext_{worker_of(m)}")
+        for m, p, d, s in sorted(ext) if any((m, p, d, s, x) not in P.index for x in EXT_SEEDS)
+    ]
+    (out / "extension.txt").write_text("".join(ln + "\n" for ln in lines))
+
+    def pooled(cfg):
+        return float(ps(cfg).mean())
+
+    hyp = {
+        "P1 m3-t3 D3 pp": 100 * (pooled(("m3", "learned", *D3)) - pooled(("t3", "learned", *D3))),
+        "P1 m3-t3 D1 pp": 100 * float(np.mean([pooled(("m3", "learned", *c)) - pooled(("t3", "learned", *c))
+                                               for c in D1])),
+        "H1 D1 pp": 100 * float(np.mean([pooled(("rtc_reflex", "learned", *c)) - pooled(("rtc_reflex", "oracle", *c))
+                                         for c in D1])),
+        "H1 D3 pp": 100 * (pooled(("rtc_reflex", "learned", *D3)) - pooled(("rtc_reflex", "oracle", *D3))),
+        "E2 late1-pred (4,4) pp": 100 * (pooled(("late1", "learned", *D4)) - pooled(("pred", "learned", *D4))),
+    }
+    hyp["P1 held"] = abs(hyp["P1 m3-t3 D3 pp"]) <= 1 and hyp["P1 m3-t3 D1 pp"] <= -1
+    lv = df[df.seed.isin(seeds)].groupby(["method", "predictor", "delay", "execute_horizon", "level"])[
+        "returned_episode_solved"].mean()
+    for sl, cells in (("D1", D1), ("D3", [D3])):  # spec §7 H1: on each slice, D1's per-level difference over its s
+        try:  # per-level parts; a partial grid (the rehearsal) lacks some rows: None instead of a crash
+            pos = (sum(lv.xs(("rtc_reflex", "learned", *c)) - lv.xs(("rtc_reflex", "oracle", *c)) for c in cells)
+                   / len(cells)).clip(lower=0)
+            share = float(pos[list(H1_LEVELS)].sum() / pos.sum()) if pos.sum() > 0 else None
+        except KeyError:
+            share = None
+        hyp[f"H1 share on the 4 levels {sl}"] = share
+    hyp["H1 held"] = hyp["H1 D1 pp"] >= 0 and hyp["H1 D3 pp"] >= 0 and all(
+        (hyp[f"H1 share on the 4 levels {sl}"] or 0) >= 0.5 for sl in ("D1", "D3"))
+    try:
+        t = pd.read_csv(diag_summary)
+        t = t[(t.k <= 7) & (t.frac >= diag.MIN_FRAC)].groupby(["level", "predictor"])[["je_pred", "e_pred"]].mean()
+        vis = t["je_pred"] / t["e_pred"]
+        gap = vis.xs("phys0.2", level="predictor") - vis.xs("learned", level="predictor")
+        drop = {p: lv.xs(("reflex", "oracle", *D3)) - lv.xs(("reflex", p, *D3)) for p in ("learned", "phys0.2")}
+        h2 = pd.DataFrame({"drop_diff": drop["phys0.2"] - drop["learned"],
+                           "vis_gap": gap.rename(index=lambda n: n.replace("worlds_l_", "worlds/l/") + ".json")})
+        hyp["H2 spearman"] = float(h2.corr(method="spearman").iloc[0, 1])
+        hyp["H2 levels with both > 0"] = int(((h2.drop_diff > 0) & (h2.vis_gap > 0)).sum())
+    except KeyError:
+        hyp["H2 spearman"] = hyp["H2 levels with both > 0"] = None
+
+    rows = []
+    for (b, sc), pl in pls.items():
+        for m, cells in pl.items():
+            items = ([(c["method"], c["d"], c["s"], "late") for c in cells] if m == "late"
+                     else [(m, d, s, m) for d, s in cells])
+            for em, d, s, label in items:
+                pr = "learned" if em in REFLEX else "-"
+                if (em, pr, d, s) in grid:
+                    rows.append({"view": f"latency-fair {sc}", "base": b, "label": label, "method": em, "delay": d,
+                                 "execute_horizon": s, "P": pooled((em, pr, d, s)),
+                                 "gpu_ms_step": gpu_ms_step(em, d, s, lat, info, sc == "second_gpu"),
+                                 "fe_step": fe_step(em, s, info)})
+    for d, s in [*D1, (3, 3), (3, 4), D3, D4]:
+        for m, pr, dd, ss in sorted(grid):
+            if (dd, ss) == (d, s) and pr in ("-", "learned"):
+                rows.append({"view": "same-delay", "base": d, "label": m, "method": m, "delay": d,
+                             "execute_horizon": s, "P": pooled((m, pr, d, s)),
+                             "gpu_ms_step": gpu_ms_step(m, d, s, lat, info), "fe_step": fe_step(m, s, info)})
+    fr = pd.DataFrame(rows)
+    for price in ("gpu_ms_step", "fe_step"):
+        fr[f"dominated_{price}"] = [
+            bool(((g[price] <= r[price]) & (g["P"] >= r["P"]) & (g.index != i)).any())
+            for i, r in fr.iterrows() for g in [fr[(fr.view == r.view) & (fr.base == r.base)]]
+        ]
+    fr.to_csv(out / "frontier.csv", index=False)
+    _figure(fr, out / "b2b5.png")
+
+    hs = [pd.read_csv(f) for f in sorted(out.glob("eval_*/hist.csv"))]
+    if hs:
+        h = pd.concat(hs)
+        edges = pd.read_csv(E_BINS).query("predictor == 'all'").sort_values("bin")["e_lo"].to_numpy()
+        h["far"] = h["bin"] >= int(np.argmin(np.abs(edges - E_FAR)))
+        g = h.assign(far_count=h["count"] * h["far"]).groupby(["method", "delay", "execute_horizon", "k"])[
+            ["count", "far_count"]].sum()
+        g.assign(share_far=g.far_count / g["count"]).to_csv(out / "hist_summary.csv")
+    _training_compute(out, info).to_csv(out / "training_compute.csv", index=False)
+    res = {"verdicts": verdicts, "hypotheses": hyp, "latency": info, "missing": len(missing)}
+    (out / "b2b5.json").write_text(json.dumps(res, indent=1, default=str))
+    print(json.dumps(res, indent=1, default=str))
+    return verdicts
+
+
+def _figure(fr: pd.DataFrame, path):
+    """Row 1: latency-fair (measured kappa), base 1-4, P against GPU-ms per step. Row 2: same delay, P against FE per
+    step, d = 1 (s 5-7), 3 (s 3-5), 4. Configs without data (P NaN) are not drawn."""
+    fig, axes = plt.subplots(2, 4, figsize=(20, 9))
+    colors = {lb: plt.cm.tab20(i) for i, lb in enumerate(sorted(fr.label.unique()))}  # one color per label everywhere
+    for ax, b in zip(axes[0], (1, 2, 3, 4)):
+        g = fr[(fr.view == "latency-fair measured") & (fr.base == b)]
+        for label, gg in g.groupby("label"):
+            ax.scatter(gg.gpu_ms_step, 100 * gg.P, color=colors[label], s=18)
+        ax.set_title(f"latency-fair, base d = {b}")
+        ax.set_xlabel("GPU-ms per step (batch 1)")
+    for ax, b in zip(axes[1], (1, 3, 4)):
+        g = fr[(fr.view == "same-delay") & (fr.base == b)]
+        for label, gg in g.groupby("label"):
+            ax.scatter(gg.fe_step, 100 * gg.P, color=colors[label], s=18)
+        ax.set_xscale("log")
+        ax.set_title(f"same delay d = {b}")
+        ax.set_xlabel("network evaluations per step")
+    for ax in axes.flat:
+        ax.set_ylabel("solved (%)")
+    axes[1][3].axis("off")
+    axes[1][3].legend(handles=[plt.Line2D([], [], marker="o", ls="", color=c, label=lb) for lb, c in colors.items()],
+                      loc="center")
+    fig.tight_layout()
+    fig.savefig(path, dpi=130)
+    plt.close(fig)
+
+
+def _training_compute(out: pathlib.Path, info: dict) -> pd.DataFrame:
+    """Spec §5.4 report column, per level: env transitions used and training FLOPs (analytic, 6 x params per item)."""
+    wm_params = (679 + 6) * 256 + 256 * 256 + 256 * 679 + 2 * 256 + 679  # (O + A) -> 256 -> 256 -> O, O = 679, A = 6
+    rows = [{"method": "world model", "transitions": 128 * 256, "train_gflop": 6 * wm_params * 10_000 * 512 / 1e9}]
+    head_gflop = info["head_gflop"]
+    for name in ("a2c2", "a2c2_distill"):
+        f = out / name / "train_log.csv"
+        if not f.exists():
+            continue
+        for r in pd.read_csv(f).to_dict("records"):
+            per_item = 3 * head_gflop + (5 * info["gflop_per_eval"] if name == "a2c2" else 0.0)
+            collect = 5 * info["gflop_per_eval"] * r["transitions"] * (1 + 1 / 8) if name == "a2c2_distill" else 0.0
+            rows.append({"method": name, "level": r["level"], "transitions": r["transitions"],
+                         "train_gflop": r["steps"] * 512 * per_item + collect})
+    return pd.DataFrame(rows)
+
+
 if __name__ == "__main__":
     tyro.extras.subcommand_cli_from_dict({
         "commands": commands, "lock": lock, "e-std": e_std, "latency": latency, "place": place, "forecast": forecast,
+        "summarize": summarize,
     })
