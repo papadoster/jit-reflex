@@ -195,7 +195,7 @@ def run(
     wm_dir = pathlib.Path(world_model_dir)
     config = {  # saved with every level: a resumed run must not mix files of other settings or world models
         "run_path": run_path, "num_envs": num_envs, "num_states": num_states, "num_draws": num_draws,
-        "num_flow_steps": S, "candidates": list(CANDIDATES), "shared_k": SHARED_K,
+        "num_flow_steps": S, "candidates": list(CANDIDATES), "shared_k": SHARED_K, "base_seed": seed,
         "world_models": {predictors.level_name(p): sha256(wm_dir / f"{predictors.level_name(p)}.pkl")
                          for p in probe.LEVELS},
     }

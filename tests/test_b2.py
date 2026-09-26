@@ -114,3 +114,13 @@ def test_probe_state_without_noise(monkeypatch):
     for name in ("pred", "reflex", "shared", "T1", "T2", "T3"):  # a* is the exact nominal, the correction ~0
         np.testing.assert_allclose(out[name][0], 0, atol=1e-6, err_msg=name)
     assert float(out["nom_W1"][0].max()) > 0 and float(out["nom_M1"][0].max()) > 0  # approximate nominals
+
+
+def test_probe_state_shared_and_full_depth(monkeypatch):
+    monkeypatch.setattr(b2, "CANDIDATES", ("T5", "W5", "M5"))
+    out = _probe()
+    i = b2.SHARED_K - 1  # at chunk index 5 the shared J is the exact J
+    np.testing.assert_allclose(out["shared"][..., i], out["reflex"][..., i], rtol=1e-5, atol=1e-7)
+    for c in b2.CANDIDATES:  # full depth = the exact reflex; W5 starts from warm[0] = roll(z, -k) = zk
+        np.testing.assert_allclose(out[f"nom_{c}"], out["pred"], rtol=1e-4, atol=1e-6, err_msg=c)
+        np.testing.assert_allclose(out[c], out["reflex"], rtol=1e-4, atol=1e-6, err_msg=c)
