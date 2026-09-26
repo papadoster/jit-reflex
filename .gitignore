@@ -223,5 +223,6 @@ wandb/
 results/smoke*/
 .DS_Store
 results/**/*.pkl
+!results/b1/world_models/*.pkl
 results/**/*.npz
 *.tgz
