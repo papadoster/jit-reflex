@@ -41,6 +41,10 @@ MIN_GAIN = 0.1  # levels where the exact reflex improves res over pred by < 10% 
 PASS_R, STRICT_R, MIN_LEVELS = 0.8, 0.9, 10
 OUT = "results/b2/offline"
 DIAG_BINS = "results/b1/diag/bins.csv"  # the |e| bin edges: deciles of the diagnostic's pairs (predictor "all")
+# moved to reflex.py: the B2+B5 closed loop uses these same packages (spec B2+B5 §3); kept here for b2's callers
+run_flow = reflex.run_flow
+first_action_fn = reflex.first_action_fn
+action_and_jacobian = reflex.action_and_jacobian
 
 
 def depth(row: str) -> int:
@@ -65,60 +69,10 @@ def fe(row: str) -> int:
     return S + P * (S + 2 * A * n) if row[0] == "T" else S + P * (n + 2 * A * n)
 
 
-def run_flow(policy, x, obs, t, n: int, dt: float):
-    """n Euler steps of pi's flow, as in model.action_from_noise, from x [H, A] at time t, conditioned on obs [O].
-
-    Returns ((x, t) after the steps, the states before each step [n, H, A]).
-    """
-
-    def step(c, _):
-        x, t = c
-        return (x + dt * policy(obs[None], x[None], t)[0], t + dt), x
-
-    return jax.lax.scan(step, (x, jnp.asarray(t, x.dtype)), None, length=n)
-
-
 def flow_states(policy, noise, obs, num_steps: int):
     """The chunk's flow states x_0 = noise, ..., x_S = the chunk: [S + 1, H, A]."""
     (x, _), xs = run_flow(policy, noise, obs, 0.0, num_steps, 1 / num_steps)
     return jnp.concatenate([xs, x[None]])
-
-
-def first_action_fn(policy, name: str, z, warm, num_steps: int):
-    """o [O] -> the first action of package `name` ("T2", "W1", "M3", ...) at one chunk index (spec section 3).
-
-    z [H, A] is the call's noise rolled to this index (reflex.shifted_noise); warm [S + 1, H, A] is the chunk's flow
-    states rolled the same way (W only). T_n, W_n and M_n with n = num_steps are the exact reflex.
-    """
-    kind, n = name[0], int(name[1:])
-    if kind == "T":  # the exact forward pass; J only through the last n steps
-
-        def f(o):
-            (x, t), _ = run_flow(policy, z, o, 0.0, num_steps - n, 1 / num_steps)
-            (x, _), _ = run_flow(policy, jax.lax.stop_gradient(x), o, t, n, 1 / num_steps)
-            return x[0]
-
-    elif kind == "W":  # the last n steps from the chunk's state at step S - n (queried at o_0, not at ô)
-
-        def f(o):
-            (x, _), _ = run_flow(policy, warm[num_steps - n], o, (num_steps - n) / num_steps, n, 1 / num_steps)
-            return x[0]
-
-    else:
-        assert kind == "M", name
-
-        def f(o):  # an n-step flow from the same noise
-            (x, _), _ = run_flow(policy, z, o, 0.0, n, 1 / n)
-            return x[0]
-
-    return f
-
-
-def action_and_jacobian(f, o):
-    """f: o [O] -> a [A]. Returns (a, da/do [A, O]) from A reverse-mode VJPs, as reflex.first_action_and_jacobian."""
-    a0, vjp = jax.vjp(f, o)
-    (jac,) = jax.vmap(vjp)(jnp.eye(a0.shape[0], dtype=a0.dtype))
-    return a0, jac
 
 
 def probe_state(policy, base, params, wm, raw, obs, key, std, num_draws: int, num_steps: int):

@@ -361,3 +361,51 @@ def test_b1_ci_resamples_level_seed_cells(tmp_path):
     assert r["cells"] == 3  # one level x three seeds
     assert r["mean"] == pytest.approx(7.0) and r["lo"] == pytest.approx(7.0) and r["hi"] == pytest.approx(7.0)
     assert (tmp_path / "b1_ci.png").exists()
+
+
+def _package_inputs():
+    policy = small_policy(5, 3)
+    B, H = 2, policy.action_chunk_size
+    noise = jax.random.normal(jax.random.key(1), (B, H, 3))
+    ref = jax.random.normal(jax.random.key(2), (B, H, 5))
+    return policy, noise, ref, jnp.zeros((B, H, 3))
+
+
+def test_cheap_packages_are_first_action_fn_per_position():
+    policy, noise, ref, chunk = _package_inputs()
+    for cand in ("T3", "M3"):
+        nom, gain = reflex.package(policy, noise, ref, chunk, 5, True, True, used=(2, 6), cand=cand)
+        for b in range(2):
+            for j in range(2, 6):
+                f = reflex.first_action_fn(policy, cand, reflex.shifted_noise(noise[b])[j], None, 5)
+                a, jac = reflex.action_and_jacobian(f, ref[b, j])
+                np.testing.assert_allclose(nom[b, j], a, atol=1e-6)
+                np.testing.assert_allclose(gain[b, j], jac, atol=1e-6)
+        assert (nom[:, :2] == 0).all() and (nom[:, 6:] == 0).all() and (gain[:, 6:] == 0).all()
+
+
+def test_t5_package_is_the_exact_reflex():
+    policy, noise, ref, chunk = _package_inputs()
+    exact = reflex.package(policy, noise, ref, chunk, 5, True, True, used=(1, 7))
+    t5 = reflex.package(policy, noise, ref, chunk, 5, True, True, used=(1, 7), cand="T5")
+    for a, b in zip(exact, t5):
+        np.testing.assert_allclose(a, b, atol=1e-5)
+
+
+def test_late_j_zeroes_the_gain_below_j_from():
+    policy, noise, ref, chunk = _package_inputs()
+    nom, gain = reflex.package(policy, noise, ref, chunk, 5, True, True, used=(2, 6), cand="T3")
+    nom_l, gain_l = reflex.package(policy, noise, ref, chunk, 5, True, True, used=(2, 6), cand="T3", j_from=4)
+    assert (nom_l == nom).all()
+    assert (gain_l[:, :4] == 0).all() and (gain_l[:, 4:] == gain[:, 4:]).all()
+    nom_p, _ = reflex.package(policy, noise, ref, chunk, 5, True, False, used=(2, 6))  # pred's nominal
+    np.testing.assert_allclose(nom[:, 2:6], nom_p[:, 2:6], atol=1e-6)  # T3's nominal is exact
+
+
+def test_forward_equivalents_of_b2b5_methods():
+    import b2
+
+    assert reflex.forward_equivalents("t3", positions=5) == b2.fe("T3") == 210
+    assert reflex.forward_equivalents("late", positions=5) == 210
+    assert reflex.forward_equivalents("m3", positions=5) == b2.fe("M3") == 200
+    assert reflex.forward_equivalents("realtime", num_steps=10) == 30
