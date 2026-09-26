@@ -46,6 +46,11 @@ def test_full_depth_packages_are_the_exact_reflex():
         a_c, jac_c = b2.action_and_jacobian(b2.first_action_fn(policy, name, zj, warm, S), o)
         np.testing.assert_allclose(a_c, a, atol=1e-5, err_msg=name)
         np.testing.assert_allclose(jac_c, jac, atol=1e-5, err_msg=name)
+    for m in (1, 2, 3):  # M_m is the exact reflex of an m-step flow
+        a_m, jac_m = reflex.first_action_and_jacobian(policy, zj, o, m)
+        a_c, jac_c = b2.action_and_jacobian(b2.first_action_fn(policy, f"M{m}", zj, warm, S), o)
+        np.testing.assert_allclose(a_c, a_m, atol=1e-6, err_msg=f"M{m}")
+        np.testing.assert_allclose(jac_c, jac_m, atol=1e-6, err_msg=f"M{m}")
 
 
 def test_truncated_jacobian_is_the_last_steps_chain():
@@ -66,7 +71,8 @@ def test_truncated_jacobian_is_the_last_steps_chain():
 def test_warm_start_starts_from_the_chunks_state():
     policy, z, o0, o = _flow_setup()
     xs = b2.flow_states(policy, z, o0, S)
-    a_w, _ = b2.action_and_jacobian(b2.first_action_fn(policy, "W1", z, xs, S), o0)
-    np.testing.assert_allclose(a_w, xs[-1][0], atol=1e-6)  # at j = 0 and o = o0 the last step rebuilds the chunk
+    for n in (1, 2, 3):  # at j = 0 and o = o0 the last n steps rebuild the chunk
+        a_w, _ = b2.action_and_jacobian(b2.first_action_fn(policy, f"W{n}", z, xs, S), o0)
+        np.testing.assert_allclose(a_w, xs[-1][0], atol=1e-6, err_msg=f"W{n}")
     a_w, _ = b2.action_and_jacobian(b2.first_action_fn(policy, "W1", z, xs, S), o)
     assert not np.allclose(a_w, xs[-1][0], atol=1e-4)  # at another obs it moves
