@@ -1,6 +1,6 @@
 # JIT Reflex: linearizing a frozen action-chunking policy between its calls
 
-*Aleksandr Karpov · Phase A report, with phase B1 in [§8](#8-phase-b1-stale-plans-and-imperfect-predictors) · Kinetix (12 levels) · September 2026. Lab notes in Russian: [E1 memo](probe.md), [E2 / Gate 2 memo](closed-loop.md), [B1 memo](b1.md), and the [design spec](../superpowers/specs/2026-09-23-jit-reflex-phase-a-design.md) with its changelog.*
+*Aleksandr Karpov · Phase A report, with phase B1 in [§8](#8-phase-b1-stale-plans-and-imperfect-predictors) and the offline part of B2 in [§9](#9-phase-b2-offline-a-cheaper-reflex-package) · Kinetix (12 levels) · September 2026. Lab notes in Russian: [E1 memo](probe.md), [E2 / Gate 2 memo](closed-loop.md), [B1 memo](b1.md), [B2 offline memo](b2-offline.md), and the [design spec](../superpowers/specs/2026-09-23-jit-reflex-phase-a-design.md) with its changelog.*
 
 ## TL;DR
 
@@ -13,6 +13,7 @@
 - **The pre-registered Gate 2 is NEGATIVE:** `J` accounted for 20% of the gain, and the bar was 50%. The pre-registered **RTC + reflex** combination also missed its bar.
 - **Cost.** A reflex call is 525 network evaluations, 35× RTC, and has **2.07× RTC latency**. In the only latency-fair comparison the benchmark allows (d = 1), the reflex loses.
 - **Phase B1 (§8)** replaced the oracle with wrong physics and a learned world model. The pre-registered verdict is SURVIVES, narrowly. With the learned model, reflex ≈ oracle reflex, and all of its gain over RTC appears only when `J` is switched on. Latency is still 1.8–1.9× RTC.
+- **Phase B2, offline (§9).** A rule written before the data sends two shallower packages to the GPU run: `J` through only the last 3 of 5 flow steps (T3), and a 3-step flow (M3). Only T3 holds up in every check: it keeps a median 94% of the exact `J`'s offline gain and beats `pred` on all 12 levels. But it cuts depth by only 20%, so latency will likely stay around 1.5× RTC.
 
 ## 1. Hypothesis
 
@@ -258,4 +259,58 @@ To explain §8.5, E1b was rerun offline on fresh seeds with every predictor ([sp
 
 ### 8.9 Next
 
-Spec §5 maps SURVIVES with R4 = ENOUGH to B2, a cheaper package used with the learned model. The offline diagnostic (§8.8) is done. It also gives B2 an offline yardstick for a cheaper `J`: ρ_clip in the same ‖e‖ bins.
+Spec §5 maps SURVIVES with R4 = ENOUGH to B2, a cheaper package used with the learned model. The offline diagnostic (§8.8) is done. B2's offline selection is done (§9).
+
+## 9. Phase B2, offline: a cheaper reflex package
+
+B1 showed that a reflex call's latency is set by its depth, not by the number of network evaluations. After the exact speedup a call still costs 1.8–1.9× RTC, and most of the extra is the backward pass through all five flow steps. B2 looks for a shallower package. Candidates were scored offline, as in E1b and §8.8. A rule written before the data picks the ones that go to a single GPU run for B2 and B5 ([spec](../superpowers/specs/2026-09-26-b2-offline-design.md), [Russian memo](b2-offline.md), data in `results/b2/offline/`).
+
+**Candidates.** Depth counts the sequential flow steps after the chunk and the predictor, with forward and backward steps counted as 1 each. The exact reflex has depth 10 and `pred` has depth 5.
+- **T_k:** the exact 5-step forward pass at ô, with `J` taken through the last k steps only. The nominal action is exact. Depth 5 + k.
+- **W_k:** a warm start that runs only the last k steps at ô, starting from the chunk's own intermediate state. Depth 2k.
+- **M_m:** an m-step flow from the same noise. Depth 2m.
+- **Width rows:** one `J` shared across all positions, and `J` on the bound action dimensions only. The latter is exact by construction, so it was not scored.
+
+**Yardstick and rule.**
+- **Yardstick:** the residual against a fresh call, ‖exec(a*) − exec(nom + clip(J·e))‖², in the ‖e‖ bins of §8.8.
+- **Summary score:** R, the share of the exact `J`'s gain over `pred` that a candidate keeps. It is computed per level from pairs with ‖e‖ ≤ 2.3 and k ≤ 7, then the median is taken over levels.
+- **Pass:** a median R ≥ 0.8, and beating `pred` on at least 10 of 12 levels.
+- **GPU run:** the shallowest passer, the best passing T_k, and the shallowest candidate with R ≥ 0.9.
+
+**Checks.** The first run, with 128 states per level, failed the oracle sanity check: ρ_clip at k = 1–4 was 0.40, against 0.578 ± 0.1.
+- **Cause:** before reading anything else, we traced the failure to state sampling, not code. A bootstrap over states gave (0.37, 0.59). The diagnostic's own code, run on the same states, gave similarly low values.
+- **Repeat:** the run was repeated with 512 states per level, and the first run was never read. The repeat passed, at the edge: 0.478.
+- **Code check:** on shared states, flow noise and action noise, the exact reflex in the B2 code matches the diagnostic's code bit for bit.
+
+| package | R | levels beating `pred` | R without the heaviest 5% of states | R with the oracle | depth | forward evals |
+|---|---|---|---|---|---|---|
+| exact reflex | 1 | 12 | 1 | 1 | 10 | 330 |
+| **T3** | **0.94** | **12** | **0.97** | **0.90** | 8 | 210 |
+| T2 | 0.71 | 12 | 0.76 | 0.66 | 7 | 150 |
+| T1 | 0.29 | 12 | 0.30 | 0.25 | 6 | 90 |
+| **M3** | 0.85 | 11 | 0.75 (9 levels) | 0.59 | 6 | 200 |
+| W3 | 0.80 | 10 | 0.35 (7 levels) | −0.11 | 6 | 200 |
+| M1 / W1 | −5.8 / −0.96 | 1 / 2 | — | — | 2 | 70 |
+| one shared `J` | −0.11 | 5 | −0.23 | 0.05 | 10 | 90 |
+
+- **The rule passes T3, M3 and W3, and sends M3 and T3 to the GPU run.** M3 ties W3 on depth and cost and wins on R. T3 is the best T_k and the only candidate with R ≥ 0.9.
+- **Only T3 is robust.** It keeps 94% of the gain on 12 of 12 levels, 97% without the heaviest 5% of states, and 90% with the oracle. At every chunk index R is 0.89–0.97, and on 4 levels it is as good as or better than the exact `J`.
+- **M3 and W3 pass on the mid-size and large deviations.**
+  - Their nominal action is not π(ô). At small ‖e‖ their residual is 9–18× the exact reflex's, and higher than `pred`'s.
+  - They fail without the heavy states and with the oracle, whose small prediction error leaves that floor exposed.
+  - M3 fails mostly at k = 1–2 (R 0.44, 0.63). At the positions executed at d = 3 (k = 3–7) its R is 0.86–1.03.
+- **Sharing one `J` across positions is worse than using no `J`.**
+
+**Cost.** T3 cuts depth by only 20% (from 10 to 8), and M3 by 40%.
+- **Latency estimate,** interpolated from B1's timings ([cost.txt](../../results/b1/gpu/cost.txt): RTX 4090, batch 1, d = 1, s = 1, 4, 7):
+  - T3 keeps 3 of the exact reflex's 5 backward steps: r_T3 ≈ r_pred + 3/5·(r_reflex − r_pred) ≈ 1.5–1.6.
+  - M3 also runs 2 fewer forward steps: r_M3 ≈ r_T3 − 2/5·(r_pred − r_naive) ≈ 1.3–1.4.
+
+  Both are above the 1.2 target. The GPU run will measure the real values.
+- **Consequence:** a latency-fair grid at d = 3 needs r ≤ 4/3 ≈ 1.33. Then d′ = ⌈r·3⌉ = 4, and s = 4 satisfies s ≥ d′ and s + d′ ≤ 8.
+  - At T3's r ≈ 1.5 the grid is impossible, and a latency-fair comparison remains only at d ≤ 2, where the reflex gains little.
+  - M3 sits at that edge, and at the positions executed at d = 3 its R is 0.86–1.03. Its measured latency will decide whether a latency-fair grid at d = 3 is possible at all.
+
+**Next.** One GPU run for B2+B5 with T3, M3, the exact reflex, `pred`, `rtc_reflex`, RTC, naive and A2C2, the trained residual corrector that is B5's mandatory baseline (B4 in the [roadmap](../roadmap.md)).
+- **First question:** taking `J` off the critical path. Execution would start on `pred`'s nominal (r ≈ 1.1), and the correction would switch on at the positions `J` has reached by then.
+- **Prediction, stated before the data:** at d = 3, M3 is close to T3; at d = 1, it is clearly worse.

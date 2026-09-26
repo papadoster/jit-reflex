@@ -46,7 +46,7 @@ Phase A computes `J` at all 8 chunk positions, through all 5 flow steps. That is
 - **T3:** `J` through the last 3 of 5 flow steps, exact nominal, depth 8 against 10. It keeps 94% of the exact `J`'s offline gain over pred on 12 of 12 levels, and still holds without the top-5% states and with the oracle.
 - **M3:** a 3-step flow, depth 6. It passes narrowly and fails both of those checks.
 
-One `J` shared across positions hurts. A rough latency estimate for T3 is r ≈ 1.4–1.6, above the 1.2 target, which rules out a latency-fair grid at d = 3. Taking `J` off the critical path is the first question for the B2+B5 spec.
+One `J` shared across positions hurts. Interpolating B1's timings gives r ≈ 1.5–1.6 for T3, above the 1.2 target. That rules out a latency-fair grid at d = 3, which needs r ≤ 4/3. M3, at about 1.3–1.4, sits at that edge. Taking `J` off the critical path is the first question for the B2+B5 spec.
 
 ## B3. Trust region: when to use the reflex
 
