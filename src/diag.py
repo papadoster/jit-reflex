@@ -170,6 +170,15 @@ def stored_config(res) -> dict | None:
     return {k: v for k, v in json.loads(str(res["config"])).items() if k != "seed"}
 
 
+def level_std(env, env_params, policy, level, key, num_envs: int, num_flow_steps: int):
+    """The diagnostic's |e| unit: naive rollouts (4-step chunks, action noise) and the per-dim std of their alive
+    chunk-boundary obs. b2b5.e_std calls this too, so the B2+B5 |e| histograms share the units (spec B2+B5 §8)."""
+    boundaries = probe.collect(
+        env, env_params, policy, level, key, num_envs, 4, train_expert.ACTION_NOISE_STD, num_flow_steps
+    )
+    return boundaries, predictors.alive_std(boundaries)
+
+
 def run(
     run_path: str = "checkpoints/bc",
     level_paths: Sequence[str] = probe.LEVELS,
@@ -208,10 +217,7 @@ def run(
     def level_diag(state_dict, level, key, wm):
         policy = probe.make_policy(state_dict, obs_dim, action_dim)
         k_c, k_s, k_p = jax.random.split(key, 3)
-        boundaries = probe.collect(
-            env, env_params, policy, level, k_c, num_envs, 4, train_expert.ACTION_NOISE_STD, num_flow_steps
-        )
-        std = predictors.alive_std(boundaries)
+        boundaries, std = level_std(env, env_params, policy, level, k_c, num_envs, num_flow_steps)
         obs, state = probe.sample(boundaries, k_s, num_states)
 
         def one(x):
