@@ -169,6 +169,9 @@ def test_lin_clip_uses_the_e2_bound():
     np.testing.assert_allclose(e["lin"], [100.0 + 0.01], rtol=1e-6)
     np.testing.assert_allclose(e["lin_clip"], [1.0 + 0.01], rtol=1e-6)  # 10 is clipped to max_correction = 1
     np.testing.assert_allclose(e["chunk_lin_clip"], [1.0 + 0.01], rtol=1e-6)  # chunk = a_ref here
+    e = probe.errors(jnp.array([[0.5, 0.0]]), zeros_a, jac, zeros_o, jnp.ones((1, 1)), zeros_a)
+    np.testing.assert_allclose(e["chunk_lin_clip"], [1.5**2 + 0.01], rtol=1e-6)  # the correction sits on the chunk
+    np.testing.assert_allclose(e["lin_clip"], [1.0 + 0.01], rtol=1e-6)
 
 
 def test_verdict_on_clipped_correction():

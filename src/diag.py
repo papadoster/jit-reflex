@@ -24,11 +24,13 @@ MEANS = ("e", "e_pred", "e_noise", "je", "je_pred", "je_noise", "cos_fix", "cos_
 def row_space_share(jac, e):
     """|e|^2 inside J's row space and along its top right singular vector (divide by |e|^2 for the shares).
 
-    jac [..., A, O], e [..., O] (broadcast) -> ([...], [...]). Singular values below 1e-6 of the largest are rank loss.
+    jac [..., A, O], e [..., O] (broadcast) -> ([...], [...]). Singular values below eps·max(A, O) of the largest are
+    rank loss, as numpy.linalg.matrix_rank.
     """
     _, s, vt = jnp.linalg.svd(jac, full_matrices=False)
     proj = jnp.einsum("...ao,...o->...a", vt, e)
-    return jnp.sum(jnp.where(s > 1e-6 * s[..., :1], proj**2, 0.0), -1), proj[..., 0] ** 2
+    sq = jnp.where(s > jnp.finfo(s.dtype).eps * max(jac.shape[-2:]) * s[..., :1], proj**2, 0.0)
+    return sq.sum(-1), sq[..., 0]
 
 
 def cosine(x, y):
@@ -76,11 +78,11 @@ def probe_state(
     (no auto-reset), raw its state. Actions are compared as executed (probe.executed), as in E1b.
     """
     H, A = policy.action_chunk_size, policy.action_dim
-    k_z, k_f, k_n = jax.random.split(key, 3)
+    k_z, k_f, k_n, k_env = jax.random.split(key, 4)
     zs = jax.random.normal(k_z, (num_chunks, H, A))
 
     def true_step(s, a):
-        o, s, _, done, _ = base.step_env(key, s, a, params)
+        o, s, _, done, _ = base.step_env(k_env, s, a, params)
         return o, s, done
 
     plan, truth, truth_ended = chain(policy, true_step, raw, obs, zs, num_steps)
@@ -94,7 +96,7 @@ def probe_state(
         f = predictors.phys_factors(k_f, raw, p)  # same key: same signs for every p, as in B1
 
         def phys_step(s, a, f=f):
-            o, s = predictors.phys_step(base, key, s, a, params, f)
+            o, s = predictors.phys_step(base, k_env, s, a, params, f)
             return o, s, jnp.bool_(False)  # a prediction is not cut by the episode's end
 
         preds.append(roll(phys_step, raw, plan)[0])
@@ -112,15 +114,18 @@ def probe_state(
         return probe.executed(a, raw)
 
     need = act(a_star)
+    # E1b: J rows of dims that drive nothing are as large as bound ones; measures 2, 4, 7 use bound dims only
+    used = jnp.abs(jax.jacfwd(act)(jnp.full(A, 0.5))).sum(0) > 0  # action dims that change the executed action
 
     def per_predictor(n):
         a_ref, jac = jax.vmap(lambda zk, ok: reflex.first_action_and_jacobian(policy, zk, ok, num_steps))(z, n)
         err = probe.errors(plan_k, a_ref, jac, n, o, a_star, act=act)  # [M, K]
+        ju = jac * used[:, None]
         e_pred, e_noise = o_star - n, o - o_star  # [K, O], [M, K, O]
-        je = jnp.einsum("kao,mko->mka", jac, o - n)
-        je_pred = jnp.einsum("kao,ko->ka", jac, e_pred)
-        rs_pred, top_pred = row_space_share(jac, e_pred)
-        rs_noise, top_noise = row_space_share(jac, e_noise)
+        je = jnp.einsum("kao,mko->mka", ju, o - n)
+        je_pred = jnp.einsum("kao,ko->ka", ju, e_pred)
+        rs_pred, top_pred = row_space_share(ju, e_pred)
+        rs_noise, top_noise = row_space_share(ju, e_noise)
         out = {name: err[name] for name in ("pred", "lin", "lin_clip", "chunk", "chunk_lin_clip")} | {
             "rs_pred": rs_pred, "top_pred": top_pred, "d_pred": jnp.sum(e_pred**2, -1),
             "rs_noise": rs_noise, "top_noise": top_noise, "d_noise": jnp.sum(e_noise**2, -1),
@@ -129,10 +134,10 @@ def probe_state(
             "e_noise": predictors.normalized_error(o_star, o, std),
             "je": jnp.linalg.norm(je, axis=-1),
             "je_pred": jnp.linalg.norm(je_pred, axis=-1),
-            "je_noise": jnp.linalg.norm(jnp.einsum("kao,mko->mka", jac, e_noise), axis=-1),
+            "je_noise": jnp.linalg.norm(jnp.einsum("kao,mko->mka", ju, e_noise), axis=-1),
             "cos_fix": cosine(act(a_ref + jnp.clip(je, -1.0, 1.0)) - act(a_ref), need - act(a_ref)),
             "cos_spur": cosine(act(plan_k + jnp.clip(je_pred, -1.0, 1.0)) - act(plan_k), need - act(plan_k)),
-            "clip": jnp.mean(jnp.abs(je) > 1.0, -1),
+            "clip": jnp.sum((jnp.abs(je) > 1.0) & used, -1) / jnp.maximum(used.sum(), 1),
         }
         return jax.tree.map(lambda x: jnp.broadcast_to(x, valid.shape), out), a_ref
 
