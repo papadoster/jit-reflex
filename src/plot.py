@@ -312,5 +312,80 @@ def b1(
     return out
 
 
+def _boot(x, n_boot: int, rng) -> tuple[float, float, float]:
+    """Mean and 95% percentile bootstrap interval of per-cell values x [cells]."""
+    x = np.asarray(x, float)
+    means = x[rng.integers(0, len(x), (n_boot, len(x)))].mean(axis=1)
+    return float(x.mean()), float(np.percentile(means, 2.5)), float(np.percentile(means, 97.5))
+
+
+def b1_ci(
+    results_glob: str = "results/b1/gpu/eval*/results.csv", out_dir: str = "results/b1/gpu", n_boot: int = 10_000
+) -> pd.DataFrame:
+    """Report only, not a decision rule: B1 means (pp) with 95% bootstrap intervals over level x seed cells.
+
+    Episodes of one (level, seed) cell share the level and the rng, so cells, not episodes, are resampled.
+    G is taken against the baseline (naive or realtime) with the higher pooled mean, as in b1. Writes b1_ci.csv/png.
+    """
+    df = pd.concat([pd.read_csv(f) for f in sorted(glob.glob(results_glob))])
+    df["arm"] = df["method"] + ":" + df["predictor"]
+    w = df.pivot_table(index=["delay", "execute_horizon", "level", "seed"], columns="arm", values="returned_episode_solved")
+    rng = np.random.default_rng(0)
+    rows = []
+
+    def add(what, where, x):
+        if x.notna().all():
+            mean, lo, hi = _boot(x, n_boot, rng)
+            rows.append({"what": what, "where": where, "mean": 100 * mean, "lo": 100 * lo, "hi": 100 * hi, "cells": len(x)})
+
+    def gains(g, where):  # g: cells x arms of one slice or one (delay, s)
+        base = g[g[["naive:-", "realtime:-"]].mean().idxmax()]
+        for arm in g.columns:
+            if not arm.endswith(":-"):
+                add(f"G {arm}", where, g[arm] - base)
+        for pr in sorted({a.split(":")[1] for a in g.columns if a.startswith("reflex:")}):
+            add(f"J {pr}", where, g[f"reflex:{pr}"] - g[f"pred:{pr}"])
+        for m in ("pred", "reflex", "rtc_reflex"):  # learned world model vs oracle
+            if f"{m}:learned" in g and f"{m}:oracle" in g:
+                add(f"{m}: learned - oracle", where, g[f"{m}:learned"] - g[f"{m}:oracle"])
+
+    cells = ["level", "seed"]
+    d1 = w.xs(1, level="delay")
+    for s, g in d1.groupby(level="execute_horizon"):
+        gains(g.droplevel("execute_horizon"), f"d1 s{s}")
+    for name, (d, horizons) in B1_SLICES.items():
+        g = w.xs(d, level="delay")
+        g = g[g.index.get_level_values("execute_horizon").isin(horizons)].groupby(level=cells).mean()
+        gains(g, f"slice {name}")
+    out = pd.DataFrame(rows)
+    out_path = pathlib.Path(out_dir)
+    out_path.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path / "b1_ci.csv", index=False)
+
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4))
+    per_s = out[out["where"].str.startswith("d1 s")].assign(s=lambda x: x["where"].str[4:].astype(int))
+    for ax, prefix, preds in (
+        (axes[0], "J ", ("oracle", "phys0.1", "phys0.2", "phys0.3", "learned")),
+        (axes[1], "G ", ("reflex:oracle", "reflex:phys0.2", "reflex:learned", "rtc_reflex:oracle", "rtc_reflex:learned")),
+    ):
+        for p in preds:
+            r = per_s[per_s["what"] == prefix + p].sort_values("s")
+            if len(r):
+                ax.errorbar(r["s"], r["mean"], yerr=[r["mean"] - r["lo"], r["hi"] - r["mean"]], marker="o", capsize=3,
+                            ls="--" if p.startswith("rtc") else "-", label=p)
+        ax.axhline(0, c="gray", lw=0.8)
+        ax.set_xlabel("execute horizon s (d = 1)")
+        ax.legend(fontsize=7)
+    axes[0].set_title("J = reflex − pred (pp), 95% bootstrap over level × seed")
+    axes[1].set_title("G = method − best of naive / RTC (pp)")
+    fig.tight_layout()
+    fig.savefig(out_path / "b1_ci.png", dpi=150)
+    plt.close(fig)
+    print(out.round(1).to_string(index=False))
+    return out
+
+
 if __name__ == "__main__":
-    tyro.extras.subcommand_cli_from_dict({"probe": probe, "success": success, "table": table, "gate2": gate2, "b1": b1})
+    tyro.extras.subcommand_cli_from_dict(
+        {"probe": probe, "success": success, "table": table, "gate2": gate2, "b1": b1, "b1-ci": b1_ci}
+    )

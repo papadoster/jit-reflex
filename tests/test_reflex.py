@@ -348,3 +348,12 @@ def test_b1_explicit_p_mid(tmp_path):
     assert out["slices"]["d3"]["phys0.3"]["status"] == "MISSING" and out["verdict"] == "SURVIVES"  # d1 via reflex
     with pytest.raises(AssertionError):
         _b1_run(tmp_path, _b1_rows(), p_mid="phys0.5")
+
+
+def test_b1_ci_resamples_level_seed_cells(tmp_path):
+    _b1_rows().to_csv(tmp_path / "results.csv", index=False)
+    out = plot.b1_ci(str(tmp_path / "*.csv"), out_dir=str(tmp_path), n_boot=200)
+    r = out[(out["what"] == "J oracle") & (out["where"] == "d1 s7")].iloc[0]
+    assert r["cells"] == 3  # one level x three seeds
+    assert r["mean"] == pytest.approx(7.0) and r["lo"] == pytest.approx(7.0) and r["hi"] == pytest.approx(7.0)
+    assert (tmp_path / "b1_ci.png").exists()

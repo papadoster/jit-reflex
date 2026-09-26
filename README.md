@@ -18,6 +18,7 @@ The full write-up is [**docs/results/report.md**](docs/results/report.md). Lab n
 - **Closed loop** (RTX 4090, 3 seeds × 256 episodes × 12 levels, [figure](results/eval/main/success.png)): with rare policy calls the reflex **beats RTC**, by +9.1 pp over delays 2–4 and +15.6 pp at delay 4. Under random velocity kicks it beats the better of naive and RTC by **+5.3 pp**.
 - **But** most of that edge comes from **re-querying the policy at the oracle-predicted state**. `J` itself matters for **rare calls**: +4…+10 pp at execute horizon s ≥ 5, and +6…+8 pp under kicks. That claim was pre-registered and confirmed on held-out seeds, narrowly. The pre-registered **Gate 2 is negative**, because `J` gave 20% of the gain against a 50% bar.
 - **Cost:** a reflex call is 525 network evaluations (35× RTC) and takes 2.07× RTC's latency. In the only latency-fair comparison the benchmark allows, the reflex loses.
+- **Phase B1** ([report §8](docs/results/report.md#8-phase-b1-stale-plans-and-imperfect-predictors), [figure](results/b1/gpu/b1_ci.png)) replaces the oracle with wrong physics and a learned world model. The pre-registered verdict is **SURVIVES**, narrowly. With the learned model the reflex is nearly as good as with the oracle (within 0.2–1.5 pp), and **all of its gain over RTC appears only when `J` is switched on**: on d = 3, s = 5, `pred` gives 0.0 pp and reflex +7.7 pp. `J`'s effect grows with both staleness and prediction error. Latency is still 1.8–1.9× RTC.
 - **Next:** the dated research agenda with predictions and kill criteria is in [docs/roadmap.md](docs/roadmap.md).
 - **Demo:** [results/video_kick.mp4](results/video_kick.mp4) shows naive, RTC and reflex side by side on `mjc_walker` with d = 2, s = 6 and kicks c = 1, from the same start with the same noise and kicks. The episode was *selected* as one where only the reflex reaches the goal. Across 16 such episodes, naive, RTC and reflex solve 1, 3 and 6. It is an illustration, not evidence.
 
@@ -29,7 +30,7 @@ mkdir -p checkpoints/bc/31/policies
 for L in grasp_easy catapult cartpole_thrust hard_lunar_lander mjc_half_cheetah mjc_swimmer mjc_walker h17_unicycle chain_lander catcher_v3 trampoline car_launch; do
   curl -fsSL -o checkpoints/bc/31/policies/worlds_l_$L.pkl https://storage.googleapis.com/rtc-assets/bc/31/policies/worlds_l_$L.pkl
 done
-uv run pytest -q             # 17 tests
+uv run pytest -q             # 30 tests
 ./scripts/run_e1.sh          # E1, ~20 min: results/probe/
 ./scripts/run_e1b.sh         # E1b, ~20 min: results/probe_e1b/
 ./scripts/run_e2_preview.sh  # small closed-loop preview, ~1 h
