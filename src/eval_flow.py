@@ -50,6 +50,8 @@ class ReflexMethodConfig:
     rtc: bool = False  # E2b: the chunk comes from RTC (realtime_action) instead of plain sampling
     predictor: str = "oracle"  # B1: "oracle" | "phys" (wrong physics) | "learned" (world model), spec B1 3.1
     phys_error: float = 0.0  # B1: relative parameter error of the "phys" predictor
+    cand: str | None = None  # B2+B5: "T3" / "M3" package (reflex.first_action_fn); None = the exact reflex
+    j_delay: int = 0  # B2+B5 late J: no J on the first j_delay executed positions of the new chunk
 
 
 @dataclasses.dataclass(frozen=True)
@@ -188,6 +190,8 @@ def eval(
                 config.method.feedback,
                 config.method.package_batch,
                 used=(d, d + s),
+                cand=config.method.cand,
+                j_from=d + config.method.j_delay if config.method.j_delay else 0,
             )
             new_pkg = {"nom": nom, "ref": ref} | ({} if gain is None else {"gain": gain})
         else:
@@ -260,7 +264,18 @@ METHODS = {
     "reflex_off": ReflexMethodConfig(requery=False, feedback=False),  # sanity check: must reproduce naive
     "rtc_reflex": ReflexMethodConfig(requery=False, rtc=True),  # E2b: RTC chunk + J feedback
     "rtc_reflex_off": ReflexMethodConfig(requery=False, feedback=False, rtc=True),  # sanity: must reproduce realtime
+    "t3": ReflexMethodConfig(cand="T3"),  # B2+B5 §3
+    "m3": ReflexMethodConfig(cand="M3"),
+    **{f"late{k}": ReflexMethodConfig(cand="T3", j_delay=k) for k in range(1, 5)},
+    "realtime10": RealtimeMethodConfig(),  # RTC with 10 flow steps, see FLOW_STEPS
 }
+
+FLOW_STEPS ={"realtime10": 10}  # B2+B5: methods whose chunk (and first chunk) use more flow steps
+
+
+def parse_cells(cells: Sequence[str]) -> list[tuple[int, int]]:
+    """B2+B5 grid cells "d,s" -> [(d, s)], in the given order."""
+    return [tuple(int(x) for x in c.split(",")) for c in cells]
 
 
 def horizons_for(delay: int, chunk_size: int, horizons: Sequence[int], minmax: bool) -> list[int]:
@@ -309,6 +324,7 @@ def main(
     package_batch: int = 16,
     predictors: Sequence[str] = ("oracle",),  # B1: predictors for the reflex methods, see parse_predictor
     world_model_dir: str = _predictors.WM_DIR,
+    cells: Sequence[str] = (),  # B2+B5: explicit "d,s" cells instead of delays x horizons
 ):
     static_env_params = kenv_state.StaticEnvParams(**train_expert.LARGE_ENV_PARAMS, frame_skip=train_expert.FRAME_SKIP)
     env_params = kenv_state.EnvParams()
@@ -376,41 +392,54 @@ def main(
         eval_info, _ = eval(config, env, rng, level, policy, env_params, static_env_params, weak_policy, world_model)
         return eval_info
 
-    pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
-    results = collections.defaultdict(list)
+    out_dir = pathlib.Path(output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    results, done = collections.defaultdict(list), set()
+    if (out_dir / "results.csv").exists():  # resume (B2+B5 §10): a config with all its level rows is not run again
+        old = pd.read_csv(out_dir / "results.csv")
+        results.update({k: list(v) for k, v in old.to_dict("list").items()})
+        n = old.groupby(["seed", "delay", "execute_horizon", "method", "predictor"]).size()
+        done = {k for k, v in n.items() if v == len(level_paths)}
+    grid = parse_cells(cells) or [
+        (d, s) for d in delays for s in horizons_for(d, config.model.action_chunk_size, horizons, minmax)
+    ]
     for seed in seeds:
         rngs = jax.random.split(jax.random.key(seed), len(level_paths))
-        for inference_delay in delays:
-            for execute_horizon in horizons_for(inference_delay, config.model.action_chunk_size, horizons, minmax):
-                for name in methods:
-                    method = METHODS[name]
-                    is_reflex = isinstance(method, ReflexMethodConfig)
-                    for predictor in predictors if is_reflex else ("-",):
-                        print(f"{time.strftime('%H:%M:%S')} {seed=} {name=} {predictor=} {inference_delay=} "
-                              f"{execute_horizon=}")
-                        m = method
-                        if is_reflex:
-                            m = dataclasses.replace(
-                                method, max_correction=max_correction, package_batch=package_batch,
-                                **parse_predictor(predictor),
-                            )
-                        c = dataclasses.replace(
-                            config, inference_delay=inference_delay, execute_horizon=execute_horizon, method=m
+        for inference_delay, execute_horizon in grid:
+            for name in methods:
+                method = METHODS[name]
+                is_reflex = isinstance(method, ReflexMethodConfig)
+                for predictor in predictors if is_reflex else ("-",):
+                    if (seed, inference_delay, execute_horizon, name, predictor) in done:
+                        continue
+                    print(f"{time.strftime('%H:%M:%S')} {seed=} {name=} {predictor=} {inference_delay=} "
+                          f"{execute_horizon=}")
+                    m = method
+                    if is_reflex:
+                        m = dataclasses.replace(
+                            method, max_correction=max_correction, package_batch=package_batch,
+                            **parse_predictor(predictor),
                         )
-                        out = jax.device_get(_eval(c, rngs, levels, state_dicts, weak_state_dicts, world_models))
-                        for i in range(len(level_paths)):
-                            for k, v in out.items():
-                                results[k].append(v[i])
-                            results["seed"].append(seed)
-                            results["delay"].append(inference_delay)
-                            results["method"].append(name)
-                            results["predictor"].append(predictor)
-                            results["level"].append(level_paths[i])
-                            results["execute_horizon"].append(execute_horizon)
-                            results["max_correction"].append(max_correction if is_reflex else float("nan"))
-                            results["kick_std"].append(config.kick_std if config.kick_prob > 0 else 0.0)
-                        # after every config: a crash (or Ctrl-C) keeps the finished ones
-                        pd.DataFrame(results).to_csv(pathlib.Path(output_dir) / "results.csv", index=False)
+                    c = dataclasses.replace(
+                        config, inference_delay=inference_delay, execute_horizon=execute_horizon, method=m,
+                        num_flow_steps=FLOW_STEPS.get(name, config.num_flow_steps),
+                    )
+                    start = time.time()
+                    out = jax.device_get(_eval(c, rngs, levels, state_dicts, weak_state_dicts, world_models))
+                    for i in range(len(level_paths)):
+                        for k, v in out.items():
+                            results[k].append(v[i])
+                        results["seed"].append(seed)
+                        results["delay"].append(inference_delay)
+                        results["method"].append(name)
+                        results["predictor"].append(predictor)
+                        results["level"].append(level_paths[i])
+                        results["execute_horizon"].append(execute_horizon)
+                        results["max_correction"].append(max_correction if is_reflex else float("nan"))
+                        results["kick_std"].append(config.kick_std if config.kick_prob > 0 else 0.0)
+                        results["seconds"].append(time.time() - start)
+                    # after every config: a crash (or Ctrl-C) keeps the finished ones
+                    pd.DataFrame(results).to_csv(out_dir / "results.csv", index=False)
 
 
 if __name__ == "__main__":
