@@ -139,5 +139,219 @@ def e_std(out: str = f"{OUT}/e_std.npz", run_path: str = "checkpoints/bc", num_e
     np.savez(out, **stds)
 
 
+B1_CELLS = [(1, 1), (1, 4), (1, 7)]  # B1's cost cells: kept for the comparison with B1 (spec §5.1)
+
+
+def latency_cells() -> dict:
+    """Cells timed per method (spec §5.1): methods without a predictor at B1's cells; with one, every cell they run in
+    (their latency grows with the model's d + s - 1 step rollout) plus B1's."""
+    cells = {m: B1_CELLS for m in ("naive", "realtime", "realtime10")}
+    for _, ms, _, cs in BLOCKS:
+        for m in ms:
+            if m in ("pred", "reflex", "t3", "m3", "rtc_reflex"):
+                cells[m] = sorted(set(cells.get(m, B1_CELLS)) | set(cs))
+    return cells
+
+
+def method_call(policy, wm, name: str, d: int, s: int, num_steps: int = 5):
+    """One call of `name` at batch 1 as eval_flow makes it: f(key, noise, obs, prev) -> outputs. Predictor methods
+    include the learned model's rollout over the planned actions, d + s - 1 steps."""
+    H = policy.action_chunk_size
+
+    def chunk(key, noise, obs, prev):
+        if name in ("realtime", "realtime10", "rtc_reflex"):
+            n = eval_flow.FLOW_STEPS.get(name, num_steps)
+            return policy.realtime_action(key, obs, n, prev, d, H - s, "exp", 5.0)
+        return policy.action_from_noise(noise, obs, num_steps)
+
+    if name in ("naive", "realtime", "realtime10"):
+        return chunk
+    m = eval_flow.METHODS[name]
+
+    def call(key, noise, obs, prev):
+        c = chunk(key, noise, obs, prev)
+        planned = jnp.concatenate([prev[:, :d], c[:, d:]], axis=1)
+        pred = jax.vmap(predictors.wm_rollout, in_axes=(None, 0, 0))(wm, obs, planned[:, : max(d + s - 1, 1)])
+        ref = jnp.concatenate([obs[:, None], pred], axis=1)
+        ref = jnp.pad(ref, ((0, 0), (0, H - ref.shape[1]), (0, 0)))
+        return reflex.package(policy, noise, ref, c, num_steps, m.requery, m.feedback, used=(d, d + s), cand=m.cand)
+
+    return call
+
+
+def _time(f, args, repeats: int, warmup: int) -> float:
+    """Median ms of f(*args) until ready."""
+    for _ in range(warmup):
+        jax.block_until_ready(f(*args))
+    t = []
+    for _ in range(repeats):
+        t0 = time.perf_counter()
+        jax.block_until_ready(f(*args))
+        t.append(time.perf_counter() - t0)
+    return 1e3 * float(np.median(t))
+
+
+def _concurrent(fa, fb, args, repeats: int, warmup: int):
+    """Spec §5.2: (ta, tb, ta while another thread runs fb back to back, tb while one runs fa)."""
+    ta, tb = _time(fa, args, repeats, warmup), _time(fb, args, repeats, warmup)
+
+    def under(f, g):
+        stop = threading.Event()
+
+        def loop():
+            while not stop.is_set():
+                jax.block_until_ready(g(*args))
+
+        th = threading.Thread(target=loop)
+        th.start()
+        try:
+            return _time(f, args, repeats, warmup)
+        finally:
+            stop.set()
+            th.join()
+
+    return ta, tb, under(fa, fb), under(fb, fa)
+
+
+def _flops(f, *args) -> float:
+    a = f.lower(*args).compile().cost_analysis()
+    return (a[0] if isinstance(a, list) else a)["flops"]
+
+
+def latency(out_dir: str = OUT, level_path: str = probe.LEVELS[0], run_path: str = "checkpoints/bc",
+            repeats: int = 200, warmup: int = 20):
+    """Spec §5.1-5.2 at batch 1: latency.csv (median ms per method and cell) and latency.json (realtime's ms, kappa
+    and kappa_j at (4, 4), the A2C2 head's ms on GPU and CPU, GFLOP of one network evaluation and of one head step)."""
+    env, env_params, levels, O, A = probe.setup([level_path])
+    policy = probe.make_policy(probe.load_state_dict(run_path, level_path), O, A)
+    with open(f"{predictors.WM_DIR}/{predictors.level_name(level_path)}.pkl", "rb") as f:
+        wm = pickle.load(f)
+    H, key = policy.action_chunk_size, jax.random.key(0)
+    obs = env.reset_to_level(key, jax.tree.map(lambda x: x[0], levels), env_params)[0][None]
+    noise = jax.random.normal(key, (1, H, A))
+    prev = policy.action_from_noise(noise, obs, 5)
+    args = (key, noise, obs, prev)
+    rows, fns = [], {}
+    for m, cells in latency_cells().items():
+        for d, s in cells:
+            fns[(m, d, s)] = f = jax.jit(method_call(policy, wm, m, d, s))
+            rows.append({"method": m, "delay": d, "execute_horizon": s, "ms": _time(f, args, repeats, warmup)})
+            print(rows[-1], flush=True)
+    lat = pd.DataFrame(rows)
+    ta, tb, ta_b, tb_a = _concurrent(fns[("pred", 4, 4)], fns[("t3", 4, 4)], args, repeats, warmup)
+    head = a2c2.Head(O, A, rngs=nnx.Rngs(0))
+    h = jax.jit(lambda o, a, t: head.apply_residual(o, a, t))
+    hargs = (obs, prev[:, 0], a2c2.time_feature(jnp.zeros(1, jnp.int32), H))
+    cpu = jax.devices("cpu")[0]
+    with jax.default_device(cpu):
+        head_cpu = a2c2.Head(O, A, rngs=nnx.Rngs(0))
+        h_cpu = jax.jit(lambda o, a, t: head_cpu.apply_residual(o, a, t))
+    one = jax.jit(lambda o, x: policy(o, x, jnp.zeros(())))
+    info = {
+        "device": str(jax.devices()[0]), "level": level_path,
+        "realtime_ms": float(lat[lat.method == "realtime"]["ms"].median()),
+        "kappa": ta_b / ta, "kappa_j": tb_a / tb, "t_nom": ta, "t_j": tb, "t_nom_with_j": ta_b, "t_j_with_nom": tb_a,
+        "head_ms_gpu": _time(h, hargs, repeats, warmup),
+        "head_ms_cpu": _time(h_cpu, jax.device_put(hargs, cpu), repeats, warmup),
+        "gflop_per_eval": _flops(one, obs, noise) / 1e9, "head_gflop": _flops(h, *hargs) / 1e9,
+    }
+    out = pathlib.Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    lat.to_csv(out / "latency.csv", index=False)
+    (out / "latency.json").write_text(json.dumps(info, indent=1))
+    print(json.dumps(info, indent=1))
+
+
+def _ceil(x: float) -> int:
+    return math.ceil(round(x, 9))
+
+
+def other_side(x: float) -> int | None:
+    """Spec §5.1: the d' a ±3% latency error could give instead of ceil(x); None if x is not near an integer."""
+    m = round(x)
+    if abs(x - m) > 0.03 * x:
+        return None
+    return m + 1 if _ceil(x) == m else m
+
+
+def placement(lat: pd.DataFrame, info: dict, base: int, kappa: float | None = None, kappa_j: float | None = None,
+              grid: set | None = None) -> dict:
+    """Spec §5.1-5.3 at base delay `base`: {method: [(d, s)]} and "late": [{d, s, delta, method, x_nom, x_j}], where
+    method is the eval method whose data the cell uses (late<delta>, t3 at delta <= 0, pred at delta >= s).
+    kappa, kappa_j: None = measured; 1.0 = the second-GPU scenario. grid: keep only cells that were run."""
+    kappa = info["kappa"] if kappa is None else kappa
+    kappa_j = info["kappa_j"] if kappa_j is None else kappa_j
+    if kappa <= 1.10:  # spec §5.2: the concurrent J counts as free
+        kappa = kappa_j = 1.0
+    rt = info["realtime_ms"]
+    r = lat.set_index(["method", "delay", "execute_horizon"])["ms"] / rt
+
+    def feasible(n):
+        return [(n, s) for s in range(n, 9 - n)]
+
+    def ran(m, cells):
+        pr = "learned" if m in REFLEX else "-"
+        return [c for c in cells if grid is None or (m, pr, *c) in grid]
+
+    out = {m: ran(m, feasible(_ceil(float(r.xs(m).median()) * base))) for m in ("naive", "realtime", "realtime10")}
+    n_head = _ceil(float(r.xs("naive").median()) * base) + int(info["head_ms_cpu"] > rt / base)
+    out["a2c2"] = ran("a2c2", feasible(n_head))
+    out["a2c2_distill"] = ran("a2c2_distill", feasible(n_head))
+    for m in ("pred", "reflex", "t3", "m3", "rtc_reflex"):
+        out[m] = ran(m, [(d, s) for (d, s), x in r.xs(m).items() if _ceil(x * base) == d])
+    out["late"] = []
+    for (d, s), x in r.xs("pred").items():
+        x_nom = kappa * x * base
+        if _ceil(x_nom) != d or ("t3", d, s) not in r.index:
+            continue
+        x_j = kappa_j * r[("t3", d, s)] * base
+        delta = _ceil(x_j) - d
+        method = "t3" if delta <= 0 else "pred" if delta >= s else f"late{delta}"
+        if ran(method, [(d, s)]) or grid is None or method.startswith("late"):
+            out["late"].append({"d": d, "s": s, "delta": delta, "method": method, "x_nom": x_nom, "x_j": x_j})
+    return out
+
+
+def place(out_dir: str = OUT):
+    """Spec §5.3: placement.json for bases 1-4 under the measured kappa and the second-GPU scenario, and
+    extra_blocks.json with the late-J cells the formulas need but the grid lacks (run by worker B)."""
+    out = pathlib.Path(out_dir)
+    lat, info = pd.read_csv(out / "latency.csv"), json.loads((out / "latency.json").read_text())
+    grid, extra, res = configs(), [], {}
+    for scen, k, kj in (("measured", None, None), ("second_gpu", 1.0, 1.0)):
+        for base in (1, 2, 3, 4):
+            pl = placement(lat, info, base, k, kj)
+            res[f"{scen} base {base}"] = pl
+            for c in pl["late"]:
+                cfg = (c["method"], "learned", c["d"], c["s"])
+                if c["method"].startswith("late") and cfg not in grid:
+                    b = ("B", [c["method"]], ["learned"], [[c["d"], c["s"]]])
+                    if b not in extra:
+                        extra.append(b)
+    (out / "placement.json").write_text(json.dumps(res, indent=1))
+    (out / "extra_blocks.json").write_text(json.dumps(extra))
+    print(json.dumps({"extra_blocks": extra, "measured base 3": res["measured base 3"]}, indent=1))
+
+
+def forecast(out_dir: str = OUT):
+    """Spec §10 safety: hours left per worker from the seconds of finished configs (a first seed includes compile)."""
+    for w in ("A", "B"):
+        todo = configs([b for b in BLOCKS + extra_blocks(out_dir) if b[0] == w])
+        f = pathlib.Path(out_dir) / f"eval_{w}" / "results.csv"
+        if not f.exists():
+            print(f"worker {w}: nothing finished yet, {len(todo)} configs")
+            continue
+        df = pd.read_csv(f)
+        per = df.groupby(["method", "predictor", "delay", "execute_horizon", "seed"])["seconds"].first()
+        per = per.groupby(["method", "predictor", "delay", "execute_horizon"]).agg(["sum", "count"])
+        done = per[per["count"] == len(SEEDS)]
+        mean, overall = done["sum"].groupby("method").mean(), done["sum"].mean()
+        left = [c for c in todo if c not in done.index]
+        hours = sum(mean.get(c[0], overall) for c in left) / 3600
+        print(f"worker {w}: {len(done)} of {len(todo)} configs done, ~{hours:.1f} h left")
+
+
 if __name__ == "__main__":
-    tyro.extras.subcommand_cli_from_dict({"commands": commands, "lock": lock, "e-std": e_std})
+    tyro.extras.subcommand_cli_from_dict({
+        "commands": commands, "lock": lock, "e-std": e_std, "latency": latency, "place": place, "forecast": forecast,
+    })
