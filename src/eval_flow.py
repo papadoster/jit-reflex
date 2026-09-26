@@ -2,6 +2,7 @@ import collections
 import dataclasses
 import functools
 import math
+import os
 import pathlib
 import pickle
 import time
@@ -270,12 +271,22 @@ METHODS = {
     "realtime10": RealtimeMethodConfig(),  # RTC with 10 flow steps, see FLOW_STEPS
 }
 
-FLOW_STEPS ={"realtime10": 10}  # B2+B5: methods whose chunk (and first chunk) use more flow steps
+FLOW_STEPS = {"realtime10": 10}  # B2+B5: methods whose chunk (and first chunk) use more flow steps
 
 
 def parse_cells(cells: Sequence[str]) -> list[tuple[int, int]]:
     """B2+B5 grid cells "d,s" -> [(d, s)], in the given order."""
     return [tuple(int(x) for x in c.split(",")) for c in cells]
+
+
+def load_done(out_dir: pathlib.Path, n_levels: int) -> tuple[pd.DataFrame, set]:
+    """Resume (B2+B5 §10): old rows of the configs with all n_levels level rows, and their keys; partial ones rerun."""
+    if not (out_dir / "results.csv").exists():
+        return pd.DataFrame(), set()
+    old = pd.read_csv(out_dir / "results.csv")
+    keys = ["seed", "delay", "execute_horizon", "method", "predictor"]
+    old = old[old.groupby(keys)["level"].transform("size") == n_levels]
+    return old, set(old[keys].itertuples(index=False, name=None))
 
 
 def horizons_for(delay: int, chunk_size: int, horizons: Sequence[int], minmax: bool) -> list[int]:
@@ -394,12 +405,10 @@ def main(
 
     out_dir = pathlib.Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    results, done = collections.defaultdict(list), set()
-    if (out_dir / "results.csv").exists():  # resume (B2+B5 §10): a config with all its level rows is not run again
-        old = pd.read_csv(out_dir / "results.csv")
-        results.update({k: list(v) for k, v in old.to_dict("list").items()})
-        n = old.groupby(["seed", "delay", "execute_horizon", "method", "predictor"]).size()
-        done = {k for k, v in n.items() if v == len(level_paths)}
+    old, done = load_done(out_dir, len(level_paths))  # old rows are kept as they are, even with other columns
+    if (out_dir / "results.csv").exists():
+        print(f"resume: {len(done)} configs already done in {out_dir}")
+    results = collections.defaultdict(list)  # this run's rows
     grid = parse_cells(cells) or [
         (d, s) for d in delays for s in horizons_for(d, config.model.action_chunk_size, horizons, minmax)
     ]
@@ -438,8 +447,11 @@ def main(
                         results["max_correction"].append(max_correction if is_reflex else float("nan"))
                         results["kick_std"].append(config.kick_std if config.kick_prob > 0 else 0.0)
                         results["seconds"].append(time.time() - start)
-                    # after every config: a crash (or Ctrl-C) keeps the finished ones
-                    pd.DataFrame(results).to_csv(out_dir / "results.csv", index=False)
+                    # after every config: a crash (or Ctrl-C) keeps the finished ones; written aside and renamed,
+                    # so a kill mid-write never truncates results.csv
+                    part = out_dir / "results.csv.part"
+                    pd.concat([old, pd.DataFrame(results)], ignore_index=True).to_csv(part, index=False)
+                    os.replace(part, out_dir / "results.csv")
 
 
 if __name__ == "__main__":
