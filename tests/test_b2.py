@@ -166,10 +166,10 @@ def test_rule_guard_and_selection():
     # the shallowest pass is not strict: point 3 adds the shallowest strict one (W3: depth 6 < T2's 7)
     rt = b2.rule(_ratios(_rows(W1=[(0.85, 0.5, True)] * 12)))
     assert b2.select(rt)["gpu"] == ["W1", "T2", "W3"]
-    # nothing passes: the best R goes as an exploratory row
-    rt = b2.rule(_ratios(_rows(T1=[(0.6, 0.5, True)] * 12, T2=[(0.7, 0.5, True)] * 12, W3=[(0.5, 0.5, True)] * 12,
+    # nothing passes: the best R goes as an exploratory row (T2: R 0.99 but beats pred nowhere; deeper than M1)
+    rt = b2.rule(_ratios(_rows(T1=[(0.6, 0.5, True)] * 12, T2=[(0.99, 0.5, False)] * 12, W3=[(0.5, 0.5, True)] * 12,
                                W1=[(0.5, 0.5, True)] * 12)))
-    assert b2.select(rt) == {"passed": [], "gpu": ["M1"], "fallback": True}
+    assert b2.select(rt) == {"passed": [], "gpu": ["T2"], "fallback": True}
 
 
 def _raw(N=40, M=2, K=7):
@@ -205,6 +205,7 @@ def test_summarize_cuts_at_e_max_and_writes_everything(tmp_path, monkeypatch):
     assert set(bn["predictor"]) == {"oracle", "learned"} and set(bn["row"]) == set(b2.ROWS)
     top = bn[(bn["bin"] == bn["bin"].max()) & (bn["row"] == "T1")]
     np.testing.assert_allclose(top["res"], 5.0)  # the open last bin holds the |e| > 10 pairs
+    assert sorted(pd.read_csv(tmp_path / "by_k.csv")["k"].unique()) == list(range(1, 8))
 
 
 def test_a_level_without_pairs_does_not_beat_pred():
@@ -213,3 +214,5 @@ def test_a_level_without_pairs_does_not_beat_pred():
                       {"level": "b", "predictor": "learned", "n": 0} | row])
     r = b2.ratios(t)
     assert r.loc[r["row"] == "T1", "beats_pred"].tolist() == [True, False]
+    rt = b2.rule(r)
+    assert rt.loc["T1", "left_out"] == "b" and rt.loc["T1", "levels_in_median"] == 1

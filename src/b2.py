@@ -289,7 +289,8 @@ def select(rt: pd.DataFrame) -> dict:
     c = rt.loc[list(CANDIDATES)].sort_values(["depth", "fe", "R"], ascending=[True, True, False])
     passed = c[c["pass"]]
     if passed.empty:
-        return {"passed": [], "gpu": [str(c["R"].idxmax())], "fallback": True}
+        R = c["R"].dropna()
+        return {"passed": [], "gpu": [str(R.idxmax())] if len(R) else [], "fallback": True}
     gpu = [passed.index[0]]  # 1: the shallowest pass
     t = passed[passed.index.str.startswith("T")]
     if len(t):
@@ -298,6 +299,19 @@ def select(rt: pd.DataFrame) -> dict:
     if len(strict):
         gpu.append(strict.index[0])  # 3: the shallowest at R >= 0.9
     return {"passed": [str(x) for x in passed.index], "gpu": [str(x) for x in dict.fromkeys(gpu)], "fallback": False}
+
+
+def by_k(raws: dict) -> pd.DataFrame:
+    """Descriptive, for the memo: per chunk index k, the median over levels of R (levels with gain >= MIN_GAIN, as in
+    rule) and of res per pair, with the number of levels in each median."""
+    r = pd.concat([ratios(pd.concat([
+        level_table({x: res[x][..., k - 1:k] for x in (*SUMS, "e", "valid")} | {"predictors": res["predictors"]}, lv)
+        for lv, res in raws.items()], ignore_index=True)).assign(k=k)
+        for k in range(1, next(iter(raws.values()))["valid"].shape[-1] + 1)], ignore_index=True)
+    keys = ["predictor", "row", "k"]
+    R = r[r["gain"] >= MIN_GAIN].groupby(keys, sort=False)["R"].agg(R="median", levels_in_median="count")
+    res = r.groupby(keys, sort=False)["res"].agg(res="median", levels="count")
+    return res.join(R).fillna({"levels_in_median": 0}).astype({"levels_in_median": int}).reset_index()
 
 
 def _rho(res, nom) -> float:
@@ -319,10 +333,20 @@ def bins(raws: dict, edges, p: int) -> pd.DataFrame:
                                   _rho(res[row][:, p][m].sum(), res[NOM[row]][:, p][m].sum()) if row in NOM else np.nan)
                             for row in ROWS})
         for row in ROWS:
+            rho = [x[row][1] for x in per]  # NaN where a level's nominal sum in the bin is 0: skipped
             out.append({"bin": b, "e_lo": lo, "e_hi": hi, "row": row, "levels": len(per),
                         "res": float(np.median([x[row][0] for x in per])) if per else np.nan,
-                        "rho_clip": float(np.median([x[row][1] for x in per])) if per else np.nan})
+                        "rho_clip": float(np.nanmedian(rho)) if np.isfinite(rho).any() else np.nan})
     return pd.DataFrame(out)
+
+
+def _style(row: str) -> dict:
+    """pred black dashed, reflex black bold, chunk_j and shared grey; T solid, W dash-dot, M dotted, colour per k."""
+    if row in ("pred", "reflex"):
+        return {"color": "k", "ls": "--" if row == "pred" else "-", "lw": 2}
+    if row in ("chunk_j", "shared"):
+        return {"color": "0.6", "ls": "-" if row == "chunk_j" else "--", "lw": 1.5}
+    return {"color": f"C{int(row[1:]) - 1}", "ls": {"T": "-", "W": "-.", "M": ":"}[row[0]], "lw": 1.5}
 
 
 def figure(bn: pd.DataFrame, path: pathlib.Path):
@@ -332,8 +356,7 @@ def figure(bn: pd.DataFrame, path: pathlib.Path):
     for ax, pred in zip(axes[0], preds):
         d = bn[bn["predictor"] == pred]
         for row, g in d.groupby("row", sort=False):
-            ax.plot(g["bin"], g["res"], "k--" if row == "pred" else ("k-" if row == "reflex" else "-"),
-                    lw=2 if row in ("pred", "reflex") else 1, label=row)
+            ax.plot(g["bin"], g["res"], label=row, **_style(row))
         g = d[d["row"] == "pred"]
         ax.set_xticks(g["bin"], [f"{x:.2g}" for x in g["e_lo"]], rotation=45)
         ax.set(title=pred, xlabel="|e| bin, lower edge", yscale="log")
@@ -354,7 +377,7 @@ def summarize(out_dir: str = OUT):
     t = pd.concat([level_table(r, lv) for lv, r in raws.items()], ignore_index=True)
     r = ratios(t)
     rt = pd.concat({p: rule(r, p) for p in names}, names=["predictor"])
-    sel = select(rule(r, "learned"))
+    sel = select(rule(r, "learned")) | {"levels": len(raws)}
     d = pd.read_csv(DIAG_BINS)
     edges = [*d.loc[d["predictor"] == "all", "e_lo"], np.inf]
     bn = pd.concat([bins(raws, edges, p).assign(predictor=n) for p, n in enumerate(names)], ignore_index=True)
@@ -368,11 +391,14 @@ def summarize(out_dir: str = OUT):
     r.to_csv(out / "ratios.csv", index=False)
     rt.to_csv(out / "rule.csv")
     bn.to_csv(out / "bins.csv", index=False)
+    by_k(raws).to_csv(out / "by_k.csv", index=False)
     (out / "selection.json").write_text(json.dumps(sel, indent=2))
     (out / "check.json").write_text(json.dumps(check, indent=2))
     figure(bn, out / "b2.png")
     print(rt.round(3).to_string())
     print(json.dumps(sel))
+    if len(raws) != len(probe.LEVELS):
+        print(f"!!! rule applied to {len(raws)} levels, not {len(probe.LEVELS)}")
     print(json.dumps(check))
     if not check["ok"]:
         print("!!! sanity check failed: look for a bug before reading anything")
