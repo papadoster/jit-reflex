@@ -199,19 +199,26 @@ def _concurrent(fa, fb, args, repeats: int, warmup: int):
     ta, tb = _time(fa, args, repeats, warmup), _time(fb, args, repeats, warmup)
 
     def under(f, g):
-        stop = threading.Event()
+        stop, err = threading.Event(), []
 
         def loop():
-            while not stop.is_set():
-                jax.block_until_ready(g(*args))
+            try:
+                while not stop.is_set():
+                    jax.block_until_ready(g(*args))
+            except Exception as e:  # e.g. OOM: kappa must not be measured without the load
+                err.append(e)
 
         th = threading.Thread(target=loop)
         th.start()
         try:
-            return _time(f, args, repeats, warmup)
+            t = _time(f, args, repeats, warmup)
+            alive = th.is_alive()
         finally:
             stop.set()
             th.join()
+        if err or not alive:
+            raise RuntimeError(f"background load died: {err[0] if err else 'thread exited'!r}")
+        return t
 
     return ta, tb, under(fa, fb), under(fb, fa)
 
@@ -310,48 +317,60 @@ def placement(lat: pd.DataFrame, info: dict, base: int, kappa: float | None = No
         x_j = kappa_j * r[("t3", d, s)] * base
         delta = _ceil(x_j) - d
         method = "t3" if delta <= 0 else "pred" if delta >= s else f"late{delta}"
+        if method not in eval_flow.METHODS:
+            raise ValueError(f"late J at (d={d}, s={s}) needs delta={delta}: eval_flow has no {method}")
         if ran(method, [(d, s)]) or grid is None or method.startswith("late"):
             out["late"].append({"d": d, "s": s, "delta": delta, "method": method, "x_nom": x_nom, "x_j": x_j})
     return out
 
 
 def place(out_dir: str = OUT):
-    """Spec §5.3: placement.json for bases 1-4 under the measured kappa and the second-GPU scenario, and
-    extra_blocks.json with the late-J cells the formulas need but the grid lacks (run by worker B)."""
+    """Spec §5.3: extra_blocks.json with the late-J cells bases 2 and 3 need but the grid lacks (run by worker B),
+    under the measured kappa and the second-GPU scenario; then placement.json for bases 1-4 on the grid with them."""
     out = pathlib.Path(out_dir)
     lat, info = pd.read_csv(out / "latency.csv"), json.loads((out / "latency.json").read_text())
-    grid, extra, res = configs(), [], {}
-    for scen, k, kj in (("measured", None, None), ("second_gpu", 1.0, 1.0)):
-        for base in (1, 2, 3, 4):
-            pl = placement(lat, info, base, k, kj)
-            res[f"{scen} base {base}"] = pl
-            for c in pl["late"]:
-                cfg = (c["method"], "learned", c["d"], c["s"])
-                if c["method"].startswith("late") and cfg not in grid:
-                    b = ("B", [c["method"]], ["learned"], [[c["d"], c["s"]]])
-                    if b not in extra:
-                        extra.append(b)
+    scens, grid, extra = (("measured", None, None), ("second_gpu", 1.0, 1.0)), configs(), []
+    for _, k, kj in scens:
+        for base in (2, 3):
+            for c in placement(lat, info, base, k, kj)["late"]:
+                b = ("B", [c["method"]], ["learned"], [[c["d"], c["s"]]])
+                if c["method"].startswith("late") and (c["method"], "learned", c["d"], c["s"]) not in grid:
+                    extra += [b] * (b not in extra)
+    ran = configs(BLOCKS + extra)
+    res = {f"{sc} base {base}": placement(lat, info, base, k, kj, ran) for sc, k, kj in scens for base in (1, 2, 3, 4)}
     (out / "placement.json").write_text(json.dumps(res, indent=1))
     (out / "extra_blocks.json").write_text(json.dumps(extra))
     print(json.dumps({"extra_blocks": extra, "measured base 3": res["measured base 3"]}, indent=1))
 
 
+CFG = ["method", "predictor", "delay", "execute_horizon"]
+
+
+def hours_left(df: pd.DataFrame, todo: set) -> tuple[int, float]:
+    """(configs done, hours left) counted per (config, seed) run; eval_flow runs every config's first seed before
+    any second. A config's first run includes its compile: a config not started costs its method's mean first-run
+    seconds (else the worker's, else 300 s), each later seed the method's mean later-run seconds (else first-run)."""
+    runs = df.groupby([*CFG, "seed"])["seconds"].first().reset_index()
+    first = runs["seed"] == runs.groupby(CFG)["seed"].transform("min")
+    n = runs.groupby(CFG).size()
+    f_m, l_m = runs[first].groupby("method")["seconds"].mean(), runs[~first].groupby("method")["seconds"].mean()
+    f_all = float(runs.loc[first, "seconds"].mean()) if first.any() else 300.0
+    done, sec = 0, 0.0
+    for c in todo:
+        k, f1 = n.get(c, 0), f_m.get(c[0], f_all)
+        done += k >= len(SEEDS)
+        sec += (k == 0) * f1 + max(len(SEEDS) - max(k, 1), 0) * l_m.get(c[0], f1)
+    return done, sec / 3600
+
+
 def forecast(out_dir: str = OUT):
-    """Spec §10 safety: hours left per worker from the seconds of finished configs (a first seed includes compile)."""
+    """Spec §10 safety: hours left per worker from the seconds of the runs so far (see hours_left)."""
     for w in ("A", "B"):
         todo = configs([b for b in BLOCKS + extra_blocks(out_dir) if b[0] == w])
         f = pathlib.Path(out_dir) / f"eval_{w}" / "results.csv"
-        if not f.exists():
-            print(f"worker {w}: nothing finished yet, {len(todo)} configs")
-            continue
-        df = pd.read_csv(f)
-        per = df.groupby(["method", "predictor", "delay", "execute_horizon", "seed"])["seconds"].first()
-        per = per.groupby(["method", "predictor", "delay", "execute_horizon"]).agg(["sum", "count"])
-        done = per[per["count"] == len(SEEDS)]
-        mean, overall = done["sum"].groupby("method").mean(), done["sum"].mean()
-        left = [c for c in todo if c not in done.index]
-        hours = sum(mean.get(c[0], overall) for c in left) / 3600
-        print(f"worker {w}: {len(done)} of {len(todo)} configs done, ~{hours:.1f} h left")
+        df = pd.read_csv(f) if f.exists() else pd.DataFrame(columns=[*CFG, "seed", "seconds"])
+        done, hours = hours_left(df, todo)
+        print(f"worker {w}: {done} of {len(todo)} configs done, ~{hours:.1f} h left")
 
 
 if __name__ == "__main__":

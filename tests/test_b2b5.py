@@ -1,4 +1,5 @@
 import json
+import time
 
 import pandas as pd
 import pytest
@@ -107,5 +108,33 @@ def test_placement_kappa_head_and_edges():
     assert sorted((c["d"], c["s"], c["method"]) for c in pl2["late"]) == [(3, s, "late1") for s in (3, 4, 5)]
 
 
+def test_placement_stops_on_a_late_delta_eval_flow_lacks():
+    with pytest.raises(ValueError, match="late5"):  # (1, 6): x_j = 5.5 -> delta 5 < s; (1, 5): delta >= s is pred
+        b2b5.placement(_lat(pred=0.9, t3=5.5), INFO, 1)
+
+
 def test_other_side_of_a_latency_edge():
     assert b2b5.other_side(3.98) == 5 and b2b5.other_side(4.02) == 4 and b2b5.other_side(3.5) is None
+
+
+def test_hours_left_counts_per_seed_runs():
+    rows = [("naive", "-", 1, 1, sd, t) for sd, t in ((20, 100.0), (21, 10.0), (22, 10.0))]  # done
+    rows += [("naive", "-", 1, 2, 20, 100.0)]  # started: 2 later seeds x 10 s
+    df = pd.DataFrame([(*r, lv) for r in rows for lv in "ab"], columns=[*b2b5.CFG, "seed", "seconds", "level"])
+    todo = {("naive", "-", 1, 1), ("naive", "-", 1, 2), ("naive", "-", 2, 2), ("pred", "learned", 2, 2)}
+    # not started: naive 100 + 2 x 10 s; pred (no runs) the worker's first-run mean 100 + 2 x 100 s
+    assert b2b5.hours_left(df, todo) == (1, pytest.approx((20 + 120 + 300) / 3600))
+    empty = pd.DataFrame(columns=[*b2b5.CFG, "seed", "seconds"])
+    assert b2b5.hours_left(empty, {("naive", "-", 2, 2)}) == (0, pytest.approx(900 / 3600))
+
+
+def test_concurrent_fails_loudly_when_the_load_dies():
+    n = [0]
+
+    def fb():
+        n[0] += 1
+        if n[0] > 3:  # the 3 solo calls pass, the background ones fail
+            raise MemoryError("oom")
+
+    with pytest.raises(RuntimeError, match="background load died"):
+        b2b5._concurrent(lambda: time.sleep(0.01), fb, (), 3, 0)
