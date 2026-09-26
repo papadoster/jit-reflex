@@ -1,0 +1,9 @@
+{
+  "passed": [
+    "T3"
+  ],
+  "gpu": [
+    "T3"
+  ],
+  "fallback": false
+}
