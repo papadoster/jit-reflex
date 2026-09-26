@@ -136,7 +136,7 @@ def eval(
     def execute_chunk(carry, _):
         def step(carry, xs):
             rng, obs, env_state, alive, hist = carry
-            action, pkg_t, k = xs
+            action, pkg_t, k, w_t = xs
             if pkg_t is not None and "gain" in pkg_t:
                 action = reflex.correct(action, pkg_t["gain"], pkg_t["ref"], obs, config.method.max_correction)
             if head is not None:  # B2+B5 §9: the residual on the chunk's action at chunk index k
@@ -144,14 +144,16 @@ def eval(
             if hist is not None:  # B2+B5 §8: |o - o^| of this step in the diagnostic's units, first episode only
                 e = _predictors.normalized_error(pkg_t["ref"], obs, e_std)
                 b = jnp.searchsorted(e_edges, e, side="right")
-                hist = hist.at[k].add(jnp.zeros(hist.shape[1], hist.dtype).at[b].add(alive.astype(hist.dtype)))
+                hist = hist.at[k].add(jnp.zeros(hist.shape[1], hist.dtype).at[b].add((alive & w_t).astype(hist.dtype)))
             rng, key = jax.random.split(rng)
             next_obs, next_env_state, reward, done, info = env.step(key, env_state, action, env_params)
             if alive is not None:
                 alive = alive & ~done
             return (rng, next_obs, next_env_state, alive, hist), (done, env_state, info)
 
-        rng, obs, env_state, action_chunk, n, pkg, alive, hist = carry
+        rng, obs, env_state, action_chunk, n, pkg, alive, c, hist = carry
+        # B2+B5 §8: the first chunk's first d steps run the initial package, whose ref is the reset obs (no prediction)
+        w = None if c is None else (c > 0) | (jnp.arange(s) >= d)
         rng, key = jax.random.split(rng)
         if isinstance(config.method, NaiveMethodConfig):
             next_action_chunk = policy.action(key, obs, config.num_flow_steps)
@@ -240,9 +242,10 @@ def eval(
         )
         next_n = jnp.concatenate([n[s:], jnp.zeros(s, dtype=jnp.int32)])
         (rng, next_obs, next_env_state, alive, hist), (dones, env_states, infos) = jax.lax.scan(
-            step, (rng, obs, env_state, alive, hist), (action_chunk_to_execute.transpose(1, 0, 2), xs_pkg, ks)
+            step, (rng, obs, env_state, alive, hist), (action_chunk_to_execute.transpose(1, 0, 2), xs_pkg, ks, w)
         )
-        return (rng, next_obs, next_env_state, next_action_chunk, next_n, next_pkg, alive, hist), (
+        next_c = None if c is None else c + 1
+        return (rng, next_obs, next_env_state, next_action_chunk, next_n, next_pkg, alive, next_c, hist), (
             dones, env_states, infos,
         )
 
@@ -257,11 +260,12 @@ def eval(
         if config.method.feedback:
             pkg["gain"] = jnp.zeros((*action_chunk.shape, obs.shape[-1]))
     alive = jnp.ones(config.num_evals, bool) if e_std is not None else None
+    c = jnp.zeros((), jnp.int32) if e_std is not None else None  # executed chunks so far
     hist = jnp.zeros((H, len(e_edges) + 1), jnp.float32) if e_std is not None else None
     scan_length = math.ceil(env_params.max_timesteps / config.execute_horizon)
     (*_, hist), (dones, env_states, infos) = jax.lax.scan(
         execute_chunk,
-        (rng, obs, env_state, action_chunk, n, pkg, alive, hist),
+        (rng, obs, env_state, action_chunk, n, pkg, alive, c, hist),
         None,
         length=scan_length,
     )

@@ -1,8 +1,8 @@
-00:16:13 seed=99 name='naive' predictor='-' inference_delay=2 execute_horizon=4
-00:16:53 seed=99 name='a2c2' predictor='-' inference_delay=2 execute_horizon=4
-00:17:31 seed=99 name='t3' predictor='learned' inference_delay=2 execute_horizon=4
-resume: 1 configs already done in /var/folders/l6/kv7gtwcd4r32jvm7rx3z5mw80000gp/T/tmpvyhcauzy/b
+00:24:55 seed=99 name='naive' predictor='-' inference_delay=2 execute_horizon=4
+00:25:35 seed=99 name='a2c2' predictor='-' inference_delay=2 execute_horizon=4
+00:26:14 seed=99 name='t3' predictor='learned' inference_delay=2 execute_horizon=4
+resume: 1 configs already done in /var/folders/l6/kv7gtwcd4r32jvm7rx3z5mw80000gp/T/tmpte3kauo6/b
 zero head == naive: True
-|e| counts == first-episode steps: True
+|e| counts == first-episode steps - d: True
 resume adds nothing: True
 ALL OK
