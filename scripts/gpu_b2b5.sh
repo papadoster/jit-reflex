@@ -5,7 +5,8 @@
 #   git clone https://github.com/papadoster/jit-reflex.git && cd jit-reflex && git checkout <commit> && ./scripts/gpu_b2b5.sh
 # Writes results/b2b5/** and packs it (with the trained heads, without the expert data) into b2b5_results.tgz.
 # Resume: after a crash just rerun it; latency, trained heads and finished eval configs are skipped. PB = the Jacobian
-# batch (16; a failed block is retried with 4). Progress and hours left:
+# batch (8: XLA's memory estimate for the exact reflex at s = 7 is 13.6 GiB at 16 and 7.3 GiB at 8, and each of the two
+# workers has 45% of 24 GB; a failed block is retried with 4). Progress and hours left:
 #   JAX_PLATFORMS=cpu uv run src/b2b5.py forecast --cut $CUT
 # Spec §10 fuse: if forecast > 20 h: stop the workers (Ctrl-C), then rerun with CUT=1..4:
 #   CUT=1 ./scripts/gpu_b2b5.sh
@@ -80,7 +81,7 @@ EVAL="src/eval_flow.py --run-path checkpoints/bc --config.num-evals 256 --world-
 # cost time, as eval_flow skips the finished configs). uv gets /dev/null so it cannot eat the callers' `while read`.
 run_line() {
   local w=$1; shift
-  JAX_COMPILATION_CACHE_DIR=$HOME/.cache/jax_$w uv run $EVAL --package-batch ${PB:-16} "$@" </dev/null 2>&1 \
+  JAX_COMPILATION_CACHE_DIR=$HOME/.cache/jax_$w uv run $EVAL --package-batch ${PB:-8} "$@" </dev/null 2>&1 \
     | { grep --line-buffered -v prefix_attention_horizon || true; } >> $O/eval_$w.log && return
   echo "[$(date +%T)] retry with --package-batch 4: $*" >> $O/eval_$w.log
   JAX_COMPILATION_CACHE_DIR=$HOME/.cache/jax_$w uv run $EVAL --package-batch 4 "$@" </dev/null 2>&1 \
