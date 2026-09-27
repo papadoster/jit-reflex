@@ -1,6 +1,6 @@
 # JIT Reflex: linearizing a frozen action-chunking policy between its calls
 
-*Aleksandr Karpov · Phase A report, with phase B1 in [§8](#8-phase-b1-stale-plans-and-imperfect-predictors) and the offline part of B2 in [§9](#9-phase-b2-offline-a-cheaper-reflex-package) · Kinetix (12 levels) · September 2026. Lab notes in Russian: [E1 memo](probe.md), [E2 / Gate 2 memo](closed-loop.md), [B1 memo](b1.md), [B2 offline memo](b2-offline.md), and the [design spec](../superpowers/specs/2026-09-23-jit-reflex-phase-a-design.md) with its changelog.*
+*Aleksandr Karpov · Phase A report, with phase B1 in [§8](#8-phase-b1-stale-plans-and-imperfect-predictors), the offline part of B2 in [§9](#9-phase-b2-offline-a-cheaper-reflex-package), and the B2+B5 GPU run in [§10](#10-phase-b2b5-the-cheaper-package-in-closed-loop-and-a-price-comparison) · Kinetix (12 levels) · September 2026. Lab notes in Russian: [E1 memo](probe.md), [E2 / Gate 2 memo](closed-loop.md), [B1 memo](b1.md), [B2 offline memo](b2-offline.md), [B2+B5 memo](b2b5.md), and the [design spec](../superpowers/specs/2026-09-23-jit-reflex-phase-a-design.md) with its changelog.*
 
 ## TL;DR
 
@@ -14,6 +14,7 @@
 - **Cost.** A reflex call is 525 network evaluations, 35× RTC, and has **2.07× RTC latency**. In the only latency-fair comparison the benchmark allows (d = 1), the reflex loses.
 - **Phase B1 (§8)** replaced the oracle with wrong physics and a learned world model. The pre-registered verdict is SURVIVES, narrowly. With the learned model, reflex ≈ oracle reflex, and all of its gain over RTC appears only when `J` is switched on. Latency is still 1.8–1.9× RTC.
 - **Phase B2, offline (§9).** A rule written before the data sends two shallower packages to the GPU run: `J` through only the last 3 of 5 flow steps (T3), and a 3-step flow (M3). Only T3 holds up in every check: it keeps a median 94% of the exact `J`'s offline gain and beats `pred` on all 12 levels. But it cuts depth by only 20%, so latency will likely stay around 1.5× RTC.
+- **Phase B2+B5 (§10).** On the GPU, T3 keeps the exact reflex's closed-loop gain and even beats it (+1.8 pp). Its latency is 1.54× RTC, and on one GPU no reflex variant fits a latency-fair grid. When the link sets one delay for everyone, T3 beats every untrained rival by +5.6…+8.7 pp. The surprise is a report-only baseline: a small residual head **distilled from fresh calls of the policy itself** beats every `J` variant in 8 of 9 cells and dominates the latency-fair frontier. It needs training and a simulator, and it fails badly on 2 of 12 levels.
 
 ## 1. Hypothesis
 
@@ -314,3 +315,75 @@ B1 showed that a reflex call's latency is set by its depth, not by the number of
 **Next.** One GPU run for B2+B5 with T3, M3, the exact reflex, `pred`, `rtc_reflex`, RTC, naive and A2C2, the trained residual corrector that is B5's mandatory baseline (B4 in the [roadmap](../roadmap.md)).
 - **First question:** taking `J` off the critical path. Execution would start on `pred`'s nominal (r ≈ 1.1), and the correction would switch on at the positions `J` has reached by then.
 - **Prediction, stated before the data:** at d = 3, M3 is close to T3; at d = 1, it is clearly worse.
+
+## 10. Phase B2+B5: the cheaper package in closed loop, and a price comparison
+
+One run on an RTX 4090 answered two questions. B2 asks whether the shallower packages of §9 keep the exact reflex's closed-loop gain. B5 asks whether a rare call plus a cheap reflex pays off when every method pays its own latency and compute. The rules were written before the data ([spec](../superpowers/specs/2026-09-26-b2b5-gpu-design.md), [Russian memo](b2b5.md), data in `results/b2b5/`).
+
+- **Scale:** 135 configurations × seeds 20–22 × 12 levels × 256 episodes. The grid took 5.5 h. No configuration is missing, and no rule came out GRAY, so the seed extension was not needed.
+- **Methods:**
+  - naive; RTC with 5 and with 10 flow steps; `pred`;
+  - the exact reflex, T3 and M3, all with the learned world model;
+  - late `J`: `pred`'s nominal action, with `J` switched on δ positions late, so that `J` can be computed alongside the next call;
+  - `rtc_reflex`;
+  - two trained residual heads, report-only. **A2C2** is the bt-kinetix variant (MIT), trained on PPO expert data. **A2C2-distill** is the same head trained to match fresh calls of the policy itself, on 1M of its own transitions.
+- **Latency** was measured per cell on the pod, including the world model's rollout. A method with latency ratio r runs at delay d′ = ⌈r·d⌉, where the base delay d is RTC's.
+
+| rule (written before the data) | verdict | pooled, pp | per seed | 95% CI (report only) |
+|---|---|---|---|---|
+| B2-R1: T3 − exact reflex, d = 3, s = 5 | **KEEPS** | +1.84 | + + + | 0.63…3.06 |
+| B2-R1: M3 − exact reflex, d = 3, s = 5 | **KEEPS** | +1.69 | + + + | 0.24…3.22 |
+| B5-R1: late `J` at honest latency, base d = 3 | **NOT FEASIBLE** | — | | |
+| B5-R2: M3 at honest latency, base d = 3 | **NOT FEASIBLE** | — | | |
+| B5-R3: T3 − best of naive, RTC, RTC-10 and `pred` at the same delay; (3,5) | **PASS** | +8.68 | + + + | 4.08…13.44 |
+| B5-R3: the same at (4,4) | **PASS** | +5.59 | + + + | 3.48…8.01 |
+| report only: B5-R1 with a second device, late `J` at (4,4) | WIN by the rule, **weak** | +1.49 | + + + | −1.86…4.76 |
+
+- **The cheaper package keeps the exact reflex's gain, and beats it.** T3 is ahead in all 9 cells, and at d = 3 the interval excludes zero. But B2's latency goal (r ≤ 1.2) is missed: T3's r is 1.54 and M3's is 1.38.
+- **On one GPU the reflex does not fit a latency-fair grid.**
+  - Computing `J` concurrently slows the next call 2.15×, because JAX runs one queue per device. Late `J` would therefore need d′ = 7.
+  - M3 misses d′ = 4 by 3.8%.
+  - With a second device, late `J` wins by the rule, but its interval contains zero. That result is weak and report-only.
+- **When the link sets the delay** (one d for everyone), T3 is well ahead of every untrained rival: +8.7 pp at (3,5) and +5.6 pp at (4,4). RTC with 10 flow steps is worse than with 5 in all 9 cells.
+- **B1's exploratory finding replicates on fresh seeds.** `rtc_reflex` with the learned model beats RTC by +2.1, +2.9 and +3.5 pp at d = 1 and s = 5, 6, 7, and by +5.5 pp at (3,5), on every seed. Its r ≈ 2.2, so this too only holds when the link sets the delay.
+- **Predictions stated before the data.**
+  - Held: late `J` beats `pred` at (4,4) by +4.2 pp; the latency estimates of §9 were right; and `rtc_reflex` is better with the learned model than with the oracle, with 81–85% of that gain on the four levels named in advance.
+  - Failed: M3 is not worse than T3 at d = 1 (+0.1 pp).
+- **Closed-loop ‖e‖.** 19–44% of executed steps have ‖e‖ > 2.3. There §8.8's tangent recovers a small but positive share of the needed correction (median ρ_clip 0.18–0.25). Applied at every step, those small corrections add up to `J`'s +7.5 pp over `pred` at (3,5), which is consistent with the diagnostic.
+
+**The surprise: the distilled head (report only, not a rule).** Solve rate in %; D1 is the mean over s = 5, 6, 7:
+
+| cell | naive | RTC | `pred` | exact reflex | T3 | A2C2 | A2C2-distill |
+|---|---|---|---|---|---|---|---|
+| D1 | 73.8 | 81.2 | 72.3 | 80.9 | 81.3 | 76.4 | **85.9** |
+| (2,2) | 71.2 | 84.2 | 86.0 | 87.0 | **87.3** | 76.3 | 85.2 |
+| (2,6) | 63.7 | 73.9 | 64.7 | 77.0 | 77.9 | 76.2 | **85.3** |
+| (3,5) | 55.7 | 68.0 | 67.4 | 74.9 | 76.7 | 75.8 | **81.4** |
+| (4,4) | 48.6 | 61.4 | 72.1 | 76.4 | 77.7 | 76.6 | **80.3** |
+
+- **It beats T3 in 8 of 9 cells, but not on every level.**
+  - The pooled gap is +4.7 pp at D1 and (3,5) and +2.7 pp at (4,4), positive on every seed. The level × seed intervals still include zero.
+  - It wins big on catapult (+40 pp at (3,5)), h17_unicycle (+27), catcher_v3 (+22), car_launch (+19) and mjc_swimmer (+11).
+  - It collapses on grasp_easy (−37, below its own naive chunk) and mjc_walker (−32).
+- **Against RTC the intervals exclude zero:** +4.8 pp at D1, +13.4 at (3,5), +18.9 at (4,4).
+- **The gap to T3 grows with the execute horizon s, not with d.** The head sees the real observation at every step, while T3's nominal action and `J` rest on a world-model forecast d + s − 1 steps long.
+- **It dominates the latency-fair frontier.** It runs on naive's cheap chunk, plus a 0.07 ms head per step on the CPU. At base d = 2–4 only naive and the distilled head are non-dominated in GPU-ms per step. At base d = 3 it solves 86.2% at 0.44 GPU-ms per step, against RTC's 74.8% at 0.60.
+- **Its price is training.** It needs 1M simulator transitions and 0.36 PFLOP per level, about 28× the world model's training compute. It was also trained with 2–11% fewer steps than the protocol asked for, which works against it.
+- **It is exploratory.** B5's rules only counted untrained methods as rivals, so this result needs its own test with a rule written in advance.
+
+**A2C2, the bt-kinetix variant.**
+- **Its profile is flat:** 75.8–76.8% in every cell, whatever the delay. It is below RTC at d = 1 (−4.8 pp) and above it at d = 4 (+15.2).
+- **The mean hides extremes.** A2C2 solves at least 91% on 8 levels, but only 0–7% on mjc_walker and trampoline, where its naive base chunk solves 39% and 82% at d = 1.
+- **The paper's scale is visible on 10 of 12 levels.** Without those two levels A2C2 is +28.5 pp over RTC at d = 4. The paper reports +23 over RTC on Kinetix, and we did not reproduce its settings.
+- **The collapse does not come from our evaluation code.** The distilled head runs through the same path and solves trampoline 62–90%.
+  - What differs is the training target: the expert's actions.
+  - Our variant also lacks the base-policy features the paper's abstract mentions, and it sits on a naive chunk rather than RTC's.
+- **It does not beat T3** (−0.9 pp at (3,5)), contrary to the prediction.
+
+**Caveats.**
+- The concurrency cost κ is specific to one GPU and JAX's single queue.
+- Both heads are report-only, and there is one distillation recipe, fixed in advance.
+- A2C2 is a variant without policy features, and it was not checked on held-out data.
+- The world models are the Mac-trained ones of §9.
+
+**Next,** to be discussed separately: the literature on distilling re-queries, and a `J` + distillation hybrid. The two fail on opposite levels. The distilled head fails on grasp_easy and mjc_walker, where T3 is strong. T3 is weak on catapult, h17_unicycle and catcher_v3, where the head is strong.
