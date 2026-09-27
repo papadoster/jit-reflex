@@ -1,0 +1,211 @@
+## A. Pooled P (%), 12 levels x seeds 20-22
+       naive  realtime  realtime10  pred  reflex    t3    m3  rtc_reflex  late1  late2  a2c2  a2c2_distill
+(1,5)   74.6      82.8        82.0  77.5    82.8  83.4  83.2        84.9    NaN    NaN  76.6          85.3
+(1,6)   75.7      81.7        80.3  72.4    81.8  81.9  81.9        84.6    NaN    NaN  76.3          86.9
+(1,7)   71.1      79.1        77.6  67.0    78.0  78.5  79.0        82.6    NaN    NaN  76.4          85.6
+(2,2)   71.2      84.2        83.2  86.0    87.0  87.3  87.3         NaN    NaN    NaN  76.3          85.2
+(2,6)   63.7      73.9        71.7  64.7    77.0  77.9  77.6         NaN    NaN    NaN  76.2          85.3
+(3,3)   59.2      74.8        72.2  79.1    81.7  82.8  82.6         NaN   82.0    NaN  76.5          84.4
+(3,4)   56.8      70.2        68.8  74.5    78.3  79.3  79.4         NaN   77.9    NaN  76.8          83.0
+(3,5)   55.7      68.0        65.4  67.4    74.9  76.7  76.6        73.5   74.9    NaN  75.8          81.4
+(4,4)   48.6      61.4        60.1  72.1    76.4  77.7  76.6         NaN   76.3   74.5  76.6          80.3
+
+naive, realtime, realtime10, a2c2, a2c2_distill over all their (d, s):
+  naive: min 48.6 max 81.3; by d (mean over s): d1 76.5, d2 68.2, d3 57.2, d4 48.6
+  realtime: min 61.4 max 89.3; by d (mean over s): d1 84.3, d2 79.2, d3 71.0, d4 61.4
+  realtime10: min 60.1 max 88.7; by d (mean over s): d1 83.3, d2 77.3, d3 68.8, d4 60.1
+  a2c2: min 75.8 max 76.8; by d (mean over s): d1 76.5, d2 76.4, d3 76.4, d4 76.6
+  a2c2_distill: min 80.3 max 88.2; by d (mean over s): d1 86.5, d2 85.4, d3 82.9, d4 80.3
+
+## B. Differences in pp: pooled, per seed, 95% bootstrap (level x seed)
+  a2c2_distill - t3 D1: +4.69 seeds [5.48, 4.31, 4.28] ci (-0.55, 9.89)
+  a2c2_distill - t3 (2,2): -2.14 seeds [-2.25, -2.05, -2.12] ci (-6.37, 1.45)
+  a2c2_distill - t3 (2,6): +7.43 seeds [8.37, 6.54, 7.39] ci (1.89, 12.91)
+  a2c2_distill - t3 (3,3): +1.58 seeds [0.88, 0.85, 3.03] ci (-3.49, 6.38)
+  a2c2_distill - t3 (3,4): +3.73 seeds [4.26, 4.33, 2.6] ci (-2.26, 9.59)
+  a2c2_distill - t3 D3: +4.71 seeds [3.58, 4.59, 5.96] ci (-2.53, 11.6)
+  a2c2_distill - t3 D4: +2.66 seeds [3.55, 2.57, 1.86] ci (-4.37, 9.16)
+  a2c2_distill - naive D1: +12.16 seeds [12.23, 11.98, 12.28] ci (8.11, 16.59)
+  a2c2_distill - naive (2,2): +13.96 seeds [13.9, 13.22, 14.78] ci (9.03, 19.01)
+  a2c2_distill - naive (2,6): +21.66 seeds [22.2, 21.71, 21.06] ci (15.92, 27.9)
+  a2c2_distill - naive (3,3): +25.20 seeds [25.0, 25.59, 25.0] ci (18.61, 32.47)
+  a2c2_distill - naive (3,4): +26.23 seeds [26.33, 27.57, 24.77] ci (18.99, 34.01)
+  a2c2_distill - naive D3: +25.76 seeds [24.28, 25.98, 27.02] ci (18.02, 33.79)
+  a2c2_distill - naive D4: +31.76 seeds [32.49, 31.51, 31.28] ci (23.13, 40.63)
+  a2c2_distill - realtime D1: +4.76 seeds [4.85, 5.27, 4.16] ci (1.4, 8.17)
+  a2c2_distill - realtime (2,2): +0.94 seeds [0.81, 1.01, 1.01] ci (-2.66, 4.29)
+  a2c2_distill - realtime (2,6): +11.37 seeds [12.04, 11.3, 10.77] ci (6.75, 16.02)
+  a2c2_distill - realtime (3,3): +9.59 seeds [9.21, 9.47, 10.09] ci (4.49, 14.81)
+  a2c2_distill - realtime (3,4): +12.83 seeds [12.86, 13.48, 12.14] ci (6.38, 19.34)
+  a2c2_distill - realtime D3: +13.39 seeds [12.43, 13.57, 14.16] ci (5.67, 20.84)
+  a2c2_distill - realtime D4: +18.88 seeds [19.66, 18.52, 18.46] ci (9.41, 27.9)
+  a2c2_distill - reflex D1: +5.10 seeds [5.43, 5.01, 4.86] ci (-0.54, 10.62)
+  a2c2_distill - reflex (2,2): -1.86 seeds [-3.16, -0.78, -1.63] ci (-6.3, 1.98)
+  a2c2_distill - reflex (2,6): +8.34 seeds [9.38, 8.56, 7.1] ci (2.0, 14.51)
+  a2c2_distill - reflex (3,3): +2.64 seeds [1.27, 2.57, 4.07] ci (-2.91, 7.73)
+  a2c2_distill - reflex (3,4): +4.76 seeds [5.83, 5.05, 3.42] ci (-1.56, 10.9)
+  a2c2_distill - reflex D3: +6.55 seeds [5.99, 5.83, 7.85] ci (-1.12, 13.89)
+  a2c2_distill - reflex D4: +3.96 seeds [4.13, 4.13, 3.61] ci (-3.48, 10.88)
+  a2c2 - naive D1: +2.63 seeds [2.22, 2.51, 3.16] ci (-8.41, 12.52)
+  a2c2 - naive (2,2): +5.13 seeds [6.15, 4.62, 4.62] ci (-6.08, 15.33)
+  a2c2 - naive (2,6): +12.53 seeds [12.47, 12.76, 12.37] ci (0.25, 23.58)
+  a2c2 - naive (3,3): +17.33 seeds [17.19, 17.51, 17.29] ci (5.2, 28.62)
+  a2c2 - naive (3,4): +19.97 seeds [19.14, 21.39, 19.37] ci (6.79, 31.9)
+  a2c2 - naive D3: +20.12 seeds [19.89, 19.79, 20.67] ci (6.92, 32.1)
+  a2c2 - naive D4: +28.04 seeds [28.06, 27.57, 28.48] ci (14.71, 40.26)
+  a2c2 - realtime D1: -4.77 seeds [-5.15, -4.2, -4.97] ci (-14.74, 3.79)
+  a2c2 - realtime (2,2): -7.89 seeds [-6.93, -7.58, -9.15] ci (-18.24, 1.18)
+  a2c2 - realtime (2,6): +2.25 seeds [2.31, 2.34, 2.08] ci (-8.52, 11.89)
+  a2c2 - realtime (3,3): +1.73 seeds [1.4, 1.4, 2.38] ci (-9.19, 11.66)
+  a2c2 - realtime (3,4): +6.56 seeds [5.66, 7.29, 6.74] ci (-4.94, 17.09)
+  a2c2 - realtime D3: +7.75 seeds [8.04, 7.39, 7.81] ci (-4.05, 18.63)
+  a2c2 - realtime D4: +15.16 seeds [15.23, 14.58, 15.66] ci (2.56, 26.98)
+  t3 - reflex D1: +0.41 seeds [-0.05, 0.71, 0.59] ci (-0.27, 1.08)
+  t3 - reflex (2,2): +0.28 seeds [-0.91, 1.27, 0.49] ci (-0.63, 1.26)
+  t3 - reflex (2,6): +0.91 seeds [1.01, 2.02, -0.29] ci (-0.28, 2.03)
+  t3 - reflex (3,3): +1.05 seeds [0.39, 1.73, 1.04] ci (0.09, 2.05)
+  t3 - reflex (3,4): +1.03 seeds [1.56, 0.72, 0.81] ci (-0.01, 2.04)
+  t3 - reflex D3: +1.84 seeds [2.41, 1.24, 1.89] ci (0.63, 3.06)
+  t3 - reflex D4: +1.30 seeds [0.59, 1.56, 1.76] ci (0.22, 2.4)
+  m3 - reflex D1: +0.52 seeds [0.75, 0.54, 0.27] ci (-0.25, 1.25)
+  m3 - reflex (2,2): +0.28 seeds [0.39, 0.85, -0.39] ci (-0.98, 1.46)
+  m3 - reflex (2,6): +0.63 seeds [1.11, 1.11, -0.33] ci (-0.65, 1.92)
+  m3 - reflex (3,3): +0.88 seeds [0.1, 0.72, 1.82] ci (-0.4, 2.03)
+  m3 - reflex (3,4): +1.16 seeds [1.6, 1.27, 0.62] ci (-0.15, 2.52)
+  m3 - reflex D3: +1.69 seeds [2.02, 1.3, 1.76] ci (0.24, 3.22)
+  m3 - reflex D4: +0.28 seeds [-0.68, 1.17, 0.36] ci (-1.15, 1.8)
+  m3 - t3 D1: +0.11 seeds [0.8, -0.16, -0.31] ci (-0.91, 1.18)
+  m3 - t3 (2,2): +0.00 seeds [1.3, -0.42, -0.88] ci (-0.94, 0.85)
+  m3 - t3 (2,6): -0.28 seeds [0.1, -0.91, -0.03] ci (-1.96, 1.42)
+  m3 - t3 (3,3): -0.17 seeds [-0.29, -1.01, 0.78] ci (-1.44, 1.13)
+  m3 - t3 (3,4): +0.13 seeds [0.03, 0.55, -0.2] ci (-1.07, 1.39)
+  m3 - t3 D3: -0.15 seeds [-0.39, 0.07, -0.13] ci (-1.65, 1.37)
+  m3 - t3 D4: -1.02 seeds [-1.27, -0.39, -1.4] ci (-2.76, 0.64)
+
+## C. Per level (%), mean over seeds; D1 = mean over s 5-7
+
+D1:
+                   naive  realtime  pred  reflex    t3   a2c2  a2c2_distill  distill-t3  distill-naive  t3-reflex
+level                                                                                                            
+car_launch          79.9      85.1  70.1    86.1  87.2   98.8          98.1        11.0           18.2        1.0
+cartpole_thrust     94.4      98.1  88.5    96.0  98.2  100.0          98.8         0.6            4.3        2.2
+catapult            43.9      49.3  36.0    39.4  39.5   67.5          72.9        33.4           29.0        0.1
+catcher_v3          56.8      83.7  58.4    78.9  79.3   98.0          97.0        17.8           40.3        0.4
+chain_lander        94.2      93.6  93.9    94.2  94.4   94.8          94.4         0.0            0.2        0.2
+grasp_easy          65.0      88.0  76.8    88.3  88.5   95.7          74.1       -14.4            9.2        0.2
+h17_unicycle        83.1      92.2  61.7    68.7  72.9   98.9          99.2        26.3           16.1        4.2
+hard_lunar_lander   93.4      94.0  90.6    94.6  94.6   93.7          94.2        -0.4            0.9        0.0
+mjc_half_cheetah    85.7      85.6  87.7    86.9  87.5   74.1          85.9        -1.6            0.2        0.6
+mjc_swimmer         67.8      75.8  71.2    88.0  88.0   93.4          92.1         4.1           24.3        0.0
+mjc_walker          39.1      45.8  52.0    67.4  63.9    2.1          36.6       -27.3           -2.5       -3.5
+trampoline          82.3      83.1  80.7    82.0  81.4    0.1          88.1         6.7            5.8       -0.6
+  levels distill > t3: 7/12, t3 > reflex: 9/12
+
+D3 (3,5):
+                   naive  realtime  pred  reflex    t3  a2c2  a2c2_distill  distill-t3  distill-naive  t3-reflex
+level                                                                                                           
+car_launch          75.5      79.9  51.2    78.3  78.8  97.7          98.0        19.3           22.5        0.5
+cartpole_thrust     47.0      60.5  81.5    88.3  94.5  99.9          98.6         4.0           51.6        6.2
+catapult            32.3      38.7  29.4    29.0  29.8  61.7          70.1        40.2           37.8        0.8
+catcher_v3          32.3      53.9  66.3    69.4  72.9  98.6          94.5        21.6           62.2        3.5
+chain_lander        93.0      95.1  94.1    93.9  95.3  92.7          94.7        -0.7            1.7        1.4
+grasp_easy          60.2      88.4  79.8    89.6  91.0  96.4          54.2       -36.8           -6.0        1.4
+h17_unicycle        73.0      71.7  65.6    66.5  71.5  99.0          98.8        27.3           25.8        4.9
+hard_lunar_lander   62.5      85.0  92.7    93.6  92.8  92.2          94.7         1.8           32.2       -0.8
+mjc_half_cheetah    82.4      85.7  85.3    86.1  86.7  76.0          83.3        -3.4            0.9        0.7
+mjc_swimmer         24.9      46.5  51.2    73.3  80.6  94.5          91.5        10.9           66.7        7.3
+mjc_walker           5.3      29.8  37.0    55.5  51.2   0.8          19.0       -32.2           13.7       -4.3
+trampoline          79.6      81.1  74.9    75.0  75.4   0.0          79.7         4.3            0.1        0.4
+  levels distill > t3: 8/12, t3 > reflex: 10/12
+
+D4 (4,4):
+                   naive  realtime  pred  reflex    t3   a2c2  a2c2_distill  distill-t3  distill-naive  t3-reflex
+level                                                                                                            
+car_launch          59.2      68.8  76.8    86.8  86.3   98.4          97.5        11.2           38.3       -0.5
+cartpole_thrust     40.5      51.6  88.8    87.8  92.7  100.0          97.0         4.3           56.5        4.9
+catapult            29.4      41.4  32.2    30.9  31.6   65.6          67.7        36.1           38.3        0.8
+catcher_v3          24.0      45.1  78.4    80.6  84.4   99.0          94.3         9.9           70.3        3.8
+chain_lander        93.5      93.6  94.3    94.5  94.1   95.7          95.7         1.6            2.2       -0.4
+grasp_easy          59.1      88.2  84.2    90.8  90.8   98.3          48.2       -42.6          -10.9        0.0
+h17_unicycle        68.1      57.7  73.8    71.9  77.1   98.6          98.3        21.2           30.2        5.2
+hard_lunar_lander   52.7      74.7  92.1    92.1  92.4   93.8          93.2         0.8           40.5        0.4
+mjc_half_cheetah    70.6      81.5  84.4    86.3  87.1   73.4          84.5        -2.6           13.9        0.8
+mjc_swimmer         12.9      29.7  52.5    71.5  75.9   94.0          92.1        16.1           79.2        4.4
+mjc_walker           1.7      26.3  36.6    50.8  47.7    1.8          16.9       -30.7           15.2       -3.1
+trampoline          71.1      78.9  71.0    72.5  71.9    0.7          78.5         6.6            7.4       -0.7
+  levels distill > t3: 9/12, t3 > reflex: 7/12
+
+## D. distill - t3 per level and seed at D3: sign counts
+seed                 20    21    22
+level                              
+car_launch         20.3  20.7  16.8
+cartpole_thrust     7.4   1.2   3.5
+catapult           35.9  40.2  44.5
+catcher_v3         18.4  22.3  24.2
+chain_lander       -4.7   0.0   2.7
+grasp_easy        -39.5 -38.7 -32.4
+h17_unicycle       29.3  25.4  27.3
+hard_lunar_lander   3.1  -0.4   2.7
+mjc_half_cheetah   -5.1  -5.1   0.0
+mjc_swimmer         9.0  12.9  10.9
+mjc_walker        -33.2 -32.4 -30.9
+trampoline          2.0   9.0   2.0
+
+## E. Latency-fair frontier (measured): best config per method, not dominated on GPU-ms
+base d = 1:
+  realtime                     (1,1) P 89.3 gpu-ms/step 1.804 fe/step 15.00 dominated False
+  A2C2-distill                 (1,2) P 88.2 gpu-ms/step 0.632 fe/step 2.51 dominated False
+  t3                           (2,2) P 87.3 gpu-ms/step 1.310 fe/step 43.50 dominated True
+  m3                           (2,2) P 87.3 gpu-ms/step 1.152 fe/step 41.50 dominated True
+  reflex                       (2,2) P 87.0 gpu-ms/step 1.471 fe/step 67.50 dominated True
+  pred                         (2,2) P 86.0 gpu-ms/step 0.943 fe/step 7.50 dominated True
+  realtime10                   (2,2) P 83.2 gpu-ms/step 1.685 fe/step 15.00 dominated True
+  late                         (3,3) P 82.8 gpu-ms/step 0.891 fe/step 42.67 dominated True
+  naive                        (1,2) P 81.3 gpu-ms/step 0.564 fe/step 2.50 dominated True
+  A2C2 (bt-kinetix variant)    (1,1) P 76.8 gpu-ms/step 1.195 fe/step 5.01 dominated True
+  rtc_reflex                   (3,5) P 73.5 gpu-ms/step 0.782 fe/step 68.00 dominated True
+  not dominated: naive (1,7) 71.1, naive (1,6) 75.7, A2C2-distill (1,7) 85.6, A2C2-distill (1,6) 86.9, A2C2-distill (1,3) 88.0, A2C2-distill (1,2) 88.2, realtime (1,1) 89.3
+base d = 2:
+  A2C2-distill                 (2,3) P 86.2 gpu-ms/step 0.444 fe/step 1.68 dominated False
+  realtime                     (2,2) P 84.2 gpu-ms/step 0.902 fe/step 7.50 dominated True
+  t3                           (3,3) P 82.8 gpu-ms/step 0.891 fe/step 42.67 dominated True
+  m3                           (3,3) P 82.6 gpu-ms/step 0.794 fe/step 40.67 dominated True
+  pred                         (3,3) P 79.1 gpu-ms/step 0.647 fe/step 6.67 dominated True
+  A2C2 (bt-kinetix variant)    (2,3) P 76.6 gpu-ms/step 0.444 fe/step 1.68 dominated True
+  reflex                       (4,4) P 76.4 gpu-ms/step 0.796 fe/step 66.25 dominated True
+  naive                        (2,3) P 71.3 gpu-ms/step 0.376 fe/step 1.67 dominated True
+  realtime10                   (4,4) P 60.1 gpu-ms/step 0.843 fe/step 7.50 dominated True
+  not dominated: naive (2,6) 63.7, naive (2,5) 66.8, A2C2-distill (2,6) 85.3, A2C2-distill (2,4) 86.1, A2C2-distill (2,3) 86.2
+base d = 3:
+  A2C2-distill                 (2,3) P 86.2 gpu-ms/step 0.444 fe/step 1.68 dominated False
+  A2C2 (bt-kinetix variant)    (2,3) P 76.6 gpu-ms/step 0.444 fe/step 1.68 dominated True
+  realtime                     (3,3) P 74.8 gpu-ms/step 0.601 fe/step 5.00 dominated True
+  pred                         (4,4) P 72.1 gpu-ms/step 0.482 fe/step 6.25 dominated True
+  naive                        (2,3) P 71.3 gpu-ms/step 0.376 fe/step 1.67 dominated True
+  not dominated: naive (2,6) 63.7, naive (2,5) 66.8, A2C2-distill (2,6) 85.3, A2C2-distill (2,4) 86.1, A2C2-distill (2,3) 86.2
+base d = 4:
+  A2C2-distill                 (3,3) P 84.4 gpu-ms/step 0.444 fe/step 1.68 dominated False
+  A2C2 (bt-kinetix variant)    (3,4) P 76.8 gpu-ms/step 0.350 fe/step 1.26 dominated True
+  realtime                     (4,4) P 61.4 gpu-ms/step 0.451 fe/step 3.75 dominated True
+  naive                        (3,3) P 59.2 gpu-ms/step 0.376 fe/step 1.67 dominated True
+  not dominated: naive (3,5) 55.7, naive (3,4) 56.8, A2C2-distill (3,5) 81.4, A2C2-distill (3,4) 83.0, A2C2-distill (3,3) 84.4
+
+## F. B3: share of executed steps with |e| > 2.3 (hist_summary.csv, all k)
+method                 late1  late2     m3   pred  reflex     t3
+delay execute_horizon                                           
+1     5                  NaN    NaN  0.279  0.268   0.287  0.273
+      6                  NaN    NaN  0.310  0.317   0.317  0.308
+      7                  NaN    NaN  0.354  0.357   0.357  0.349
+2     2                  NaN    NaN  0.222  0.190   0.227  0.212
+      6                  NaN    NaN  0.404  0.393   0.408  0.393
+3     3                0.318    NaN  0.333  0.295   0.341  0.323
+      4                0.386    NaN  0.391  0.346   0.392  0.379
+      5                0.424    NaN  0.429  0.394   0.437  0.418
+4     4                0.408  0.402  0.432  0.381   0.431  0.416
+
+## G. Training compute (GFLOP per level)
+                      mean           min           max  count
+method                                                       
+a2c2          4.256584e+06  4.256584e+06  4.256584e+06     12
+a2c2_distill  3.557218e+05  3.541312e+05  3.566965e+05     12
+world model   1.277679e+04  1.277679e+04  1.277679e+04      1
