@@ -3,7 +3,8 @@
 1. a2c2 with an all-zero head reproduces naive episode for episode;
 2. the |e| histogram of t3 (learned) counts each executed step of the first episode once, except the first D
    (the initial package, no prediction);
-3. a second eval_flow run over the same output directory runs nothing (resume).
+3. a second eval_flow run over the same output directory runs nothing (resume);
+4. results.csv records the Jacobian batch used by reflex methods (NaN for the others).
 """
 
 import pathlib
@@ -43,6 +44,9 @@ res, h = pd.read_csv(tmp / "b" / "results.csv"), pd.read_csv(tmp / "b" / "hist.c
 ok2 = bool(h["count"].sum() == (res["returned_episode_lengths"].iloc[0] - D) * N)
 eval_flow.main(**common, methods=["t3"], predictors=["learned"], output_dir=str(tmp / "b"))
 ok3 = len(pd.read_csv(tmp / "b" / "results.csv")) == len(res) and len(pd.read_csv(tmp / "b" / "hist.csv")) == len(h)
+ok4 = bool((res["package_batch"] == 16).all() and r["package_batch"].isna().all())
 print(f"zero head == naive: {ok1}\n|e| counts == first-episode steps - d: {ok2}\nresume adds nothing: {ok3}")
-print("ALL OK" if ok1 and ok2 and ok3 else "FAILED")
-sys.exit(0 if ok1 and ok2 and ok3 else 1)
+print(f"package_batch column: {ok4}")
+ok = ok1 and ok2 and ok3 and ok4
+print("ALL OK" if ok else "FAILED")
+sys.exit(0 if ok else 1)

@@ -1,12 +1,17 @@
 import json
+import pickle
 import time
 
+import flax.nnx as nnx
+import jax
 import numpy as np
 import pandas as pd
 import pytest
 
+import a2c2
 import b2b5
 import eval_flow
+import model
 import probe
 
 
@@ -14,8 +19,9 @@ def test_b2b5_methods_are_registered():
     m = eval_flow.METHODS
     assert m["t3"].cand == "T3" and m["t3"].j_delay == 0
     assert m["m3"].cand == "M3"
-    assert [m[f"late{k}"].j_delay for k in range(1, 5)] == [1, 2, 3, 4]
-    assert all(m[f"late{k}"].cand == "T3" for k in range(1, 5))
+    assert [m[f"late{k}"].j_delay for k in range(1, 7)] == [1, 2, 3, 4, 5, 6]  # delta < s <= 7 with H = 8
+    assert all(m[f"late{k}"].cand == "T3" for k in range(1, 7))
+    assert "late6" in eval_flow.HIST and "late6" in b2b5.REFLEX
     assert eval_flow.FLOW_STEPS == {"realtime10": 10}
     assert isinstance(m["realtime10"], eval_flow.RealtimeMethodConfig)
 
@@ -123,9 +129,82 @@ def test_placement_kappa_head_and_edges():
     assert sorted((c["d"], c["s"], c["method"]) for c in pl2["late"]) == [(3, s, "late1") for s in (3, 4, 5)]
 
 
-def test_placement_stops_on_a_late_delta_eval_flow_lacks():
-    with pytest.raises(ValueError, match="late5"):  # (1, 6): x_j = 5.5 -> delta 5 < s; (1, 5): delta >= s is pred
-        b2b5.placement(_lat(pred=0.9, t3=5.5), INFO, 1)
+def test_placement_reaches_late5_and_late6():
+    for t3, k in ((5.5, 5), (6.5, 6)):  # x_j = t3 at base 1: delta = k at d = 1; (1, 5) with delta >= s is pred
+        late = {(c["d"], c["s"], c["method"]) for c in b2b5.placement(_lat(pred=0.9, t3=t3), INFO, 1)["late"]}
+        assert (1, 7, f"late{k}") in late and (1, 5, "pred") in late
+    with pytest.raises(ValueError, match="late7"):  # impossible with H = 8 (s <= 7), but loud
+        b2b5.late_method(7, 8)
+
+
+def _lat44(pred, t3):
+    """_lat() with other r_pred and r_t3 at (4,4) only: B5-R1 reads them, the per-cell placement does not."""
+    lat = _lat()
+    lat.loc[(lat.method == "pred") & (lat.delay == 4), "ms"] = pred
+    lat.loc[(lat.method == "t3") & (lat.delay == 4), "ms"] = t3
+    return lat
+
+
+def test_r1_cell_comes_from_the_44_measurement():
+    lat = _lat44(0.95, 1.2)  # x_nom = 2.85 -> d' 3, cell (3,5); x_j = 3.6 -> 4, delta 1
+    c = b2b5.r1_cell(lat, INFO)
+    assert (c["d"], c["s"], c["delta"], c["method"]) == (3, 5, 1, "late1")
+    assert not [c for c in b2b5.placement(lat, INFO, 3)["late"] if c["s"] == 8 - c["d"]]  # per-cell r: none
+    c = b2b5.r1_cell(lat, INFO | {"kappa": 1.2})  # 1.2 x 0.95 x 3 = 3.42 -> 4; kappa_j 1.0: 3.6 -> 4, delta 0
+    assert (c["d"], c["s"], c["method"]) == (4, 4, "t3")
+    assert b2b5.r1_cell(lat, INFO | {"kappa": 1.1, "kappa_j": 2.0})["method"] == "late1"  # kappa <= 1.10: free
+    assert b2b5.r1_cell(_lat(pred=1.5), INFO)["method"] is None  # 4.5 -> 5: NOT-FEASIBLE
+    assert b2b5.r1_cell(lat, INFO, d=4)["method"] == "t3"  # the other d' of the edge: delta 4 - 4
+
+
+def test_place_adds_the_r1_cell_and_its_edge_neighbour(tmp_path):
+    _lat44(2.02 / 3, 1.2).to_csv(tmp_path / "latency.csv", index=False)  # x_nom 2.02: d' 3, edge d' 2
+    (tmp_path / "latency.json").write_text(json.dumps(INFO))
+    b2b5.place(out_dir=str(tmp_path))  # R1: late1 (3,5) is in the grid; the edge: delta 4 - 2 at (2,6) is not
+    assert json.loads((tmp_path / "extra_blocks.json").read_text()) == [["B", ["late2"], ["learned"], [[2, 6]]]]
+    _lat44(2.5 / 3, 1.5).to_csv(tmp_path / "latency.csv", index=False)  # R1: d' 3, x_j 4.5 -> delta 2; no edge
+    b2b5.place(out_dir=str(tmp_path))
+    assert json.loads((tmp_path / "extra_blocks.json").read_text()) == [["B", ["late2"], ["learned"], [[3, 5]]]]
+
+
+def test_flops_are_counted_on_cpu_copies():
+    O, A = 679, 6
+    sd = nnx.state(model.FlowPolicy(obs_dim=O, action_dim=A, config=model.ModelConfig(), rngs=nnx.Rngs(0)))
+    g, hg = b2b5.cpu_gflop(sd.to_pure_dict(), jax.numpy.zeros((1, O)), jax.numpy.zeros((1, 8, A)))
+    assert 0.02 < g < 0.1 and hg == pytest.approx(0.000621, rel=0.01)  # the rehearsal: 0.052 and 0.000621
+
+
+def test_a_missing_head_drops_only_its_method(tmp_path, capsys):
+    (tmp_path / "a2c2").mkdir()
+    with (tmp_path / "a2c2" / "worlds_l_catapult.pkl").open("wb") as f:
+        pickle.dump(nnx.state(a2c2.Head(4, 2, rngs=nnx.Rngs(0))).to_pure_dict(), f)
+    heads, ms = eval_flow.load_head_sets(["naive", "a2c2", "a2c2_distill"], str(tmp_path), ["worlds/l/catapult.json"])
+    assert list(heads) == ["a2c2"] and ms == ["naive", "a2c2"]
+    assert "!!! a2c2_distill: heads missing" in capsys.readouterr().out
+
+
+def _covered(lines) -> set:
+    """The (method, predictor, d, s) configs eval_flow runs for these command lines."""
+    out = set()
+    for ln in lines:
+        a = {k: v for k, *v in (p.split() for p in ln.lstrip("-").split(" --"))}
+        out |= {(m, p if m in b2b5.REFLEX else "-", *map(int, c.split(",")))
+                for m in a["methods"] for p in a["predictors"] for c in a["cells"]}
+    return out
+
+
+def test_cut_drops_the_spec_steps_in_order_without_touching_the_grid():
+    sizes = [len(b2b5.cut_configs(n)) for n in range(5)]
+    assert sizes == [0, 8, 10, 12, 18]  # (2,2) (2,6) x 4; phys0.2 x 2; t3 m3 oracle; a2c2_distill x 6
+    assert ("a2c2_distill", "-", 1, 4) in b2b5.cut_configs(4) and ("a2c2_distill", "-", 2, 3) not in b2b5.cut_configs(4)
+    assert not any(c[0] == "realtime10" for c in b2b5.cut_configs(4))
+    for n in range(5):
+        lines = b2b5.command_lines("A", "x", cut=n) + b2b5.command_lines("B", "x", cut=n)
+        assert _covered(lines) == b2b5.configs() - b2b5.cut_configs(n)
+    assert b2b5.command_lines("B", "x", cut=0) == b2b5.command_lines("B", "x")
+    assert b2b5.grid_sha() == json.loads(open("results/b2b5/lock.json").read())["grid"]
+    with pytest.raises(ValueError):
+        b2b5.cut_configs(5)
 
 
 def test_other_side_of_a_latency_edge():
@@ -195,8 +274,8 @@ def test_summarize_rules(tmp_path):
     (tmp_path / "eval_B").mkdir()
     pd.DataFrame(hist).to_csv(tmp_path / "eval_B" / "hist.csv", index=False)
     (tmp_path / "a2c2_distill").mkdir()
-    pd.DataFrame([{"level": "x", "transitions": t, "steps": 10} for t in (1, 1000)]).to_csv(  # a rerun: last row
-        tmp_path / "a2c2_distill" / "train_log.csv", index=False)
+    pd.DataFrame([{"level": "x", "transitions": t, "steps": 10, "mse": m, "mse_base": 0.2}  # a rerun: last row
+                  for t, m in ((1, 0.5), (1000, 0.1))]).to_csv(tmp_path / "a2c2_distill" / "train_log.csv", index=False)
     v = b2b5.summarize(out_dir=str(tmp_path))
     assert v["B2-R1 t3"]["verdict"] == v["B2-R1 t3"]["final"] == "KEEPS"
     assert v["B5-R1 late"]["verdict"] == "WIN" and abs(v["B5-R1 late"]["pooled_pp"] - 5.0) < 1e-6
@@ -221,6 +300,7 @@ def test_summarize_rules(tmp_path):
     tc = pd.read_csv(tmp_path / "training_compute.csv").query("method == 'a2c2_distill'")
     g = INFO["gflop_per_eval"]
     assert tc.train_gflop.tolist() == pytest.approx([10 * 512 * 3 * INFO["head_gflop"] + 5 * g * 1000 * 9 / 8 * 1.1])
+    assert res["head MSE < base MSE (§9)"] == {"a2c2_distill (held-out)": {"x": True}}
 
 
 def test_summarize_gray_writes_the_extension(tmp_path):
@@ -245,6 +325,19 @@ def test_summarize_strict_stops_on_a_missing_seed(tmp_path):
     _write_results(tmp_path, lambda *a: 0.5, seeds=(20, 21))
     with pytest.raises(SystemExit):
         b2b5.summarize(out_dir=str(tmp_path))
+
+
+def test_summarize_strict_accepts_cut_configs(tmp_path):
+    _write_results(tmp_path, lambda *a: 0.5)
+    f = tmp_path / "eval_A" / "results.csv"
+    df = pd.read_csv(f)
+    cut = b2b5.cut_configs(4)
+    df[[c not in cut for c in df[b2b5.CFG].itertuples(index=False, name=None)]].to_csv(f, index=False)
+    with pytest.raises(SystemExit):
+        b2b5.summarize(out_dir=str(tmp_path))
+    b2b5.summarize(out_dir=str(tmp_path), cut=4)
+    res = json.loads((tmp_path / "b2b5.json").read_text())
+    assert res["missing"] == 0 and len(res["cut"]) == 18 and ["pred", "phys0.2", 3, 5] in res["cut"]
 
 
 def test_summarize_partial_grid_without_strict(tmp_path):

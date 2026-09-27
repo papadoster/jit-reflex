@@ -302,14 +302,15 @@ METHODS = {
     "rtc_reflex_off": ReflexMethodConfig(requery=False, feedback=False, rtc=True),  # sanity: must reproduce realtime
     "t3": ReflexMethodConfig(cand="T3"),  # B2+B5 §3
     "m3": ReflexMethodConfig(cand="M3"),
-    **{f"late{k}": ReflexMethodConfig(cand="T3", j_delay=k) for k in range(1, 5)},
+    **{f"late{k}": ReflexMethodConfig(cand="T3", j_delay=k) for k in range(1, 7)},  # H = 8: delta < s <= 7
     "realtime10": RealtimeMethodConfig(),  # RTC with 10 flow steps, see FLOW_STEPS
     "a2c2": HeadMethodConfig("a2c2"),
     "a2c2_distill": HeadMethodConfig("a2c2_distill"),
 }
 
 FLOW_STEPS = {"realtime10": 10}  # B2+B5: methods whose chunk (and first chunk) use more flow steps
-HIST = ("pred", "reflex", "t3", "m3", *(f"late{k}" for k in range(1, 5)))  # B2+B5 §8: |e| histograms, learned only
+LATE = tuple(m for m in METHODS if m.startswith("late"))  # B2+B5 late J, late1-late6
+HIST = ("pred", "reflex", "t3", "m3", *LATE)  # B2+B5 §8: |e| histograms, learned only
 KEYS = ["seed", "delay", "execute_horizon", "method", "predictor"]  # one config of a run (resume, hist.csv)
 
 
@@ -340,6 +341,19 @@ def load_done(out_dir: pathlib.Path, level_paths: Sequence[str]) -> tuple[pd.Dat
     n = old[old["level"].isin(level_paths)].groupby(KEYS)["level"].nunique()
     done = set(n.index[n == len(set(level_paths))])
     return old[~stale(old, level_paths, done)], done
+
+
+def load_head_sets(methods: Sequence[str], heads_root: str, level_paths: Sequence[str]) -> tuple[dict, list[str]]:
+    """B2+B5 §14: ({head method: stacked heads}, the methods to run). A head method whose heads are missing is dropped
+    loudly; every other method of the call still runs."""
+    heads = {}
+    for m in methods:
+        if isinstance(METHODS[m], HeadMethodConfig):
+            try:
+                heads[m] = jax.device_put(a2c2.load_heads(heads_root, METHODS[m].head, level_paths))
+            except FileNotFoundError as e:
+                print(f"!!! {m}: heads missing ({e}), its configs are skipped", flush=True)
+    return heads, [m for m in methods if m in heads or not isinstance(METHODS[m], HeadMethodConfig)]
 
 
 def horizons_for(delay: int, chunk_size: int, horizons: Sequence[int], minmax: bool) -> list[int]:
@@ -425,11 +439,7 @@ def main(
             with (pathlib.Path(world_model_dir) / f"{_predictors.level_name(level_path)}.pkl").open("rb") as f:
                 wms.append(pickle.load(f))
         world_models = jax.device_put(jax.tree.map(lambda *x: jnp.array(x), *wms))
-    heads = {
-        m: jax.device_put(a2c2.load_heads(heads_root, METHODS[m].head, level_paths))
-        for m in methods
-        if isinstance(METHODS[m], HeadMethodConfig)
-    }
+    heads, methods = load_head_sets(methods, heads_root, level_paths)
     e_stds, edges = None, e_edges(e_bins)
     if e_std is not None:
         with np.load(e_std) as z:
@@ -533,6 +543,7 @@ def main(
                         results["level"].append(level_paths[i])
                         results["execute_horizon"].append(execute_horizon)
                         results["max_correction"].append(max_correction if is_reflex else float("nan"))
+                        results["package_batch"].append(package_batch if is_reflex else float("nan"))
                         results["kick_std"].append(config.kick_std if config.kick_prob > 0 else 0.0)
                         results["seconds"].append(time.time() - start)
                     # after every config: a crash (or Ctrl-C) keeps the finished ones; written aside and renamed,

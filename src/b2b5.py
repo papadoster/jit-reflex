@@ -34,7 +34,7 @@ OUT = "results/b2b5"
 SEEDS, EXT_SEEDS = (20, 21, 22), (23, 24, 25)
 CHEAP = ("naive", "realtime", "realtime10", "a2c2", "a2c2_distill")
 PRED = ("pred", "reflex", "t3", "m3")
-REFLEX = (*PRED, "rtc_reflex", *(f"late{k}" for k in range(1, 5)))  # methods with a predictor
+REFLEX = (*PRED, "rtc_reflex", *eval_flow.LATE)  # methods with a predictor
 ALL16 = [(d, s) for d in range(1, 5) for s in range(d, 9 - d)]  # s >= d, d + s <= 8
 R9 = [(1, 5), (1, 6), (1, 7), (2, 2), (2, 6), (3, 3), (3, 4), (3, 5), (4, 4)]
 D1, D3, D4 = [(1, 5), (1, 6), (1, 7)], (3, 5), (4, 4)
@@ -74,16 +74,44 @@ def _args(methods, preds, cells, seeds, out: str) -> str:
             f"--cells {' '.join(f'{d},{s}' for d, s in cells)} --seeds {' '.join(map(str, seeds))} --output-dir {out}")
 
 
-def command_lines(worker: str, out_dir: str = OUT, seeds: Sequence[int] = SEEDS) -> list[str]:
-    return [
-        _args(ms, ps, [tuple(c) for c in cs], seeds, f"{out_dir}/eval_{w}")
-        for w, ms, ps, cs in BLOCKS + extra_blocks(out_dir) if w == worker
-    ]
+def cut_configs(cut: int) -> set:
+    """Spec §10 fuse (forecast > 20 h): the grid configs its first `cut` steps drop, in its order. BLOCKS (and so the
+    lock) stay as they are; realtime10 is never cut."""
+    if not 0 <= cut <= 4:
+        raise ValueError(f"cut {cut}: the spec has steps 1-4")
+    steps = [
+        lambda m, p, d, s: m in PRED and (d, s) in ((2, 2), (2, 6)),
+        lambda m, p, d, s: p == "phys0.2",
+        lambda m, p, d, s: m in ("t3", "m3") and p == "oracle",
+        lambda m, p, d, s: m == "a2c2_distill" and (d, s) not in [*D1, D3, D4] and d != 2,
+    ][:cut]
+    return {c for c in configs() if any(f(*c) for f in steps)}
 
 
-def commands(worker: str, out_dir: str = OUT):
-    """eval_flow.py arguments of a worker's blocks, one line each; the pod script adds the shared ones."""
-    print("\n".join(command_lines(worker, out_dir)))
+def command_lines(worker: str, out_dir: str = OUT, seeds: Sequence[int] = SEEDS, cut: int = 0) -> list[str]:
+    """One line per block; a block with cut configs splits into one line per predictor and set of kept cells."""
+    drop, lines = cut_configs(cut), []
+    for w, ms, ps, cs in BLOCKS + extra_blocks(out_dir):
+        if w != worker:
+            continue
+        cs, out = [tuple(c) for c in cs], f"{out_dir}/eval_{w}"
+        if not any((m, p, *c) in drop for m in ms for p in ps for c in cs):
+            lines.append(_args(ms, ps, cs, seeds, out))
+            continue
+        groups = {}
+        for p in ps:
+            for m in ms:
+                kept = tuple(c for c in cs if (m, p, *c) not in drop)
+                if kept:
+                    groups.setdefault((p, kept), []).append(m)
+        lines += [_args(g, (p,), kept, seeds, out) for (p, kept), g in groups.items()]
+    return lines
+
+
+def commands(worker: str, out_dir: str = OUT, cut: int = 0):
+    """eval_flow.py arguments of a worker's blocks, one line each; the pod script adds the shared ones. cut: spec §10
+    fuse steps 1..cut (see cut_configs)."""
+    print("\n".join(command_lines(worker, out_dir, cut=cut)))
 
 
 def _sha(path) -> str:
@@ -229,17 +257,36 @@ def _flops(f, *args) -> float:
     return (a[0] if isinstance(a, list) else a)["flops"]
 
 
+def cpu_gflop(state_dict, obs, noise) -> tuple[float, float]:
+    """Spec §5.4: GFLOP of one network evaluation and of one A2C2 head step, from cost_analysis of CPU copies whatever
+    the default backend: on the GPU XLA's count misses the matmuls (B1 on the 4090: 0.0010 per evaluation, the CPU
+    0.052)."""
+    cpu = jax.devices("cpu")[0]
+    (_, O), (_, H, A) = obs.shape, noise.shape
+    obs, noise = jax.device_put((obs, noise), cpu)
+    with jax.default_device(cpu):
+        policy = probe.make_policy(jax.device_put(state_dict, cpu), O, A)
+        head = a2c2.Head(O, A, rngs=nnx.Rngs(0))
+        g = _flops(jax.jit(lambda o, x: policy(o, x, jnp.zeros(()))), obs, noise) / 1e9
+        tf = a2c2.time_feature(jnp.zeros(1, jnp.int32), H)
+        hg = _flops(jax.jit(lambda o, a, t: head.apply_residual(o, a, t)), obs, noise[:, 0], tf) / 1e9
+    assert 0.02 < g < 0.1, f"{g} GFLOP per network evaluation: cost_analysis is off (the CPU gives 0.052)"
+    return g, hg
+
+
 def latency(out_dir: str = OUT, level_path: str = probe.LEVELS[0], run_path: str = "checkpoints/bc",
             repeats: int = 200, warmup: int = 20):
     """Spec §5.1-5.2 at batch 1: latency.csv (median ms per method and cell) and latency.json (realtime's ms, kappa
     and kappa_j at (4, 4), the A2C2 head's ms on GPU and CPU, GFLOP of one network evaluation and of one head step)."""
     env, env_params, levels, O, A = probe.setup([level_path])
-    policy = probe.make_policy(probe.load_state_dict(run_path, level_path), O, A)
+    sd = probe.load_state_dict(run_path, level_path)
+    policy = probe.make_policy(sd, O, A)
     with open(f"{predictors.WM_DIR}/{predictors.level_name(level_path)}.pkl", "rb") as f:
         wm = pickle.load(f)
     H, key = policy.action_chunk_size, jax.random.key(0)
     obs = env.reset_to_level(key, jax.tree.map(lambda x: x[0], levels), env_params)[0][None]
     noise = jax.random.normal(key, (1, H, A))
+    gflop, head_gflop = cpu_gflop(sd, obs, noise)  # first: a bad count stops the pod before the timing
     prev = policy.action_from_noise(noise, obs, 5)
     args = (key, noise, obs, prev)
     rows, fns = [], {}
@@ -257,14 +304,13 @@ def latency(out_dir: str = OUT, level_path: str = probe.LEVELS[0], run_path: str
     with jax.default_device(cpu):
         head_cpu = a2c2.Head(O, A, rngs=nnx.Rngs(0))
         h_cpu = jax.jit(lambda o, a, t: head_cpu.apply_residual(o, a, t))
-    one = jax.jit(lambda o, x: policy(o, x, jnp.zeros(())))
     info = {
         "device": str(jax.devices()[0]), "level": level_path,
         "realtime_ms": float(lat[lat.method == "realtime"]["ms"].median()),
         "kappa": ta_b / ta, "kappa_j": tb_a / tb, "t_nom": ta, "t_j": tb, "t_nom_with_j": ta_b, "t_j_with_nom": tb_a,
         "head_ms_gpu": _time(h, hargs, repeats, warmup),
         "head_ms_cpu": _time(h_cpu, jax.device_put(hargs, cpu), repeats, warmup),
-        "gflop_per_eval": _flops(one, obs, noise) / 1e9, "head_gflop": _flops(h, *hargs) / 1e9,
+        "gflop_per_eval": gflop, "head_gflop": head_gflop,
     }
     out = pathlib.Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -285,15 +331,42 @@ def other_side(x: float) -> int | None:
     return m + 1 if _ceil(x) == m else m
 
 
+def kappas(info: dict, kappa: float | None = None, kappa_j: float | None = None) -> tuple[float, float]:
+    """Spec §5.2: (kappa, kappa_j); None = measured; kappa <= 1.10 counts the concurrent J as free: (1, 1)."""
+    k = info["kappa"] if kappa is None else kappa
+    kj = info["kappa_j"] if kappa_j is None else kappa_j
+    return (1.0, 1.0) if k <= 1.10 else (k, kj)
+
+
+def late_method(delta: int, s: int) -> str:
+    """Spec §5.2: the eval method whose data a late-J cell uses: t3 at delta <= 0, pred at delta >= s, else late<delta>
+    (late1-late6 cover every delta < s <= 7 of H = 8)."""
+    m = "t3" if delta <= 0 else "pred" if delta >= s else f"late{delta}"
+    if m not in eval_flow.METHODS:
+        raise ValueError(f"late J needs delta={delta} < s={s}: eval_flow has no {m}")
+    return m
+
+
+def r1_cell(lat: pd.DataFrame, info: dict, kappa: float | None = None, kappa_j: float | None = None,
+            d: int | None = None) -> dict:
+    """Spec §6.2: B5-R1's candidate at base 3 from the (4,4) measurement: x_nom = kappa r_pred(4,4) 3, x_j = kappa_j
+    r_t3(4,4) 3, d'_nom = ceil(x_nom), delta = ceil(x_j) - d'_nom, cell (d'_nom, 8 - d'_nom). {d, s, delta, method,
+    x_nom, x_j}; method None if d'_nom > 4 (NOT-FEASIBLE). d: another d'_nom (the §5.1 edge)."""
+    k, kj = kappas(info, kappa, kappa_j)
+    r = lat.set_index(["method", "delay", "execute_horizon"])["ms"] / info["realtime_ms"]
+    x_nom, x_j = k * float(r[("pred", *D4)]) * 3, kj * float(r[("t3", *D4)]) * 3
+    d = _ceil(x_nom) if d is None else d
+    delta = _ceil(x_j) - d
+    return {"d": d, "s": 8 - d, "delta": delta, "method": late_method(delta, 8 - d) if d <= 4 else None,
+            "x_nom": x_nom, "x_j": x_j}
+
+
 def placement(lat: pd.DataFrame, info: dict, base: int, kappa: float | None = None, kappa_j: float | None = None,
               grid: set | None = None) -> dict:
     """Spec §5.1-5.3 at base delay `base`: {method: [(d, s)]} and "late": [{d, s, delta, method, x_nom, x_j}], where
     method is the eval method whose data the cell uses (late<delta>, t3 at delta <= 0, pred at delta >= s).
     kappa, kappa_j: None = measured; 1.0 = the second-GPU scenario. grid: keep only cells that were run."""
-    kappa = info["kappa"] if kappa is None else kappa
-    kappa_j = info["kappa_j"] if kappa_j is None else kappa_j
-    if kappa <= 1.10:  # spec §5.2: the concurrent J counts as free
-        kappa = kappa_j = 1.0
+    kappa, kappa_j = kappas(info, kappa, kappa_j)
     rt = info["realtime_ms"]
     r = lat.set_index(["method", "delay", "execute_horizon"])["ms"] / rt
 
@@ -317,26 +390,33 @@ def placement(lat: pd.DataFrame, info: dict, base: int, kappa: float | None = No
             continue
         x_j = kappa_j * r[("t3", d, s)] * base
         delta = _ceil(x_j) - d
-        method = "t3" if delta <= 0 else "pred" if delta >= s else f"late{delta}"
-        if method not in eval_flow.METHODS:
-            raise ValueError(f"late J at (d={d}, s={s}) needs delta={delta}: eval_flow has no {method}")
+        method = late_method(delta, s)
         if ran(method, [(d, s)]) or grid is None or method.startswith("late"):
             out["late"].append({"d": d, "s": s, "delta": delta, "method": method, "x_nom": x_nom, "x_j": x_j})
     return out
 
 
 def place(out_dir: str = OUT):
-    """Spec §5.3: extra_blocks.json with the late-J cells bases 2 and 3 need but the grid lacks (run by worker B),
-    under the measured kappa and the second-GPU scenario; then placement.json for bases 1-4 on the grid with them."""
+    """Spec §5.3: extra_blocks.json with the late-J cells the grid lacks (run by worker B): those bases 2 and 3 need
+    and B5-R1's (§6.2), under the measured kappa and the second-GPU scenario, and the measured R1 cell's neighbour at
+    the other d' of a §5.1 edge; then placement.json for bases 1-4 on the grid with them."""
     out = pathlib.Path(out_dir)
     lat, info = pd.read_csv(out / "latency.csv"), json.loads((out / "latency.json").read_text())
     scens, grid, extra = (("measured", None, None), ("second_gpu", 1.0, 1.0)), configs(), []
+
+    def need(c):
+        b = ("B", [c["method"]], ["learned"], [[c["d"], c["s"]]])
+        if c["method"] in eval_flow.LATE and (c["method"], "learned", c["d"], c["s"]) not in grid and b not in extra:
+            extra.append(b)
+
     for _, k, kj in scens:
         for base in (2, 3):
             for c in placement(lat, info, base, k, kj)["late"]:
-                b = ("B", [c["method"]], ["learned"], [[c["d"], c["s"]]])
-                if c["method"].startswith("late") and (c["method"], "learned", c["d"], c["s"]) not in grid:
-                    extra += [b] * (b not in extra)
+                need(c)
+        need(r1_cell(lat, info, k, kj))
+    n = other_side(r1_cell(lat, info)["x_nom"])
+    if n is not None and n <= 4:
+        need(r1_cell(lat, info, d=n))
     ran = configs(BLOCKS + extra)
     res = {f"{sc} base {base}": placement(lat, info, base, k, kj, ran) for sc, k, kj in scens for base in (1, 2, 3, 4)}
     (out / "placement.json").write_text(json.dumps(res, indent=1))
@@ -364,10 +444,11 @@ def hours_left(df: pd.DataFrame, todo: set) -> tuple[int, float]:
     return done, sec / 3600
 
 
-def forecast(out_dir: str = OUT):
-    """Spec §10 safety: hours left per worker from the seconds of the runs so far (see hours_left)."""
+def forecast(out_dir: str = OUT, cut: int = 0):
+    """Spec §10 safety: hours left per worker from the seconds of the runs so far (see hours_left), without the configs
+    the fuse's steps 1..cut drop."""
     for w in ("A", "B"):
-        todo = configs([b for b in BLOCKS + extra_blocks(out_dir) if b[0] == w])
+        todo = configs([b for b in BLOCKS + extra_blocks(out_dir) if b[0] == w]) - cut_configs(cut)
         f = pathlib.Path(out_dir) / f"eval_{w}" / "results.csv"
         df = pd.read_csv(f) if f.exists() else pd.DataFrame(columns=[*CFG, "seed", "seconds"])
         done, hours = hours_left(df, todo)
@@ -427,11 +508,12 @@ LABELS = {"a2c2": "A2C2 (bt-kinetix variant)", "a2c2_distill": "A2C2-distill"}  
 
 
 def summarize(out_dir: str = OUT, strict: bool = True, seeds: Sequence[int] = SEEDS,
-              diag_summary: str = "results/b1/diag/summary.csv") -> dict:
+              diag_summary: str = "results/b1/diag/summary.csv", cut: int = 0) -> dict:
     """Spec §6-7: rules (with the GRAY extension and the final verdict), predictions and hypotheses, A2C2 - t3, prices,
-    |e| shares, training compute. Writes b2b5.json (strict JSON, NaN -> null), frontier.csv, hist_summary.csv,
-    training_compute.csv, b2b5.png and extension.txt (empty unless a rule is GRAY). strict: stop if a grid config misses
-    a seed; without it a missing config gives MISSING."""
+    |e| shares, training compute, the heads' MSE check (§9). Writes b2b5.json (strict JSON, NaN -> null), frontier.csv,
+    hist_summary.csv, training_compute.csv, b2b5.png and extension.txt (empty unless a rule is GRAY). strict: stop if a
+    grid config misses a seed; without it a missing config gives MISSING. cut: the §10 fuse's steps 1..cut ran; their
+    configs are absent on purpose (listed as "cut", never "missing"; a rule that needs one gives MISSING)."""
     out = pathlib.Path(out_dir)
     df = pd.concat([pd.read_csv(f) for f in sorted(out.glob("eval_*/results.csv"))]).drop_duplicates(
         ["seed", "delay", "execute_horizon", "method", "predictor", "level"]
@@ -442,7 +524,8 @@ def summarize(out_dir: str = OUT, strict: bool = True, seeds: Sequence[int] = SE
     lat, info = pd.read_csv(out / "latency.csv"), json.loads((out / "latency.json").read_text())
     ratio = lat.set_index(["method", "delay", "execute_horizon"])["ms"] / info["realtime_ms"]
     grid = configs(BLOCKS + extra_blocks(out_dir))
-    missing = [(*c, sd) for c in sorted(grid) for sd in seeds if (*c, sd) not in P.index]
+    cut_set = cut_configs(cut)
+    missing = [(*c, sd) for c in sorted(grid - cut_set) for sd in seeds if (*c, sd) not in P.index]
     if missing and strict:
         raise SystemExit(f"{len(missing)} (config, seed) cells missing, rerun the workers: {missing[:10]}")
 
@@ -469,10 +552,9 @@ def summarize(out_dir: str = OUT, strict: bool = True, seeds: Sequence[int] = SE
     pl3, pl3_2 = pls[(3, "measured")], pls[(3, "second_gpu")]
     rules = {f"B2-R1 {c}{sfx}": ("keep", (c, "learned", *cl), [("reflex", "learned", *cl)])  # §6.1: D4 shown only
              for c in ("t3", "m3") for cl, sfx in ((D3, ""), (D4, " D4 (report)"))}
-    for name, pl in (("B5-R1 late", pl3), ("B5-R1 late, second GPU (report)", pl3_2)):
-        cand = [c for c in pl["late"] if c["s"] == 8 - c["d"]]
-        rules[name] = ("win", (cand[0]["method"], "learned", cand[0]["d"], cand[0]["s"]) if cand else None,
-                       rivals_at(pl))
+    r1, r1_2 = r1_cell(lat, info), r1_cell(lat, info, 1.0, 1.0)  # §6.2: the cell and delta from the (4,4) measurement
+    for name, c, pl in (("B5-R1 late", r1, pl3), ("B5-R1 late, second GPU (report)", r1_2, pl3_2)):
+        rules[name] = ("win", (c["method"], "learned", c["d"], c["s"]) if c["method"] else None, rivals_at(pl))
     x_m3 = float(ratio[("m3", *D4)] * 3)
     rules["B5-R2 m3"] = ("win", ("m3", "learned", *D4) if _ceil(x_m3) <= 4 else None, rivals_at(pl3))  # §6.3
     for d, s in (D3, D4):
@@ -504,20 +586,18 @@ def summarize(out_dir: str = OUT, strict: bool = True, seeds: Sequence[int] = SE
         v = verdicts[f"B2-R1 {c}"]
         v |= {"r(3,5)": float(ratio[(c, *D3)]),
               "B2 goal": v["final"] == "KEEPS" and bool(ratio[(c, *D3)] <= 1.2)}
-    late = [c for c in pl3["late"] if c["s"] == 8 - c["d"]]
-    k, kj = (info["kappa"], info["kappa_j"]) if info["kappa"] > 1.10 else (1.0, 1.0)  # spec §5.2
-    x_nom, x_j = ((late[0]["x_nom"], late[0]["x_j"]) if late  # none (NOT-FEASIBLE): §6.2's (4,4) measurement
-                  else (k * ratio[("pred", *D4)] * 3, kj * ratio[("t3", *D4)] * 3))
-    for name, x in (("B5-R1 late", float(x_nom)), ("B5-R2 m3", x_m3)):
+    for name, x in (("B5-R1 late", r1["x_nom"]), ("B5-R2 m3", x_m3)):
         n = other_side(x)  # spec §5.1: within ±3% of a d' edge, the verdict at the other d' goes next to it
         e = {"x": x, "other_d": n}
         if n is not None and (name == "B5-R1 late" or round(x) == 4):  # m3: only its 4/5 feasibility edge (§6.3)
-            dl = _ceil(x_j) - n  # late: the same J latency, delta counted from the other d'
-            m = "m3" if name.endswith("m3") else "t3" if dl <= 0 else "pred" if dl >= 8 - n else f"late{dl}"
-            ve = decide("win", ps((m, "learned", n, 8 - n)) - best(rivals_at(pl3))) if n <= 4 else "NOT-FEASIBLE"
+            if n <= 4:  # late: the same J latency, delta counted from the other d'
+                m = "m3" if name.endswith("m3") else r1_cell(lat, info, d=n)["method"]
+                ve = decide("win", ps((m, "learned", n, 8 - n)) - best(rivals_at(pl3)))
+            else:
+                ve = "NOT-FEASIBLE"
             e["verdict_other_d"] = "no data" if ve == "MISSING" else ve
         verdicts[name]["edge"] = e
-    edges3 = {"late J": {"x": float(x_j), "other_d": other_side(float(x_j))}}  # report only: borderline placements
+    edges3 = {"late J": {"x": r1["x_j"], "other_d": other_side(r1["x_j"])}}  # report only: borderline placements
     edges3 |= {m: {"x": x, "other_d": other_side(x)} for m in ("naive", "realtime10")
                for x in [3 * float(ratio.xs(m).median())]}  # realtime is the base itself
     edges3["pred"] = [{"d": d, "s": s, "x": x, "other_d": n} for (d, s), r in ratio.xs("pred").items()
@@ -617,8 +697,14 @@ def summarize(out_dir: str = OUT, strict: bool = True, seeds: Sequence[int] = SE
             ["count", "far_count"]].sum()
         g.assign(share_far=g.far_count / g["count"]).to_csv(out / "hist_summary.csv")
     _training_compute(out, info).to_csv(out / "training_compute.csv", index=False)
+    mse = {}  # spec §9: the head beats the uncorrected chunk action on every level (A2C2's check is in-sample)
+    for name, check in (("a2c2", "in-sample"), ("a2c2_distill", "held-out")):
+        if (out / name / "train_log.csv").exists():
+            t = pd.read_csv(out / name / "train_log.csv").drop_duplicates("level", keep="last")  # a rerun appends
+            mse[f"{name} ({check})"] = {r.level: bool(r.mse < r.mse_base) for r in t.itertuples()}
     res = {"verdicts": verdicts, "hypotheses": hyp, "a2c2": a2c2_rows, "a2c2_flag": flag,
-           "edges base 3 (report)": edges3, "latency": info, "missing": len(missing)}
+           "head MSE < base MSE (§9)": mse, "edges base 3 (report)": edges3, "latency": info,
+           "missing": len(missing), "cut": sorted(cut_set)}
     res = json.loads(json.dumps(res, default=str), parse_constant=lambda _: None)  # strict JSON: NaN -> null
     text = json.dumps(res, indent=1, ensure_ascii=False, allow_nan=False)
     (out / "b2b5.json").write_text(text, encoding="utf-8")
