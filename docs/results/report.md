@@ -377,13 +377,13 @@ One run on an RTX 4090 answered two questions. B2 asks whether the shallower pac
 - **The paper's scale is visible on 10 of 12 levels.** Without those two levels A2C2 is +28.5 pp over RTC at d = 4. The paper reports +23 over RTC on Kinetix, and we did not reproduce its settings.
 - **The collapse does not come from our evaluation code.** The distilled head runs through the same path and solves trampoline 62–90%.
   - What differs is the training target: the expert's actions.
-  - Our variant also lacks the base-policy features the paper's abstract mentions, and it sits on a naive chunk rather than RTC's.
+  - Our variant has the same inputs as the paper's Kinetix head: the paper uses base-policy features only on LIBERO. It differs in the network (256 → 512 without LayerNorm, against three layers of 512 with LayerNorm) and in the observation (679 rather than 2722 dimensions), and it sits on a naive chunk rather than RTC's. (Corrected on 2026-09-28: an earlier version said our variant lacked policy features that the paper uses.)
 - **It does not beat T3** (−0.9 pp at (3,5)), contrary to the prediction.
 
 **Caveats.**
 - The concurrency cost κ is specific to one GPU and JAX's single queue.
 - Both heads are report-only, and there is one distillation recipe, fixed in advance.
-- A2C2 is a variant without policy features, and it was not checked on held-out data.
+- A2C2 is the bt-kinetix variant: the paper's Kinetix inputs, but a different network and observation size. It was not checked on held-out data.
 - The world models are the Mac-trained ones of §9.
 
 **Next,** to be discussed separately: the literature on distilling re-queries, and a `J` + distillation hybrid. The two fail on opposite levels. The distilled head fails on grasp_easy and mjc_walker, where T3 is strong. T3 is weak on catapult, h17_unicycle and catcher_v3, where the head is strong.
