@@ -33,7 +33,7 @@ from lerobot.policies.smolvla.smolvlm_with_expert import apply_rope
 from lerobot.utils.constants import ACTION, OBS_LANGUAGE_ATTENTION_MASK, OBS_LANGUAGE_TOKENS, OBS_STATE
 
 p = argparse.ArgumentParser()
-p.add_argument("--mode", choices=["mem", "bench", "check", "visual", "arm"], default="bench")
+p.add_argument("--mode", choices=["mem", "bench", "check", "visual", "arm", "e1"], default="bench")
 p.add_argument("--policy", default="HuggingFaceVLA/smolvla_libero")
 p.add_argument("--rename", default="", help="e.g. image:camera1,image2:camera2 for lerobot/smolvla_libero")
 p.add_argument("--device", default="mps")
@@ -42,6 +42,8 @@ p.add_argument("--suite", default="libero_spatial")
 p.add_argument("--task", type=int, default=0)
 p.add_argument("--state", type=int, default=0, help="env step of the measured state (rollout with 10-step chunks)")
 p.add_argument("--reps", type=int, default=5)
+p.add_argument("--init-state", type=int, default=1, help="e1: LIBERO initial state of the rollout")
+p.add_argument("--ks", default="0,1,2,3,4,5,6,7", help="e1: which of the 8 states t_k = k*T//8 to measure")
 p.add_argument("--out", default="", help="JSON lines, one per measurement, written as they finish")
 args = p.parse_args()
 dev = torch.device(args.device)
@@ -255,32 +257,55 @@ if args.mode == "mem":
     free()
     raise SystemExit
 
-if args.mode in ("visual", "arm"):  # re-render the scene from an edited MuJoCo state; no gradients
+if args.mode in ("visual", "arm", "e1"):  # re-render the scene from an edited MuJoCo state
+    import mujoco
+
     le = env.envs[0].unwrapped
     ctrl, sim, G_POS = le._env, le._env.env.sim, 0.011  # LIBERO OffScreenRenderEnv; m per action unit per step
-    s0 = ctrl.get_sim_state()  # [time, qpos, qvel]
+    rob, name = ctrl.env.robots[0], ctrl.env.obj_of_interest[0]
+    qa, va = np.array(rob._ref_joint_pos_indexes), np.array(rob._ref_joint_vel_indexes)
+    jnt = ctrl.env.objects_dict[name].joints[0]  # free joint of the object of interest: qpos pos(3)+quat(4), qvel 6
+    adr, vadr = sim.model.get_joint_qpos_addr(jnt)[0], sim.model.get_joint_qvel_addr(jnt)[0]
     batch_axis = lambda d: {k: batch_axis(v) for k, v in d.items()} if isinstance(d, dict) else np.asarray(d)[None]
 
-    def render(st):  # -> (policy batch, raw LIBERO obs, ms)
+    def render(st):  # -> (policy batch, raw LIBERO obs, ms); st is a flattened state [time, qpos, qvel]
         t0 = time.perf_counter()
         raw_obs = ctrl.regenerate_obs_from_state(st)
         t_r = 1e3 * (time.perf_counter() - t0)
         return to_batch(batch_axis(le._format_raw_obs(raw_obs))), raw_obs, t_r
 
-    def chunk(img_b, state_b):  # raw-unit chunk from the images of one batch and the state of another; fixed noise
+    def chunk(img_b, state_b):  # raw-unit chunk from the images of one batch and the state of another; o's noise
         imgs, masks = policy.prepare_images(img_b)
         with torch.no_grad():
             ch = m.sample_actions(imgs, masks, o.lang, o.lmask, policy.prepare_state(state_b), noise=o.noise)
         return ch[0, :, :A] * std_a
 
-    b0, raw0, _ = render(s0)
-    base = chunk(b0, b0)
+    def move_arm(s_from, dxy):  # arm qpos that shift the EEF site by dxy metres, orientation held (Gauss-Newton IK)
+        st = s_from.copy()
+        ctrl.set_state(st), sim.forward()
+        target = sim.data.site_xpos[rob.eef_site_id] + np.r_[dxy, 0.0]
+        for _ in range(6):
+            jp, jr = np.zeros((3, sim.model.nv)), np.zeros((3, sim.model.nv))
+            mujoco.mj_jacSite(sim.model._model, sim.data._data, jp, jr, rob.eef_site_id)
+            err = np.r_[target - sim.data.site_xpos[rob.eef_site_id], 0.0, 0.0, 0.0]
+            st[1 + qa] += np.linalg.pinv(np.vstack([jp, jr])[:, va]) @ err
+            ctrl.set_state(st), sim.forward()
+        return st, float(np.linalg.norm(target - sim.data.site_xpos[rob.eef_site_id]))
+
+    def move_obj(s_from, dxyz):  # object of interest shifted by dxyz metres, its velocity zeroed
+        st = s_from.copy()
+        st[1 + adr: 4 + adr] += dxyz
+        st[1 + sim.model.nq + vadr: 1 + sim.model.nq + vadr + 6] = 0.0
+        return st
+
     unit = lambda v: v / (v.norm() + 1e-12)
     cos = lambda x, y: round(float(unit(x.flatten()) @ unit(y.flatten())), 3)
+    if args.mode != "e1":
+        s0 = ctrl.get_sim_state()
+        b0, raw0, _ = render(s0)
+        base = chunk(b0, b0)
 
 if args.mode == "visual":  # Q7: d action along "object of interest moved by delta"
-    name = ctrl.env.obj_of_interest[0]
-    adr = sim.model.get_joint_qpos_addr(ctrl.env.objects_dict[name].joints[0])[0]  # free joint: pos(3), quat(4)
     p0 = raw0[f"{name}_pos"].copy()
     emit("visual_meta", {"object": name, "object_pos": [round(float(x), 4) for x in p0],
                          "segmentation_keys": [k for k in raw0 if "segment" in k]})
@@ -289,9 +314,7 @@ if args.mode == "visual":  # Q7: d action along "object of interest moved by del
             for sign in (1, -1):
                 u = np.zeros(3)
                 u[axis] = sign * d_m
-                st = s0.copy()
-                st[1 + adr: 4 + adr] += u
-                b, raw_u, t_r = render(st)
+                b, raw_u, t_r = render(move_obj(s0, u))
                 t0 = time.perf_counter()
                 da = chunk(b, b0) - base  # images change, the arm state does not
                 t_c = 1e3 * (time.perf_counter() - t0)
@@ -306,26 +329,9 @@ if args.mode == "visual":  # Q7: d action along "object of interest moved by del
     raise SystemExit
 
 if args.mode == "arm":  # does SmolVLA read the arm from the state vector or from the pixels?
-    import mujoco
-
-    rob = ctrl.env.robots[0]
-    qa, va = np.array(rob._ref_joint_pos_indexes), np.array(rob._ref_joint_vel_indexes)
-
-    def move_arm(dxy):  # arm joint qpos that shift the EEF site by dxy (metres), orientation held; Gauss-Newton IK
-        st = s0.copy()
-        ctrl.set_state(st), sim.forward()
-        target = sim.data.site_xpos[rob.eef_site_id] + np.r_[dxy, 0.0]
-        for _ in range(6):
-            jp, jr = np.zeros((3, sim.model.nv)), np.zeros((3, sim.model.nv))
-            mujoco.mj_jacSite(sim.model._model, sim.data._data, jp, jr, rob.eef_site_id)
-            err = np.r_[target - sim.data.site_xpos[rob.eef_site_id], 0.0, 0.0, 0.0]
-            st[1 + qa] += np.linalg.pinv(np.vstack([jp, jr])[:, va]) @ err
-            ctrl.set_state(st), sim.forward()
-        return st
-
     s_state0 = b0[OBS_STATE]
     for dxy in ((0.01, 0), (-0.01, 0), (0, 0.01), (0, -0.01)):
-        b1, raw1, _ = render(move_arm(np.array(dxy, dtype=float)))
+        b1, raw1, _ = render(move_arm(s0, np.array(dxy, dtype=float))[0])
         d_full, d_state, d_img = chunk(b1, b1) - base, chunk(b0, b1) - base, chunk(b1, b0) - base
         ds_raw = (b1[OBS_STATE] - s_state0)[0] * std_s  # normalized -> raw
         emit("arm_shift", {
@@ -339,6 +345,92 @@ if args.mode == "arm":  # does SmolVLA read the arm from the state vector or fro
             "cos_a10": {"full_state": cos(d_full[:10], d_state[:10]), "full_image": cos(d_full[:10], d_img[:10])},
             "additivity_resid": round(float((d_full[:10] - d_state[:10] - d_img[:10]).norm() / (d_full[:10].norm() + 1e-12)), 3),
         })
+    raise SystemExit
+
+if args.mode == "e1":  # C1-E1, docs/superpowers/specs/2026-09-27-c1-e1-offline-design.md: one rollout, its 8 states
+    SUITES = ["libero_spatial", "libero_object", "libero_goal", "libero_10"]
+    MAGS_MM = (1, 2, 5, 10, 20, 50)
+    v = lambda x: [round(float(y), 6) for y in x]
+    torch.manual_seed(1000 + 10 * SUITES.index(args.suite) + args.task)
+    le.init_state_id = args.init_state  # LiberoEnv resets to init_states[init_state_id]
+    obs, _ = env.reset(seed=0)
+    policy.reset()
+    sim, rob = ctrl.env.sim, ctrl.env.robots[0]  # a hard reset rebuilds the MjSim: rebind everything taken from it
+    qa, va = np.array(rob._ref_joint_pos_indexes), np.array(rob._ref_joint_vel_indexes)
+    name = ctrl.env.obj_of_interest[0]
+    jnt = ctrl.env.objects_dict[name].joints[0]
+    adr, vadr = sim.model.get_joint_qpos_addr(jnt)[0], sim.model.get_joint_qvel_addr(jnt)[0]
+    sims, grips, last_g = [], [], -1.0  # state before each step; gripper command executed before it (-1 = open)
+    for t in range(le._max_episode_steps):
+        sims.append(ctrl.get_sim_state())
+        grips.append(last_g)
+        with torch.no_grad():
+            act = env_post({ACTION: post(policy.select_action(to_batch(obs)))})[ACTION].cpu().numpy()
+        last_g = float(act[0, 6])
+        obs, _, term, _, _ = env.step(act)
+        if term[0]:
+            break
+    T, success = t + 1, bool(ctrl.check_success())
+    emit("e1_rollout", {"suite": args.suite, "task": args.task, "init_state": args.init_state, "T": T,
+                        "max_steps": le._max_episode_steps, "success": success, "object": name})
+    for k in (int(x) for x in args.ks.split(",")):
+        tk = k * T // 8
+        s_k = sims[tk]
+        b0, raw0, t_r0 = render(s_k)
+        o = Obs(b0)  # chunk() and jac_vmap() read the current o
+        t0 = time.perf_counter()
+        a = chunk(b0, b0)
+        ms_call = [1e3 * (time.perf_counter() - t0)]
+        jac_vmap(o)  # warm-up, then the timed one
+        t0 = time.perf_counter()
+        J_raw = raw(jac_vmap(o))  # (A, SD): d a0_raw / d s_raw, exact, fp32
+        sync()
+        ms_J = 1e3 * (time.perf_counter() - t0)
+        ops = {"call": cost(lambda: chunk(b0, b0)), "J": cost(lambda: jac_vmap(o))} if k == int(args.ks.split(",")[0]) else None
+        free()
+        closed = grips[tk] > 0
+        dist = float(np.linalg.norm(raw0[f"{name}_to_robot0_eef_pos"]))
+        stage = "closed" if closed else ("near" if dist <= 0.10 else "far")
+        carry = closed and float(np.linalg.norm(raw0[f"{name}_pos"] - raw0["robot0_eef_pos"])) <= 0.06
+        arm, objs, ms_render = [], [], [t_r0]
+        for ax in (0, 1):
+            for sg in (1, -1):
+                for mm in MAGS_MM:
+                    dxy = np.zeros(2)
+                    dxy[ax] = sg * mm / 1000
+                    st, ik_err = move_arm(s_k, dxy)
+                    rec = {"ax": ax, "sg": sg, "mm": mm, "ik_err_mm": round(1e3 * ik_err, 3)}
+                    if ik_err > 5e-4:  # spec §4: shift rejected
+                        arm.append(rec | {"ik_fail": True})
+                        continue
+                    if carry:  # spec §4: a held object moves with the hand
+                        st[1 + adr: 3 + adr] += dxy
+                    b1, raw1, t_r = render(st)
+                    t0 = time.perf_counter()
+                    dF = chunk(b1, b1) - a
+                    ms_call.append(1e3 * (time.perf_counter() - t0))
+                    ms_render.append(t_r)
+                    ds = (b1[OBS_STATE] - b0[OBS_STATE])[0] * std_s
+                    rec |= {"dF0": v(dF[0]), "S": {h: v(dF[:h, :3].sum(0)) for h in (10, 25, 50)}, "ds": v(ds),
+                            "Cs": v(J_raw @ ds)}
+                    if mm in (10, 20):
+                        dS, dI = chunk(b0, b1) - a, chunk(b1, b0) - a
+                        rec |= {"dS0": v(dS[0]), "dI0": v(dI[0]), "nFS10": round(float((dF[:10] - dS[:10]).norm()), 6),
+                                "nFI10": round(float((dF[:10] - dI[:10]).norm()), 6)}
+                    arm.append(rec)
+                    if closed:  # spec §4: no object shifts while it is held
+                        continue
+                    b1, raw1, t_r = render(move_obj(s_k, np.r_[dxy, 0.0]))
+                    dO = chunk(b1, b1) - a
+                    objs.append({"ax": ax, "sg": sg, "mm": mm, "dO0": v(dO[0]),
+                                 "S": {h: v(dO[:h, :3].sum(0)) for h in (10, 25, 50)},
+                                 "moved_mm": round(1e3 * float(np.linalg.norm(raw1[f"{name}_pos"] - raw0[f"{name}_pos"])), 3)})
+        emit("e1_state", {"suite": args.suite, "task": args.task, "k": k, "t": tk, "T": T, "stage": stage,
+                          "dist_m": round(dist, 4), "carry": carry, "a0": v(a[0]), "J_raw": [v(r) for r in J_raw],
+                          "arm": arm, "obj": objs, "ops": ops,
+                          "ms": {"call": round(float(np.median(ms_call)), 1), "render": round(float(np.median(ms_render)), 1),
+                                 "J": round(ms_J, 1)}})
+        free()
     raise SystemExit
 
 # --- timing and cost of one call and its parts ---------------------------------------------------------------
