@@ -48,6 +48,8 @@ Phase A computes `J` at all 8 chunk positions, through all 5 flow steps. That is
 
 One `J` shared across positions hurts. Interpolating B1's timings gives r ≈ 1.5–1.6 for T3, above the 1.2 target. That rules out a latency-fair grid at d = 3, which needs r ≤ 4/3. M3, at about 1.3–1.4, sits at that edge. Taking `J` off the critical path is the first question for the B2+B5 spec.
 
+**Status: GPU run done 2026-09-27** ([report §10](results/report.md#10-phase-b2b5-the-cheaper-package-in-closed-loop-and-a-price-comparison), [Russian memo](results/b2b5.md), [spec](superpowers/specs/2026-09-26-b2b5-gpu-design.md)). In closed loop T3 and M3 keep the exact reflex's gain; T3 even beats it (+1.8 pp at d = 3). The latency target is missed: measured r is 1.54 for T3 and 1.38 for M3.
+
 ## B3. Trust region: when to use the reflex
 
 E1 shows ρ falling as the deviation grows, with the mean dominated by rare contact events. In closed loop the reflex loses on catapult and unicycle.
@@ -59,6 +61,8 @@ E1 shows ρ falling as the deviation grows, with the mean dominated by rare cont
 
 **Prediction.** The gated reflex does at least as well as the reflex on every level, and removes the catapult and unicycle losses.
 
+**Data so far (B2+B5, 2026-09-27):** in closed loop 19–44% of executed steps have ‖e‖ > 2.3. There the tangent recovers a small but positive share of the needed correction, and `J` still adds +7.5 pp over pred at d = 3. The gate itself has not been tested.
+
 ## B4. Strong baselines and literature review
 
 - **A2C2**, a trained residual corrector, reports +23 pp over RTC on Kinetix. A reimplementation exists in bt-kinetix.
@@ -66,11 +70,15 @@ E1 shows ρ falling as the deviation grows, with the mean dominated by rare cont
 - **Expected:** A2C2 wins on solve rate. The honest position then becomes training-free versus trained.
 - A systematic literature review, before phase C.
 
+**Status: A2C2 run in B2+B5, 2026-09-27** (report-only baseline, [report §10](results/report.md#10-phase-b2b5-the-cheaper-package-in-closed-loop-and-a-price-comparison)). The bt-kinetix variant is flat at about 76% at every delay and does not beat T3. Its mean hides two collapsed levels; on the other 10 it is +28.5 pp over RTC at d = 4. The expectation above held only in part. A distilled variant, the same head trained on fresh calls of the policy itself, beat every `J` variant in 8 of 9 cells, unevenly across levels. The literature review is still open.
+
 ## B5. Compute-matched comparison (only after B2)
 
 Does "call a big policy rarely, plus a cheap reflex" beat "call it often" at equal compute? At phase A cost it does not. At d = 2:
 - reflex with s = 6 costs 525 / 6 ≈ 88 network evaluations per step and solves 77.3%;
 - RTC with s = 2 costs 7.5 per step and solves 84.1%.
+
+**Status: done 2026-09-27** (in the same GPU run as B2). At honest latency on one GPU no reflex variant fits: computing `J` alongside the next call slows it 2.15×, and M3 misses by 3.8% (NOT FEASIBLE). When one delay is imposed on everyone, T3 beats naive, RTC, 10-step RTC and pred by +5.6…+8.7 pp (PASS). On the latency-fair frontier the distilled head dominates at base delays 2–4.
 
 ## C1. A real VLA action head
 
