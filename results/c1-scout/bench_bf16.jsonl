@@ -1,0 +1,50 @@
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "mem_after_load_gib": 2.46}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "meta": {"suite": "libero_spatial", "task": 0, "chunk": 50, "flow_steps": 10, "vlm_layers": 32, "prefix_tokens": 149, "params_M": 604.9, "state_raw": [-0.2112, -0.0111, 1.1742, 3.1409, -0.0028, -0.0877, 0.0387, -0.0387]}}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "ms_call_stock": 675.2}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "ms_prefix_stock": 203.0}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "ms_imglang_cache": 203.5}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "ms_state_token_pass": 41.5}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "ms_flow_10_steps": 439.5}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "ms_J_a0_exact_stock_path": 4587.2}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "ms_J_a0_exact_split": 4421.5}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "ms_J_a0_T1_split": 1201.1}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "ms_J_a0_T3_split": 1906.6}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "ms_J_a0_T5_split": 2673.8}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "ms_J_10pos_T3_split": 15794.3}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "ms_call_rtc_lerobot_d3": 676.3}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "cost_call_stock": {"gflop": 564.37, "aten_ops": 42116}}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "cost_J_a0_exact_split": {"gflop": 265.0, "aten_ops": 350876}}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "cost_J_a0_T3_split": {"gflop": 159.73, "aten_ops": 152626}}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "split_vs_stock_max_abs": 0.05178868770599365}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "J_rev_vs_fd": 0.6328}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "Tk_vs_exact": {"T1": 0.948, "T3": 0.783, "T5": 0.555}}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "J_raw_pos_block_per_cm": [[0.084, -0.011, -0.006], [0.046, 0.023, -0.004], [-0.004, -0.006, 0.005]]}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "J_raw_full": [[8.392, -1.058, -0.579, 0.397, -0.17, 1.13, 45.389, -45.281], [4.604, 2.262, -0.366, 1.493, -0.694, 1.212, 22.284, -14.197], [-0.435, -0.616, 0.477, -0.798, 0.326, -0.881, -15.263, -3.432], [-0.235, 0.008, 0.012, 0.066, -0.027, -0.047, -0.436, 1.784], [0.2, -0.086, -0.075, -0.159, 0.111, -0.618, -1.056, -0.694], [0.094, -0.012, -0.037, -0.005, 0.013, -0.014, 0.542, 0.061], [0.013, 0.056, 0.038, 0.065, 0.004, -0.022, -0.31, 0.864]]}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "J_norm_fro": 6.552}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "J_fro_by_position": {"0": 6.552, "1": 8.438, "3": 5.859, "6": 4.531, "9": 3.788}}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 0, "lin_residual_pos": {"0.2cm": {"resid": 0.491, "da_norm": 0.0496, "Jds_norm": 0.0292}, "0.5cm": {"resid": 0.571, "da_norm": 0.1, "Jds_norm": 0.1134}, "1cm": {"resid": 0.261, "da_norm": 0.2348, "Jds_norm": 0.2451}, "2cm": {"resid": 0.441, "da_norm": 0.4276, "Jds_norm": 0.3649}}}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "mem_after_load_gib": 2.46}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "meta": {"suite": "libero_spatial", "task": 0, "chunk": 50, "flow_steps": 10, "vlm_layers": 32, "prefix_tokens": 149, "params_M": 604.9, "state_raw": [-0.0243, 0.1116, 0.9339, 3.1334, -0.0134, -0.0096, 0.0373, -0.0232]}}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "ms_call_stock": 668.1}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "ms_prefix_stock": 202.5}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "ms_imglang_cache": 202.8}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "ms_state_token_pass": 40.1}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "ms_flow_10_steps": 456.1}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "ms_J_a0_exact_stock_path": 4990.2}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "ms_J_a0_exact_split": 4422.9}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "ms_J_a0_T1_split": 1139.6}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "ms_J_a0_T3_split": 1822.3}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "ms_J_a0_T5_split": 2641.0}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "ms_J_10pos_T3_split": 13785.5}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "ms_call_rtc_lerobot_d3": 686.4}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "cost_call_stock": {"gflop": 564.37, "aten_ops": 42116}}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "cost_J_a0_exact_split": {"gflop": 265.0, "aten_ops": 350876}}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "cost_J_a0_T3_split": {"gflop": 159.73, "aten_ops": 152626}}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "split_vs_stock_max_abs": 0.036398887634277344}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "J_rev_vs_fd": 0.5297}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "Tk_vs_exact": {"T1": 0.966, "T3": 0.839, "T5": 0.645}}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "J_raw_pos_block_per_cm": [[0.005, -0.022, -0.005], [0.0, -0.007, -0.001], [0.007, -0.018, -0.005]]}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "J_raw_full": [[0.547, -2.182, -0.492, 0.121, -0.023, 0.313, 8.152, 11.081], [0.031, -0.673, -0.123, 0.169, 0.07, 0.005, 2.358, 3.585], [0.724, -1.845, -0.534, 0.12, -0.031, 0.342, 3.474, 16.851], [-0.053, 0.125, 0.014, -0.013, -0.009, -0.017, -0.572, -0.728], [-0.104, -0.133, -0.013, -0.06, -0.02, 0.083, 0.824, 1.105], [-0.048, 0.095, 0.092, -0.061, 0.009, -0.035, -0.833, -1.517], [-0.018, 0.047, -0.007, -0.009, 0.001, -0.047, -0.731, -0.205]]}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "J_norm_fro": 2.101}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "J_fro_by_position": {"0": 2.101, "1": 1.789, "3": 1.384, "6": 1.285, "9": 1.675}}
+{"policy": "HuggingFaceVLA/smolvla_libero", "device": "mps", "dtype": "bfloat16", "state": 40, "lin_residual_pos": {"0.2cm": {"resid": 0.834, "da_norm": 0.014, "Jds_norm": 0.0059}, "0.5cm": {"resid": 0.396, "da_norm": 0.031, "Jds_norm": 0.0249}, "1cm": {"resid": 0.377, "da_norm": 0.0272, "Jds_norm": 0.0271}, "2cm": {"resid": 0.296, "da_norm": 0.0795, "Jds_norm": 0.0825}}}
