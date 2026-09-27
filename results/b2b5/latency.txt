@@ -1,0 +1,268 @@
+{'method': 'naive', 'delay': 1, 'execute_horizon': 1, 'ms': 1.1281617917120457}
+{'method': 'naive', 'delay': 1, 'execute_horizon': 4, 'ms': 1.1271820403635502}
+{'method': 'naive', 'delay': 1, 'execute_horizon': 7, 'ms': 1.1270823888480663}
+{'method': 'realtime', 'delay': 1, 'execute_horizon': 1, 'ms': 1.8134634010493755}
+{'method': 'realtime', 'delay': 1, 'execute_horizon': 4, 'ms': 1.804347150027752}
+{'method': 'realtime', 'delay': 1, 'execute_horizon': 7, 'ms': 1.7939722165465355}
+{'method': 'realtime10', 'delay': 1, 'execute_horizon': 1, 'ms': 3.3708703704178333}
+{'method': 'realtime10', 'delay': 1, 'execute_horizon': 4, 'ms': 3.3843470737338066}
+{'method': 'realtime10', 'delay': 1, 'execute_horizon': 7, 'ms': 3.3706952817738056}
+{'method': 'rtc_reflex', 'delay': 1, 'execute_horizon': 1, 'ms': 3.942816983908415}
+{'method': 'rtc_reflex', 'delay': 1, 'execute_horizon': 4, 'ms': 3.860009368509054}
+{'method': 'rtc_reflex', 'delay': 1, 'execute_horizon': 5, 'ms': 3.9039510302245617}
+{'method': 'rtc_reflex', 'delay': 1, 'execute_horizon': 6, 'ms': 3.9906143210828304}
+{'method': 'rtc_reflex', 'delay': 1, 'execute_horizon': 7, 'ms': 4.123259335756302}
+{'method': 'rtc_reflex', 'delay': 3, 'execute_horizon': 5, 'ms': 3.908111248165369}
+{'method': 'pred', 'delay': 1, 'execute_horizon': 1, 'ms': 1.1410824954509735}
+{'method': 'pred', 'delay': 1, 'execute_horizon': 4, 'ms': 1.8684500828385353}
+{'method': 'pred', 'delay': 1, 'execute_horizon': 5, 'ms': 1.9096210598945618}
+{'method': 'pred', 'delay': 1, 'execute_horizon': 6, 'ms': 1.9219964742660522}
+{'method': 'pred', 'delay': 1, 'execute_horizon': 7, 'ms': 1.949547789990902}
+{'method': 'pred', 'delay': 2, 'execute_horizon': 2, 'ms': 1.8854555673897266}
+{'method': 'pred', 'delay': 2, 'execute_horizon': 6, 'ms': 1.9525275565683842}
+{'method': 'pred', 'delay': 3, 'execute_horizon': 3, 'ms': 1.9412473775446415}
+{'method': 'pred', 'delay': 3, 'execute_horizon': 4, 'ms': 1.9287369213998318}
+{'method': 'pred', 'delay': 3, 'execute_horizon': 5, 'ms': 1.9686780869960785}
+{'method': 'pred', 'delay': 4, 'execute_horizon': 4, 'ms': 1.929531805217266}
+{'method': 'reflex', 'delay': 1, 'execute_horizon': 1, 'ms': 2.2995509207248688}
+{'method': 'reflex', 'delay': 1, 'execute_horizon': 4, 'ms': 3.203063737601042}
+{'method': 'reflex', 'delay': 1, 'execute_horizon': 5, 'ms': 3.2031340524554253}
+{'method': 'reflex', 'delay': 1, 'execute_horizon': 6, 'ms': 3.3154459670186043}
+{'method': 'reflex', 'delay': 1, 'execute_horizon': 7, 'ms': 3.421165980398655}
+{'method': 'reflex', 'delay': 2, 'execute_horizon': 2, 'ms': 2.9416470788419247}
+{'method': 'reflex', 'delay': 2, 'execute_horizon': 6, 'ms': 3.3198660239577293}
+{'method': 'reflex', 'delay': 3, 'execute_horizon': 3, 'ms': 3.0090389773249626}
+{'method': 'reflex', 'delay': 3, 'execute_horizon': 4, 'ms': 3.1568650156259537}
+{'method': 'reflex', 'delay': 3, 'execute_horizon': 5, 'ms': 3.2472587190568447}
+{'method': 'reflex', 'delay': 4, 'execute_horizon': 4, 'ms': 3.1841909512877464}
+{'method': 't3', 'delay': 1, 'execute_horizon': 1, 'ms': 1.9094375893473625}
+{'method': 't3', 'delay': 1, 'execute_horizon': 4, 'ms': 2.747709397226572}
+{'method': 't3', 'delay': 1, 'execute_horizon': 5, 'ms': 2.733794040977955}
+{'method': 't3', 'delay': 1, 'execute_horizon': 6, 'ms': 2.795681357383728}
+{'method': 't3', 'delay': 1, 'execute_horizon': 7, 'ms': 2.8655892238020897}
+{'method': 't3', 'delay': 2, 'execute_horizon': 2, 'ms': 2.6208702474832535}
+{'method': 't3', 'delay': 2, 'execute_horizon': 6, 'ms': 2.885545138269663}
+{'method': 't3', 'delay': 3, 'execute_horizon': 3, 'ms': 2.6734210550785065}
+{'method': 't3', 'delay': 3, 'execute_horizon': 4, 'ms': 2.763709519058466}
+{'method': 't3', 'delay': 3, 'execute_horizon': 5, 'ms': 2.777995076030493}
+{'method': 't3', 'delay': 4, 'execute_horizon': 4, 'ms': 2.7169431559741497}
+{'method': 'm3', 'delay': 1, 'execute_horizon': 1, 'ms': 1.4322586357593536}
+{'method': 'm3', 'delay': 1, 'execute_horizon': 4, 'ms': 2.3840651847422123}
+{'method': 'm3', 'delay': 1, 'execute_horizon': 5, 'ms': 2.448862884193659}
+{'method': 'm3', 'delay': 1, 'execute_horizon': 6, 'ms': 2.499625086784363}
+{'method': 'm3', 'delay': 1, 'execute_horizon': 7, 'ms': 2.5599822402000427}
+{'method': 'm3', 'delay': 2, 'execute_horizon': 2, 'ms': 2.304662484675646}
+{'method': 'm3', 'delay': 2, 'execute_horizon': 6, 'ms': 2.518650609999895}
+{'method': 'm3', 'delay': 3, 'execute_horizon': 3, 'ms': 2.380630001425743}
+{'method': 'm3', 'delay': 3, 'execute_horizon': 4, 'ms': 2.4799141101539135}
+{'method': 'm3', 'delay': 3, 'execute_horizon': 5, 'ms': 2.4873740039765835}
+{'method': 'm3', 'delay': 4, 'execute_horizon': 4, 'ms': 2.4983002804219723}
+{
+ "device": "cuda:0",
+ "level": "worlds/l/grasp_easy.json",
+ "realtime_ms": 1.804347150027752,
+ "kappa": 2.149545946805601,
+ "kappa_j": 1.4789624688499603,
+ "t_nom": 1.8915017135441303,
+ "t_j": 2.748930361121893,
+ "t_nom_with_j": 4.065869841724634,
+ "t_j_with_nom": 4.065564833581448,
+ "head_ms_gpu": 0.0679423101246357,
+ "head_ms_cpu": 0.0703074038028717,
+ "gflop_per_eval": 0.052032916,
+ "head_gflop": 0.000621318
+}
+{
+ "extra_blocks": [],
+ "measured base 3": {
+  "naive": [
+   [
+    2,
+    2
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    6
+   ]
+  ],
+  "realtime": [
+   [
+    3,
+    3
+   ],
+   [
+    3,
+    4
+   ],
+   [
+    3,
+    5
+   ]
+  ],
+  "realtime10": [],
+  "a2c2": [
+   [
+    2,
+    2
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    6
+   ]
+  ],
+  "a2c2_distill": [
+   [
+    2,
+    2
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    6
+   ]
+  ],
+  "pred": [
+   [
+    4,
+    4
+   ]
+  ],
+  "reflex": [],
+  "t3": [],
+  "m3": [],
+  "rtc_reflex": [],
+  "late": []
+ }
+}
+{
+ "extra_blocks": [],
+ "measured base 3": {
+  "naive": [
+   [
+    2,
+    2
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    6
+   ]
+  ],
+  "realtime": [
+   [
+    3,
+    3
+   ],
+   [
+    3,
+    4
+   ],
+   [
+    3,
+    5
+   ]
+  ],
+  "realtime10": [],
+  "a2c2": [
+   [
+    2,
+    2
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    6
+   ]
+  ],
+  "a2c2_distill": [
+   [
+    2,
+    2
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    6
+   ]
+  ],
+  "pred": [
+   [
+    4,
+    4
+   ]
+  ],
+  "reflex": [],
+  "t3": [],
+  "m3": [],
+  "rtc_reflex": [],
+  "late": []
+ }
+}

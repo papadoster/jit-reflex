@@ -1,0 +1,549 @@
+{
+ "verdicts": {
+  "B2-R1 t3": {
+   "verdict": "KEEPS",
+   "pooled_pp": 1.844618055555558,
+   "per_seed_pp": [
+    2.408854166666674,
+    1.236979166666663,
+    1.888020833333337
+   ],
+   "cand": [
+    "t3",
+    "learned",
+    3,
+    5
+   ],
+   "rivals": [
+    [
+     "reflex",
+     "learned",
+     3,
+     5
+    ]
+   ],
+   "ci95_pp": [
+    0.6293402777777778,
+    3.059895833333333
+   ],
+   "final": "KEEPS",
+   "r(3,5)": 1.5396123057515654,
+   "B2 goal": false
+  },
+  "B2-R1 t3 D4 (report)": {
+   "verdict": "KEEPS",
+   "pooled_pp": 1.3020833333333335,
+   "per_seed_pp": [
+    0.5859375,
+    1.5625,
+    1.7578125
+   ],
+   "cand": [
+    "t3",
+    "learned",
+    4,
+    4
+   ],
+   "rivals": [
+    [
+     "reflex",
+     "learned",
+     4,
+     4
+    ]
+   ],
+   "ci95_pp": [
+    0.2170138888888889,
+    2.3980034722222223
+   ],
+   "final": "KEEPS"
+  },
+  "B2-R1 m3": {
+   "verdict": "KEEPS",
+   "pooled_pp": 1.6927083333333333,
+   "per_seed_pp": [
+    2.018229166666674,
+    1.302083333333326,
+    1.7578125
+   ],
+   "cand": [
+    "m3",
+    "learned",
+    3,
+    5
+   ],
+   "rivals": [
+    [
+     "reflex",
+     "learned",
+     3,
+     5
+    ]
+   ],
+   "ci95_pp": [
+    0.2387152777777778,
+    3.22265625
+   ],
+   "final": "KEEPS",
+   "r(3,5)": 1.3785451452279158,
+   "B2 goal": false
+  },
+  "B2-R1 m3 D4 (report)": {
+   "verdict": "KEEPS",
+   "pooled_pp": 0.282118055555558,
+   "per_seed_pp": [
+    -0.68359375,
+    1.171875,
+    0.35807291666667407
+   ],
+   "cand": [
+    "m3",
+    "learned",
+    4,
+    4
+   ],
+   "rivals": [
+    [
+     "reflex",
+     "learned",
+     4,
+     4
+    ]
+   ],
+   "ci95_pp": [
+    -1.150444878472222,
+    1.8012152777777777
+   ],
+   "final": "KEEPS"
+  },
+  "B5-R1 late": {
+   "verdict": "NOT-FEASIBLE",
+   "final": "NOT-FEASIBLE",
+   "edge": {
+    "x": 6.896040938253166,
+    "other_d": 8,
+    "verdict_other_d": "NOT-FEASIBLE"
+   }
+  },
+  "B5-R1 late, second GPU (report)": {
+   "verdict": "WIN",
+   "pooled_pp": 1.4865451388888915,
+   "per_seed_pp": [
+    0.42317708333333703,
+    1.627604166666674,
+    2.408854166666663
+   ],
+   "cand": [
+    "late1",
+    "learned",
+    4,
+    4
+   ],
+   "rivals": [
+    [
+     "naive",
+     "-",
+     2,
+     2
+    ],
+    [
+     "naive",
+     "-",
+     2,
+     3
+    ],
+    [
+     "naive",
+     "-",
+     2,
+     4
+    ],
+    [
+     "naive",
+     "-",
+     2,
+     5
+    ],
+    [
+     "naive",
+     "-",
+     2,
+     6
+    ],
+    [
+     "realtime",
+     "-",
+     3,
+     3
+    ],
+    [
+     "realtime",
+     "-",
+     3,
+     4
+    ],
+    [
+     "realtime",
+     "-",
+     3,
+     5
+    ],
+    [
+     "pred",
+     "learned",
+     4,
+     4
+    ]
+   ],
+   "ci95_pp": [
+    -1.85546875,
+    4.763454861111112
+   ],
+   "final": "WIN"
+  },
+  "B5-R2 m3": {
+   "verdict": "NOT-FEASIBLE",
+   "final": "NOT-FEASIBLE",
+   "edge": {
+    "x": 4.153802022604487,
+    "other_d": null
+   }
+  },
+  "B5-R3 t3 (3,5)": {
+   "verdict": "PASS",
+   "pooled_pp": 8.680555555555557,
+   "per_seed_pp": [
+    8.854166666666675,
+    8.984375,
+    8.203125
+   ],
+   "cand": [
+    "t3",
+    "learned",
+    3,
+    5
+   ],
+   "rivals": [
+    [
+     "naive",
+     "-",
+     3,
+     5
+    ],
+    [
+     "realtime",
+     "-",
+     3,
+     5
+    ],
+    [
+     "realtime10",
+     "-",
+     3,
+     5
+    ],
+    [
+     "pred",
+     "learned",
+     3,
+     5
+    ]
+   ],
+   "ci95_pp": [
+    4.079861111111112,
+    13.444010416666666
+   ],
+   "final": "PASS"
+  },
+  "B5-R3 t3 (4,4)": {
+   "verdict": "PASS",
+   "pooled_pp": 5.5881076388888875,
+   "per_seed_pp": [
+    4.3619791666666625,
+    6.1848958333333375,
+    6.2174479166666625
+   ],
+   "cand": [
+    "t3",
+    "learned",
+    4,
+    4
+   ],
+   "rivals": [
+    [
+     "naive",
+     "-",
+     4,
+     4
+    ],
+    [
+     "realtime",
+     "-",
+     4,
+     4
+    ],
+    [
+     "realtime10",
+     "-",
+     4,
+     4
+    ],
+    [
+     "pred",
+     "learned",
+     4,
+     4
+    ]
+   ],
+   "ci95_pp": [
+    3.4830729166666665,
+    8.0078125
+   ],
+   "final": "PASS"
+  }
+ },
+ "hypotheses": {
+  "P1 m3-t3 D3 pp": -0.1519097222222321,
+  "P1 m3-t3 D1 pp": 0.10850694444445308,
+  "H1 D1 pp": 1.110387731481477,
+  "H1 D3 pp": 2.159288194444453,
+  "E2 late1-pred (4,4) pp": 4.19921875,
+  "E2 late2-pred (4,4) pp": 2.430555555555547,
+  "E1 A2C2-t3 D3 pp": -0.9331597222222247,
+  "P1 held": false,
+  "H1 share on the 4 levels D1": 0.8140845070422534,
+  "H1 share on the 4 levels D3": 0.8540772532188844,
+  "H1 held": true,
+  "H2 spearman": 0.20279720279720279,
+  "H2 levels with both > 0": 9
+ },
+ "a2c2": {
+  "A2C2 (вариант bt-kinetix) − t3": {
+   "D1 (s 5-7)": {
+    "pooled_pp": -4.846643518518516,
+    "per_seed_pp": [
+     -4.5247395833333295,
+     -5.1649305555555545,
+     -4.850260416666666
+    ]
+   },
+   "(1,5)": {
+    "pooled_pp": -6.846788194444442,
+    "per_seed_pp": [
+     -6.34765625,
+     -7.32421875,
+     -6.868489583333326
+    ]
+   },
+   "(1,6)": {
+    "pooled_pp": -5.588107638888892,
+    "per_seed_pp": [
+     -5.5338541666666625,
+     -6.1848958333333375,
+     -5.045572916666674
+    ]
+   },
+   "(1,7)": {
+    "pooled_pp": -2.105034722222217,
+    "per_seed_pp": [
+     -1.692708333333326,
+     -1.985677083333326,
+     -2.63671875
+    ]
+   },
+   "(2,2)": {
+    "pooled_pp": -10.970052083333332,
+    "per_seed_pp": [
+     -9.993489583333337,
+     -10.64453125,
+     -12.272135416666663
+    ]
+   },
+   "(2,6)": {
+    "pooled_pp": -1.6927083333333333,
+    "per_seed_pp": [
+     -1.3671875,
+     -2.408854166666663,
+     -1.302083333333337
+    ]
+   },
+   "(3,3)": {
+    "pooled_pp": -6.282552083333333,
+    "per_seed_pp": [
+     -6.93359375,
+     -7.2265625,
+     -4.6875
+    ]
+   },
+   "(3,4)": {
+    "pooled_pp": -2.528211805555554,
+    "per_seed_pp": [
+     -2.9296875,
+     -1.85546875,
+     -2.799479166666663
+    ]
+   },
+   "D3 (3,5)": {
+    "pooled_pp": -0.9331597222222247,
+    "per_seed_pp": [
+     -0.813802083333337,
+     -1.595052083333337,
+     -0.390625
+    ]
+   },
+   "D4 (4,4)": {
+    "pooled_pp": -1.0633680555555545,
+    "per_seed_pp": [
+     -0.87890625,
+     -1.3671875,
+     -0.944010416666663
+    ]
+   }
+  },
+  "A2C2-distill − t3": {
+   "D1 (s 5-7)": {
+    "pooled_pp": 4.6875,
+    "per_seed_pp": [
+     5.4796006944444455,
+     4.3077256944444455,
+     4.275173611111108
+    ]
+   },
+   "(1,5)": {
+    "pooled_pp": 1.9314236111111123,
+    "per_seed_pp": [
+     3.352864583333337,
+     0.846354166666663,
+     1.595052083333337
+    ]
+   },
+   "(1,6)": {
+    "pooled_pp": 5.0672743055555545,
+    "per_seed_pp": [
+     5.37109375,
+     4.6223958333333375,
+     5.208333333333326
+    ]
+   },
+   "(1,7)": {
+    "pooled_pp": 7.063802083333333,
+    "per_seed_pp": [
+     7.71484375,
+     7.4544270833333375,
+     6.0221354166666625
+    ]
+   },
+   "(2,2)": {
+    "pooled_pp": -2.137586805555554,
+    "per_seed_pp": [
+     -2.24609375,
+     -2.05078125,
+     -2.115885416666663
+    ]
+   },
+   "(2,6)": {
+    "pooled_pp": 7.432725694444442,
+    "per_seed_pp": [
+     8.365885416666663,
+     6.54296875,
+     7.3893229166666625
+    ]
+   },
+   "(3,3)": {
+    "pooled_pp": 1.5842013888888877,
+    "per_seed_pp": [
+     0.87890625,
+     0.846354166666663,
+     3.02734375
+    ]
+   },
+   "(3,4)": {
+    "pooled_pp": 3.732638888888884,
+    "per_seed_pp": [
+     4.2643229166666625,
+     4.329427083333326,
+     2.604166666666663
+    ]
+   },
+   "D3 (3,5)": {
+    "pooled_pp": 4.7092013888888875,
+    "per_seed_pp": [
+     3.580729166666663,
+     4.58984375,
+     5.95703125
+    ]
+   },
+   "D4 (4,4)": {
+    "pooled_pp": 2.658420138888888,
+    "per_seed_pp": [
+     3.548177083333337,
+     2.571614583333326,
+     1.85546875
+    ]
+   }
+  }
+ },
+ "a2c2_flag": null,
+ "head MSE < base MSE (§9)": {
+  "a2c2 (in-sample)": {
+   "worlds/l/grasp_easy.json": true,
+   "worlds/l/catapult.json": true,
+   "worlds/l/cartpole_thrust.json": true,
+   "worlds/l/hard_lunar_lander.json": true,
+   "worlds/l/mjc_half_cheetah.json": true,
+   "worlds/l/mjc_swimmer.json": true,
+   "worlds/l/mjc_walker.json": true,
+   "worlds/l/h17_unicycle.json": true,
+   "worlds/l/chain_lander.json": true,
+   "worlds/l/catcher_v3.json": true,
+   "worlds/l/trampoline.json": true,
+   "worlds/l/car_launch.json": true
+  },
+  "a2c2_distill (held-out)": {
+   "worlds/l/grasp_easy.json": true,
+   "worlds/l/catapult.json": true,
+   "worlds/l/cartpole_thrust.json": true,
+   "worlds/l/hard_lunar_lander.json": true,
+   "worlds/l/mjc_half_cheetah.json": true,
+   "worlds/l/mjc_swimmer.json": true,
+   "worlds/l/mjc_walker.json": true,
+   "worlds/l/h17_unicycle.json": true,
+   "worlds/l/chain_lander.json": true,
+   "worlds/l/catcher_v3.json": true,
+   "worlds/l/trampoline.json": true,
+   "worlds/l/car_launch.json": true
+  }
+ },
+ "edges base 3 (report)": {
+  "late J": {
+   "x": 6.680959854575759,
+   "other_d": null
+  },
+  "naive": {
+   "x": 1.8741106006339414,
+   "other_d": null
+  },
+  "realtime10": {
+   "x": 5.60458175196384,
+   "other_d": null
+  },
+  "pred": []
+ },
+ "latency": {
+  "device": "cuda:0",
+  "level": "worlds/l/grasp_easy.json",
+  "realtime_ms": 1.804347150027752,
+  "kappa": 2.149545946805601,
+  "kappa_j": 1.4789624688499603,
+  "t_nom": 1.8915017135441303,
+  "t_j": 2.748930361121893,
+  "t_nom_with_j": 4.065869841724634,
+  "t_j_with_nom": 4.065564833581448,
+  "head_ms_gpu": 0.0679423101246357,
+  "head_ms_cpu": 0.0703074038028717,
+  "gflop_per_eval": 0.052032916,
+  "head_gflop": 0.000621318
+ },
+ "missing": 0,
+ "cut": []
+}

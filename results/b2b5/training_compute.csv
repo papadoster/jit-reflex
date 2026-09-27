@@ -1,0 +1,26 @@
+method,transitions,train_gflop,level
+world model,32768,12776.78592,
+a2c2,1015303,4256584.359297024,worlds/l/grasp_easy.json
+a2c2,1015303,4256584.359297024,worlds/l/catapult.json
+a2c2,1015303,4256584.359297024,worlds/l/cartpole_thrust.json
+a2c2,1015303,4256584.359297024,worlds/l/hard_lunar_lander.json
+a2c2,1015303,4256584.359297024,worlds/l/mjc_half_cheetah.json
+a2c2,1015303,4256584.359297024,worlds/l/mjc_swimmer.json
+a2c2,1015303,4256584.359297024,worlds/l/mjc_walker.json
+a2c2,1015303,4256584.359297024,worlds/l/h17_unicycle.json
+a2c2,1015303,4256584.359297024,worlds/l/chain_lander.json
+a2c2,1015303,4256584.359297024,worlds/l/catcher_v3.json
+a2c2,1015303,4256584.359297024,worlds/l/trampoline.json
+a2c2,1015303,4256584.359297024,worlds/l/car_launch.json
+a2c2_distill,1015808,354665.657032704,worlds/l/grasp_easy.json
+a2c2_distill,1015808,356299.49472768,worlds/l/catapult.json
+a2c2_distill,1015808,355077.93383424,worlds/l/cartpole_thrust.json
+a2c2_distill,1015808,354879.43018905603,worlds/l/hard_lunar_lander.json
+a2c2_distill,1015808,356039.91303782404,worlds/l/mjc_half_cheetah.json
+a2c2_distill,1015808,356681.23250688,worlds/l/mjc_swimmer.json
+a2c2_distill,1015808,356696.502018048,worlds/l/mjc_walker.json
+a2c2_distill,1015808,355841.40939264,worlds/l/h17_unicycle.json
+a2c2_distill,1015808,354131.224141824,worlds/l/chain_lander.json
+a2c2_distill,1015808,355551.288680448,worlds/l/catcher_v3.json
+a2c2_distill,1015808,356559.076417536,worlds/l/trampoline.json
+a2c2_distill,1015808,356238.416683008,worlds/l/car_launch.json

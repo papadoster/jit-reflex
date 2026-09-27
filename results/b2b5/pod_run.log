@@ -1,0 +1,1088 @@
+Using CPython 3.11.13 interpreter at: /usr/bin/python3.11
+Creating virtual environment at: .venv
+Resolved 121 packages in 4ms
+   Building kinetix @ file:///workspace/jit-reflex/third_party/kinetix
+   Building real-time-chunking-kinetix @ file:///workspace/jit-reflex
+   Updating https://github.com/DramaCow/jaxued.git (main)
+Downloading nvidia-cublas-cu12 (581.4MiB)
+Downloading numpy (17.4MiB)
+Downloading tensorstore (17.0MiB)
+Downloading pandas (12.5MiB)
+Downloading nvidia-nvjitlink-cu12 (37.4MiB)
+Downloading pillow (4.3MiB)
+Downloading pygments (1.2MiB)
+Downloading black (1.7MiB)
+Downloading virtualenv (4.1MiB)
+Downloading imageio-ffmpeg (28.1MiB)
+Downloading matplotlib (8.2MiB)
+Downloading jax (2.1MiB)
+Downloading kiwisolver (1.4MiB)
+Downloading tensorflow-probability (6.7MiB)
+Downloading pydantic-core (1.9MiB)
+Downloading nvidia-cufft-cu12 (184.2MiB)
+Downloading setuptools (1.2MiB)
+Downloading nvidia-cusolver-cu12 (248.3MiB)
+Downloading pygame (13.3MiB)
+Downloading nvidia-cusparse-cu12 (278.5MiB)
+Downloading scipy (38.7MiB)
+Downloading nvidia-cuda-cupti-cu12 (9.8MiB)
+Downloading jaxlib (82.1MiB)
+Downloading nvidia-nccl-cu12 (192.0MiB)
+Downloading ml-dtypes (2.1MiB)
+Downloading nvidia-cudnn-cu12 (693.0MiB)
+Downloading nvidia-cuda-nvcc-cu12 (38.3MiB)
+Downloading fonttools (4.7MiB)
+Downloading jax-cuda12-plugin (14.8MiB)
+Downloading wandb (19.9MiB)
+Downloading jax-cuda12-pjrt (96.1MiB)
+    Updated https://github.com/DramaCow/jaxued.git (62d155ae772aa2a0ecac9541d498df7ae88e6def)
+   Building jaxued @ git+https://github.com/DramaCow/jaxued.git@62d155ae772aa2a0ecac9541d498df7ae88e6def
+   Building orbax==0.1.9
+   Building antlr4-python3-runtime==4.9.3
+      Built orbax==0.1.9
+      Built antlr4-python3-runtime==4.9.3
+      Built real-time-chunking-kinetix @ file:///workspace/jit-reflex
+      Built jaxued @ git+https://github.com/DramaCow/jaxued.git@62d155ae772aa2a0ecac9541d498df7ae88e6def
+      Built kinetix @ file:///workspace/jit-reflex/third_party/kinetix
+   Building moviepy==1.0.3
+      Built moviepy==1.0.3
+ Downloading setuptools
+ Downloading pygments
+   Building gym==0.26.2
+ Downloading kiwisolver
+      Built gym==0.26.2
+ Downloading black
+ Downloading pydantic-core
+ Downloading jax
+ Downloading ml-dtypes
+ Downloading virtualenv
+ Downloading pillow
+ Downloading fonttools
+ Downloading tensorflow-probability
+ Downloading matplotlib
+ Downloading nvidia-cuda-cupti-cu12
+ Downloading pandas
+ Downloading pygame
+ Downloading jax-cuda12-plugin
+ Downloading tensorstore
+ Downloading numpy
+ Downloading wandb
+ Downloading imageio-ffmpeg
+ Downloading nvidia-nvjitlink-cu12
+ Downloading nvidia-cuda-nvcc-cu12
+ Downloading scipy
+ Downloading jaxlib
+ Downloading jax-cuda12-pjrt
+ Downloading nvidia-cufft-cu12
+ Downloading nvidia-nccl-cu12
+ Downloading nvidia-cusolver-cu12
+ Downloading nvidia-cusparse-cu12
+ Downloading nvidia-cublas-cu12
+ Downloading nvidia-cudnn-cu12
+Prepared 119 packages in 8m 04s
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 119 packages in 2.20s
+ + absl-py==2.1.0
+ + annotated-types==0.7.0
+ + antlr4-python3-runtime==4.9.3
+ + argparse==1.4.0
+ + black==25.1.0
+ + certifi==2025.1.31
+ + cfgv==3.4.0
+ + charset-normalizer==3.4.1
+ + chex==0.1.88
+ + click==8.1.8
+ + cloudpickle==3.1.1
+ + contourpy==1.3.1
+ + cycler==0.12.1
+ + decorator==4.4.2
+ + distlib==0.3.9
+ + distrax==0.1.5
+ + dm-tree==0.1.8
+ + docker-pycreds==0.4.0
+ + docstring-parser==0.16
+ + einops==0.8.0
+ + etils==1.11.0
+ + farama-notifications==0.0.4
+ + filelock==3.17.0
+ + flax==0.10.2
+ + fonttools==4.55.8
+ + fsspec==2025.2.0
+ + gast==0.6.0
+ + gitdb==4.0.12
+ + gitpython==3.1.44
+ + gym==0.26.2
+ + gym-notices==0.0.8
+ + gymnasium==1.0.0
+ + gymnax==0.0.8
+ + hydra-core==1.3.2
+ + identify==2.6.6
+ + idna==3.10
+ + imageio==2.37.0
+ + imageio-ffmpeg==0.6.0
+ + importlib-resources==6.5.2
+ + iniconfig==2.3.0
+ + jax==0.4.35
+ + jax-cuda12-pjrt==0.4.35
+ + jax-cuda12-plugin==0.4.35
+ + jax2d==1.0.0
+ + jaxgl==1.0.1
+ + jaxlib==0.4.34
+ + jaxued==0.0.1 (from git+https://github.com/DramaCow/jaxued.git@62d155ae772aa2a0ecac9541d498df7ae88e6def)
+ + kinetix==1.0.0 (from file:///workspace/jit-reflex/third_party/kinetix)
+ + kiwisolver==1.4.8
+ + markdown-it-py==3.0.0
+ + matplotlib==3.10.0
+ + mdurl==0.1.2
+ + ml-dtypes==0.4.1
+ + moviepy==1.0.3
+ + msgpack==1.1.0
+ + mypy-extensions==1.0.0
+ + nest-asyncio==1.6.0
+ + nodeenv==1.9.1
+ + numpy==1.26.4
+ + nvidia-cublas-cu12==12.8.3.14
+ + nvidia-cuda-cupti-cu12==12.8.57
+ + nvidia-cuda-nvcc-cu12==12.8.61
+ + nvidia-cuda-runtime-cu12==12.8.57
+ + nvidia-cudnn-cu12==9.7.0.66
+ + nvidia-cufft-cu12==11.3.3.41
+ + nvidia-cusolver-cu12==11.7.2.55
+ + nvidia-cusparse-cu12==12.5.7.53
+ + nvidia-nccl-cu12==2.25.1
+ + nvidia-nvjitlink-cu12==12.8.61
+ + omegaconf==2.3.0
+ + opt-einsum==3.4.0
+ + optax==0.2.4
+ + orbax==0.1.9
+ + orbax-checkpoint==0.5.3
+ + packaging==24.2
+ + pandas==2.2.3
+ + pathspec==0.12.1
+ + pillow==11.1.0
+ + platformdirs==4.3.6
+ + pluggy==1.6.0
+ + pre-commit==4.1.0
+ + proglog==0.1.10
+ + protobuf==5.29.3
+ + psutil==6.1.1
+ + pydantic==2.10.6
+ + pydantic-core==2.27.2
+ + pygame==2.6.1
+ + pygame-widgets==1.1.6
+ + pygments==2.19.1
+ + pyparsing==3.2.1
+ + pytest==9.1.1
+ + python-dateutil==2.9.0.post0
+ + pytz==2025.1
+ + pyyaml==6.0.2
+ + real-time-chunking-kinetix==0.0.1 (from file:///workspace/jit-reflex)
+ + requests==2.32.3
+ + rich==13.9.4
+ + safetensors==0.5.2
+ + scipy==1.15.1
+ + seaborn==0.13.2
+ + sentry-sdk==2.20.0
+ + setproctitle==1.3.4
+ + setuptools==75.8.0
+ + shtab==1.7.1
+ + six==1.17.0
+ + smmap==5.0.2
+ + tensorflow-probability==0.25.0
+ + tensorstore==0.1.71
+ + toolz==1.0.0
+ + tqdm==4.67.1
+ + tqdm-loggable==0.2
+ + typeguard==4.4.1
+ + typing-extensions==4.12.2
+ + tyro==0.9.13
+ + tzdata==2025.1
+ + urllib3==2.3.0
+ + virtualenv==20.29.1
+ + wandb==0.19.6
+ + zipp==3.21.0
+[CudaDevice(id=0)]
+lock OK
+{'method': 'naive', 'delay': 1, 'execute_horizon': 1, 'ms': 1.1281617917120457}
+{'method': 'naive', 'delay': 1, 'execute_horizon': 4, 'ms': 1.1271820403635502}
+{'method': 'naive', 'delay': 1, 'execute_horizon': 7, 'ms': 1.1270823888480663}
+{'method': 'realtime', 'delay': 1, 'execute_horizon': 1, 'ms': 1.8134634010493755}
+{'method': 'realtime', 'delay': 1, 'execute_horizon': 4, 'ms': 1.804347150027752}
+{'method': 'realtime', 'delay': 1, 'execute_horizon': 7, 'ms': 1.7939722165465355}
+{'method': 'realtime10', 'delay': 1, 'execute_horizon': 1, 'ms': 3.3708703704178333}
+{'method': 'realtime10', 'delay': 1, 'execute_horizon': 4, 'ms': 3.3843470737338066}
+{'method': 'realtime10', 'delay': 1, 'execute_horizon': 7, 'ms': 3.3706952817738056}
+{'method': 'rtc_reflex', 'delay': 1, 'execute_horizon': 1, 'ms': 3.942816983908415}
+{'method': 'rtc_reflex', 'delay': 1, 'execute_horizon': 4, 'ms': 3.860009368509054}
+{'method': 'rtc_reflex', 'delay': 1, 'execute_horizon': 5, 'ms': 3.9039510302245617}
+{'method': 'rtc_reflex', 'delay': 1, 'execute_horizon': 6, 'ms': 3.9906143210828304}
+{'method': 'rtc_reflex', 'delay': 1, 'execute_horizon': 7, 'ms': 4.123259335756302}
+{'method': 'rtc_reflex', 'delay': 3, 'execute_horizon': 5, 'ms': 3.908111248165369}
+{'method': 'pred', 'delay': 1, 'execute_horizon': 1, 'ms': 1.1410824954509735}
+{'method': 'pred', 'delay': 1, 'execute_horizon': 4, 'ms': 1.8684500828385353}
+{'method': 'pred', 'delay': 1, 'execute_horizon': 5, 'ms': 1.9096210598945618}
+{'method': 'pred', 'delay': 1, 'execute_horizon': 6, 'ms': 1.9219964742660522}
+{'method': 'pred', 'delay': 1, 'execute_horizon': 7, 'ms': 1.949547789990902}
+{'method': 'pred', 'delay': 2, 'execute_horizon': 2, 'ms': 1.8854555673897266}
+{'method': 'pred', 'delay': 2, 'execute_horizon': 6, 'ms': 1.9525275565683842}
+{'method': 'pred', 'delay': 3, 'execute_horizon': 3, 'ms': 1.9412473775446415}
+{'method': 'pred', 'delay': 3, 'execute_horizon': 4, 'ms': 1.9287369213998318}
+{'method': 'pred', 'delay': 3, 'execute_horizon': 5, 'ms': 1.9686780869960785}
+{'method': 'pred', 'delay': 4, 'execute_horizon': 4, 'ms': 1.929531805217266}
+{'method': 'reflex', 'delay': 1, 'execute_horizon': 1, 'ms': 2.2995509207248688}
+{'method': 'reflex', 'delay': 1, 'execute_horizon': 4, 'ms': 3.203063737601042}
+{'method': 'reflex', 'delay': 1, 'execute_horizon': 5, 'ms': 3.2031340524554253}
+{'method': 'reflex', 'delay': 1, 'execute_horizon': 6, 'ms': 3.3154459670186043}
+{'method': 'reflex', 'delay': 1, 'execute_horizon': 7, 'ms': 3.421165980398655}
+{'method': 'reflex', 'delay': 2, 'execute_horizon': 2, 'ms': 2.9416470788419247}
+{'method': 'reflex', 'delay': 2, 'execute_horizon': 6, 'ms': 3.3198660239577293}
+{'method': 'reflex', 'delay': 3, 'execute_horizon': 3, 'ms': 3.0090389773249626}
+{'method': 'reflex', 'delay': 3, 'execute_horizon': 4, 'ms': 3.1568650156259537}
+{'method': 'reflex', 'delay': 3, 'execute_horizon': 5, 'ms': 3.2472587190568447}
+{'method': 'reflex', 'delay': 4, 'execute_horizon': 4, 'ms': 3.1841909512877464}
+{'method': 't3', 'delay': 1, 'execute_horizon': 1, 'ms': 1.9094375893473625}
+{'method': 't3', 'delay': 1, 'execute_horizon': 4, 'ms': 2.747709397226572}
+{'method': 't3', 'delay': 1, 'execute_horizon': 5, 'ms': 2.733794040977955}
+{'method': 't3', 'delay': 1, 'execute_horizon': 6, 'ms': 2.795681357383728}
+{'method': 't3', 'delay': 1, 'execute_horizon': 7, 'ms': 2.8655892238020897}
+{'method': 't3', 'delay': 2, 'execute_horizon': 2, 'ms': 2.6208702474832535}
+{'method': 't3', 'delay': 2, 'execute_horizon': 6, 'ms': 2.885545138269663}
+{'method': 't3', 'delay': 3, 'execute_horizon': 3, 'ms': 2.6734210550785065}
+{'method': 't3', 'delay': 3, 'execute_horizon': 4, 'ms': 2.763709519058466}
+{'method': 't3', 'delay': 3, 'execute_horizon': 5, 'ms': 2.777995076030493}
+{'method': 't3', 'delay': 4, 'execute_horizon': 4, 'ms': 2.7169431559741497}
+{'method': 'm3', 'delay': 1, 'execute_horizon': 1, 'ms': 1.4322586357593536}
+{'method': 'm3', 'delay': 1, 'execute_horizon': 4, 'ms': 2.3840651847422123}
+{'method': 'm3', 'delay': 1, 'execute_horizon': 5, 'ms': 2.448862884193659}
+{'method': 'm3', 'delay': 1, 'execute_horizon': 6, 'ms': 2.499625086784363}
+{'method': 'm3', 'delay': 1, 'execute_horizon': 7, 'ms': 2.5599822402000427}
+{'method': 'm3', 'delay': 2, 'execute_horizon': 2, 'ms': 2.304662484675646}
+{'method': 'm3', 'delay': 2, 'execute_horizon': 6, 'ms': 2.518650609999895}
+{'method': 'm3', 'delay': 3, 'execute_horizon': 3, 'ms': 2.380630001425743}
+{'method': 'm3', 'delay': 3, 'execute_horizon': 4, 'ms': 2.4799141101539135}
+{'method': 'm3', 'delay': 3, 'execute_horizon': 5, 'ms': 2.4873740039765835}
+{'method': 'm3', 'delay': 4, 'execute_horizon': 4, 'ms': 2.4983002804219723}
+{
+ "device": "cuda:0",
+ "level": "worlds/l/grasp_easy.json",
+ "realtime_ms": 1.804347150027752,
+ "kappa": 2.149545946805601,
+ "kappa_j": 1.4789624688499603,
+ "t_nom": 1.8915017135441303,
+ "t_j": 2.748930361121893,
+ "t_nom_with_j": 4.065869841724634,
+ "t_j_with_nom": 4.065564833581448,
+ "head_ms_gpu": 0.0679423101246357,
+ "head_ms_cpu": 0.0703074038028717,
+ "gflop_per_eval": 0.052032916,
+ "head_gflop": 0.000621318
+}
+{
+ "extra_blocks": [],
+ "measured base 3": {
+  "naive": [
+   [
+    2,
+    2
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    6
+   ]
+  ],
+  "realtime": [
+   [
+    3,
+    3
+   ],
+   [
+    3,
+    4
+   ],
+   [
+    3,
+    5
+   ]
+  ],
+  "realtime10": [],
+  "a2c2": [
+   [
+    2,
+    2
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    6
+   ]
+  ],
+  "a2c2_distill": [
+   [
+    2,
+    2
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    6
+   ]
+  ],
+  "pred": [
+   [
+    4,
+    4
+   ]
+  ],
+  "reflex": [],
+  "t3": [],
+  "m3": [],
+  "rtc_reflex": [],
+  "late": []
+ }
+}
+[09:58:29] A2C2 (expert data, one level at a time)
+[10:15:02] restart: expert data via 16 parallel ranges (/workspace/a2c2_fast.sh), then gpu_b2b5.sh resumes (latency.json kept, same commit)
+[10:18:46] fetched grasp_easy
+40c7d030745a1482eb7469078f41505b6a3d8d572a30a2f0341dead534db3cc3  results/b2b5/expert/worlds_l_grasp_easy.npz
+{"level": "worlds/l/grasp_easy.json", "transitions": 1015303, "items": 1015296, "steps": 31728, "loss_first": 0.278820276260376, "loss_last": 0.16360752284526825, "mse": 0.16215524077415466, "mse_base": 0.32216712832450867, "check": "in-sample", "seconds": 166}
+[10:23:59] fetched catapult
+de8a71f473b1a8d33f7b64ede659d85d10d647d88c5d6482d08b5fad5e92e17a  results/b2b5/expert/worlds_l_catapult.npz
+[10:25:57] fetched cartpole_thrust
+{"level": "worlds/l/catapult.json", "transitions": 1015303, "items": 1015296, "steps": 31728, "loss_first": 0.5050220489501953, "loss_last": 0.4246913492679596, "mse": 0.42406269907951355, "mse_base": 0.7226688861846924, "check": "in-sample", "seconds": 158}
+6a21f565caa9662ce7fef8211e2b881fa8b3c1a90fa5fba53857a87c6980729b  results/b2b5/expert/worlds_l_cartpole_thrust.npz
+{"level": "worlds/l/cartpole_thrust.json", "transitions": 1015303, "items": 1015296, "steps": 31728, "loss_first": 0.5060558319091797, "loss_last": 0.4278881251811981, "mse": 0.4272284507751465, "mse_base": 0.7215637564659119, "check": "in-sample", "seconds": 158}
+[10:30:06] fetched hard_lunar_lander
+5bd8f2e43e5b0eb9a1f65f1fcdc4f760fdb5f3d77cd50555886499269a3f27d5  results/b2b5/expert/worlds_l_hard_lunar_lander.npz
+[10:31:38] fetched mjc_half_cheetah
+{"level": "worlds/l/hard_lunar_lander.json", "transitions": 1015303, "items": 1015296, "steps": 31728, "loss_first": 0.38392239809036255, "loss_last": 0.31653332710266113, "mse": 0.3184124529361725, "mse_base": 0.5364324450492859, "check": "in-sample", "seconds": 162}
+[10:33:01] fetched mjc_swimmer
+a53bbabfa356575645292cd3d1748c4e0292f479420b5740ff3aa54b72a267d4  results/b2b5/expert/worlds_l_mjc_half_cheetah.npz
+[10:33:49] fetched mjc_walker
+{"level": "worlds/l/mjc_half_cheetah.json", "transitions": 1015303, "items": 1015296, "steps": 31728, "loss_first": 0.22632864117622375, "loss_last": 0.14081703126430511, "mse": 0.14372263848781586, "mse_base": 0.2528474032878876, "check": "in-sample", "seconds": 157}
+038489c4214e4e21c2f6a3f4aa89ed07ba61dfad0e50035a494367a262539b62  results/b2b5/expert/worlds_l_mjc_swimmer.npz
+[10:36:42] fetched h17_unicycle
+{"level": "worlds/l/mjc_swimmer.json", "transitions": 1015303, "items": 1015296, "steps": 31728, "loss_first": 0.3898550271987915, "loss_last": 0.30450886487960815, "mse": 0.30321893095970154, "mse_base": 0.5390947461128235, "check": "in-sample", "seconds": 161}
+4b852fc73509036c9469f272327afba15d071999d4d77b1a2f8a6eca11908384  results/b2b5/expert/worlds_l_mjc_walker.npz
+[10:38:59] fetched chain_lander
+{"level": "worlds/l/mjc_walker.json", "transitions": 1015303, "items": 1015296, "steps": 31728, "loss_first": 0.23041115701198578, "loss_last": 0.15336358547210693, "mse": 0.15143835544586182, "mse_base": 0.30519893765449524, "check": "in-sample", "seconds": 157}
+71db45da2adf5ff854bfcf36a8d5a20ac0ee5655fd7f21aa7c2435506ecc1f91  results/b2b5/expert/worlds_l_h17_unicycle.npz
+[10:41:59] fetched catcher_v3
+{"level": "worlds/l/h17_unicycle.json", "transitions": 1015303, "items": 1015296, "steps": 31728, "loss_first": 0.47705674171447754, "loss_last": 0.3962465822696686, "mse": 0.3943004608154297, "mse_base": 0.6619820594787598, "check": "in-sample", "seconds": 155}
+74d3517f27f57f896e05bf280a72f93b5ecf6155876e6f78efde451f6f2d6138  results/b2b5/expert/worlds_l_chain_lander.npz
+[10:45:10] fetched trampoline
+{"level": "worlds/l/chain_lander.json", "transitions": 1015303, "items": 1015296, "steps": 31728, "loss_first": 0.5086182951927185, "loss_last": 0.4274078905582428, "mse": 0.4272177815437317, "mse_base": 0.7059136629104614, "check": "in-sample", "seconds": 160}
+a7b8fd77b1f59c3573d796bae0efcd08a2e1cf63e1b1a6210b5cae44d89377a1  results/b2b5/expert/worlds_l_catcher_v3.npz
+[10:49:53] fetched car_launch
+{"level": "worlds/l/catcher_v3.json", "transitions": 1015303, "items": 1015296, "steps": 31728, "loss_first": 0.39683958888053894, "loss_last": 0.29824960231781006, "mse": 0.29816898703575134, "mse_base": 0.5186308026313782, "check": "in-sample", "seconds": 164}
+2c8dc324773e242d68e2a9edae5666ae10e723eb7bdae4f68bdfce24f33f1310  results/b2b5/expert/worlds_l_trampoline.npz
+{"level": "worlds/l/trampoline.json", "transitions": 1015303, "items": 1015296, "steps": 31728, "loss_first": 0.4364061653614044, "loss_last": 0.3481042683124542, "mse": 0.3467397689819336, "mse_base": 0.594976544380188, "check": "in-sample", "seconds": 160}
+f5b66c572f1c7d6c83bde5cea090faf0c66d7851ae5f8947bf20e04a9da8e67a  results/b2b5/expert/worlds_l_car_launch.npz
+{"level": "worlds/l/car_launch.json", "transitions": 1015303, "items": 1015296, "steps": 31728, "loss_first": 0.3546580970287323, "loss_last": 0.28073447942733765, "mse": 0.28431665897369385, "mse_base": 0.49045300483703613, "check": "in-sample", "seconds": 158}
+[10:56:05] A2C2 heads: 12/12
+Resolved 121 packages in 3ms
+Audited 119 packages in 4ms
+[CudaDevice(id=0)]
+lock OK
+{
+ "extra_blocks": [],
+ "measured base 3": {
+  "naive": [
+   [
+    2,
+    2
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    6
+   ]
+  ],
+  "realtime": [
+   [
+    3,
+    3
+   ],
+   [
+    3,
+    4
+   ],
+   [
+    3,
+    5
+   ]
+  ],
+  "realtime10": [],
+  "a2c2": [
+   [
+    2,
+    2
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    6
+   ]
+  ],
+  "a2c2_distill": [
+   [
+    2,
+    2
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    6
+   ]
+  ],
+  "pred": [
+   [
+    4,
+    4
+   ]
+  ],
+  "reflex": [],
+  "t3": [],
+  "m3": [],
+  "rtc_reflex": [],
+  "late": []
+ }
+}
+[10:56:15] A2C2 (expert data, one level at a time)
+[10:56:15] A2C2-distill
+{"level": "worlds/l/grasp_easy.json", "transitions": 1015808, "items": 926209, "steps": 28944, "loss_first": 0.03462032973766327, "loss_last": 0.011105059646070004, "mse": 0.011433945968747139, "mse_base": 0.021450484171509743, "check": "held-out", "seconds": 203}
+{"level": "worlds/l/catapult.json", "transitions": 1015808, "items": 981448, "steps": 30656, "loss_first": 0.034297969192266464, "loss_last": 0.021921679377555847, "mse": 0.021993953734636307, "mse_base": 0.03222262114286423, "check": "held-out", "seconds": 203}
+{"level": "worlds/l/cartpole_thrust.json", "transitions": 1015808, "items": 940302, "steps": 29376, "loss_first": 0.01772487349808216, "loss_last": 0.00805504247546196, "mse": 0.008027825504541397, "mse_base": 0.01157272607088089, "check": "held-out", "seconds": 203}
+{"level": "worlds/l/hard_lunar_lander.json", "transitions": 1015808, "items": 933667, "steps": 29168, "loss_first": 0.012316076084971428, "loss_last": 0.003293670481070876, "mse": 0.0035744754131883383, "mse_base": 0.006628446280956268, "check": "held-out", "seconds": 202}
+{"level": "worlds/l/mjc_half_cheetah.json", "transitions": 1015808, "items": 972747, "steps": 30384, "loss_first": 0.07322748750448227, "loss_last": 0.030376741662621498, "mse": 0.030024757608771324, "mse_base": 0.05113716796040535, "check": "held-out", "seconds": 203}
+{"level": "worlds/l/mjc_swimmer.json", "transitions": 1015808, "items": 994234, "steps": 31056, "loss_first": 0.05032593011856079, "loss_last": 0.022739585489034653, "mse": 0.02293860726058483, "mse_base": 0.05258014798164368, "check": "held-out", "seconds": 206}
+{"level": "worlds/l/mjc_walker.json", "transitions": 1015808, "items": 994775, "steps": 31072, "loss_first": 0.08104652166366577, "loss_last": 0.03553323820233345, "mse": 0.03768586367368698, "mse_base": 0.07674698531627655, "check": "held-out", "seconds": 206}
+{"level": "worlds/l/h17_unicycle.json", "transitions": 1015808, "items": 966033, "steps": 30176, "loss_first": 0.0810776874423027, "loss_last": 0.05788586288690567, "mse": 0.058005109429359436, "mse_base": 0.07280412316322327, "check": "held-out", "seconds": 201}
+{"level": "worlds/l/chain_lander.json", "transitions": 1015808, "items": 908692, "steps": 28384, "loss_first": 0.02677689865231514, "loss_last": 0.017356377094984055, "mse": 0.017085110768675804, "mse_base": 0.023644670844078064, "check": "held-out", "seconds": 201}
+{"level": "worlds/l/catcher_v3.json", "transitions": 1015808, "items": 956181, "steps": 29872, "loss_first": 0.0637987032532692, "loss_last": 0.024325529113411903, "mse": 0.023841509595513344, "mse_base": 0.04481404274702072, "check": "held-out", "seconds": 203}
+{"level": "worlds/l/trampoline.json", "transitions": 1015808, "items": 989747, "steps": 30928, "loss_first": 0.013395696878433228, "loss_last": 0.0033490131609141827, "mse": 0.003142487956210971, "mse_base": 0.005544746294617653, "check": "held-out", "seconds": 204}
+{"level": "worlds/l/car_launch.json", "transitions": 1015808, "items": 979054, "steps": 30592, "loss_first": 0.04970497637987137, "loss_last": 0.011933734640479088, "mse": 0.010962037369608879, "mse_base": 0.03851712495088577, "check": "held-out", "seconds": 205}
+[11:39:04] grid (CUT=0): two workers, logs results/b2b5/eval_A.log and eval_B.log
+  hours left: JAX_PLATFORMS=cpu uv run src/b2b5.py forecast --cut 0   (> 20 h: Ctrl-C, rerun with CUT=1..4)
+[17:06:38] second pass, one process: fills whatever failed
+lock OK
+{
+ "verdicts": {
+  "B2-R1 t3": {
+   "verdict": "KEEPS",
+   "pooled_pp": 1.844618055555558,
+   "per_seed_pp": [
+    2.408854166666674,
+    1.236979166666663,
+    1.888020833333337
+   ],
+   "cand": [
+    "t3",
+    "learned",
+    3,
+    5
+   ],
+   "rivals": [
+    [
+     "reflex",
+     "learned",
+     3,
+     5
+    ]
+   ],
+   "ci95_pp": [
+    0.6293402777777778,
+    3.059895833333333
+   ],
+   "final": "KEEPS",
+   "r(3,5)": 1.5396123057515654,
+   "B2 goal": false
+  },
+  "B2-R1 t3 D4 (report)": {
+   "verdict": "KEEPS",
+   "pooled_pp": 1.3020833333333335,
+   "per_seed_pp": [
+    0.5859375,
+    1.5625,
+    1.7578125
+   ],
+   "cand": [
+    "t3",
+    "learned",
+    4,
+    4
+   ],
+   "rivals": [
+    [
+     "reflex",
+     "learned",
+     4,
+     4
+    ]
+   ],
+   "ci95_pp": [
+    0.2170138888888889,
+    2.3980034722222223
+   ],
+   "final": "KEEPS"
+  },
+  "B2-R1 m3": {
+   "verdict": "KEEPS",
+   "pooled_pp": 1.6927083333333333,
+   "per_seed_pp": [
+    2.018229166666674,
+    1.302083333333326,
+    1.7578125
+   ],
+   "cand": [
+    "m3",
+    "learned",
+    3,
+    5
+   ],
+   "rivals": [
+    [
+     "reflex",
+     "learned",
+     3,
+     5
+    ]
+   ],
+   "ci95_pp": [
+    0.2387152777777778,
+    3.22265625
+   ],
+   "final": "KEEPS",
+   "r(3,5)": 1.3785451452279158,
+   "B2 goal": false
+  },
+  "B2-R1 m3 D4 (report)": {
+   "verdict": "KEEPS",
+   "pooled_pp": 0.282118055555558,
+   "per_seed_pp": [
+    -0.68359375,
+    1.171875,
+    0.35807291666667407
+   ],
+   "cand": [
+    "m3",
+    "learned",
+    4,
+    4
+   ],
+   "rivals": [
+    [
+     "reflex",
+     "learned",
+     4,
+     4
+    ]
+   ],
+   "ci95_pp": [
+    -1.150444878472222,
+    1.8012152777777777
+   ],
+   "final": "KEEPS"
+  },
+  "B5-R1 late": {
+   "verdict": "NOT-FEASIBLE",
+   "final": "NOT-FEASIBLE",
+   "edge": {
+    "x": 6.896040938253166,
+    "other_d": 8,
+    "verdict_other_d": "NOT-FEASIBLE"
+   }
+  },
+  "B5-R1 late, second GPU (report)": {
+   "verdict": "WIN",
+   "pooled_pp": 1.4865451388888915,
+   "per_seed_pp": [
+    0.42317708333333703,
+    1.627604166666674,
+    2.408854166666663
+   ],
+   "cand": [
+    "late1",
+    "learned",
+    4,
+    4
+   ],
+   "rivals": [
+    [
+     "naive",
+     "-",
+     2,
+     2
+    ],
+    [
+     "naive",
+     "-",
+     2,
+     3
+    ],
+    [
+     "naive",
+     "-",
+     2,
+     4
+    ],
+    [
+     "naive",
+     "-",
+     2,
+     5
+    ],
+    [
+     "naive",
+     "-",
+     2,
+     6
+    ],
+    [
+     "realtime",
+     "-",
+     3,
+     3
+    ],
+    [
+     "realtime",
+     "-",
+     3,
+     4
+    ],
+    [
+     "realtime",
+     "-",
+     3,
+     5
+    ],
+    [
+     "pred",
+     "learned",
+     4,
+     4
+    ]
+   ],
+   "ci95_pp": [
+    -1.85546875,
+    4.763454861111112
+   ],
+   "final": "WIN"
+  },
+  "B5-R2 m3": {
+   "verdict": "NOT-FEASIBLE",
+   "final": "NOT-FEASIBLE",
+   "edge": {
+    "x": 4.153802022604487,
+    "other_d": null
+   }
+  },
+  "B5-R3 t3 (3,5)": {
+   "verdict": "PASS",
+   "pooled_pp": 8.680555555555557,
+   "per_seed_pp": [
+    8.854166666666675,
+    8.984375,
+    8.203125
+   ],
+   "cand": [
+    "t3",
+    "learned",
+    3,
+    5
+   ],
+   "rivals": [
+    [
+     "naive",
+     "-",
+     3,
+     5
+    ],
+    [
+     "realtime",
+     "-",
+     3,
+     5
+    ],
+    [
+     "realtime10",
+     "-",
+     3,
+     5
+    ],
+    [
+     "pred",
+     "learned",
+     3,
+     5
+    ]
+   ],
+   "ci95_pp": [
+    4.079861111111112,
+    13.444010416666666
+   ],
+   "final": "PASS"
+  },
+  "B5-R3 t3 (4,4)": {
+   "verdict": "PASS",
+   "pooled_pp": 5.5881076388888875,
+   "per_seed_pp": [
+    4.3619791666666625,
+    6.1848958333333375,
+    6.2174479166666625
+   ],
+   "cand": [
+    "t3",
+    "learned",
+    4,
+    4
+   ],
+   "rivals": [
+    [
+     "naive",
+     "-",
+     4,
+     4
+    ],
+    [
+     "realtime",
+     "-",
+     4,
+     4
+    ],
+    [
+     "realtime10",
+     "-",
+     4,
+     4
+    ],
+    [
+     "pred",
+     "learned",
+     4,
+     4
+    ]
+   ],
+   "ci95_pp": [
+    3.4830729166666665,
+    8.0078125
+   ],
+   "final": "PASS"
+  }
+ },
+ "hypotheses": {
+  "P1 m3-t3 D3 pp": -0.1519097222222321,
+  "P1 m3-t3 D1 pp": 0.10850694444445308,
+  "H1 D1 pp": 1.110387731481477,
+  "H1 D3 pp": 2.159288194444453,
+  "E2 late1-pred (4,4) pp": 4.19921875,
+  "E2 late2-pred (4,4) pp": 2.430555555555547,
+  "E1 A2C2-t3 D3 pp": -0.9331597222222247,
+  "P1 held": false,
+  "H1 share on the 4 levels D1": 0.8140845070422534,
+  "H1 share on the 4 levels D3": 0.8540772532188844,
+  "H1 held": true,
+  "H2 spearman": 0.20279720279720279,
+  "H2 levels with both > 0": 9
+ },
+ "a2c2": {
+  "A2C2 (вариант bt-kinetix) − t3": {
+   "D1 (s 5-7)": {
+    "pooled_pp": -4.846643518518516,
+    "per_seed_pp": [
+     -4.5247395833333295,
+     -5.1649305555555545,
+     -4.850260416666666
+    ]
+   },
+   "(1,5)": {
+    "pooled_pp": -6.846788194444442,
+    "per_seed_pp": [
+     -6.34765625,
+     -7.32421875,
+     -6.868489583333326
+    ]
+   },
+   "(1,6)": {
+    "pooled_pp": -5.588107638888892,
+    "per_seed_pp": [
+     -5.5338541666666625,
+     -6.1848958333333375,
+     -5.045572916666674
+    ]
+   },
+   "(1,7)": {
+    "pooled_pp": -2.105034722222217,
+    "per_seed_pp": [
+     -1.692708333333326,
+     -1.985677083333326,
+     -2.63671875
+    ]
+   },
+   "(2,2)": {
+    "pooled_pp": -10.970052083333332,
+    "per_seed_pp": [
+     -9.993489583333337,
+     -10.64453125,
+     -12.272135416666663
+    ]
+   },
+   "(2,6)": {
+    "pooled_pp": -1.6927083333333333,
+    "per_seed_pp": [
+     -1.3671875,
+     -2.408854166666663,
+     -1.302083333333337
+    ]
+   },
+   "(3,3)": {
+    "pooled_pp": -6.282552083333333,
+    "per_seed_pp": [
+     -6.93359375,
+     -7.2265625,
+     -4.6875
+    ]
+   },
+   "(3,4)": {
+    "pooled_pp": -2.528211805555554,
+    "per_seed_pp": [
+     -2.9296875,
+     -1.85546875,
+     -2.799479166666663
+    ]
+   },
+   "D3 (3,5)": {
+    "pooled_pp": -0.9331597222222247,
+    "per_seed_pp": [
+     -0.813802083333337,
+     -1.595052083333337,
+     -0.390625
+    ]
+   },
+   "D4 (4,4)": {
+    "pooled_pp": -1.0633680555555545,
+    "per_seed_pp": [
+     -0.87890625,
+     -1.3671875,
+     -0.944010416666663
+    ]
+   }
+  },
+  "A2C2-distill − t3": {
+   "D1 (s 5-7)": {
+    "pooled_pp": 4.6875,
+    "per_seed_pp": [
+     5.4796006944444455,
+     4.3077256944444455,
+     4.275173611111108
+    ]
+   },
+   "(1,5)": {
+    "pooled_pp": 1.9314236111111123,
+    "per_seed_pp": [
+     3.352864583333337,
+     0.846354166666663,
+     1.595052083333337
+    ]
+   },
+   "(1,6)": {
+    "pooled_pp": 5.0672743055555545,
+    "per_seed_pp": [
+     5.37109375,
+     4.6223958333333375,
+     5.208333333333326
+    ]
+   },
+   "(1,7)": {
+    "pooled_pp": 7.063802083333333,
+    "per_seed_pp": [
+     7.71484375,
+     7.4544270833333375,
+     6.0221354166666625
+    ]
+   },
+   "(2,2)": {
+    "pooled_pp": -2.137586805555554,
+    "per_seed_pp": [
+     -2.24609375,
+     -2.05078125,
+     -2.115885416666663
+    ]
+   },
+   "(2,6)": {
+    "pooled_pp": 7.432725694444442,
+    "per_seed_pp": [
+     8.365885416666663,
+     6.54296875,
+     7.3893229166666625
+    ]
+   },
+   "(3,3)": {
+    "pooled_pp": 1.5842013888888877,
+    "per_seed_pp": [
+     0.87890625,
+     0.846354166666663,
+     3.02734375
+    ]
+   },
+   "(3,4)": {
+    "pooled_pp": 3.732638888888884,
+    "per_seed_pp": [
+     4.2643229166666625,
+     4.329427083333326,
+     2.604166666666663
+    ]
+   },
+   "D3 (3,5)": {
+    "pooled_pp": 4.7092013888888875,
+    "per_seed_pp": [
+     3.580729166666663,
+     4.58984375,
+     5.95703125
+    ]
+   },
+   "D4 (4,4)": {
+    "pooled_pp": 2.658420138888888,
+    "per_seed_pp": [
+     3.548177083333337,
+     2.571614583333326,
+     1.85546875
+    ]
+   }
+  }
+ },
+ "a2c2_flag": null,
+ "head MSE < base MSE (§9)": {
+  "a2c2 (in-sample)": {
+   "worlds/l/grasp_easy.json": true,
+   "worlds/l/catapult.json": true,
+   "worlds/l/cartpole_thrust.json": true,
+   "worlds/l/hard_lunar_lander.json": true,
+   "worlds/l/mjc_half_cheetah.json": true,
+   "worlds/l/mjc_swimmer.json": true,
+   "worlds/l/mjc_walker.json": true,
+   "worlds/l/h17_unicycle.json": true,
+   "worlds/l/chain_lander.json": true,
+   "worlds/l/catcher_v3.json": true,
+   "worlds/l/trampoline.json": true,
+   "worlds/l/car_launch.json": true
+  },
+  "a2c2_distill (held-out)": {
+   "worlds/l/grasp_easy.json": true,
+   "worlds/l/catapult.json": true,
+   "worlds/l/cartpole_thrust.json": true,
+   "worlds/l/hard_lunar_lander.json": true,
+   "worlds/l/mjc_half_cheetah.json": true,
+   "worlds/l/mjc_swimmer.json": true,
+   "worlds/l/mjc_walker.json": true,
+   "worlds/l/h17_unicycle.json": true,
+   "worlds/l/chain_lander.json": true,
+   "worlds/l/catcher_v3.json": true,
+   "worlds/l/trampoline.json": true,
+   "worlds/l/car_launch.json": true
+  }
+ },
+ "edges base 3 (report)": {
+  "late J": {
+   "x": 6.680959854575759,
+   "other_d": null
+  },
+  "naive": {
+   "x": 1.8741106006339414,
+   "other_d": null
+  },
+  "realtime10": {
+   "x": 5.60458175196384,
+   "other_d": null
+  },
+  "pred": []
+ },
+ "latency": {
+  "device": "cuda:0",
+  "level": "worlds/l/grasp_easy.json",
+  "realtime_ms": 1.804347150027752,
+  "kappa": 2.149545946805601,
+  "kappa_j": 1.4789624688499603,
+  "t_nom": 1.8915017135441303,
+  "t_j": 2.748930361121893,
+  "t_nom_with_j": 4.065869841724634,
+  "t_j_with_nom": 4.065564833581448,
+  "head_ms_gpu": 0.0679423101246357,
+  "head_ms_cpu": 0.0703074038028717,
+  "gflop_per_eval": 0.052032916,
+  "head_gflop": 0.000621318
+ },
+ "missing": 0,
+ "cut": []
+}
+[17:12:48] done: b2b5_results.tgz (28M)
+On the Mac: tar xzf b2b5_results.tgz && (cd results/b2b5 && shasum -a 256 -c MANIFEST.sha256) and compare
+  results/b2b5/policies.sha256 with: shasum -a 256 checkpoints/bc/31/policies/*.pkl; only then stop the pod
