@@ -1,0 +1,12 @@
+grasp_easy: episodes 28779, solved share 0.966 fetched 2.1 MB
+catapult: episodes 10056, solved share 0.740 fetched 2.1 MB
+cartpole_thrust: episodes 19952, solved share 0.997 fetched 2.1 MB
+hard_lunar_lander: episodes 20276, solved share 0.940 fetched 2.1 MB
+mjc_half_cheetah: episodes 14316, solved share 0.903 fetched 2.1 MB
+mjc_swimmer: episodes 6863, solved share 0.908 fetched 2.1 MB
+mjc_walker: episodes 5733, solved share 0.814 fetched 2.1 MB
+h17_unicycle: episodes 13004, solved share 0.996 fetched 2.1 MB
+chain_lander: episodes 20999, solved share 0.942 fetched 2.1 MB
+catcher_v3: episodes 14955, solved share 0.975 fetched 2.1 MB
+trampoline: episodes 5780, solved share 0.838 fetched 2.1 MB
+car_launch: episodes 19851, solved share 0.967 fetched 2.1 MB

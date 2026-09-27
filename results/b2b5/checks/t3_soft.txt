@@ -1,0 +1,76 @@
+worlds_l_grasp_easy: code max |res - b2 def| = 0.0e+00; nom_T3 gap 6.0e-07; mean res |e|<=2.3 reflex 0.0872 (b2 0.0959), T3 0.0987 (b2 0.1070)
+worlds_l_catapult: code max |res - b2 def| = 0.0e+00; nom_T3 gap 9.5e-07; mean res |e|<=2.3 reflex 0.0227 (b2 0.0228), T3 0.0233 (b2 0.0233)
+worlds_l_cartpole_thrust: code max |res - b2 def| = 0.0e+00; nom_T3 gap 8.3e-07; mean res |e|<=2.3 reflex 0.0022 (b2 0.0022), T3 0.0018 (b2 0.0018)
+worlds_l_hard_lunar_lander: code max |res - b2 def| = 0.0e+00; nom_T3 gap 9.7e-07; mean res |e|<=2.3 reflex 0.0251 (b2 0.0251), T3 0.0249 (b2 0.0249)
+worlds_l_mjc_half_cheetah: code max |res - b2 def| = 0.0e+00; nom_T3 gap 1.5e-06; mean res |e|<=2.3 reflex 0.0996 (b2 0.0845), T3 0.1116 (b2 0.0968)
+worlds_l_mjc_swimmer: code max |res - b2 def| = 0.0e+00; nom_T3 gap 1.0e-06; mean res |e|<=2.3 reflex 0.0657 (b2 0.0635), T3 0.0709 (b2 0.0665)
+worlds_l_mjc_walker: code max |res - b2 def| = 0.0e+00; nom_T3 gap 6.2e-07; mean res |e|<=2.3 reflex 0.2654 (b2 0.2044), T3 0.3209 (b2 0.2471)
+worlds_l_h17_unicycle: code max |res - b2 def| = 0.0e+00; nom_T3 gap 3.0e-06; mean res |e|<=2.3 reflex 0.0700 (b2 0.0699), T3 0.0776 (b2 0.0771)
+worlds_l_chain_lander: code max |res - b2 def| = 0.0e+00; nom_T3 gap 4.8e-07; mean res |e|<=2.3 reflex 0.0067 (b2 0.0067), T3 0.0058 (b2 0.0058)
+worlds_l_catcher_v3: code max |res - b2 def| = 0.0e+00; nom_T3 gap 6.6e-07; mean res |e|<=2.3 reflex 0.0409 (b2 0.0409), T3 0.0409 (b2 0.0409)
+worlds_l_trampoline: code max |res - b2 def| = 0.0e+00; nom_T3 gap 3.0e-07; mean res |e|<=2.3 reflex 0.0279 (b2 0.0191), T3 0.0303 (b2 0.0209)
+worlds_l_car_launch: code max |res - b2 def| = 0.0e+00; nom_T3 gap 4.8e-07; mean res |e|<=2.3 reflex 0.0363 (b2 0.0433), T3 0.0397 (b2 0.0474)
+
+=== |e| = e ===
+per |e| bin (all levels pooled):
+       pairs   e_lo  size_ratio  lin_ratio  overshoot_reflex  overshoot_T3  proj_reflex  proj_T3  res_reflex  res_T3 e_col
+bin                                                                                                                       
+0    17652.0  0.000       0.753      0.549             0.497         0.297        1.000    0.935       0.006   0.007     e
+1    28900.0  0.165       0.781      0.594             0.490         0.309        0.999    0.903       0.018   0.021     e
+2    25755.0  0.362       0.759      0.598             0.466         0.296        0.985    0.840       0.031   0.034     e
+3    22031.0  0.629       0.733      0.601             0.449         0.274        0.963    0.772       0.065   0.076     e
+4    19217.0  1.013       0.721      0.624             0.427         0.254        0.916    0.698       0.111   0.127     e
+5    15337.0  1.564       0.747      0.626             0.407         0.270        0.866    0.662       0.214   0.233     e
+6    10335.0  2.317       0.774      0.635             0.375         0.278        0.783    0.615       0.308   0.322     e
+7     6502.0  3.290       0.802      0.641             0.351         0.270        0.699    0.570       0.391   0.397     e
+8     3990.0  4.602       0.832      0.614             0.344         0.287        0.732    0.603       0.373   0.373     e
+9    12609.0  7.037       0.919      0.688             0.528         0.442        1.008    0.971       0.072   0.071     e
+
+|e| > 2.3, per level:
+                              pairs  size_ratio  overshoot_reflex  overshoot_T3 e_col
+level                                                                                
+worlds_l_car_launch          1491.0       0.893             0.335         0.288     e
+worlds_l_cartpole_thrust    12779.0       0.952             0.550         0.459     e
+worlds_l_catapult             916.0       0.692             0.361         0.302     e
+worlds_l_catcher_v3          1421.0       0.805             0.330         0.247     e
+worlds_l_chain_lander        2462.0       0.838             0.298         0.249     e
+worlds_l_grasp_easy          1256.0       0.755             0.421         0.224     e
+worlds_l_h17_unicycle         225.0       0.955             0.498         0.512     e
+worlds_l_hard_lunar_lander    417.0       0.920             0.302         0.283     e
+worlds_l_mjc_half_cheetah    1964.0       0.759             0.391         0.266     e
+worlds_l_mjc_swimmer         5822.0       0.804             0.331         0.249     e
+worlds_l_mjc_walker          4312.0       0.740             0.353         0.276     e
+worlds_l_trampoline           612.0       0.894             0.394         0.325     e
+levels with size_ratio < 0.9: 9/12, overshoot T3 < reflex: 11/12
+
+=== |e| = e_rel ===
+per |e| bin (all levels pooled):
+       pairs   e_lo  size_ratio  lin_ratio  overshoot_reflex  overshoot_T3  proj_reflex  proj_T3  res_reflex  res_T3  e_col
+bin                                                                                                                        
+0    18242.0  0.000       0.754      0.550             0.495         0.298        1.000    0.935       0.006   0.007  e_rel
+1    29567.0  0.165       0.782      0.592             0.489         0.309        0.999    0.902       0.018   0.020  e_rel
+2    25761.0  0.362       0.760      0.595             0.465         0.297        0.984    0.838       0.031   0.034  e_rel
+3    21065.0  0.629       0.731      0.605             0.450         0.271        0.964    0.765       0.069   0.081  e_rel
+4    19142.0  1.013       0.721      0.623             0.426         0.252        0.915    0.697       0.110   0.127  e_rel
+5    15343.0  1.564       0.747      0.627             0.408         0.272        0.866    0.663       0.214   0.233  e_rel
+6    10317.0  2.317       0.774      0.633             0.374         0.275        0.778    0.612       0.308   0.322  e_rel
+7     6405.0  3.290       0.802      0.642             0.350         0.271        0.691    0.566       0.397   0.403  e_rel
+8     3932.0  4.602       0.833      0.617             0.344         0.288        0.739    0.611       0.377   0.377  e_rel
+9    12554.0  7.037       0.918      0.688             0.529         0.443        1.008    0.971       0.072   0.071  e_rel
+
+|e| > 2.3, per level:
+                              pairs  size_ratio  overshoot_reflex  overshoot_T3  e_col
+level                                                                                 
+worlds_l_car_launch          1491.0       0.893             0.335         0.288  e_rel
+worlds_l_cartpole_thrust    12752.0       0.953             0.550         0.460  e_rel
+worlds_l_catapult             916.0       0.692             0.361         0.302  e_rel
+worlds_l_catcher_v3          1421.0       0.805             0.330         0.247  e_rel
+worlds_l_chain_lander        2275.0       0.845             0.289         0.244  e_rel
+worlds_l_grasp_easy          1256.0       0.755             0.421         0.224  e_rel
+worlds_l_h17_unicycle         225.0       0.955             0.498         0.512  e_rel
+worlds_l_hard_lunar_lander    417.0       0.920             0.302         0.283  e_rel
+worlds_l_mjc_half_cheetah    1964.0       0.759             0.391         0.266  e_rel
+worlds_l_mjc_swimmer         5822.0       0.804             0.331         0.249  e_rel
+worlds_l_mjc_walker          4312.0       0.740             0.353         0.276  e_rel
+worlds_l_trampoline           600.0       0.891             0.394         0.325  e_rel
+levels with size_ratio < 0.9: 9/12, overshoot T3 < reflex: 11/12

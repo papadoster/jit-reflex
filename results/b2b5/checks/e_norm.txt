@@ -1,0 +1,112 @@
+published bins reproduced from the stored raw: True
+
+features per level:
+                         level  moving  median_std  same_valid  same_e_1e-5  dropped_tau1e-05                                     dropped_std_tau1e-05  dropped_tau0.0001                                            dropped_std_tau0.0001  dropped_tau0.001                                             dropped_std_tau0.001
+0          worlds_l_grasp_easy      49    0.611824         1.0          1.0                 0                                                                           0                                                                                  0                                                                 
+1            worlds_l_catapult      35    0.394467         1.0          1.0                 0                                                                           0                                                                                  0                                                                 
+2     worlds_l_cartpole_thrust      20    0.001417         1.0          1.0                 7  1.2e-06 1.4e-06 1.4e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06                  7          1.2e-06 1.4e-06 1.4e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06                 7          1.2e-06 1.4e-06 1.4e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06
+3   worlds_l_hard_lunar_lander      28    0.318075         1.0          1.0                 7  1.4e-06 1.7e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 5.7e-06                  7          1.4e-06 1.7e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 5.7e-06                 7          1.4e-06 1.7e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 5.7e-06
+4    worlds_l_mjc_half_cheetah      54    0.499305         1.0          1.0                 5                  1.4e-06 1.4e-06 1.4e-06 1.4e-06 1.9e-06                  5                          1.4e-06 1.4e-06 1.4e-06 1.4e-06 1.9e-06                 5                          1.4e-06 1.4e-06 1.4e-06 1.4e-06 1.9e-06
+5         worlds_l_mjc_swimmer      26    0.407172         1.0          1.0                 5                  1.4e-06 1.4e-06 1.4e-06 1.4e-06 1.4e-06                  5                          1.4e-06 1.4e-06 1.4e-06 1.4e-06 1.4e-06                 5                          1.4e-06 1.4e-06 1.4e-06 1.4e-06 1.4e-06
+6          worlds_l_mjc_walker      54    0.342387         1.0          1.0                 5                  1.4e-06 1.4e-06 1.4e-06 1.4e-06 1.4e-06                  5                          1.4e-06 1.4e-06 1.4e-06 1.4e-06 1.4e-06                 5                          1.4e-06 1.4e-06 1.4e-06 1.4e-06 1.4e-06
+7        worlds_l_h17_unicycle      27    0.075784         1.0          1.0                 6          1.4e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06                  6                  1.4e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06                 6                  1.4e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06
+8        worlds_l_chain_lander      48    0.363903         1.0          1.0                 6          1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 2.9e-06                  8  1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 2.9e-06 1.3e-05 1.2e-04                 8  1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 2.9e-06 1.3e-05 1.2e-04
+9          worlds_l_catcher_v3      49    0.416986         1.0          1.0                 7  1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06                  7          1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06                 7          1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06
+10         worlds_l_trampoline      34    0.318828         1.0          1.0                 6          1.4e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06                  7          1.4e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 4.6e-05                 7          1.4e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 1.9e-06 4.6e-05
+11         worlds_l_car_launch      38    0.466990         1.0          1.0                 7  1.4e-06 1.4e-06 1.4e-06 1.4e-06 1.4e-06 1.4e-06 4.0e-06                  7          1.4e-06 1.4e-06 1.4e-06 1.4e-06 1.4e-06 1.4e-06 4.0e-06                 7          1.4e-06 1.4e-06 1.4e-06 1.4e-06 1.4e-06 1.4e-06 4.0e-06
+
+rho_clip by |e| bin and the 0.3 crossing:
+published (stored raw)             deciles          rho_clip < 0.3 from |e| 2.32-3.29; rho by bin 0.79 0.70 0.58 0.51 0.41 0.35 0.25 0.22 0.18 0.06
+published (stored raw)             published edges  rho_clip < 0.3 from |e| 2.32-3.29; rho by bin 0.79 0.70 0.58 0.51 0.41 0.35 0.25 0.22 0.18 0.06
+stored, no cartpole                deciles          rho_clip < 0.3 from |e| 2.12-3.00; rho by bin 0.81 0.72 0.58 0.53 0.42 0.35 0.28 0.20 0.17 0.09
+stored, no cartpole                published edges  rho_clip < 0.3 from |e| 2.32-3.29; rho by bin 0.80 0.71 0.57 0.51 0.41 0.35 0.23 0.21 0.16 0.03
+new run, orig                      deciles          rho_clip < 0.3 from |e| 2.32-3.29; rho by bin 0.79 0.70 0.58 0.51 0.41 0.35 0.25 0.22 0.18 0.06
+new run, orig                      published edges  rho_clip < 0.3 from |e| 2.32-3.29; rho by bin 0.79 0.70 0.58 0.51 0.41 0.35 0.25 0.22 0.18 0.06
+new run, orig, no cartpole         deciles          rho_clip < 0.3 from |e| 2.12-3.00; rho by bin 0.81 0.72 0.58 0.53 0.42 0.35 0.28 0.20 0.17 0.09
+new run, orig, no cartpole         published edges  rho_clip < 0.3 from |e| 2.32-3.29; rho by bin 0.80 0.71 0.57 0.51 0.41 0.35 0.23 0.21 0.16 0.03
+new run, tau1e-05                  deciles          rho_clip < 0.3 from |e| 2.31-3.28; rho by bin 0.79 0.70 0.58 0.52 0.41 0.35 0.25 0.22 0.18 0.06
+new run, tau1e-05                  published edges  rho_clip < 0.3 from |e| 2.32-3.29; rho by bin 0.79 0.70 0.58 0.52 0.41 0.35 0.25 0.22 0.18 0.06
+new run, tau1e-05, no cartpole     deciles          rho_clip < 0.3 from |e| 2.12-3.00; rho by bin 0.81 0.72 0.58 0.53 0.42 0.35 0.28 0.20 0.17 0.09
+new run, tau1e-05, no cartpole     published edges  rho_clip < 0.3 from |e| 2.32-3.29; rho by bin 0.80 0.71 0.57 0.51 0.41 0.35 0.23 0.21 0.16 0.03
+new run, tau0.0001                 deciles          rho_clip < 0.3 from |e| 2.30-3.27; rho by bin 0.80 0.70 0.58 0.52 0.41 0.35 0.25 0.22 0.17 0.06
+new run, tau0.0001                 published edges  rho_clip < 0.3 from |e| 2.32-3.29; rho by bin 0.80 0.70 0.58 0.52 0.41 0.35 0.25 0.22 0.18 0.06
+new run, tau0.0001, no cartpole    deciles          rho_clip < 0.3 from |e| 2.11-2.99; rho by bin 0.82 0.72 0.59 0.53 0.43 0.35 0.28 0.20 0.17 0.10
+new run, tau0.0001, no cartpole    published edges  rho_clip < 0.3 from |e| 2.32-3.29; rho by bin 0.80 0.71 0.57 0.51 0.41 0.35 0.23 0.21 0.16 0.03
+new run, tau0.001                  deciles          rho_clip < 0.3 from |e| 2.30-3.27; rho by bin 0.80 0.70 0.58 0.52 0.41 0.35 0.25 0.22 0.17 0.06
+new run, tau0.001                  published edges  rho_clip < 0.3 from |e| 2.32-3.29; rho by bin 0.80 0.70 0.58 0.52 0.41 0.35 0.25 0.22 0.18 0.06
+new run, tau0.001, no cartpole     deciles          rho_clip < 0.3 from |e| 2.11-2.99; rho by bin 0.82 0.72 0.59 0.53 0.43 0.35 0.28 0.20 0.17 0.10
+new run, tau0.001, no cartpole     published edges  rho_clip < 0.3 from |e| 2.32-3.29; rho by bin 0.80 0.71 0.57 0.51 0.41 0.35 0.23 0.21 0.16 0.03
+
+learned, k <= 7: share of pairs with |e| > 2.3, pooled over levels:
+variant
+orig         0.203
+tau0.0001    0.201
+tau0.001     0.201
+tau1e-05     0.203
+without cartpole_thrust:
+variant
+orig         0.134
+tau0.0001    0.132
+tau0.001     0.132
+tau1e-05     0.134
+per level (median |e| and share far):
+                           median_e                             share_far                            
+variant                        orig tau0.0001 tau0.001 tau1e-05      orig tau0.0001 tau0.001 tau1e-05
+level                                                                                                
+worlds_l_car_launch            0.66      0.66     0.66     0.66      0.04      0.04     0.04     0.04
+worlds_l_cartpole_thrust      29.58     29.57    29.57    29.57      0.97      0.96     0.96     0.96
+worlds_l_catapult              0.33      0.33     0.33     0.33      0.03      0.03     0.03     0.03
+worlds_l_catcher_v3            0.57      0.57     0.57     0.57      0.09      0.09     0.09     0.09
+worlds_l_chain_lander          0.41      0.36     0.36     0.41      0.19      0.18     0.18     0.19
+worlds_l_grasp_easy            0.94      0.94     0.94     0.94      0.13      0.13     0.13     0.13
+worlds_l_h17_unicycle          0.24      0.24     0.24     0.24      0.01      0.01     0.01     0.01
+worlds_l_hard_lunar_lander     0.18      0.18     0.18     0.18      0.03      0.03     0.03     0.03
+worlds_l_mjc_half_cheetah      1.29      1.29     1.29     1.29      0.16      0.16     0.16     0.16
+worlds_l_mjc_swimmer           2.00      2.00     2.00     2.00      0.43      0.43     0.43     0.43
+worlds_l_mjc_walker            1.59      1.59     1.59     1.59      0.32      0.32     0.32     0.32
+worlds_l_trampoline            0.32      0.31     0.31     0.32      0.04      0.04     0.04     0.04
+
+B2+B5 closed loop (eval_B/hist.csv), share of steps with |e| > 2.3 (bins from 2.317):
+                              all levels  no cartpole  diff_pp
+method delay execute_horizon                                  
+late1  3     3                     0.318        0.290   -2.832
+             4                     0.386        0.361   -2.499
+             5                     0.424        0.400   -2.351
+       4     4                     0.408        0.384   -2.364
+late2  4     4                     0.402        0.379   -2.325
+m3     1     5                     0.279        0.247   -3.231
+             6                     0.310        0.280   -3.074
+             7                     0.354        0.325   -2.849
+       2     2                     0.222        0.185   -3.700
+             6                     0.404        0.378   -2.609
+       3     3                     0.333        0.304   -2.908
+             4                     0.391        0.365   -2.604
+             5                     0.429        0.405   -2.429
+       4     4                     0.432        0.408   -2.370
+pred   1     5                     0.268        0.238   -3.001
+             6                     0.317        0.290   -2.718
+             7                     0.357        0.332   -2.517
+       2     2                     0.190        0.153   -3.634
+             6                     0.393        0.370   -2.266
+       3     3                     0.295        0.268   -2.757
+             4                     0.346        0.321   -2.484
+             5                     0.394        0.372   -2.210
+       4     4                     0.381        0.358   -2.266
+reflex 1     5                     0.287        0.256   -3.136
+             6                     0.317        0.288   -2.995
+             7                     0.357        0.330   -2.749
+       2     2                     0.227        0.191   -3.578
+             6                     0.408        0.383   -2.523
+       3     3                     0.341        0.313   -2.784
+             4                     0.392        0.367   -2.537
+             5                     0.437        0.413   -2.344
+       4     4                     0.431        0.408   -2.296
+t3     1     5                     0.273        0.241   -3.214
+             6                     0.308        0.278   -3.024
+             7                     0.349        0.321   -2.789
+       2     2                     0.212        0.175   -3.682
+             6                     0.393        0.367   -2.571
+       3     3                     0.323        0.294   -2.872
+             4                     0.379        0.353   -2.587
+             5                     0.418        0.393   -2.431
+       4     4                     0.416        0.392   -2.376
