@@ -262,10 +262,24 @@ if args.mode in ("visual", "arm", "e1"):  # re-render the scene from an edited M
 
     le = env.envs[0].unwrapped
     ctrl, sim, G_POS = le._env, le._env.env.sim, 0.011  # LIBERO OffScreenRenderEnv; m per action unit per step
-    rob, name = ctrl.env.robots[0], ctrl.env.obj_of_interest[0]
-    qa, va = np.array(rob._ref_joint_pos_indexes), np.array(rob._ref_joint_vel_indexes)
-    jnt = ctrl.env.objects_dict[name].joints[0]  # free joint of the object of interest: qpos pos(3)+quat(4), qvel 6
-    adr, vadr = sim.model.get_joint_qpos_addr(jnt)[0], sim.model.get_joint_qvel_addr(jnt)[0]
+
+    def bind():  # everything taken from the MjSim; a hard reset rebuilds it
+        global sim, rob, qa, va, name, adr, vadr
+        sim, rob = ctrl.env.sim, ctrl.env.robots[0]
+        qa, va = np.array(rob._ref_joint_pos_indexes), np.array(rob._ref_joint_vel_indexes)
+        # the shifted object (spec §4): first object of interest with a free joint; None if all are fixture regions
+        name = next((n for n in ctrl.env.obj_of_interest if n in ctrl.env.objects_dict), None)
+        adr = vadr = None
+        if name:
+            jnt = ctrl.env.objects_dict[name].joints[0]  # qpos pos(3)+quat(4), qvel 6
+            adr, vadr = sim.model.get_joint_qpos_addr(jnt)[0], sim.model.get_joint_qvel_addr(jnt)[0]
+
+    def interest_pos(raw_obs):  # what the near/far stage is measured to: that object, else the first region's site
+        if name:
+            return raw_obs[f"{name}_pos"]
+        return sim.data.site_xpos[sim.model.site_name2id(ctrl.env.obj_of_interest[0])].copy()
+
+    bind()
     batch_axis = lambda d: {k: batch_axis(v) for k, v in d.items()} if isinstance(d, dict) else np.asarray(d)[None]
 
     def render(st):  # -> (policy batch, raw LIBERO obs, ms); st is a flattened state [time, qpos, qvel]
@@ -355,11 +369,7 @@ if args.mode == "e1":  # C1-E1, docs/superpowers/specs/2026-09-27-c1-e1-offline-
     le.init_state_id = args.init_state  # LiberoEnv resets to init_states[init_state_id]
     obs, _ = env.reset(seed=0)
     policy.reset()
-    sim, rob = ctrl.env.sim, ctrl.env.robots[0]  # a hard reset rebuilds the MjSim: rebind everything taken from it
-    qa, va = np.array(rob._ref_joint_pos_indexes), np.array(rob._ref_joint_vel_indexes)
-    name = ctrl.env.obj_of_interest[0]
-    jnt = ctrl.env.objects_dict[name].joints[0]
-    adr, vadr = sim.model.get_joint_qpos_addr(jnt)[0], sim.model.get_joint_qvel_addr(jnt)[0]
+    bind()  # a hard reset rebuilds the MjSim
     sims, grips, last_g = [], [], -1.0  # state before each step; gripper command executed before it (-1 = open)
     for t in range(le._max_episode_steps):
         sims.append(ctrl.get_sim_state())
@@ -372,7 +382,8 @@ if args.mode == "e1":  # C1-E1, docs/superpowers/specs/2026-09-27-c1-e1-offline-
             break
     T, success = t + 1, bool(ctrl.check_success())
     emit("e1_rollout", {"suite": args.suite, "task": args.task, "init_state": args.init_state, "T": T,
-                        "max_steps": le._max_episode_steps, "success": success, "object": name})
+                        "max_steps": le._max_episode_steps, "success": success, "object": name,
+                        "interest": ctrl.env.obj_of_interest[0]})
     for k in (int(x) for x in args.ks.split(",")):
         tk = k * T // 8
         s_k = sims[tk]
@@ -389,9 +400,9 @@ if args.mode == "e1":  # C1-E1, docs/superpowers/specs/2026-09-27-c1-e1-offline-
         ops = {"call": cost(lambda: chunk(b0, b0)), "J": cost(lambda: jac_vmap(o))} if k == int(args.ks.split(",")[0]) else None
         free()
         closed = grips[tk] > 0
-        dist = float(np.linalg.norm(raw0[f"{name}_to_robot0_eef_pos"]))
+        dist = float(np.linalg.norm(interest_pos(raw0) - raw0["robot0_eef_pos"]))
         stage = "closed" if closed else ("near" if dist <= 0.10 else "far")
-        carry = closed and float(np.linalg.norm(raw0[f"{name}_pos"] - raw0["robot0_eef_pos"])) <= 0.06
+        carry = closed and name is not None and float(np.linalg.norm(raw0[f"{name}_pos"] - raw0["robot0_eef_pos"])) <= 0.06
         arm, objs, ms_render = [], [], [t_r0]
         for ax in (0, 1):
             for sg in (1, -1):
@@ -418,7 +429,7 @@ if args.mode == "e1":  # C1-E1, docs/superpowers/specs/2026-09-27-c1-e1-offline-
                         rec |= {"dS0": v(dS[0]), "dI0": v(dI[0]), "nFS10": round(float((dF[:10] - dS[:10]).norm()), 6),
                                 "nFI10": round(float((dF[:10] - dI[:10]).norm()), 6)}
                     arm.append(rec)
-                    if closed:  # spec §4: no object shifts while it is held
+                    if closed or name is None:  # spec §4: no shift while it is held, or when there is no movable object
                         continue
                     b1, raw1, t_r = render(move_obj(s_k, np.r_[dxy, 0.0]))
                     dO = chunk(b1, b1) - a
