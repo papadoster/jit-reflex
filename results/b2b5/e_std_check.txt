@@ -1,0 +1,4 @@
+B2+B5 spec §8: the |e| unit (results/b2b5/e_std.npz) comes from diag.level_std with the diagnostic's key (seed 3000 + level index, first of three splits, 64 envs).
+Check: src/diag.py run on worlds/l/catapult.json into a scratch dir (after level_std was factored out of level_diag) against the committed-run raw file results/b1/diag/raw/worlds_l_catapult.npz:
+diag rerun, catapult: e (128, 5, 4, 31) max |diff| 0.0 OK
+e_std.npz: 12 levels, 679 dims each; moving dims (std > 1e-6) 20-49 per level.
