@@ -1,0 +1,4 @@
+method,transitions,train_gflop,level
+world model,32768,12776.78592,
+a2c2,9735,5098.027157504,worlds/l/catapult.json
+a2c2_distill,10240,3586.9262699520004,worlds/l/catapult.json

@@ -1,0 +1,2 @@
+level,transitions,items,steps,loss_first,loss_last,mse,mse_base,check,seconds
+worlds/l/catapult.json,9735,9728,38,0.9218848347663879,0.8508691191673279,0.7790405750274658,0.5881744623184204,in-sample,20

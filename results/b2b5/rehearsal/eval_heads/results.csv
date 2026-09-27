@@ -1,0 +1,3 @@
+returned_episode_lengths,returned_episode_returns,returned_episode_solved,solved_length,seed,delay,method,predictor,level,execute_horizon,max_correction,kick_std,seconds
+230.625,0.125,0.125,53.0,99,3,a2c2,-,worlds/l/catapult.json,5,,0.0,38.11595702171326
+205.75,0.25,0.25,55.0,99,3,a2c2_distill,-,worlds/l/catapult.json,5,,0.0,35.7746307849884

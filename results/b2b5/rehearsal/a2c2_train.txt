@@ -1,0 +1,1 @@
+{"level": "worlds/l/catapult.json", "transitions": 9735, "items": 9728, "steps": 38, "loss_first": 0.9218848347663879, "loss_last": 0.8508691191673279, "mse": 0.7790405750274658, "mse_base": 0.5881744623184204, "check": "in-sample", "seconds": 20}

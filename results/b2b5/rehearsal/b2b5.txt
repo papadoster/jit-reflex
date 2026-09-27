@@ -1,0 +1,381 @@
+{
+ "verdicts": {
+  "B2-R1 t3": {
+   "verdict": "KEEPS",
+   "pooled_pp": 3.125,
+   "per_seed_pp": [
+    3.125
+   ],
+   "cand": [
+    "t3",
+    "learned",
+    3,
+    5
+   ],
+   "rivals": [
+    [
+     "reflex",
+     "learned",
+     3,
+     5
+    ]
+   ],
+   "ci95_pp": [
+    -7.291666666666667,
+    12.5
+   ],
+   "final": "KEEPS",
+   "r(3,5)": 3.138376727409278,
+   "B2 goal": false
+  },
+  "B2-R1 t3 D4 (report)": {
+   "verdict": "MISSING",
+   "pooled_pp": null,
+   "per_seed_pp": [
+    null
+   ],
+   "cand": [
+    "t3",
+    "learned",
+    4,
+    4
+   ],
+   "rivals": [
+    [
+     "reflex",
+     "learned",
+     4,
+     4
+    ]
+   ],
+   "final": "MISSING"
+  },
+  "B2-R1 m3": {
+   "verdict": "KEEPS",
+   "pooled_pp": 2.083333333333337,
+   "per_seed_pp": [
+    2.083333333333337
+   ],
+   "cand": [
+    "m3",
+    "learned",
+    3,
+    5
+   ],
+   "rivals": [
+    [
+     "reflex",
+     "learned",
+     3,
+     5
+    ]
+   ],
+   "ci95_pp": [
+    -5.208333333333334,
+    9.375
+   ],
+   "final": "KEEPS",
+   "r(3,5)": 2.8317599550866697,
+   "B2 goal": false
+  },
+  "B2-R1 m3 D4 (report)": {
+   "verdict": "MISSING",
+   "pooled_pp": null,
+   "per_seed_pp": [
+    null
+   ],
+   "cand": [
+    "m3",
+    "learned",
+    4,
+    4
+   ],
+   "rivals": [
+    [
+     "reflex",
+     "learned",
+     4,
+     4
+    ]
+   ],
+   "final": "MISSING"
+  },
+  "B5-R1 late": {
+   "verdict": "NOT-FEASIBLE",
+   "final": "NOT-FEASIBLE",
+   "edge": {
+    "x": 5.707956655291882,
+    "other_d": null
+   }
+  },
+  "B5-R1 late, second GPU (report)": {
+   "verdict": "NOT-FEASIBLE",
+   "final": "NOT-FEASIBLE"
+  },
+  "B5-R2 m3": {
+   "verdict": "NOT-FEASIBLE",
+   "final": "NOT-FEASIBLE",
+   "edge": {
+    "x": 7.737819144939687,
+    "other_d": null
+   }
+  },
+  "B5-R3 t3 (3,5)": {
+   "verdict": "PASS",
+   "pooled_pp": 6.25,
+   "per_seed_pp": [
+    6.25
+   ],
+   "cand": [
+    "t3",
+    "learned",
+    3,
+    5
+   ],
+   "rivals": [
+    [
+     "naive",
+     "-",
+     3,
+     5
+    ],
+    [
+     "realtime",
+     "-",
+     3,
+     5
+    ],
+    [
+     "realtime10",
+     "-",
+     3,
+     5
+    ],
+    [
+     "pred",
+     "learned",
+     3,
+     5
+    ]
+   ],
+   "ci95_pp": [
+    -8.333333333333332,
+    22.916666666666664
+   ],
+   "final": "PASS"
+  },
+  "B5-R3 t3 (4,4)": {
+   "verdict": "MISSING",
+   "pooled_pp": null,
+   "per_seed_pp": [
+    null
+   ],
+   "cand": [
+    "t3",
+    "learned",
+    4,
+    4
+   ],
+   "rivals": [
+    [
+     "naive",
+     "-",
+     4,
+     4
+    ],
+    [
+     "realtime",
+     "-",
+     4,
+     4
+    ],
+    [
+     "realtime10",
+     "-",
+     4,
+     4
+    ],
+    [
+     "pred",
+     "learned",
+     4,
+     4
+    ]
+   ],
+   "final": "MISSING"
+  }
+ },
+ "hypotheses": {
+  "P1 m3-t3 D3 pp": -1.041666666666663,
+  "P1 m3-t3 D1 pp": null,
+  "H1 D1 pp": null,
+  "H1 D3 pp": null,
+  "E2 late1-pred (4,4) pp": null,
+  "E2 late2-pred (4,4) pp": null,
+  "E1 A2C2-t3 D3 pp": -65.625,
+  "P1 held": false,
+  "H1 share on the 4 levels D1": null,
+  "H1 share on the 4 levels D3": null,
+  "H1 held": false,
+  "H2 spearman": null,
+  "H2 levels with both > 0": null
+ },
+ "a2c2": {
+  "A2C2 (вариант bt-kinetix) − t3": {
+   "D1 (s 5-7)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   },
+   "(1,5)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   },
+   "(1,6)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   },
+   "(1,7)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   },
+   "(2,2)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   },
+   "(2,6)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   },
+   "(3,3)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   },
+   "(3,4)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   },
+   "D3 (3,5)": {
+    "pooled_pp": -65.625,
+    "per_seed_pp": [
+     -65.625
+    ]
+   },
+   "D4 (4,4)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   }
+  },
+  "A2C2-distill − t3": {
+   "D1 (s 5-7)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   },
+   "(1,5)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   },
+   "(1,6)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   },
+   "(1,7)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   },
+   "(2,2)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   },
+   "(2,6)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   },
+   "(3,3)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   },
+   "(3,4)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   },
+   "D3 (3,5)": {
+    "pooled_pp": -53.125,
+    "per_seed_pp": [
+     -53.125
+    ]
+   },
+   "D4 (4,4)": {
+    "pooled_pp": null,
+    "per_seed_pp": [
+     null
+    ]
+   }
+  }
+ },
+ "a2c2_flag": "реализация под сомнением",
+ "edges base 3 (report)": {
+  "late J": {
+   "x": 8.710026000244596,
+   "other_d": null
+  },
+  "naive": {
+   "x": 1.9687064189123142,
+   "other_d": 3
+  },
+  "realtime10": {
+   "x": 5.971668831530462,
+   "other_d": 7
+  },
+  "pred": []
+ },
+ "latency": {
+  "device": "TFRT_CPU_0",
+  "level": "worlds/l/grasp_easy.json",
+  "realtime_ms": 9.84358403366059,
+  "kappa": 1.0822748976281407,
+  "kappa_j": 1.0427700970339555,
+  "t_nom": 18.613916938193142,
+  "t_j": 28.874333947896957,
+  "t_nom_with_j": 20.1453750487417,
+  "t_j_with_nom": 30.109292012639344,
+  "head_ms_gpu": 0.051459064707159996,
+  "head_ms_cpu": 0.05479191895574331,
+  "gflop_per_eval": 0.052032916,
+  "head_gflop": 0.000621318
+ },
+ "missing": 122
+}

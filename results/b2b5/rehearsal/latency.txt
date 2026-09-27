@@ -1,0 +1,166 @@
+{'method': 'naive', 'delay': 1, 'execute_horizon': 1, 'ms': 6.412457907572389}
+{'method': 'naive', 'delay': 1, 'execute_horizon': 4, 'ms': 6.496999994851649}
+{'method': 'naive', 'delay': 1, 'execute_horizon': 7, 'ms': 6.459709024056792}
+{'method': 'realtime', 'delay': 1, 'execute_horizon': 1, 'ms': 9.828125010244548}
+{'method': 'realtime', 'delay': 1, 'execute_horizon': 4, 'ms': 9.854833013378084}
+{'method': 'realtime', 'delay': 1, 'execute_horizon': 7, 'ms': 9.84358403366059}
+{'method': 'realtime10', 'delay': 1, 'execute_horizon': 1, 'ms': 19.594207988120615}
+{'method': 'realtime10', 'delay': 1, 'execute_horizon': 4, 'ms': 19.645583000965416}
+{'method': 'realtime10', 'delay': 1, 'execute_horizon': 7, 'ms': 19.31995793711394}
+{'method': 'rtc_reflex', 'delay': 1, 'execute_horizon': 1, 'ms': 26.91379201132804}
+{'method': 'rtc_reflex', 'delay': 1, 'execute_horizon': 4, 'ms': 40.74941703584045}
+{'method': 'rtc_reflex', 'delay': 1, 'execute_horizon': 5, 'ms': 43.31350000575185}
+{'method': 'rtc_reflex', 'delay': 1, 'execute_horizon': 6, 'ms': 48.86070906650275}
+{'method': 'rtc_reflex', 'delay': 1, 'execute_horizon': 7, 'ms': 51.45350005477667}
+{'method': 'rtc_reflex', 'delay': 3, 'execute_horizon': 5, 'ms': 43.23349997866899}
+{'method': 'pred', 'delay': 1, 'execute_horizon': 1, 'ms': 6.751209031790495}
+{'method': 'pred', 'delay': 1, 'execute_horizon': 4, 'ms': 18.804250052198768}
+{'method': 'pred', 'delay': 1, 'execute_horizon': 5, 'ms': 20.27924999129027}
+{'method': 'pred', 'delay': 1, 'execute_horizon': 6, 'ms': 21.608749986626208}
+{'method': 'pred', 'delay': 1, 'execute_horizon': 7, 'ms': 22.42020796984434}
+{'method': 'pred', 'delay': 2, 'execute_horizon': 2, 'ms': 14.189000008627772}
+{'method': 'pred', 'delay': 2, 'execute_horizon': 6, 'ms': 21.382040926255286}
+{'method': 'pred', 'delay': 3, 'execute_horizon': 3, 'ms': 16.739874961785972}
+{'method': 'pred', 'delay': 3, 'execute_horizon': 4, 'ms': 18.491540919058025}
+{'method': 'pred', 'delay': 3, 'execute_horizon': 5, 'ms': 19.87237494904548}
+{'method': 'pred', 'delay': 4, 'execute_horizon': 4, 'ms': 18.728916998952627}
+{'method': 'reflex', 'delay': 1, 'execute_horizon': 1, 'ms': 17.22574990708381}
+{'method': 'reflex', 'delay': 1, 'execute_horizon': 4, 'ms': 37.927291938103735}
+{'method': 'reflex', 'delay': 1, 'execute_horizon': 5, 'ms': 40.57341697625816}
+{'method': 'reflex', 'delay': 1, 'execute_horizon': 6, 'ms': 45.50174996256828}
+{'method': 'reflex', 'delay': 1, 'execute_horizon': 7, 'ms': 48.9233749685809}
+{'method': 'reflex', 'delay': 2, 'execute_horizon': 2, 'ms': 28.89391698408872}
+{'method': 'reflex', 'delay': 2, 'execute_horizon': 6, 'ms': 45.17595795914531}
+{'method': 'reflex', 'delay': 3, 'execute_horizon': 3, 'ms': 35.45312490314245}
+{'method': 'reflex', 'delay': 3, 'execute_horizon': 4, 'ms': 37.481750012375414}
+{'method': 'reflex', 'delay': 3, 'execute_horizon': 5, 'ms': 40.467165992595255}
+{'method': 'reflex', 'delay': 4, 'execute_horizon': 4, 'ms': 37.210665992461145}
+{'method': 't3', 'delay': 1, 'execute_horizon': 1, 'ms': 12.657333980314434}
+{'method': 't3', 'delay': 1, 'execute_horizon': 4, 'ms': 28.59433402772993}
+{'method': 't3', 'delay': 1, 'execute_horizon': 5, 'ms': 30.500792083330452}
+{'method': 't3', 'delay': 1, 'execute_horizon': 6, 'ms': 34.99166702385992}
+{'method': 't3', 'delay': 1, 'execute_horizon': 7, 'ms': 37.647583056241274}
+{'method': 't3', 'delay': 2, 'execute_horizon': 2, 'ms': 23.21429189760238}
+{'method': 't3', 'delay': 2, 'execute_horizon': 6, 'ms': 34.952124929986894}
+{'method': 't3', 'delay': 3, 'execute_horizon': 3, 'ms': 26.85775002464652}
+{'method': 't3', 'delay': 3, 'execute_horizon': 4, 'ms': 28.362541110254824}
+{'method': 't3', 'delay': 3, 'execute_horizon': 5, 'ms': 30.89287504553795}
+{'method': 't3', 'delay': 4, 'execute_horizon': 4, 'ms': 28.579290956258774}
+{'method': 'm3', 'delay': 1, 'execute_horizon': 1, 'ms': 10.07575006224215}
+{'method': 'm3', 'delay': 1, 'execute_horizon': 4, 'ms': 25.27741703670472}
+{'method': 'm3', 'delay': 1, 'execute_horizon': 5, 'ms': 27.2530410438776}
+{'method': 'm3', 'delay': 1, 'execute_horizon': 6, 'ms': 30.144041986204684}
+{'method': 'm3', 'delay': 1, 'execute_horizon': 7, 'ms': 32.63175010215491}
+{'method': 'm3', 'delay': 2, 'execute_horizon': 2, 'ms': 20.300750038586557}
+{'method': 'm3', 'delay': 2, 'execute_horizon': 6, 'ms': 30.376499984413385}
+{'method': 'm3', 'delay': 3, 'execute_horizon': 3, 'ms': 24.498166050761938}
+{'method': 'm3', 'delay': 3, 'execute_horizon': 4, 'ms': 25.36500000860542}
+{'method': 'm3', 'delay': 3, 'execute_horizon': 5, 'ms': 27.874667081050575}
+{'method': 'm3', 'delay': 4, 'execute_horizon': 4, 'ms': 25.389290996827185}
+{
+ "device": "TFRT_CPU_0",
+ "level": "worlds/l/grasp_easy.json",
+ "realtime_ms": 9.84358403366059,
+ "kappa": 1.0822748976281407,
+ "kappa_j": 1.0427700970339555,
+ "t_nom": 18.613916938193142,
+ "t_j": 28.874333947896957,
+ "t_nom_with_j": 20.1453750487417,
+ "t_j_with_nom": 30.109292012639344,
+ "head_ms_gpu": 0.051459064707159996,
+ "head_ms_cpu": 0.05479191895574331,
+ "gflop_per_eval": 0.052032916,
+ "head_gflop": 0.000621318
+}
+{
+ "extra_blocks": [],
+ "measured base 3": {
+  "naive": [
+   [
+    2,
+    2
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    6
+   ]
+  ],
+  "realtime": [
+   [
+    3,
+    3
+   ],
+   [
+    3,
+    4
+   ],
+   [
+    3,
+    5
+   ]
+  ],
+  "realtime10": [],
+  "a2c2": [
+   [
+    2,
+    2
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    6
+   ]
+  ],
+  "a2c2_distill": [
+   [
+    2,
+    2
+   ],
+   [
+    2,
+    3
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    5
+   ],
+   [
+    2,
+    6
+   ]
+  ],
+  "pred": [],
+  "reflex": [],
+  "t3": [],
+  "m3": [],
+  "rtc_reflex": [],
+  "late": []
+ }
+}
