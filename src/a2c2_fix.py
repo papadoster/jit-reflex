@@ -85,5 +85,30 @@ def latency(out_dir: str = OUT, level_path: str = probe.LEVELS[0], repeats: int 
     print(json.dumps(info, indent=1))
 
 
+def zero_head_check(out_dir: str = OUT, level_path: str = "worlds/l/trampoline.json", num_evals: int = 8,
+                    seed: int = 20):
+    """Spec §6: a2c2_paper with a zero last layer must give naive bit for bit. The history wrappers pass keys and
+    action noise through unchanged and the policy sees the current frame, so any difference is a bug."""
+    _, _, _, O, A = probe.setup([level_path])
+    head = _paper_head(O, A)
+    last = head.residual_policy.layers[-1]
+    last.kernel.value = jnp.zeros_like(last.kernel.value)
+    last.bias.value = jnp.zeros_like(last.bias.value)
+    root = pathlib.Path(out_dir) / "zero_head"
+    (root / METHOD).mkdir(parents=True, exist_ok=True)
+    with (root / METHOD / f"{predictors.level_name(level_path)}.pkl").open("wb") as f:
+        pickle.dump(nnx.state(head).to_pure_dict(), f)
+    eval_flow.main(config=eval_flow.EvalConfig(num_evals=num_evals), level_paths=[level_path], seeds=[seed],
+                   methods=["naive", METHOD], cells=["1,5"], output_dir=str(root / "eval"),
+                   run_path="checkpoints/bc", heads_root=str(root))
+    d = pd.read_csv(root / "eval" / "results.csv").set_index("method")
+    cols = ["returned_episode_solved", "returned_episode_returns", "returned_episode_lengths"]
+    same = bool((d.loc["naive", cols] == d.loc[METHOD, cols]).all())
+    line = f"zero-head {METHOD} == naive: {same}\n{d[cols].to_string()}"
+    (pathlib.Path(out_dir) / "zero_head.txt").write_text(line + "\n")
+    print(line)
+    assert same, "a2c2_paper with a zero head differs from naive: look for a bug before any run"
+
+
 if __name__ == "__main__":
-    tyro.extras.subcommand_cli_from_dict({"experts": experts, "latency": latency})
+    tyro.extras.subcommand_cli_from_dict({"experts": experts, "latency": latency, "zero-head-check": zero_head_check})
