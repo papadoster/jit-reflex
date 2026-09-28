@@ -21,11 +21,19 @@ def test_expert_path_and_url():
 
 def test_latency_writes_head_numbers(tmp_path):
     a2c2_fix.latency(out_dir=str(tmp_path), repeats=3, warmup=1)
-    info = __import__("json").loads((tmp_path / "head_latency.json").read_text())
-    assert info["in_dim"] == 4 * 679 + 6 + 6 + 2
-    assert info["head_ms_cpu"] > 0 and info["head_ms_gpu"] > 0
-    # 2 x (2730 x 512 + 512 x 512 + 512 x 6) multiply-adds, LayerNorm and ReLU on top: about 3.3 MFLOP
-    assert 0.003 < info["head_gflop"] < 0.004
+    heads = __import__("json").loads((tmp_path / "head_latency.json").read_text())["heads"]
+    assert heads["a2c2_paper"]["in_dim"] == 4 * 679 + 6 + 6 + 2 and heads["a2c2_wide"]["in_dim"] == 679 + 6 + 2
+    assert all(h["head_ms_cpu"] > 0 and h["head_ms_gpu"] > 0 for h in heads.values())
+    # 2 x (in x 512 + 512 x 512 + 512 x 6) multiply-adds, LayerNorm and ReLU on top: about 3.3 and 1.2 MFLOP
+    assert 0.003 < heads["a2c2_paper"]["head_gflop"] < 0.004
+    assert 0.0011 < heads["a2c2_wide"]["head_gflop"] < 0.0015
+
+
+def test_rivals_flag_the_unequal_distill_rows():
+    paper, wide = a2c2_fix.rivals("a2c2_paper"), a2c2_fix.rivals("a2c2_wide")
+    assert paper[("a2c2_distill", "-")] == "неравное по голове: история и сеть"
+    assert wide[("a2c2_distill", "-")] == "неравное по сети"
+    assert ("a2c2_paper", "-") in wide and ("a2c2_paper", "-") not in paper
 
 
 import numpy as np

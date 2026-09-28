@@ -3,7 +3,8 @@
 # inside tmux: a lost SSH session kills the run.
 #   tmux new -s a2c2fix
 #   git clone https://github.com/papadoster/jit-reflex.git && cd jit-reflex && git checkout <commit> && ./scripts/gpu_a2c2_fix.sh
-# Writes results/b2b5_fix/** and packs it into a2c2_fix_results.tgz WITHOUT the head weights (~7 MB each): their
+# Two variants (a2c2_paper, a2c2_wide). Writes results/b2b5_fix/** and packs it into a2c2_fix_results.tgz WITHOUT the
+# head weights (~2-7 MB each): their
 # SHA-256 are in heads.sha256; fetch them separately only if needed. Resume: rerun it, finished stages are skipped.
 set -uo pipefail
 cd "$(dirname "$0")/.."
@@ -37,17 +38,20 @@ JAX_PLATFORMS=cpu uv run src/a2c2_fix.py experts | awk '{print $2}' | xargs sha2
 uv run python -c "import jax; d = jax.devices(); print(d); assert d[0].platform == 'gpu', 'no GPU visible'" || exit 1
 export PYTHONUNBUFFERED=1
 [ -f $O/head_latency.json ] || uv run src/a2c2_fix.py latency --out-dir $O || exit 1
-echo "[$(date +%T)] relabel (12 levels)"
-JAX_PLATFORMS=cpu uv run src/a2c2_fix.py experts | while read -r L path url; do
-  [ -f $O/a2c2_paper/worlds_l_$L.pkl ] && continue
-  uv run src/a2c2.py relabel --level-path worlds/l/$L.json --experts "$path" --out-dir $O/a2c2_paper --paper \
-    --num-chunks 256 </dev/null 2>&1 | tee -a $O/relabel_train.txt
-  [ -f $O/a2c2_paper/worlds_l_$L.pkl ] && sha256sum $O/a2c2_paper/worlds_l_$L.pkl >> $O/heads.sha256 \
-    || echo "!!! relabel for $L failed: its configs will be missing" | tee -a $O/relabel_train.txt
+for H in a2c2_paper a2c2_wide; do  # spec §2: same data and labels, PAPER_HEAD with and without the history obs
+  flag=--paper; [ $H = a2c2_wide ] && flag=--wide
+  echo "[$(date +%T)] relabel $H (12 levels)"
+  JAX_PLATFORMS=cpu uv run src/a2c2_fix.py experts | while read -r L path url; do
+    [ -f $O/$H/worlds_l_$L.pkl ] && continue
+    uv run src/a2c2.py relabel --level-path worlds/l/$L.json --experts "$path" --out-dir $O/$H $flag \
+      --num-chunks 256 </dev/null 2>&1 | tee -a $O/relabel_train.txt
+    [ -f $O/$H/worlds_l_$L.pkl ] && sha256sum $O/$H/worlds_l_$L.pkl >> $O/heads.sha256 \
+      || echo "!!! relabel $H for $L failed: its configs will be missing" | tee -a $O/relabel_train.txt
+  done
 done
-echo "[$(date +%T)] grid: a2c2_paper, 16 cells x seeds 20-22"
+echo "[$(date +%T)] grid: a2c2_paper and a2c2_wide, 16 cells x seeds 20-22"
 CELLS="1,1 1,2 1,3 1,4 1,5 1,6 1,7 2,2 2,3 2,4 2,5 2,6 3,3 3,4 3,5 4,4"
-EVAL="src/eval_flow.py --run-path checkpoints/bc --config.num-evals 256 --methods a2c2_paper --cells $CELLS
+EVAL="src/eval_flow.py --run-path checkpoints/bc --config.num-evals 256 --methods a2c2_paper a2c2_wide --cells $CELLS
   --seeds 20 21 22 --heads-root $O --output-dir $O/eval"
 uv run $EVAL 2>&1 | grep --line-buffered -v prefix_attention_horizon >> $O/eval.log \
   || { echo "[$(date +%T)] retry" >> $O/eval.log; uv run $EVAL 2>&1 | grep --line-buffered -v prefix_attention_horizon >> $O/eval.log; }

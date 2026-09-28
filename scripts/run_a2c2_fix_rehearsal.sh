@@ -9,10 +9,13 @@ L=trampoline
 P=$(uv run --offline src/a2c2_fix.py experts | awk -v L=$L '$1 == L {print $2}')
 [ -f "$P" ] || { echo "!!! $P missing: the rehearsal uses the expert already on the Mac"; exit 1; }
 uv run --offline src/a2c2_fix.py latency --out-dir $O --repeats 5 --warmup 2
-uv run --offline src/a2c2_fix.py zero-head-check --out-dir $O
-uv run --offline src/a2c2.py relabel --level-path worlds/l/$L.json --experts "$P" --out-dir $O/a2c2_paper --paper \
-  --num-envs 16 --num-chunks 8 --num-epochs 1
+for H in a2c2_paper a2c2_wide; do
+  flag=--paper; [ $H = a2c2_wide ] && flag=--wide
+  uv run --offline src/a2c2_fix.py zero-head-check --method $H --out-dir $O
+  uv run --offline src/a2c2.py relabel --level-path worlds/l/$L.json --experts "$P" --out-dir $O/$H $flag \
+    --num-envs 16 --num-chunks 8 --num-epochs 1
+done
 uv run --offline src/eval_flow.py --run-path checkpoints/bc --config.num-evals 8 --level-paths worlds/l/$L.json \
-  --methods a2c2_paper --cells 3,5 --seeds 20 --heads-root $O --output-dir $O/eval
+  --methods a2c2_paper a2c2_wide --cells 3,5 --seeds 20 --heads-root $O --output-dir $O/eval
 uv run --offline src/a2c2_fix.py summarize --new-dir $O --no-strict | tail -20
 echo "rehearsal OK"
