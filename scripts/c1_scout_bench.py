@@ -274,10 +274,12 @@ if args.mode in ("visual", "arm", "e1"):  # re-render the scene from an edited M
             jnt = ctrl.env.objects_dict[name].joints[0]  # qpos pos(3)+quat(4), qvel 6
             adr, vadr = sim.model.get_joint_qpos_addr(jnt)[0], sim.model.get_joint_qvel_addr(jnt)[0]
 
-    def interest_pos(raw_obs):  # what the near/far stage is measured to: that object, else the first region's site
+    def interest_pos(raw_obs):  # near/far is measured to that object, else to the first region's or fixture's site
         if name:
             return raw_obs[f"{name}_pos"]
-        return sim.data.site_xpos[sim.model.site_name2id(ctrl.env.obj_of_interest[0])].copy()
+        n0 = ctrl.env.obj_of_interest[0]
+        site = n0 if n0 in sim.model.site_names else f"{n0}_default_site"  # a region, else a fixture such as a stove
+        return sim.data.site_xpos[sim.model.site_name2id(site)].copy()
 
     bind()
     batch_axis = lambda d: {k: batch_axis(v) for k, v in d.items()} if isinstance(d, dict) else np.asarray(d)[None]
