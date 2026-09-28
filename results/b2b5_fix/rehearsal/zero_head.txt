@@ -1,0 +1,5 @@
+zero-head a2c2_paper == naive: True
+            returned_episode_solved  returned_episode_returns  returned_episode_lengths
+method                                                                                 
+naive                         0.875                     0.875                     174.0
+a2c2_paper                    0.875                     0.875                     174.0

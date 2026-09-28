@@ -1,0 +1,8 @@
+{
+ "device": "TFRT_CPU_0",
+ "head": "a2c2_paper",
+ "in_dim": 2730,
+ "head_ms_gpu": 0.13804202899336815,
+ "head_ms_cpu": 0.13599998783320189,
+ "head_gflop": 0.003333136
+}
