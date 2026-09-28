@@ -2,6 +2,7 @@
 `c1_scout_bench.py --mode e1`, with no manual decisions. Prints the read gate first and stops if it fails.
     python scripts/c1_e1_summary.py results/c1-e1/e1.jsonl        # writes summary.json next to the input
     python scripts/c1_e1_summary.py --selftest
+    python scripts/c1_e1_summary.py results/c1-e1/e1.jsonl --override-gate "<journal entry>"   # owner's deviation
 """
 
 import json
@@ -93,14 +94,16 @@ def go(rs, name, kind, extra_ok=True):
                 "ci95": boot(rs, f"rho_{name}", kind=kind, mm=10) if n else None}
 
 
-def summarize(lines):
+def summarize(lines, override=None):
     rolls = [l["e1_rollout"] for l in lines if "e1_rollout" in l]
     states = [l["e1_state"] for l in lines if "e1_state" in l]
     succ = sum(r["success"] for r in rolls)
     res = {"read_gate": {"rollouts": len(rolls), "states": len(states), "successes": succ,
                          "pass": len(rolls) == 32 and len(states) == 256 and succ >= 20}}
     if not res["read_gate"]["pass"]:
-        return res  # spec §5: results are not read
+        if not override:
+            return res  # spec §5: results are not read
+        res["read_gate"]["override"] = override  # a deviation recorded in the spec journal before reading
     rs = rows(states)
     ik_fail = sum(r.get("ik_fail", False) for st in states for r in st["arm"])
     no_resp = {k: sum(r["resp"] < EPS for r in rs if r["kind"] == k) for k in ("arm", "obj")}
@@ -171,6 +174,7 @@ if __name__ == "__main__":
         selftest()
         raise SystemExit
     src = Path(sys.argv[1])
-    res = summarize([json.loads(l) for l in src.read_text().splitlines() if l.strip()])
+    override = sys.argv[3] if sys.argv[2:3] == ["--override-gate"] else None
+    res = summarize([json.loads(l) for l in src.read_text().splitlines() if l.strip()], override)
     (src.parent / "summary.json").write_text(json.dumps(res, indent=1, ensure_ascii=False, default=str))
     print(json.dumps(res, indent=1, ensure_ascii=False, default=str))
