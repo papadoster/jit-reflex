@@ -164,7 +164,7 @@ class Agent:
         self.ppc_next, self.ppc_off = math.inf, {}  # PPC: the next chunk starts unbiased (delta_K = 0)
 
     def observe(self, t, eef, obj):
-        self.x, self.p_hist[t], self.c_hist[t] = np.array(eef, float), np.array(obj, float), self.c.copy()
+        self.p_hist[t], self.c_hist[t] = np.array(obj, float), self.c.copy()
 
     def unknown_shift(self, t):
         if self.method == "Gpost" and self.p_pre is not None:
@@ -220,6 +220,8 @@ class Agent:
         Path: offsets (1 - F_{2k+1}/F_{2K+1}) v_perp for steps t..t+K-1, v_perp against the clipped plan step,
         re-planned at each measurement (the latest one wins) and cleared at a new chunk. No near-object reset
         (the paper's reset only clears the latch) and no 2-EMA latch stabiliser."""
+        if t - self.sched.t_obs >= len(self.sched.chunk):
+            return  # the chunk is used up; a new call is due at this step and on_new_chunk clears the offsets
         if t == self._ppc_t or t - 1 not in self.p_hist:
             return
         self._ppc_t = t

@@ -374,3 +374,17 @@ def test_ppc_offsets_are_replanned_not_summed():
         ag.trigger(t)
         a = ag.act(t, ag.sched.action(t))
         assert a[1] == pytest.approx(0.8 * 0.002 / orx.G_POS)  # the latest 0.8 v_perp, not 0.8 + 0.6
+
+
+def test_ppc_does_not_read_past_the_chunk_at_the_scheduled_call():
+    ag, x = orx.Agent("PPC", 50, 0), np.zeros(3)
+    for t in range(61):  # the runner's order
+        ag.observe(t, x, np.array([0.10, 0.002 * min(max(t - 47, 0), 5), 0.0]))  # +2 mm/step in y at t = 48..52
+        if ag.sched.arrive(t):
+            ag.on_new_chunk()
+        if ag.sched.wants_call(t, ag.trigger(t)):
+            ag.sched.issue(t, np.tile([0.7, 0, 0, 0, 0, 0, -1.0], (50, 1)))
+            if ag.sched.arrive(t):
+                ag.on_new_chunk()
+        ag.act(t, ag.sched.action(t))
+    assert ag.sched.n_sched == 2
