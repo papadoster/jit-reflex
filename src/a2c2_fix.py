@@ -110,5 +110,122 @@ def zero_head_check(out_dir: str = OUT, level_path: str = "worlds/l/trampoline.j
     assert same, "a2c2_paper with a zero head differs from naive: look for a bug before any run"
 
 
+ROWS = {  # spec §4: rival -> the flag its row carries
+    ("t3", "learned"): "", ("realtime", "-"): "", ("a2c2_distill", "-"): "неравное по голове",
+    ("a2c2", "-"): "старый вариант", ("naive", "-"): "",
+}
+SLICES = {"D1": b2b5.D1, "(2,2)": [(2, 2)], "(2,6)": [(2, 6)], "(3,3)": [(3, 3)], "(3,4)": [(3, 4)],
+          "D3": [b2b5.D3], "D4": [b2b5.D4]}
+
+
+def level_sets() -> dict:
+    return {"all 12": list(probe.LEVELS), "held-out 9": [lv for lv in probe.LEVELS if lv not in DEV],
+            "development 3": list(DEV)}
+
+
+def cells_of(df: pd.DataFrame) -> pd.Series:
+    """returned_episode_solved per (method, predictor, delay, execute_horizon, seed, level)."""
+    return df.set_index(["method", "predictor", "delay", "execute_horizon", "seed", "level"])[
+        "returned_episode_solved"].sort_index()
+
+
+def diff(cell: pd.Series, a, b, cells, levels) -> dict | None:
+    """a - b, averaged over `cells`, on `levels`: pooled pp, per-seed pp, 95% bootstrap over level x seed (as B2+B5).
+    None if a and b share no (seed, level)."""
+    try:
+        x = pd.concat([cell.xs((*a, *c)) - cell.xs((*b, *c)) for c in cells], axis=1).mean(axis=1, skipna=False)
+    except KeyError:
+        return None
+    x = x[x.index.get_level_values("level").isin(levels)].dropna()
+    if x.empty:
+        return None
+    m, lo, hi = plot._boot(x.to_numpy(), 10_000, np.random.default_rng(0))
+    return {"pooled_pp": 100 * m, "per_seed_pp": [round(100 * v, 6) for v in x.groupby(level="seed").mean()],
+            "ci95_pp": [100 * lo, 100 * hi], "levels": int(x.index.get_level_values("level").nunique())}
+
+
+def head_cells(lat: pd.DataFrame, info: dict, head: dict) -> dict:
+    """Spec §3 (B2+B5 §5.1): a2c2_paper's latency-fair cells per base d: naive's d' = ceil(r_naive d), plus 1 when the
+    head's CPU time exceeds the tact realtime_ms / d; none when d' > 4."""
+    r = float((lat[lat.method == "naive"]["ms"] / info["realtime_ms"]).median())
+    out = {}
+    for base in (1, 2, 3, 4):
+        n = b2b5._ceil(r * base) + int(head["head_ms_cpu"] > info["realtime_ms"] / base)
+        out[base] = [(n, s) for s in range(n, 9 - n)] if n <= 4 else []
+    return out
+
+
+def summarize(new_dir: str = OUT, old_dir: str = b2b5.OUT, strict: bool = True):
+    """Spec §4, report only: fix.json and fix.txt in new_dir, levels.csv (per-level P at D1, D3, D4)."""
+    new, old = pathlib.Path(new_dir), pathlib.Path(old_dir)
+    df = pd.concat([pd.read_csv(f) for f in sorted(glob.glob(f"{old}/eval_*/results.csv"))]
+                   + [pd.read_csv(new / "eval" / "results.csv")])
+    df = df[df.seed.isin(b2b5.SEEDS)].drop_duplicates(["seed", "delay", "execute_horizon", "method", "predictor",
+                                                        "level"])
+    cell = cells_of(df)
+    have = set(zip(df.method, df.delay, df.execute_horizon, df.seed, df.level))
+    missing = [(d, s, sd, lv) for d, s in b2b5.ALL16 for sd in b2b5.SEEDS for lv in probe.LEVELS
+               if (METHOD, d, s, sd, lv) not in have]
+    if missing and strict:
+        raise SystemExit(f"{len(missing)} (cell, seed, level) of {METHOD} missing, rerun the eval: {missing[:5]}")
+    a = (METHOD, "-")
+    rows = {f"{METHOD} − {b[0]}" + (f" ({flag})" if flag else ""): {
+        ls: {sl: diff(cell, a, b, cs, lvs) for sl, cs in SLICES.items()} for ls, lvs in level_sets().items()}
+        for b, flag in ROWS.items()}
+    P = df.groupby(["method", "predictor", "delay", "execute_horizon", "level"])["returned_episode_solved"].mean()
+
+    def per_level(m, p, cs):  # P per level averaged over cells cs; empty if any cell is missing (non-strict runs)
+        try:
+            return sum(P.xs((m, p, *c)) for c in cs) / len(cs)
+        except KeyError:
+            return pd.Series(dtype=float)
+
+    lv_rows = []
+    for sl in ("D1", "D3", "D4"):
+        t = pd.DataFrame({m: per_level(m, p, SLICES[sl]) for m, p in [a, *ROWS]})
+        lv_rows.append(t.assign(slice=sl, development=t.index.isin(DEV)))
+    levels = pd.concat(lv_rows)
+    pooled = {(m, sl): float(per_level(m, p, SLICES[sl]).mean()) for m, p in [a, ("realtime", "-"), ("a2c2", "-")]
+              for sl in ("D3", "D4")}
+    held = level_sets()["held-out 9"]
+    old_d = {ls: rows[f"{METHOD} − a2c2 (старый вариант)"][ls] for ls in ("all 12", "held-out 9")}
+    pa2 = {lv: {"a2c2_paper": float(per_level(*a, b2b5.D1).get(lv, np.nan)),
+                "naive": float(per_level("naive", "-", b2b5.D1).get(lv, np.nan))}
+           for lv in ("worlds/l/trampoline.json", "worlds/l/mjc_walker.json")}
+    lat, info = pd.read_csv(old / "latency.csv"), json.loads((old / "latency.json").read_text())
+    head = json.loads((new / "head_latency.json").read_text())
+    fair = {}
+    for base, cs in head_cells(lat, info, head).items():
+        fair[base] = [{"cell": c, "P_all12": float(per_level(*a, [c]).mean()),
+                       "P_held9": float(per_level(*a, [c]).reindex(held).mean()),
+                       "gpu_ms_step": b2b5.gpu_ms_step("a2c2", *c, lat, info) - info["head_ms_gpu"]
+                       + head["head_ms_gpu"]} for c in cs]
+    log = pd.read_csv(new / METHOD / "train_log.csv").drop_duplicates("level", keep="last")
+    mse_ok = {r.level: bool(r.mse < r.mse_base) for r in log.itertuples()}
+    expert_gflop = 2 * (2722 * 256 + 256 * 256 + 256 * 6) / 1e9  # train_expert.Agent actor: 2722 -> 256 -> 256 -> 6
+    compute = [{"level": r.level, "transitions": int(r.transitions * 1.1), "train_gflop": r.steps * 512 * 3
+                * head["head_gflop"] + r.transitions * 1.1 * (5 * info["gflop_per_eval"] / 8 + expert_gflop)}
+               for r in log.itertuples()]
+    out = {
+        "rows": rows,
+        "strawman_flag": pooled[(METHOD, "D3")] < pooled[("realtime", "D3")],  # §9 guard: worse than RTC at D3
+        "P-A1 beats old A2C2 at D3 and D4": {ls: {sl: (old_d[ls][sl] or {}).get("pooled_pp", float("nan")) > 0
+                                                  for sl in ("D3", "D4")} for ls in old_d},
+        "P-A2 not below naive at D1": {lv: v["a2c2_paper"] >= v["naive"] for lv, v in pa2.items()} | {"values": pa2},
+        "latency_fair": fair, "head": head, "mse < mse_base (held-out)": mse_ok, "training_compute": compute,
+        "missing": len(missing),
+    }
+    (new / "fix.json").write_text(json.dumps(out, indent=1, default=str))
+    levels.to_csv(new / "levels.csv")
+    txt = [f"{name} [{ls}] {sl}: {r['pooled_pp']:+.2f} seeds {r['per_seed_pp']} ci {np.round(r['ci95_pp'], 2).tolist()}"
+           for name, by in rows.items() for ls, sls in by.items() for sl, r in sls.items() if r]
+    txt += [f"strawman flag: {out['strawman_flag']}", f"P-A1: {out['P-A1 beats old A2C2 at D3 and D4']}",
+            f"P-A2: {out['P-A2 not below naive at D1']}", f"missing: {len(missing)}",
+            "per level (development levels flagged):", levels.round(3).to_string()]
+    (new / "fix.txt").write_text("\n".join(txt) + "\n")
+    print("\n".join(txt))
+
+
 if __name__ == "__main__":
-    tyro.extras.subcommand_cli_from_dict({"experts": experts, "latency": latency, "zero-head-check": zero_head_check})
+    tyro.extras.subcommand_cli_from_dict({"experts": experts, "latency": latency, "zero-head-check": zero_head_check,
+                                          "summarize": summarize})
