@@ -1,0 +1,17 @@
+{
+ "device": "cuda:0",
+ "heads": {
+  "a2c2_paper": {
+   "in_dim": 2730,
+   "head_ms_gpu": 0.03687571734189987,
+   "head_ms_cpu": 0.08567329496145248,
+   "head_gflop": 0.003333136
+  },
+  "a2c2_wide": {
+   "in_dim": 687,
+   "head_ms_gpu": 0.02841278910636902,
+   "head_ms_cpu": 0.04515284672379494,
+   "head_gflop": 0.001241104
+  }
+ }
+}

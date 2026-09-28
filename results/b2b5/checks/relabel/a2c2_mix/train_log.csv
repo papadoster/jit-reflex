@@ -1,0 +1,4 @@
+level,mode,paper,experts,transitions,items,steps,loss_first,loss_last,mse,mse_base,check,seconds
+worlds/l/trampoline.json,mix,False,seed_2_step_840_worlds_l_trampoline.pkl|seed_7_step_800_worlds_l_trampoline.pkl,196608,191806,5984,0.7197057604789734,0.3880152702331543,0.3899032473564148,0.6919219493865967,held-out,486
+worlds/l/mjc_walker.json,mix,False,seed_7_step_580_worlds_l_mjc_walker.pkl|seed_4_step_580_worlds_l_mjc_walker.pkl,196608,193067,6032,0.3886924982070923,0.14283980429172516,0.15041732788085938,0.3235090374946594,held-out,476
+worlds/l/car_launch.json,mix,False,seed_0_step_920_worlds_l_car_launch.pkl,196608,189463,5920,0.565378725528717,0.305222749710083,0.28556373715400696,0.48734286427497864,held-out,488

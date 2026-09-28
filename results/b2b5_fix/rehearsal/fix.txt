@@ -1,0 +1,107 @@
+=== a2c2_paper ===
+a2c2_paper − t3 [all 12] D3: -77.73 seeds [-77.734375] ci [-77.73, -77.73]
+a2c2_paper − t3 [development 3] D3: -77.73 seeds [-77.734375] ci [-77.73, -77.73]
+a2c2_paper − realtime [all 12] D3: -79.30 seeds [-79.296875] ci [-79.3, -79.3]
+a2c2_paper − realtime [development 3] D3: -79.30 seeds [-79.296875] ci [-79.3, -79.3]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [all 12] D3: -79.69 seeds [-79.6875] ci [-79.69, -79.69]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [development 3] D3: -79.69 seeds [-79.6875] ci [-79.69, -79.69]
+a2c2_paper − a2c2 (старый вариант) [all 12] D3: +0.00 seeds [0.0] ci [0.0, 0.0]
+a2c2_paper − a2c2 (старый вариант) [development 3] D3: +0.00 seeds [0.0] ci [0.0, 0.0]
+a2c2_paper − naive [all 12] D3: -77.73 seeds [-77.734375] ci [-77.73, -77.73]
+a2c2_paper − naive [development 3] D3: -77.73 seeds [-77.734375] ci [-77.73, -77.73]
+strawman flag: True
+P-A1: {'all 12': {'D3': False, 'D4': False}, 'held-out 9': {'D3': False, 'D4': False}}
+P-A2: {'worlds/l/trampoline.json': False, 'worlds/l/mjc_walker.json': False, 'values': {'worlds/l/trampoline.json': {'a2c2_paper': nan, 'naive': 0.8229166666666666}, 'worlds/l/mjc_walker.json': {'a2c2_paper': nan, 'naive': 0.39105902777777773}}}
+MSE check: {'worlds/l/trampoline.json': False}
+=== a2c2_wide ===
+a2c2_wide − t3 [all 12] D3: +9.77 seeds [9.765625] ci [9.77, 9.77]
+a2c2_wide − t3 [development 3] D3: +9.77 seeds [9.765625] ci [9.77, 9.77]
+a2c2_wide − realtime [all 12] D3: +8.20 seeds [8.203125] ci [8.2, 8.2]
+a2c2_wide − realtime [development 3] D3: +8.20 seeds [8.203125] ci [8.2, 8.2]
+a2c2_wide − a2c2_distill (неравное по сети) [all 12] D3: +7.81 seeds [7.8125] ci [7.81, 7.81]
+a2c2_wide − a2c2_distill (неравное по сети) [development 3] D3: +7.81 seeds [7.8125] ci [7.81, 7.81]
+a2c2_wide − a2c2 (старый вариант) [all 12] D3: +87.50 seeds [87.5] ci [87.5, 87.5]
+a2c2_wide − a2c2 (старый вариант) [development 3] D3: +87.50 seeds [87.5] ci [87.5, 87.5]
+a2c2_wide − naive [all 12] D3: +9.77 seeds [9.765625] ci [9.77, 9.77]
+a2c2_wide − naive [development 3] D3: +9.77 seeds [9.765625] ci [9.77, 9.77]
+a2c2_wide − a2c2_paper [all 12] D3: +87.50 seeds [87.5] ci [87.5, 87.5]
+a2c2_wide − a2c2_paper [development 3] D3: +87.50 seeds [87.5] ci [87.5, 87.5]
+strawman flag: False
+P-A1: {'all 12': {'D3': True, 'D4': False}, 'held-out 9': {'D3': False, 'D4': False}}
+P-A2: {'worlds/l/trampoline.json': False, 'worlds/l/mjc_walker.json': False, 'values': {'worlds/l/trampoline.json': {'a2c2_wide': nan, 'naive': 0.8229166666666666}, 'worlds/l/mjc_walker.json': {'a2c2_wide': nan, 'naive': 0.39105902777777773}}}
+MSE check: {'worlds/l/trampoline.json': False}
+missing: {'a2c2_paper': 575, 'a2c2_wide': 575}
+per level (development levels flagged):
+                                 a2c2_paper     t3  realtime  a2c2_distill   a2c2  naive     variant slice  development  a2c2_wide
+worlds/l/car_launch.json                NaN  0.872     0.851         0.981  0.988  0.799  a2c2_paper    D1         True        NaN
+worlds/l/cartpole_thrust.json           NaN  0.982     0.981         0.988  1.000  0.944  a2c2_paper    D1        False        NaN
+worlds/l/catapult.json                  NaN  0.395     0.493         0.729  0.675  0.439  a2c2_paper    D1        False        NaN
+worlds/l/catcher_v3.json                NaN  0.793     0.837         0.970  0.980  0.568  a2c2_paper    D1        False        NaN
+worlds/l/chain_lander.json              NaN  0.944     0.936         0.944  0.948  0.942  a2c2_paper    D1        False        NaN
+worlds/l/grasp_easy.json                NaN  0.885     0.880         0.741  0.957  0.650  a2c2_paper    D1        False        NaN
+worlds/l/h17_unicycle.json              NaN  0.729     0.922         0.992  0.989  0.831  a2c2_paper    D1        False        NaN
+worlds/l/hard_lunar_lander.json         NaN  0.946     0.940         0.942  0.937  0.934  a2c2_paper    D1        False        NaN
+worlds/l/mjc_half_cheetah.json          NaN  0.875     0.856         0.859  0.741  0.857  a2c2_paper    D1        False        NaN
+worlds/l/mjc_swimmer.json               NaN  0.880     0.758         0.921  0.934  0.678  a2c2_paper    D1        False        NaN
+worlds/l/mjc_walker.json                NaN  0.639     0.458         0.366  0.021  0.391  a2c2_paper    D1         True        NaN
+worlds/l/trampoline.json                NaN  0.814     0.831         0.881  0.001  0.823  a2c2_paper    D1         True        NaN
+worlds/l/car_launch.json                NaN  0.788     0.799         0.980  0.977  0.755  a2c2_paper    D3         True        NaN
+worlds/l/cartpole_thrust.json           NaN  0.945     0.605         0.986  0.999  0.470  a2c2_paper    D3        False        NaN
+worlds/l/catapult.json                  NaN  0.298     0.387         0.701  0.617  0.323  a2c2_paper    D3        False        NaN
+worlds/l/catcher_v3.json                NaN  0.729     0.539         0.945  0.986  0.323  a2c2_paper    D3        False        NaN
+worlds/l/chain_lander.json              NaN  0.953     0.951         0.947  0.927  0.930  a2c2_paper    D3        False        NaN
+worlds/l/grasp_easy.json                NaN  0.910     0.884         0.542  0.964  0.602  a2c2_paper    D3        False        NaN
+worlds/l/h17_unicycle.json              NaN  0.715     0.717         0.988  0.990  0.730  a2c2_paper    D3        False        NaN
+worlds/l/hard_lunar_lander.json         NaN  0.928     0.850         0.947  0.922  0.625  a2c2_paper    D3        False        NaN
+worlds/l/mjc_half_cheetah.json          NaN  0.867     0.857         0.833  0.760  0.824  a2c2_paper    D3        False        NaN
+worlds/l/mjc_swimmer.json               NaN  0.806     0.465         0.915  0.945  0.249  a2c2_paper    D3        False        NaN
+worlds/l/mjc_walker.json                NaN  0.512     0.298         0.190  0.008  0.053  a2c2_paper    D3         True        NaN
+worlds/l/trampoline.json                0.0  0.754     0.811         0.797  0.000  0.796  a2c2_paper    D3         True        NaN
+worlds/l/car_launch.json                NaN  0.863     0.688         0.975  0.984  0.592  a2c2_paper    D4         True        NaN
+worlds/l/cartpole_thrust.json           NaN  0.927     0.516         0.970  1.000  0.405  a2c2_paper    D4        False        NaN
+worlds/l/catapult.json                  NaN  0.316     0.414         0.677  0.656  0.294  a2c2_paper    D4        False        NaN
+worlds/l/catcher_v3.json                NaN  0.844     0.451         0.943  0.990  0.240  a2c2_paper    D4        False        NaN
+worlds/l/chain_lander.json              NaN  0.941     0.936         0.957  0.957  0.935  a2c2_paper    D4        False        NaN
+worlds/l/grasp_easy.json                NaN  0.908     0.882         0.482  0.983  0.591  a2c2_paper    D4        False        NaN
+worlds/l/h17_unicycle.json              NaN  0.771     0.577         0.983  0.986  0.681  a2c2_paper    D4        False        NaN
+worlds/l/hard_lunar_lander.json         NaN  0.924     0.747         0.932  0.938  0.527  a2c2_paper    D4        False        NaN
+worlds/l/mjc_half_cheetah.json          NaN  0.871     0.815         0.845  0.734  0.706  a2c2_paper    D4        False        NaN
+worlds/l/mjc_swimmer.json               NaN  0.759     0.297         0.921  0.940  0.129  a2c2_paper    D4        False        NaN
+worlds/l/mjc_walker.json                NaN  0.477     0.263         0.169  0.018  0.017  a2c2_paper    D4         True        NaN
+worlds/l/trampoline.json                NaN  0.719     0.789         0.785  0.007  0.711  a2c2_paper    D4         True        NaN
+worlds/l/car_launch.json                NaN  0.872     0.851         0.981  0.988  0.799   a2c2_wide    D1         True        NaN
+worlds/l/cartpole_thrust.json           NaN  0.982     0.981         0.988  1.000  0.944   a2c2_wide    D1        False        NaN
+worlds/l/catapult.json                  NaN  0.395     0.493         0.729  0.675  0.439   a2c2_wide    D1        False        NaN
+worlds/l/catcher_v3.json                NaN  0.793     0.837         0.970  0.980  0.568   a2c2_wide    D1        False        NaN
+worlds/l/chain_lander.json              NaN  0.944     0.936         0.944  0.948  0.942   a2c2_wide    D1        False        NaN
+worlds/l/grasp_easy.json                NaN  0.885     0.880         0.741  0.957  0.650   a2c2_wide    D1        False        NaN
+worlds/l/h17_unicycle.json              NaN  0.729     0.922         0.992  0.989  0.831   a2c2_wide    D1        False        NaN
+worlds/l/hard_lunar_lander.json         NaN  0.946     0.940         0.942  0.937  0.934   a2c2_wide    D1        False        NaN
+worlds/l/mjc_half_cheetah.json          NaN  0.875     0.856         0.859  0.741  0.857   a2c2_wide    D1        False        NaN
+worlds/l/mjc_swimmer.json               NaN  0.880     0.758         0.921  0.934  0.678   a2c2_wide    D1        False        NaN
+worlds/l/mjc_walker.json                NaN  0.639     0.458         0.366  0.021  0.391   a2c2_wide    D1         True        NaN
+worlds/l/trampoline.json                NaN  0.814     0.831         0.881  0.001  0.823   a2c2_wide    D1         True        NaN
+worlds/l/car_launch.json                NaN  0.788     0.799         0.980  0.977  0.755   a2c2_wide    D3         True        NaN
+worlds/l/cartpole_thrust.json           NaN  0.945     0.605         0.986  0.999  0.470   a2c2_wide    D3        False        NaN
+worlds/l/catapult.json                  NaN  0.298     0.387         0.701  0.617  0.323   a2c2_wide    D3        False        NaN
+worlds/l/catcher_v3.json                NaN  0.729     0.539         0.945  0.986  0.323   a2c2_wide    D3        False        NaN
+worlds/l/chain_lander.json              NaN  0.953     0.951         0.947  0.927  0.930   a2c2_wide    D3        False        NaN
+worlds/l/grasp_easy.json                NaN  0.910     0.884         0.542  0.964  0.602   a2c2_wide    D3        False        NaN
+worlds/l/h17_unicycle.json              NaN  0.715     0.717         0.988  0.990  0.730   a2c2_wide    D3        False        NaN
+worlds/l/hard_lunar_lander.json         NaN  0.928     0.850         0.947  0.922  0.625   a2c2_wide    D3        False        NaN
+worlds/l/mjc_half_cheetah.json          NaN  0.867     0.857         0.833  0.760  0.824   a2c2_wide    D3        False        NaN
+worlds/l/mjc_swimmer.json               NaN  0.806     0.465         0.915  0.945  0.249   a2c2_wide    D3        False        NaN
+worlds/l/mjc_walker.json                NaN  0.512     0.298         0.190  0.008  0.053   a2c2_wide    D3         True        NaN
+worlds/l/trampoline.json                NaN  0.754     0.811         0.797  0.000  0.796   a2c2_wide    D3         True      0.875
+worlds/l/car_launch.json                NaN  0.863     0.688         0.975  0.984  0.592   a2c2_wide    D4         True        NaN
+worlds/l/cartpole_thrust.json           NaN  0.927     0.516         0.970  1.000  0.405   a2c2_wide    D4        False        NaN
+worlds/l/catapult.json                  NaN  0.316     0.414         0.677  0.656  0.294   a2c2_wide    D4        False        NaN
+worlds/l/catcher_v3.json                NaN  0.844     0.451         0.943  0.990  0.240   a2c2_wide    D4        False        NaN
+worlds/l/chain_lander.json              NaN  0.941     0.936         0.957  0.957  0.935   a2c2_wide    D4        False        NaN
+worlds/l/grasp_easy.json                NaN  0.908     0.882         0.482  0.983  0.591   a2c2_wide    D4        False        NaN
+worlds/l/h17_unicycle.json              NaN  0.771     0.577         0.983  0.986  0.681   a2c2_wide    D4        False        NaN
+worlds/l/hard_lunar_lander.json         NaN  0.924     0.747         0.932  0.938  0.527   a2c2_wide    D4        False        NaN
+worlds/l/mjc_half_cheetah.json          NaN  0.871     0.815         0.845  0.734  0.706   a2c2_wide    D4        False        NaN
+worlds/l/mjc_swimmer.json               NaN  0.759     0.297         0.921  0.940  0.129   a2c2_wide    D4        False        NaN
+worlds/l/mjc_walker.json                NaN  0.477     0.263         0.169  0.018  0.017   a2c2_wide    D4         True        NaN
+worlds/l/trampoline.json                NaN  0.719     0.789         0.785  0.007  0.711   a2c2_wide    D4         True        NaN

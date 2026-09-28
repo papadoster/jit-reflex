@@ -1,0 +1,2 @@
+level,mode,history,wide,experts,transitions,items,steps,loss_first,loss_last,mse,mse_base,check,seconds
+worlds/l/trampoline.json,one,True,True,seed_2_step_840_worlds_l_trampoline.pkl,1024,1024,2,0.8679755330085754,0.8679755330085754,1.0799343585968018,0.5804412364959717,held-out,29
