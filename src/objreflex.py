@@ -265,8 +265,8 @@ def episode_metrics(xs, acts, objs, lift=0.03):
 
 
 def headroom(ch_before, ch_after, delta):
-    """C1-E1 headroom on the same state: the share of the shift the brain's own fresh plan follows over h steps."""
-    d = np.asarray(ch_after, float) - np.asarray(ch_before, float)
+    """C1-E1 headroom on the same state: the share of the shift the brain's own fresh plan follows over h steps
+    (on the clipped plans, i.e. what the arm executes)."""
+    d = np.clip(ch_after, -1, 1) - np.clip(ch_before, -1, 1)
     delta = np.asarray(delta, float)
-    u = delta / np.linalg.norm(delta)
-    return {h: float(G_POS * d[:h, :3].sum(0) @ u / np.linalg.norm(delta)) for h in (10, 25, 50)}
+    return {h: float(G_POS * d[:h, :3].sum(0) @ delta / (delta @ delta)) for h in (10, 25, 50)}

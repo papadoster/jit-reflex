@@ -428,9 +428,13 @@ def test_episode_metrics():
 def test_headroom_ratio():
     ch0 = np.zeros((50, 7))
     ch1 = np.zeros((50, 7))
-    ch1[:10, 0] = 0.5  # the fresh plan moves 10 * 0.5 * 11 mm = 5.5 cm along +x over 10 steps
-    r = orx.headroom(ch0, ch1, np.array([0.055, 0, 0]))
-    assert r[10] == pytest.approx(1.0) and r[50] == pytest.approx(1.0)
+    ch1[:20, 0] = 0.5  # the fresh plan moves 20 * 0.5 * 11 mm = 11 cm along +x over 20 steps
+    ch1[:, 1] = 0.3  # sideways to the shift: projected out
+    r = orx.headroom(ch0, ch1, np.array([0.11, 0, 0]))
+    assert r[10] == pytest.approx(0.5) and r[25] == pytest.approx(1.0) and r[50] == pytest.approx(1.0)
+    ch1 = np.zeros((50, 7))
+    ch1[:10, 0] = 1.5  # clipped to 1: 10 * 1 * 11 mm = 11 cm
+    assert orx.headroom(ch0, ch1, np.array([0.11, 0, 0]))[10] == pytest.approx(1.0)
 
 
 def test_grasp_ok_needs_the_lift_at_a_closed_step():
