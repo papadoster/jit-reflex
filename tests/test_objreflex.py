@@ -100,3 +100,22 @@ def test_no_second_call_in_flight():
 def test_schedule_rejects_chunk_overrun():
     with pytest.raises(AssertionError):
         orx.Schedule(40, 20)
+    with pytest.raises(AssertionError):
+        orx.Schedule(10, 30)
+
+
+def test_schedule_saturated_brain_when_delay_exceeds_period():
+    s = orx.Schedule(10, 20)
+    calls, max_idx = [], 0
+    for t in range(80):  # the runner's order
+        s.arrive(t)
+        if s.wants_call(t, False):
+            s.issue(t, np.zeros((50, 7)))
+            calls.append(t)
+            s.arrive(t)
+        s.action(t)
+        max_idx = max(max_idx, t - s.t_obs)
+        if t > 10:
+            assert not s.wants_call(t, True)  # a trigger cannot get through: the brain is saturated
+    assert calls == [0, 10, 30, 50, 70] and s.n_trig == 0 and s.n_sched == 5
+    assert max_idx == 39

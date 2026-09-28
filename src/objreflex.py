@@ -88,7 +88,8 @@ class Schedule:
     of an episode arrives at once. A triggered call resets the schedule; no call while one is in flight."""
 
     def __init__(self, s, d):
-        assert s >= 1 and d >= 0 and s + d <= H, (s, d)
+        # with one call in flight, a chunk is used up to index max(s, d) + d - 1
+        assert s >= 1 and d >= 0 and max(s, d) + d <= H, (s, d)
         self.s, self.d = s, d
         self.next_call, self.in_flight = 0, None  # in_flight: (t_obs, arrival, chunk)
         self.chunk, self.t_obs = None, None
@@ -99,6 +100,7 @@ class Schedule:
 
     def issue(self, t, chunk):
         """Issue a call observed at t; it counts as scheduled if t reached next_call, else as triggered."""
+        assert self.in_flight is None
         scheduled = t >= self.next_call
         self.n_sched += scheduled
         self.n_trig += not scheduled
