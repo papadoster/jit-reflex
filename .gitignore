@@ -226,6 +226,8 @@ results/**/*.pkl
 !results/b1/world_models/*.pkl
 !results/b2b5/a2c2/*.pkl
 !results/b2b5/a2c2_distill/*.pkl
+!results/b2b5_fix/a2c2_paper/*.pkl
+!results/b2b5_fix/a2c2_wide/*.pkl
 results/**/*.npz
 !results/b2b5/e_std.npz
 *.tgz
