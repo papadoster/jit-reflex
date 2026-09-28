@@ -311,37 +311,66 @@ def test_ppc_fibonacci_profile_and_pace():
     assert k_exec == 50  # moving against the plan: no pace change
 
 
-def test_ppc_calls_earlier_and_offsets_sideways():
+def _ppc_agent(p0, x=np.zeros(3)):  # PPC agent at step 0 with a chunk moving the arm +x (action 0.7)
     ag = orx.Agent("PPC", 50, 0)
-    x, p = np.zeros(3), np.array([0.10, 0.0, 0.0])
-    ag.observe(0, x, p)
+    ag.observe(0, x, p0)
     ag.sched.issue(0, np.tile([0.7, 0, 0, 0, 0, 0, -1.0], (50, 1)))
     ag.sched.arrive(0)
+    ag.trigger(0)
     ag.act(0, ag.sched.action(0))
+    return ag
+
+
+def test_ppc_calls_earlier_and_offsets_sideways():
+    x, p = np.zeros(3), np.array([0.10, 0.0, 0.0])
+    ag = _ppc_agent(p, x)
     ag.observe(1, x, p + np.array([0.02, 0.02, 0.0]))  # a jump with a component along the plan and across it
+    ag.trigger(1)
     a = ag.act(1, ag.sched.action(1))
     assert ag.ppc_next < 50 and a[1] > 0  # an earlier call and a sideways offset toward +y
     assert ag.trigger(ag.ppc_next)
 
 
-def test_ppc_resets_near_the_object():
-    ag = orx.Agent("PPC", 50, 0)
-    ag.observe(0, np.zeros(3), np.array([0.02, 0, 0]))
-    ag.sched.issue(0, np.tile([0.7, 0, 0, 0, 0, 0, -1.0], (50, 1)))
-    ag.sched.arrive(0)
-    ag.act(0, ag.sched.action(0))
-    ag.observe(1, np.zeros(3), np.array([0.03, 0.01, 0]))
-    a = ag.act(1, ag.sched.action(1))
-    assert np.array_equal(a, ag.sched.action(1)) and ag.ppc_next == math.inf
+def test_ppc_keeps_correcting_near_the_object_until_grasp():
+    x, p = np.zeros(3), np.array([0.02, 0.0, 0.0])  # the arm 2 cm from the object: no reset
+    ag = _ppc_agent(p, x)
+    ag.observe(1, x, p + np.array([0.0, 0.01, 0.0]))  # a sideways jump
+    ag.trigger(1)
+    assert ag.act(1, ag.sched.action(1))[1] != ag.sched.action(1)[1]
+    ag.observe(2, x, p + np.array([0.0, 0.01, 0.0]))
+    ag.trigger(2)
+    ag.act(2, np.array([0.7, 0, 0, 0, 0, 0, 1.0]))  # close
+    ag.observe(3, x, p + np.array([0.0, 0.03, 0.0]))  # a further jump
+    assert not ag.trigger(3)
+    assert np.array_equal(ag.act(3, ag.sched.action(3)), ag.sched.action(3))
+
+
+def test_ppc_new_chunk_clears_offsets():
+    x, p = np.zeros(3), np.array([0.10, 0.0, 0.0])
+    ag = _ppc_agent(p, x)
+    ag.observe(1, x, p + np.array([0.0, 0.02, 0.0]))
+    ag.trigger(1)
+    assert ag.ppc_off
+    ag.on_new_chunk()
+    assert not ag.ppc_off and np.array_equal(ag.act(1, ag.sched.action(1)), ag.sched.action(1))
+
+
+def test_ppc_early_call_is_not_a_step_late():
+    # s = 15, a 3 cm shift along the plan at t = 5: alpha* = 1 + 0.03 / 0.011, K_exec = ceil(15 / alpha*) = 5,
+    # so the call is due at t_obs + 5 = 5, the shift step itself, the same step as T0
+    for method in ("PPC", "T0"):
+        _, _, _, ag = _run(method, s=15, steps=6)
+        assert ag.sched.n_trig == 1 and ag.sched.t_obs == 5, method
+    # s = 50: K_exec = ceil(50 / alpha*) = 14, so PPC calls at t_obs + 14, later than T0 (paper's pace)
+    _, _, _, ag = _run("PPC", s=50, steps=15)
+    assert ag.sched.n_trig == 1 and ag.sched.t_obs == 14
 
 
 def test_ppc_offsets_are_replanned_not_summed():
-    ag, x, p = orx.Agent("PPC", 50, 0), np.zeros(3), np.array([0.10, 0.0, 0.0])
-    ag.observe(0, x, p)
-    ag.sched.issue(0, np.tile([0.7, 0, 0, 0, 0, 0, -1.0], (50, 1)))
-    ag.sched.arrive(0)
-    ag.act(0, ag.sched.action(0))
+    x, p = np.zeros(3), np.array([0.10, 0.0, 0.0])
+    ag = _ppc_agent(p, x)
     for t in (1, 2, 3):  # the object moves +2 mm/step across the plan
         ag.observe(t, x, p + np.array([0.0, 0.002 * t, 0.0]))
+        ag.trigger(t)
         a = ag.act(t, ag.sched.action(t))
         assert a[1] == pytest.approx(0.8 * 0.002 / orx.G_POS)  # the latest 0.8 v_perp, not 0.8 + 0.6

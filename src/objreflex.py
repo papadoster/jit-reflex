@@ -15,7 +15,6 @@ G_POS = 0.011  # m of EEF motion per action unit per step (integrator, docs/c1/s
 EPS = 0.005  # G dead band, m
 T0_THR = 0.01  # T0 re-queries at |U| >= 1 cm
 T_THR = 0.05  # the T switch re-queries at |U| > 5 cm
-R_GRIP = 0.04  # PPC reset radius (gripper half-span), m
 PPC_K = 2  # PPC minimum execution steps (paper default)
 PPC_V_MIN = 0.001  # object speed counted by PPC, m/step
 H = 50  # SmolVLA chunk length
@@ -157,7 +156,7 @@ class Agent:
         self.grasp_started = False
         # G engaged at least once (|U| > EPS), even if clipping sent nothing (report: false triggers in control)
         self.g_on = False
-        self.ppc_next, self.ppc_off = math.inf, {}
+        self.ppc_next, self.ppc_off, self._ppc_t = math.inf, {}, None  # _ppc_t: last step PPC measured
         self.j_corr, self.o_raw = None, {}  # GJ: callable(t, k) -> J_k (o_t - o_hat_k); raw states by step
 
     def on_new_chunk(self):
@@ -177,6 +176,7 @@ class Agent:
         if self.grasp_started or self.sched.chunk is None:
             return False
         if self.method == "PPC":
+            self._ppc_measure(t)
             return t >= self.ppc_next
         u = np.linalg.norm(self.unknown_shift(t))
         if self.method == "T0":
@@ -213,26 +213,29 @@ class Agent:
         a[:3] = new
         return a
 
+    def _ppc_measure(self, t):
+        """Our PPC (paper §3, arXiv 2605.11459), measured in trigger() so the early call is not a step late.
+        Velocity v(t) = p(t) - p(t-1) from the oracle tracker, counted above PPC_V_MIN. Pace is realised only
+        through the execution horizon K_exec (the next call at t_obs + K_exec); the plan's steps are not scaled.
+        Path: offsets (1 - F_{2k+1}/F_{2K+1}) v_perp for steps t..t+K-1, v_perp against the clipped plan step,
+        re-planned at each measurement (the latest one wins) and cleared at a new chunk. No near-object reset
+        (the paper's reset only clears the latch) and no 2-EMA latch stabiliser."""
+        if t == self._ppc_t or t - 1 not in self.p_hist:
+            return
+        self._ppc_t = t
+        v = self.p_hist[t] - self.p_hist[t - 1]
+        if np.linalg.norm(v) <= PPC_V_MIN:
+            return
+        dp = G_POS * np.clip(self.sched.action(t)[:3], -1, 1)
+        _, k_exec = ppc_pace(v, dp, self.sched.s)
+        self.ppc_next = min(self.ppc_next, self.sched.t_obs + k_exec)
+        ndp = np.linalg.norm(dp)
+        v_perp = v - (v @ dp) / ndp**2 * dp if ndp > 1e-9 else v
+        self.ppc_off = {t + j: w * v_perp for j, w in enumerate(ppc_profile(PPC_K))}
+
     def _ppc(self, t, a):
-        """Our PPC (paper §3, arXiv 2605.11459): velocity v(t) = p(t) - p(t-1) from the oracle tracker; pace
-        shortens the executing chunk (an earlier call), path adds (1 - F_{2k+1}/F_{2K+1}) v_perp over the next K
-        steps. Our interpretation: dp is the step of the clipped plan action (as in G); the offsets are re-planned
-        at each velocity measurement (the latest one wins, no summing) and cleared at a new chunk. Reset (no
-        correction) within R_GRIP of the object. The 2-EMA latch stabiliser is not implemented."""
-        p, x = self.p_hist[t], self.x
-        if np.linalg.norm(x - p) < R_GRIP:
-            self.ppc_next, self.ppc_off = math.inf, {}
-            return a
-        if t - 1 in self.p_hist:
-            v = p - self.p_hist[t - 1]
-            if np.linalg.norm(v) > PPC_V_MIN:
-                dp = G_POS * np.clip(a[:3], -1, 1)
-                _, k_exec = ppc_pace(v, dp, self.sched.s)
-                self.ppc_next = min(self.ppc_next, self.sched.t_obs + k_exec)
-                ndp = np.linalg.norm(dp)
-                v_perp = v - (v @ dp) / ndp**2 * dp if ndp > 1e-9 else v
-                self.ppc_off = {t + j: w * v_perp for j, w in enumerate(ppc_profile(PPC_K))}
+        """Our PPC path: this step's planned offset on top of the clipped plan action (as G does)."""
         off = self.ppc_off.pop(t, None)
         if off is not None:
-            a[:3] = np.clip(a[:3] + off / G_POS, -1, 1)
+            a[:3] = np.clip(np.clip(a[:3], -1, 1) + off / G_POS, -1, 1)
         return a
