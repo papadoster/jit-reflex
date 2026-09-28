@@ -1,0 +1,317 @@
+=== a2c2_paper ===
+a2c2_paper − t3 [all 12] D1: +14.31 seeds [14.69184, 14.084201, 14.160156] ci [10.82, 18.0]
+a2c2_paper − t3 [all 12] (2,2): +8.47 seeds [9.179688, 8.463542, 7.779948] ci [6.08, 11.19]
+a2c2_paper − t3 [all 12] (2,6): +17.49 seeds [17.708333, 16.927083, 17.838542] ci [13.11, 22.02]
+a2c2_paper − t3 [all 12] (3,3): +12.35 seeds [11.458333, 12.174479, 13.411458] ci [9.15, 15.93]
+a2c2_paper − t3 [all 12] (3,4): +15.58 seeds [15.00651, 16.210938, 15.527344] ci [11.78, 19.72]
+a2c2_paper − t3 [all 12] D3: +18.48 seeds [18.261719, 18.782552, 18.391927] ci [14.07, 23.03]
+a2c2_paper − t3 [all 12] D4: +17.06 seeds [17.220052, 16.992188, 16.959635] ci [12.98, 21.43]
+a2c2_paper − t3 [held-out 9] D1: +13.45 seeds [13.874421, 13.208912, 13.266782] ci [8.94, 18.34]
+a2c2_paper − t3 [held-out 9] (2,2): +7.26 seeds [8.159722, 6.944444, 6.684028] ci [4.44, 10.53]
+a2c2_paper − t3 [held-out 9] (2,6): +16.12 seeds [16.536458, 15.190972, 16.623264] ci [10.84, 21.76]
+a2c2_paper − t3 [held-out 9] (3,3): +10.49 seeds [9.765625, 10.590278, 11.111111] ci [6.6, 15.02]
+a2c2_paper − t3 [held-out 9] (3,4): +13.12 seeds [13.064236, 13.194444, 13.107639] ci [8.7, 18.24]
+a2c2_paper − t3 [held-out 9] D3: +16.16 seeds [15.885417, 15.842014, 16.753472] ci [11.0, 21.83]
+a2c2_paper − t3 [held-out 9] D4: +14.40 seeds [14.366319, 14.583333, 14.236111] ci [10.14, 19.31]
+a2c2_paper − t3 [development 3] D1: +16.90 seeds [17.144097, 16.710069, 16.840278] ci [13.86, 20.07]
+a2c2_paper − t3 [development 3] (2,2): +12.11 seeds [12.239583, 13.020833, 11.067708] ci [8.64, 15.97]
+a2c2_paper − t3 [development 3] (2,6): +21.61 seeds [21.223958, 22.135417, 21.484375] ci [15.32, 28.69]
+a2c2_paper − t3 [development 3] (3,3): +17.93 seeds [16.536458, 16.927083, 20.3125] ci [15.67, 20.14]
+a2c2_paper − t3 [development 3] (3,4): +22.96 seeds [20.833333, 25.260417, 22.786458] ci [19.4, 26.65]
+a2c2_paper − t3 [development 3] D3: +25.43 seeds [25.390625, 27.604167, 23.307292] ci [20.27, 31.25]
+a2c2_paper − t3 [development 3] D4: +25.04 seeds [25.78125, 24.21875, 25.130208] ci [17.62, 32.94]
+a2c2_paper − realtime [all 12] D1: +14.38 seeds [14.0625, 15.049913, 14.040799] ci [11.02, 18.14]
+a2c2_paper − realtime [all 12] (2,2): +11.56 seeds [12.239583, 11.523438, 10.904948] ci [8.92, 14.4]
+a2c2_paper − realtime [all 12] (2,6): +21.43 seeds [21.386719, 21.679688, 21.223958] ci [16.83, 26.25]
+a2c2_paper − realtime [all 12] (3,3): +20.36 seeds [19.791667, 20.800781, 20.47526] ci [16.24, 24.67]
+a2c2_paper − realtime [all 12] (3,4): +24.67 seeds [23.60026, 25.358073, 25.065104] ci [19.64, 29.84]
+a2c2_paper − realtime [all 12] D3: +27.16 seeds [27.115885, 27.766927, 26.595052] ci [21.5, 33.08]
+a2c2_paper − realtime [all 12] D4: +33.28 seeds [33.333333, 32.942708, 33.561198] ci [26.78, 39.79]
+a2c2_paper − realtime [held-out 9] D1: +11.49 seeds [11.29919, 12.13831, 11.038773] ci [8.42, 14.8]
+a2c2_paper − realtime [held-out 9] (2,2): +10.39 seeds [11.067708, 10.763889, 9.331597] ci [7.13, 13.8]
+a2c2_paper − realtime [held-out 9] (2,6): +19.31 seeds [18.576389, 20.008681, 19.357639] ci [14.84, 23.86]
+a2c2_paper − realtime [held-out 9] (3,3): +19.39 seeds [19.53125, 19.878472, 18.75] ci [14.61, 24.23]
+a2c2_paper − realtime [held-out 9] (3,4): +23.70 seeds [23.133681, 24.175347, 23.784722] ci [18.06, 29.5]
+a2c2_paper − realtime [held-out 9] D3: +26.13 seeds [25.954861, 26.302083, 26.128472] ci [19.95, 32.36]
+a2c2_paper − realtime [held-out 9] D4: +32.48 seeds [32.161458, 32.118056, 33.159722] ci [25.17, 39.9]
+a2c2_paper − realtime [development 3] D1: +23.06 seeds [22.352431, 23.784722, 23.046875] ci [15.06, 32.16]
+a2c2_paper − realtime [development 3] (2,2): +15.06 seeds [15.755208, 13.802083, 15.625] ci [11.63, 18.45]
+a2c2_paper − realtime [development 3] (2,6): +27.78 seeds [29.817708, 26.692708, 26.822917] ci [16.49, 40.54]
+a2c2_paper − realtime [development 3] (3,3): +23.26 seeds [20.572917, 23.567708, 25.651042] ci [15.45, 32.25]
+a2c2_paper − realtime [development 3] (3,4): +27.60 seeds [25.0, 28.90625, 28.90625] ci [17.79, 39.32]
+a2c2_paper − realtime [development 3] D3: +30.25 seeds [30.598958, 32.161458, 27.994792] ci [18.06, 44.31]
+a2c2_paper − realtime [development 3] D4: +35.68 seeds [36.848958, 35.416667, 34.765625] ci [23.44, 49.35]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [all 12] D1: +9.62 seeds [9.21224, 9.776476, 9.884983] ci [5.49, 14.64]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [all 12] (2,2): +10.61 seeds [11.425781, 10.514323, 9.895833] ci [6.61, 15.29]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [all 12] (2,6): +10.06 seeds [9.342448, 10.384115, 10.449219] ci [5.06, 16.36]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [all 12] (3,3): +10.76 seeds [10.579427, 11.328125, 10.384115] ci [6.07, 16.41]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [all 12] (3,4): +11.85 seeds [10.742188, 11.88151, 12.923177] ci [6.69, 18.03]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [all 12] D3: +13.77 seeds [14.68099, 14.192708, 12.434896] ci [7.64, 21.02]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [all 12] D4: +14.40 seeds [13.671875, 14.420573, 15.104167] ci [7.8, 22.14]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [held-out 9] D1: +6.13 seeds [5.989583, 6.076389, 6.322338] ci [3.5, 9.22]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [held-out 9] (2,2): +6.18 seeds [7.291667, 6.25, 4.991319] ci [3.92, 8.7]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [held-out 9] (2,6): +5.38 seeds [4.6875, 5.381944, 6.076389] ci [3.17, 7.84]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [held-out 9] (3,3): +5.02 seeds [4.861111, 5.164931, 5.034722] ci [3.1, 7.09]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [held-out 9] (3,4): +6.60 seeds [6.25, 6.25, 7.291667] ci [3.39, 10.43]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [held-out 9] D3: +8.93 seeds [9.895833, 9.418403, 7.465278] ci [4.4, 14.55]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [held-out 9] D4: +9.42 seeds [8.767361, 9.678819, 9.809028] ci [4.24, 15.87]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [development 3] D1: +20.11 seeds [18.880208, 20.876736, 20.572917] ci [7.12, 35.24]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [development 3] (2,2): +23.91 seeds [23.828125, 23.307292, 24.609375] ci [11.41, 36.63]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [development 3] (2,6): +24.09 seeds [23.307292, 25.390625, 23.567708] ci [5.6, 44.49]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [development 3] (3,3): +27.99 seeds [27.734375, 29.817708, 26.432292] ci [12.8, 43.27]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [development 3] (3,4): +27.60 seeds [24.21875, 28.776042, 29.817708] ci [11.85, 44.53]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [development 3] D3: +28.30 seeds [29.036458, 28.515625, 27.34375] ci [10.46, 48.7]
+a2c2_paper − a2c2_distill (неравное по голове: история и сеть) [development 3] D4: +29.34 seeds [28.385417, 28.645833, 30.989583] ci [10.98, 50.44]
+a2c2_paper − a2c2 (старый вариант) [all 12] D1: +19.16 seeds [19.21658, 19.249132, 19.010417] ci [9.31, 30.53]
+a2c2_paper − a2c2 (старый вариант) [all 12] (2,2): +19.44 seeds [19.173177, 19.108073, 20.052083] ci [9.61, 30.94]
+a2c2_paper − a2c2 (старый вариант) [all 12] (2,6): +19.18 seeds [19.075521, 19.335938, 19.140625] ci [9.47, 30.38]
+a2c2_paper − a2c2 (старый вариант) [all 12] (3,3): +18.63 seeds [18.391927, 19.401042, 18.098958] ci [8.86, 29.81]
+a2c2_paper − a2c2 (старый вариант) [all 12] (3,4): +18.11 seeds [17.936198, 18.066406, 18.326823] ci [8.34, 29.46]
+a2c2_paper − a2c2 (старый вариант) [all 12] D3: +19.41 seeds [19.075521, 20.377604, 18.782552] ci [9.57, 30.82]
+a2c2_paper − a2c2 (старый вариант) [all 12] D4: +18.12 seeds [18.098958, 18.359375, 17.903646] ci [8.29, 29.55]
+a2c2_paper − a2c2 (старый вариант) [held-out 9] D1: +5.31 seeds [5.512153, 5.266204, 5.150463] ci [2.81, 8.21]
+a2c2_paper − a2c2 (старый вариант) [held-out 9] (2,2): +5.76 seeds [5.555556, 5.208333, 6.510417] ci [2.89, 8.96]
+a2c2_paper − a2c2 (старый вариант) [held-out 9] (2,6): +5.40 seeds [5.164931, 5.598958, 5.425347] ci [3.08, 8.07]
+a2c2_paper − a2c2 (старый вариант) [held-out 9] (3,3): +5.03 seeds [4.6875, 5.946181, 4.470486] ci [2.34, 8.22]
+a2c2_paper − a2c2 (старый вариант) [held-out 9] (3,4): +4.33 seeds [4.427083, 4.210069, 4.340278] ci [1.84, 7.15]
+a2c2_paper − a2c2 (старый вариант) [held-out 9] D3: +5.53 seeds [4.904514, 6.553819, 5.121528] ci [2.82, 8.52]
+a2c2_paper − a2c2 (старый вариант) [held-out 9] D4: +4.15 seeds [4.383681, 4.340278, 3.732639] ci [1.59, 7.13]
+a2c2_paper − a2c2 (старый вариант) [development 3] D1: +60.71 seeds [60.329861, 61.197917, 60.590278] ci [29.9, 86.5]
+a2c2_paper − a2c2 (старый вариант) [development 3] (2,2): +60.50 seeds [60.026042, 60.807292, 60.677083] ci [29.6, 85.89]
+a2c2_paper − a2c2 (старый вариант) [development 3] (2,6): +60.55 seeds [60.807292, 60.546875, 60.286458] ci [30.73, 86.46]
+a2c2_paper − a2c2 (старый вариант) [development 3] (3,3): +59.42 seeds [59.505208, 59.765625, 58.984375] ci [29.04, 84.68]
+a2c2_paper − a2c2 (старый вариант) [development 3] (3,4): +59.46 seeds [58.463542, 59.635417, 60.286458] ci [29.56, 84.64]
+a2c2_paper − a2c2 (старый вариант) [development 3] D3: +61.07 seeds [61.588542, 61.848958, 59.765625] ci [31.12, 87.72]
+a2c2_paper − a2c2 (старый вариант) [development 3] D4: +60.03 seeds [59.244792, 60.416667, 60.416667] ci [30.12, 87.15]
+a2c2_paper − naive [all 12] D1: +21.79 seeds [21.440972, 21.755642, 22.167969] ci [17.06, 26.71]
+a2c2_paper − naive [all 12] (2,2): +24.58 seeds [25.325521, 23.730469, 24.674479] ci [19.18, 29.95]
+a2c2_paper − naive [all 12] (2,6): +31.72 seeds [31.542969, 32.096354, 31.510417] ci [25.2, 38.4]
+a2c2_paper − naive [all 12] (3,3): +35.96 seeds [35.579427, 36.914062, 35.384115] ci [28.92, 43.36]
+a2c2_paper − naive [all 12] (3,4): +38.08 seeds [37.076823, 39.453125, 37.695312] ci [30.71, 45.61]
+a2c2_paper − naive [all 12] D3: +39.53 seeds [38.964844, 40.169271, 39.453125] ci [31.84, 47.29]
+a2c2_paper − naive [all 12] D4: +46.16 seeds [46.158854, 45.93099, 46.386719] ci [38.18, 54.16]
+a2c2_paper − naive [held-out 9] D1: +19.95 seeds [20.095486, 19.921875, 19.835069] ci [14.59, 25.45]
+a2c2_paper − naive [held-out 9] (2,2): +23.02 seeds [23.828125, 21.614583, 23.611111] ci [16.51, 29.54]
+a2c2_paper − naive [held-out 9] (2,6): +30.67 seeds [30.902778, 31.25, 29.861111] ci [23.93, 37.72]
+a2c2_paper − naive [held-out 9] (3,3): +34.16 seeds [34.288194, 35.112847, 33.072917] ci [26.2, 42.4]
+a2c2_paper − naive [held-out 9] (3,4): +37.43 seeds [36.935764, 38.888889, 36.458333] ci [29.6, 45.52]
+a2c2_paper − naive [held-out 9] D3: +39.24 seeds [38.585069, 39.930556, 39.192708] ci [31.51, 47.16]
+a2c2_paper − naive [held-out 9] D4: +44.99 seeds [45.616319, 44.53125, 44.835069] ci [36.5, 53.54]
+a2c2_paper − naive [development 3] D1: +27.30 seeds [25.477431, 27.256944, 29.166667] ci [18.37, 37.75]
+a2c2_paper − naive [development 3] (2,2): +29.25 seeds [29.817708, 30.078125, 27.864583] ci [21.57, 38.15]
+a2c2_paper − naive [development 3] (2,6): +34.85 seeds [33.463542, 34.635417, 36.458333] ci [20.05, 52.04]
+a2c2_paper − naive [development 3] (3,3): +41.36 seeds [39.453125, 42.317708, 42.317708] ci [27.56, 57.2]
+a2c2_paper − naive [development 3] (3,4): +40.02 seeds [37.5, 41.145833, 41.40625] ci [24.26, 58.46]
+a2c2_paper − naive [development 3] D3: +40.41 seeds [40.104167, 40.885417, 40.234375] ci [21.96, 61.72]
+a2c2_paper − naive [development 3] D4: +49.65 seeds [47.786458, 50.130208, 51.041667] ci [33.25, 68.49]
+strawman flag: False
+P-A1: {'all 12': {'D3': True, 'D4': True}, 'held-out 9': {'D3': True, 'D4': True}}
+P-A2: {'worlds/l/trampoline.json': True, 'worlds/l/mjc_walker.json': True, 'values': {'worlds/l/trampoline.json': {'a2c2_paper': 0.97265625, 'naive': 0.8229166666666666}, 'worlds/l/mjc_walker.json': {'a2c2_paper': 0.8706597222222222, 'naive': 0.39105902777777773}}}
+MSE check: {'worlds/l/grasp_easy.json': True, 'worlds/l/catapult.json': True, 'worlds/l/cartpole_thrust.json': True, 'worlds/l/hard_lunar_lander.json': True, 'worlds/l/mjc_half_cheetah.json': True, 'worlds/l/mjc_swimmer.json': True, 'worlds/l/mjc_walker.json': True, 'worlds/l/h17_unicycle.json': True, 'worlds/l/chain_lander.json': True, 'worlds/l/catcher_v3.json': True, 'worlds/l/trampoline.json': True, 'worlds/l/car_launch.json': True}
+=== a2c2_wide ===
+a2c2_wide − t3 [all 12] D1: +11.74 seeds [12.326389, 11.697049, 11.208767] ci [9.13, 14.45]
+a2c2_wide − t3 [all 12] (2,2): +4.60 seeds [4.85026, 4.720052, 4.231771] ci [2.59, 6.76]
+a2c2_wide − t3 [all 12] (2,6): +14.58 seeds [15.722656, 13.89974, 14.127604] ci [10.96, 18.29]
+a2c2_wide − t3 [all 12] (3,3): +10.18 seeds [9.049479, 9.960938, 11.523438] ci [7.87, 12.53]
+a2c2_wide − t3 [all 12] (3,4): +13.66 seeds [13.736979, 13.867188, 13.378906] ci [10.97, 16.41]
+a2c2_wide − t3 [all 12] D3: +15.95 seeds [15.527344, 16.24349, 16.080729] ci [12.6, 19.34]
+a2c2_wide − t3 [all 12] D4: +15.53 seeds [15.46224, 16.24349, 14.876302] ci [12.24, 18.93]
+a2c2_wide − t3 [held-out 9] D1: +10.64 seeds [11.241319, 10.431134, 10.257523] ci [7.33, 14.16]
+a2c2_wide − t3 [held-out 9] (2,2): +2.37 seeds [2.690972, 2.387153, 2.039931] ci [0.62, 4.01]
+a2c2_wide − t3 [held-out 9] (2,6): +12.33 seeds [14.105903, 10.9375, 11.935764] ci [8.17, 16.74]
+a2c2_wide − t3 [held-out 9] (3,3): +7.77 seeds [6.901042, 7.638889, 8.767361] ci [5.41, 10.4]
+a2c2_wide − t3 [held-out 9] (3,4): +11.14 seeds [11.545139, 10.546875, 11.328125] ci [8.2, 14.35]
+a2c2_wide − t3 [held-out 9] D3: +13.51 seeds [13.368056, 13.237847, 13.932292] ci [9.64, 17.69]
+a2c2_wide − t3 [held-out 9] D4: +12.70 seeds [12.239583, 13.671875, 12.196181] ci [9.27, 16.41]
+a2c2_wide − t3 [development 3] D1: +15.05 seeds [15.581597, 15.494792, 14.0625] ci [13.32, 16.67]
+a2c2_wide − t3 [development 3] (2,2): +11.28 seeds [11.328125, 11.71875, 10.807292] ci [6.99, 16.06]
+a2c2_wide − t3 [development 3] (2,6): +21.35 seeds [20.572917, 22.786458, 20.703125] ci [16.23, 26.91]
+a2c2_wide − t3 [development 3] (3,3): +17.40 seeds [15.494792, 16.927083, 19.791667] ci [15.32, 19.44]
+a2c2_wide − t3 [development 3] (3,4): +21.22 seeds [20.3125, 23.828125, 19.53125] ci [19.14, 23.44]
+a2c2_wide − t3 [development 3] D3: +23.26 seeds [22.005208, 25.260417, 22.526042] ci [20.88, 25.74]
+a2c2_wide − t3 [development 3] D4: +24.00 seeds [25.130208, 23.958333, 22.916667] ci [18.4, 29.21]
+a2c2_wide − realtime [all 12] D1: +11.82 seeds [11.697049, 12.66276, 11.08941] ci [9.2, 14.87]
+a2c2_wide − realtime [all 12] (2,2): +7.68 seeds [7.910156, 7.779948, 7.356771] ci [5.21, 10.29]
+a2c2_wide − realtime [all 12] (2,6): +18.52 seeds [19.401042, 18.652344, 17.513021] ci [13.95, 23.31]
+a2c2_wide − realtime [all 12] (3,3): +18.19 seeds [17.382812, 18.58724, 18.58724] ci [14.19, 22.42]
+a2c2_wide − realtime [all 12] (3,4): +22.75 seeds [22.330729, 23.014323, 22.916667] ci [17.82, 27.86]
+a2c2_wide − realtime [all 12] D3: +24.63 seeds [24.38151, 25.227865, 24.283854] ci [19.49, 29.92]
+a2c2_wide − realtime [all 12] D4: +31.75 seeds [31.575521, 32.19401, 31.477865] ci [25.42, 38.15]
+a2c2_wide − realtime [held-out 9] D1: +8.69 seeds [8.666088, 9.360532, 8.029514] ci [6.7, 10.77]
+a2c2_wide − realtime [held-out 9] (2,2): +5.50 seeds [5.598958, 6.206597, 4.6875] ci [2.76, 8.46]
+a2c2_wide − realtime [held-out 9] (2,6): +15.52 seeds [16.145833, 15.755208, 14.670139] ci [11.08, 20.3]
+a2c2_wide − realtime [held-out 9] (3,3): +16.67 seeds [16.666667, 16.927083, 16.40625] ci [12.17, 21.57]
+a2c2_wide − realtime [held-out 9] (3,4): +21.72 seeds [21.614583, 21.527778, 22.005208] ci [15.97, 27.97]
+a2c2_wide − realtime [held-out 9] D3: +23.48 seeds [23.4375, 23.697917, 23.307292] ci [17.61, 29.67]
+a2c2_wide − realtime [held-out 9] D4: +30.79 seeds [30.034722, 31.206597, 31.119792] ci [23.25, 38.64]
+a2c2_wide − realtime [development 3] D1: +21.21 seeds [20.789931, 22.569444, 20.269097] ci [14.92, 28.31]
+a2c2_wide − realtime [development 3] (2,2): +14.24 seeds [14.84375, 12.5, 15.364583] ci [11.63, 16.67]
+a2c2_wide − realtime [development 3] (2,6): +27.52 seeds [29.166667, 27.34375, 26.041667] ci [17.84, 38.72]
+a2c2_wide − realtime [development 3] (3,3): +22.74 seeds [19.53125, 23.567708, 25.130208] ci [15.84, 30.47]
+a2c2_wide − realtime [development 3] (3,4): +25.87 seeds [24.479167, 27.473958, 25.651042] ci [18.4, 34.9]
+a2c2_wide − realtime [development 3] D3: +28.08 seeds [27.213542, 29.817708, 27.213542] ci [19.31, 38.24]
+a2c2_wide − realtime [development 3] D4: +34.64 seeds [36.197917, 35.15625, 32.552083] ci [25.52, 44.84]
+a2c2_wide − a2c2_distill (неравное по сети) [all 12] D1: +7.06 seeds [6.846788, 7.389323, 6.933594] ci [2.77, 11.91]
+a2c2_wide − a2c2_distill (неравное по сети) [all 12] (2,2): +6.74 seeds [7.096354, 6.770833, 6.347656] ci [2.45, 11.52]
+a2c2_wide − a2c2_distill (неравное по сети) [all 12] (2,6): +7.15 seeds [7.356771, 7.356771, 6.738281] ci [1.74, 13.51]
+a2c2_wide − a2c2_distill (неравное по сети) [all 12] (3,3): +8.59 seeds [8.170573, 9.114583, 8.496094] ci [3.92, 14.18]
+a2c2_wide − a2c2_distill (неравное по сети) [all 12] (3,4): +9.93 seeds [9.472656, 9.53776, 10.77474] ci [4.8, 15.7]
+a2c2_wide − a2c2_distill (неравное по сети) [all 12] D3: +11.24 seeds [11.946615, 11.653646, 10.123698] ci [5.29, 18.06]
+a2c2_wide − a2c2_distill (неравное по сети) [all 12] D4: +12.87 seeds [11.914062, 13.671875, 13.020833] ci [6.55, 20.11]
+a2c2_wide − a2c2_distill (неравное по сети) [held-out 9] D1: +3.32 seeds [3.356481, 3.298611, 3.313079] ci [-0.04, 6.99]
+a2c2_wide − a2c2_distill (неравное по сети) [held-out 9] (2,2): +1.29 seeds [1.822917, 1.692708, 0.347222] ci [-1.37, 3.5]
+a2c2_wide − a2c2_distill (неравное по сети) [held-out 9] (2,6): +1.59 seeds [2.256944, 1.128472, 1.388889] ci [-1.68, 4.67]
+a2c2_wide − a2c2_distill (неравное по сети) [held-out 9] (3,3): +2.30 seeds [1.996528, 2.213542, 2.690972] ci [0.56, 3.95]
+a2c2_wide − a2c2_distill (неравное по сети) [held-out 9] (3,4): +4.62 seeds [4.730903, 3.602431, 5.512153] ci [0.98, 8.72]
+a2c2_wide − a2c2_distill (неравное по сети) [held-out 9] D3: +6.28 seeds [7.378472, 6.814236, 4.644097] ci [1.29, 12.25]
+a2c2_wide − a2c2_distill (неравное по сети) [held-out 9] D4: +7.73 seeds [6.640625, 8.767361, 7.769097] ci [2.47, 14.27]
+a2c2_wide − a2c2_distill (неравное по сети) [development 3] D1: +18.26 seeds [17.317708, 19.661458, 17.795139] ci [6.8, 31.41]
+a2c2_wide − a2c2_distill (неравное по сети) [development 3] (2,2): +23.09 seeds [22.916667, 22.005208, 24.348958] ci [11.68, 34.2]
+a2c2_wide − a2c2_distill (неравное по сети) [development 3] (2,6): +23.83 seeds [22.65625, 26.041667, 22.786458] ci [7.68, 42.45]
+a2c2_wide − a2c2_distill (неравное по сети) [development 3] (3,3): +27.47 seeds [26.692708, 29.817708, 25.911458] ci [13.11, 41.71]
+a2c2_wide − a2c2_distill (неравное по сети) [development 3] (3,4): +25.87 seeds [23.697917, 27.34375, 26.5625] ci [11.68, 40.45]
+a2c2_wide − a2c2_distill (неравное по сети) [development 3] D3: +26.13 seeds [25.651042, 26.171875, 26.5625] ci [11.02, 42.41]
+a2c2_wide − a2c2_distill (неравное по сети) [development 3] D4: +28.30 seeds [27.734375, 28.385417, 28.776042] ci [12.24, 45.79]
+a2c2_wide − a2c2 (старый вариант) [all 12] D1: +16.59 seeds [16.851128, 16.861979, 16.059028] ci [6.86, 27.89]
+a2c2_wide − a2c2 (старый вариант) [all 12] (2,2): +15.57 seeds [14.84375, 15.364583, 16.503906] ci [5.43, 27.41]
+a2c2_wide − a2c2 (старый вариант) [all 12] (2,6): +16.28 seeds [17.089844, 16.308594, 15.429688] ci [6.12, 27.97]
+a2c2_wide − a2c2 (старый вариант) [all 12] (3,3): +16.46 seeds [15.983073, 17.1875, 16.210938] ci [6.67, 27.81]
+a2c2_wide − a2c2 (старый вариант) [all 12] (3,4): +16.19 seeds [16.666667, 15.722656, 16.178385] ci [6.61, 27.41]
+a2c2_wide − a2c2 (старый вариант) [all 12] D3: +16.88 seeds [16.341146, 17.838542, 16.471354] ci [7.24, 28.11]
+a2c2_wide − a2c2 (старый вариант) [all 12] D4: +16.59 seeds [16.341146, 17.610677, 15.820312] ci [6.86, 27.8]
+a2c2_wide − a2c2 (старый вариант) [held-out 9] D1: +2.50 seeds [2.879051, 2.488426, 2.141204] ci [0.33, 4.82]
+a2c2_wide − a2c2 (старый вариант) [held-out 9] (2,2): +0.87 seeds [0.086806, 0.651042, 1.866319] ci [-2.34, 3.88]
+a2c2_wide − a2c2 (старый вариант) [held-out 9] (2,6): +1.61 seeds [2.734375, 1.345486, 0.737847] ci [-1.62, 4.53]
+a2c2_wide − a2c2 (старый вариант) [held-out 9] (3,3): +2.31 seeds [1.822917, 2.994792, 2.126736] ci [0.01, 4.8]
+a2c2_wide − a2c2 (старый вариант) [held-out 9] (3,4): +2.34 seeds [2.907986, 1.5625, 2.560764] ci [0.07, 4.72]
+a2c2_wide − a2c2 (старый вариант) [held-out 9] D3: +2.88 seeds [2.387153, 3.949653, 2.300347] ci [0.85, 4.98]
+a2c2_wide − a2c2 (старый вариант) [held-out 9] D4: +2.46 seeds [2.256944, 3.428819, 1.692708] ci [0.58, 4.7]
+a2c2_wide − a2c2 (старый вариант) [development 3] D1: +58.85 seeds [58.767361, 59.982639, 57.8125] ci [28.96, 84.26]
+a2c2_wide − a2c2 (старый вариант) [development 3] (2,2): +59.68 seeds [59.114583, 59.505208, 60.416667] ci [29.17, 85.77]
+a2c2_wide − a2c2 (старый вариант) [development 3] (2,6): +60.29 seeds [60.15625, 61.197917, 59.505208] ci [30.16, 85.5]
+a2c2_wide − a2c2 (старый вариант) [development 3] (3,3): +58.90 seeds [58.463542, 59.765625, 58.463542] ci [28.95, 84.42]
+a2c2_wide − a2c2 (старый вариант) [development 3] (3,4): +57.73 seeds [57.942708, 58.203125, 57.03125] ci [28.17, 82.56]
+a2c2_wide − a2c2 (старый вариант) [development 3] D3: +58.90 seeds [58.203125, 59.505208, 58.984375] ci [29.34, 83.64]
+a2c2_wide − a2c2 (старый вариант) [development 3] D4: +58.98 seeds [58.59375, 60.15625, 58.203125] ci [29.34, 84.33]
+a2c2_wide − naive [all 12] D1: +19.22 seeds [19.075521, 19.36849, 19.21658] ci [14.8, 23.74]
+a2c2_wide − naive [all 12] (2,2): +20.70 seeds [20.996094, 19.986979, 21.126302] ci [16.05, 25.39]
+a2c2_wide − naive [all 12] (2,6): +28.81 seeds [29.557292, 29.06901, 27.799479] ci [22.19, 35.63]
+a2c2_wide − naive [all 12] (3,3): +33.79 seeds [33.170573, 34.700521, 33.496094] ci [26.7, 41.1]
+a2c2_wide − naive [all 12] (3,4): +36.15 seeds [35.807292, 37.109375, 35.546875] ci [29.0, 43.5]
+a2c2_wide − naive [all 12] D3: +37.00 seeds [36.230469, 37.630208, 37.141927] ci [29.69, 44.34]
+a2c2_wide − naive [all 12] D4: +44.63 seeds [44.401042, 45.182292, 44.303385] ci [37.03, 52.34]
+a2c2_wide − naive [held-out 9] D1: +17.14 seeds [17.462384, 17.144097, 16.82581] ci [12.17, 22.42]
+a2c2_wide − naive [held-out 9] (2,2): +18.13 seeds [18.359375, 17.057292, 18.967014] ci [12.67, 23.76]
+a2c2_wide − naive [held-out 9] (2,6): +26.88 seeds [28.472222, 26.996528, 25.173611] ci [19.73, 34.52]
+a2c2_wide − naive [held-out 9] (3,3): +31.44 seeds [31.423611, 32.161458, 30.729167] ci [23.51, 39.95]
+a2c2_wide − naive [held-out 9] (3,4): +35.45 seeds [35.416667, 36.241319, 34.678819] ci [27.52, 43.94]
+a2c2_wide − naive [held-out 9] D3: +36.59 seeds [36.067708, 37.326389, 36.371528] ci [28.67, 44.86]
+a2c2_wide − naive [held-out 9] D4: +43.30 seeds [43.489583, 43.619792, 42.795139] ci [34.75, 52.3]
+a2c2_wide − naive [development 3] D1: +25.45 seeds [23.914931, 26.041667, 26.388889] ci [18.16, 33.91]
+a2c2_wide − naive [development 3] (2,2): +28.43 seeds [28.90625, 28.776042, 27.604167] ci [22.13, 35.76]
+a2c2_wide − naive [development 3] (2,6): +34.59 seeds [32.8125, 35.286458, 35.677083] ci [21.14, 50.39]
+a2c2_wide − naive [development 3] (3,3): +40.84 seeds [38.411458, 42.317708, 41.796875] ci [28.34, 55.43]
+a2c2_wide − naive [development 3] (3,4): +38.28 seeds [36.979167, 39.713542, 38.151042] ci [24.74, 53.99]
+a2c2_wide − naive [development 3] D3: +38.24 seeds [36.71875, 38.541667, 39.453125] ci [23.13, 55.47]
+a2c2_wide − naive [development 3] D4: +48.61 seeds [47.135417, 49.869792, 48.828125] ci [35.29, 63.89]
+a2c2_wide − a2c2_paper [all 12] D1: -2.57 seeds [-2.365451, -2.387153, -2.951389] ci [-4.57, -0.89]
+a2c2_wide − a2c2_paper [all 12] (2,2): -3.87 seeds [-4.329427, -3.74349, -3.548177] ci [-7.32, -1.12]
+a2c2_wide − a2c2_paper [all 12] (2,6): -2.91 seeds [-1.985677, -3.027344, -3.710938] ci [-5.81, -0.62]
+a2c2_wide − a2c2_paper [all 12] (3,3): -2.17 seeds [-2.408854, -2.213542, -1.888021] ci [-4.18, -0.52]
+a2c2_wide − a2c2_paper [all 12] (3,4): -1.92 seeds [-1.269531, -2.34375, -2.148438] ci [-3.93, -0.22]
+a2c2_wide − a2c2_paper [all 12] D3: -2.53 seeds [-2.734375, -2.539062, -2.311198] ci [-4.73, -0.61]
+a2c2_wide − a2c2_paper [all 12] D4: -1.53 seeds [-1.757812, -0.748698, -2.083333] ci [-3.2, -0.04]
+a2c2_wide − a2c2_paper [held-out 9] D1: -2.81 seeds [-2.633102, -2.777778, -3.009259] ci [-5.37, -0.66]
+a2c2_wide − a2c2_paper [held-out 9] (2,2): -4.89 seeds [-5.46875, -4.557292, -4.644097] ci [-9.33, -1.26]
+a2c2_wide − a2c2_paper [held-out 9] (2,6): -3.79 seeds [-2.430556, -4.253472, -4.6875] ci [-7.49, -0.82]
+a2c2_wide − a2c2_paper [held-out 9] (3,3): -2.72 seeds [-2.864583, -2.951389, -2.34375] ci [-5.24, -0.55]
+a2c2_wide − a2c2_paper [held-out 9] (3,4): -1.98 seeds [-1.519097, -2.647569, -1.779514] ci [-4.51, 0.14]
+a2c2_wide − a2c2_paper [held-out 9] D3: -2.65 seeds [-2.517361, -2.604167, -2.821181] ci [-5.22, -0.43]
+a2c2_wide − a2c2_paper [held-out 9] D4: -1.69 seeds [-2.126736, -0.911458, -2.039931] ci [-3.53, -0.09]
+a2c2_wide − a2c2_paper [development 3] D1: -1.85 seeds [-1.5625, -1.215278, -2.777778] ci [-4.02, -0.04]
+a2c2_wide − a2c2_paper [development 3] (2,2): -0.82 seeds [-0.911458, -1.302083, -0.260417] ci [-2.47, 0.61]
+a2c2_wide − a2c2_paper [development 3] (2,6): -0.26 seeds [-0.651042, 0.651042, -0.78125] ci [-2.69, 1.95]
+a2c2_wide − a2c2_paper [development 3] (3,3): -0.52 seeds [-1.041667, 0.0, -0.520833] ci [-1.82, 0.65]
+a2c2_wide − a2c2_paper [development 3] (3,4): -1.74 seeds [-0.520833, -1.432292, -3.255208] ci [-4.6, 0.65]
+a2c2_wide − a2c2_paper [development 3] D3: -2.17 seeds [-3.385417, -2.34375, -0.78125] ci [-6.25, 1.56]
+a2c2_wide − a2c2_paper [development 3] D4: -1.04 seeds [-0.651042, -0.260417, -2.213542] ci [-4.77, 2.21]
+strawman flag: False
+P-A1: {'all 12': {'D3': True, 'D4': True}, 'held-out 9': {'D3': True, 'D4': True}}
+P-A2: {'worlds/l/trampoline.json': True, 'worlds/l/mjc_walker.json': True, 'values': {'worlds/l/trampoline.json': {'a2c2_wide': 0.9748263888888888, 'naive': 0.8229166666666666}, 'worlds/l/mjc_walker.json': {'a2c2_wide': 0.8125, 'naive': 0.39105902777777773}}}
+MSE check: {'worlds/l/grasp_easy.json': True, 'worlds/l/catapult.json': True, 'worlds/l/cartpole_thrust.json': True, 'worlds/l/hard_lunar_lander.json': True, 'worlds/l/mjc_half_cheetah.json': True, 'worlds/l/mjc_swimmer.json': True, 'worlds/l/mjc_walker.json': True, 'worlds/l/h17_unicycle.json': True, 'worlds/l/chain_lander.json': True, 'worlds/l/catcher_v3.json': True, 'worlds/l/trampoline.json': True, 'worlds/l/car_launch.json': True}
+missing: {'a2c2_paper': 0, 'a2c2_wide': 0}
+per level (development levels flagged):
+                                 a2c2_paper     t3  realtime  a2c2_distill   a2c2  naive     variant slice  development  a2c2_wide
+level                                                                                                                             
+worlds/l/car_launch.json              0.989  0.872     0.851         0.981  0.988  0.799  a2c2_paper    D1         True        NaN
+worlds/l/cartpole_thrust.json         0.999  0.982     0.981         0.988  1.000  0.944  a2c2_paper    D1        False        NaN
+worlds/l/catapult.json                0.790  0.395     0.493         0.729  0.675  0.439  a2c2_paper    D1        False        NaN
+worlds/l/catcher_v3.json              0.999  0.793     0.837         0.970  0.980  0.568  a2c2_paper    D1        False        NaN
+worlds/l/chain_lander.json            0.956  0.944     0.936         0.944  0.948  0.942  a2c2_paper    D1        False        NaN
+worlds/l/grasp_easy.json              0.996  0.885     0.880         0.741  0.957  0.650  a2c2_paper    D1        False        NaN
+worlds/l/h17_unicycle.json            1.000  0.729     0.922         0.992  0.989  0.831  a2c2_paper    D1        False        NaN
+worlds/l/hard_lunar_lander.json       0.987  0.946     0.940         0.942  0.937  0.934  a2c2_paper    D1        False        NaN
+worlds/l/mjc_half_cheetah.json        0.974  0.875     0.856         0.859  0.741  0.857  a2c2_paper    D1        False        NaN
+worlds/l/mjc_swimmer.json             0.938  0.880     0.758         0.921  0.934  0.678  a2c2_paper    D1        False        NaN
+worlds/l/mjc_walker.json              0.871  0.639     0.458         0.366  0.021  0.391  a2c2_paper    D1         True        NaN
+worlds/l/trampoline.json              0.973  0.814     0.831         0.881  0.001  0.823  a2c2_paper    D1         True        NaN
+worlds/l/car_launch.json              0.988  0.788     0.799         0.980  0.977  0.755  a2c2_paper    D3         True        NaN
+worlds/l/cartpole_thrust.json         1.000  0.945     0.605         0.986  0.999  0.470  a2c2_paper    D3        False        NaN
+worlds/l/catapult.json                0.777  0.298     0.387         0.701  0.617  0.323  a2c2_paper    D3        False        NaN
+worlds/l/catcher_v3.json              0.997  0.729     0.539         0.945  0.986  0.323  a2c2_paper    D3        False        NaN
+worlds/l/chain_lander.json            0.956  0.953     0.951         0.947  0.927  0.930  a2c2_paper    D3        False        NaN
+worlds/l/grasp_easy.json              0.992  0.910     0.884         0.542  0.964  0.602  a2c2_paper    D3        False        NaN
+worlds/l/h17_unicycle.json            1.000  0.715     0.717         0.988  0.990  0.730  a2c2_paper    D3        False        NaN
+worlds/l/hard_lunar_lander.json       0.984  0.928     0.850         0.947  0.922  0.625  a2c2_paper    D3        False        NaN
+worlds/l/mjc_half_cheetah.json        0.973  0.867     0.857         0.833  0.760  0.824  a2c2_paper    D3        False        NaN
+worlds/l/mjc_swimmer.json             0.927  0.806     0.465         0.915  0.945  0.249  a2c2_paper    D3        False        NaN
+worlds/l/mjc_walker.json              0.882  0.512     0.298         0.190  0.008  0.053  a2c2_paper    D3         True        NaN
+worlds/l/trampoline.json              0.947  0.754     0.811         0.797  0.000  0.796  a2c2_paper    D3         True        NaN
+worlds/l/car_launch.json              0.987  0.863     0.688         0.975  0.984  0.592  a2c2_paper    D4         True        NaN
+worlds/l/cartpole_thrust.json         0.999  0.927     0.516         0.970  1.000  0.405  a2c2_paper    D4        False        NaN
+worlds/l/catapult.json                0.758  0.316     0.414         0.677  0.656  0.294  a2c2_paper    D4        False        NaN
+worlds/l/catcher_v3.json              0.996  0.844     0.451         0.943  0.990  0.240  a2c2_paper    D4        False        NaN
+worlds/l/chain_lander.json            0.952  0.941     0.936         0.957  0.957  0.935  a2c2_paper    D4        False        NaN
+worlds/l/grasp_easy.json              0.996  0.908     0.882         0.482  0.983  0.591  a2c2_paper    D4        False        NaN
+worlds/l/h17_unicycle.json            1.000  0.771     0.577         0.983  0.986  0.681  a2c2_paper    D4        False        NaN
+worlds/l/hard_lunar_lander.json       0.987  0.924     0.747         0.932  0.938  0.527  a2c2_paper    D4        False        NaN
+worlds/l/mjc_half_cheetah.json        0.957  0.871     0.815         0.845  0.734  0.706  a2c2_paper    D4        False        NaN
+worlds/l/mjc_swimmer.json             0.913  0.759     0.297         0.921  0.940  0.129  a2c2_paper    D4        False        NaN
+worlds/l/mjc_walker.json              0.884  0.477     0.263         0.169  0.018  0.017  a2c2_paper    D4         True        NaN
+worlds/l/trampoline.json              0.939  0.719     0.789         0.785  0.007  0.711  a2c2_paper    D4         True        NaN
+worlds/l/car_launch.json                NaN  0.872     0.851         0.981  0.988  0.799   a2c2_wide    D1         True      0.989
+worlds/l/cartpole_thrust.json           NaN  0.982     0.981         0.988  1.000  0.944   a2c2_wide    D1        False      0.999
+worlds/l/catapult.json                  NaN  0.395     0.493         0.729  0.675  0.439   a2c2_wide    D1        False      0.597
+worlds/l/catcher_v3.json                NaN  0.793     0.837         0.970  0.980  0.568   a2c2_wide    D1        False      0.998
+worlds/l/chain_lander.json              NaN  0.944     0.936         0.944  0.948  0.942   a2c2_wide    D1        False      0.975
+worlds/l/grasp_easy.json                NaN  0.885     0.880         0.741  0.957  0.650   a2c2_wide    D1        False      0.994
+worlds/l/h17_unicycle.json              NaN  0.729     0.922         0.992  0.989  0.831   a2c2_wide    D1        False      1.000
+worlds/l/hard_lunar_lander.json         NaN  0.946     0.940         0.942  0.937  0.934   a2c2_wide    D1        False      0.984
+worlds/l/mjc_half_cheetah.json          NaN  0.875     0.856         0.859  0.741  0.857   a2c2_wide    D1        False      0.905
+worlds/l/mjc_swimmer.json               NaN  0.880     0.758         0.921  0.934  0.678   a2c2_wide    D1        False      0.934
+worlds/l/mjc_walker.json                NaN  0.639     0.458         0.366  0.021  0.391   a2c2_wide    D1         True      0.812
+worlds/l/trampoline.json                NaN  0.814     0.831         0.881  0.001  0.823   a2c2_wide    D1         True      0.975
+worlds/l/car_launch.json                NaN  0.788     0.799         0.980  0.977  0.755   a2c2_wide    D3         True      0.990
+worlds/l/cartpole_thrust.json           NaN  0.945     0.605         0.986  0.999  0.470   a2c2_wide    D3        False      0.999
+worlds/l/catapult.json                  NaN  0.298     0.387         0.701  0.617  0.323   a2c2_wide    D3        False      0.589
+worlds/l/catcher_v3.json                NaN  0.729     0.539         0.945  0.986  0.323   a2c2_wide    D3        False      0.995
+worlds/l/chain_lander.json              NaN  0.953     0.951         0.947  0.927  0.930   a2c2_wide    D3        False      0.979
+worlds/l/grasp_easy.json                NaN  0.910     0.884         0.542  0.964  0.602   a2c2_wide    D3        False      0.993
+worlds/l/h17_unicycle.json              NaN  0.715     0.717         0.988  0.990  0.730   a2c2_wide    D3        False      1.000
+worlds/l/hard_lunar_lander.json         NaN  0.928     0.850         0.947  0.922  0.625   a2c2_wide    D3        False      0.992
+worlds/l/mjc_half_cheetah.json          NaN  0.867     0.857         0.833  0.760  0.824   a2c2_wide    D3        False      0.901
+worlds/l/mjc_swimmer.json               NaN  0.806     0.465         0.915  0.945  0.249   a2c2_wide    D3        False      0.921
+worlds/l/mjc_walker.json                NaN  0.512     0.298         0.190  0.008  0.053   a2c2_wide    D3         True      0.779
+worlds/l/trampoline.json                NaN  0.754     0.811         0.797  0.000  0.796   a2c2_wide    D3         True      0.983
+worlds/l/car_launch.json                NaN  0.863     0.688         0.975  0.984  0.592   a2c2_wide    D4         True      0.993
+worlds/l/cartpole_thrust.json           NaN  0.927     0.516         0.970  1.000  0.405   a2c2_wide    D4        False      0.999
+worlds/l/catapult.json                  NaN  0.316     0.414         0.677  0.656  0.294   a2c2_wide    D4        False      0.632
+worlds/l/catcher_v3.json                NaN  0.844     0.451         0.943  0.990  0.240   a2c2_wide    D4        False      0.993
+worlds/l/chain_lander.json              NaN  0.941     0.936         0.957  0.957  0.935   a2c2_wide    D4        False      0.982
+worlds/l/grasp_easy.json                NaN  0.908     0.882         0.482  0.983  0.591   a2c2_wide    D4        False      0.992
+worlds/l/h17_unicycle.json              NaN  0.771     0.577         0.983  0.986  0.681   a2c2_wide    D4        False      1.000
+worlds/l/hard_lunar_lander.json         NaN  0.924     0.747         0.932  0.938  0.527   a2c2_wide    D4        False      0.979
+worlds/l/mjc_half_cheetah.json          NaN  0.871     0.815         0.845  0.734  0.706   a2c2_wide    D4        False      0.900
+worlds/l/mjc_swimmer.json               NaN  0.759     0.297         0.921  0.940  0.129   a2c2_wide    D4        False      0.928
+worlds/l/mjc_walker.json                NaN  0.477     0.263         0.169  0.018  0.017   a2c2_wide    D4         True      0.803
+worlds/l/trampoline.json                NaN  0.719     0.789         0.785  0.007  0.711   a2c2_wide    D4         True      0.982
