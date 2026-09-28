@@ -144,7 +144,7 @@ class Agent:
     plan's observation. G adds e = K_p (U - E), |e| <= |U| / T_ramp, converted to action units by G_POS.
     """
 
-    METHODS = ("none", "T0", "G", "GT", "PPC", "Gpost", "GJ")
+    METHODS = ("none", "T0", "G", "GT", "PPC", "PPC9", "Gpost", "GJ")
 
     def __init__(self, method, s, d, t_ramp=5, k_p=1.0):
         assert method in self.METHODS, method
@@ -156,7 +156,7 @@ class Agent:
         self.grasp_started = False
         # G engaged at least once (|U| > EPS), even if clipping sent nothing (report: false triggers in control)
         self.g_on = False
-        self.ppc_next, self.ppc_off, self._ppc_t = math.inf, {}, None  # _ppc_t: last step PPC measured
+        self.ppc_next, self.ppc_off = math.inf, {}
         self.j_corr, self.o_raw = None, {}  # GJ: callable(t, k) -> J_k (o_t - o_hat_k); raw states by step
 
     def on_new_chunk(self):
@@ -172,10 +172,12 @@ class Agent:
         return self.p_hist[t] - self.p_hist[self.sched.t_obs]
 
     def trigger(self, t):
-        """An unscheduled brain call at step t (T0, the T switch of GT, PPC's shorter horizon)."""
+        """An unscheduled brain call at step t (T0, the T switch of GT, PPC's shorter horizon).
+        Call exactly once per step, after observe/arrive and before act: PPC measures velocity and plans its
+        offsets here."""
         if self.grasp_started or self.sched.chunk is None:
             return False
-        if self.method == "PPC":
+        if self.method in ("PPC", "PPC9"):
             self._ppc_measure(t)
             return t >= self.ppc_next
         u = np.linalg.norm(self.unknown_shift(t))
@@ -192,7 +194,7 @@ class Agent:
                 a = np.clip(a + np.clip(self.j_corr(t, t - self.sched.t_obs), -1, 1), -1, 1)
             if self.method in ("G", "GT", "Gpost", "GJ"):
                 a = self._g(t, a)
-            if self.method == "PPC":
+            if self.method in ("PPC", "PPC9"):
                 a = self._ppc(t, a)
         if a[6] > 0:
             self.grasp_started = True
@@ -219,21 +221,25 @@ class Agent:
         through the execution horizon K_exec (the next call at t_obs + K_exec); the plan's steps are not scaled.
         Path: offsets (1 - F_{2k+1}/F_{2K+1}) v_perp for steps t..t+K-1, v_perp against the clipped plan step,
         re-planned at each measurement (the latest one wins) and cleared at a new chunk. No near-object reset
-        (the paper's reset only clears the latch) and no 2-EMA latch stabiliser."""
+        (the paper's reset only clears the latch) and no 2-EMA latch stabiliser.
+        PPC9: App. A.9 variant (profile over K_exec) — report-only row on the smooth-motion set; a still
+        measurement (|v| <= PPC_V_MIN) clears its pending offsets, so the latest measurement always wins."""
         if t - self.sched.t_obs >= len(self.sched.chunk):
             return  # the chunk is used up; a new call is due at this step and on_new_chunk clears the offsets
-        if t == self._ppc_t or t - 1 not in self.p_hist:
+        if t - 1 not in self.p_hist:
             return
-        self._ppc_t = t
         v = self.p_hist[t] - self.p_hist[t - 1]
         if np.linalg.norm(v) <= PPC_V_MIN:
+            if self.method == "PPC9":
+                self.ppc_off = {}  # else a K_exec-long tail would survive a jump
             return
         dp = G_POS * np.clip(self.sched.action(t)[:3], -1, 1)
         _, k_exec = ppc_pace(v, dp, self.sched.s)
         self.ppc_next = min(self.ppc_next, self.sched.t_obs + k_exec)
         ndp = np.linalg.norm(dp)
         v_perp = v - (v @ dp) / ndp**2 * dp if ndp > 1e-9 else v
-        self.ppc_off = {t + j: w * v_perp for j, w in enumerate(ppc_profile(PPC_K))}
+        k = k_exec if self.method == "PPC9" else PPC_K
+        self.ppc_off = {t + j: w * v_perp for j, w in enumerate(ppc_profile(k))}
 
     def _ppc(self, t, a):
         """Our PPC path: this step's planned offset on top of the clipped plan action (as G does)."""

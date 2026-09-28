@@ -311,8 +311,8 @@ def test_ppc_fibonacci_profile_and_pace():
     assert k_exec == 50  # moving against the plan: no pace change
 
 
-def _ppc_agent(p0, x=np.zeros(3)):  # PPC agent at step 0 with a chunk moving the arm +x (action 0.7)
-    ag = orx.Agent("PPC", 50, 0)
+def _ppc_agent(p0, x=np.zeros(3), method="PPC"):  # a PPC agent at step 0 with a chunk moving the arm +x (0.7)
+    ag = orx.Agent(method, 50, 0)
     ag.observe(0, x, p0)
     ag.sched.issue(0, np.tile([0.7, 0, 0, 0, 0, 0, -1.0], (50, 1)))
     ag.sched.arrive(0)
@@ -327,7 +327,7 @@ def test_ppc_calls_earlier_and_offsets_sideways():
     ag.observe(1, x, p + np.array([0.02, 0.02, 0.0]))  # a jump with a component along the plan and across it
     ag.trigger(1)
     a = ag.act(1, ag.sched.action(1))
-    assert ag.ppc_next < 50 and a[1] > 0  # an earlier call and a sideways offset toward +y
+    assert ag.ppc_next == 14 and a[1] > 0  # an earlier call (ceil(50 / alpha*), alpha* = 1 + 0.02 / 0.0077)
     assert ag.trigger(ag.ppc_next)
 
 
@@ -388,3 +388,24 @@ def test_ppc_does_not_read_past_the_chunk_at_the_scheduled_call():
                 ag.on_new_chunk()
         ag.act(t, ag.sched.action(t))
     assert ag.sched.n_sched == 2
+
+
+def test_ppc9_profile_over_k_exec_under_constant_sideways_motion():
+    x, p = np.zeros(3), np.array([0.10, 0.0, 0.0])
+    ag = _ppc_agent(p, x, "PPC9")
+    for t in (1, 2, 3, 4):  # +2 mm/step across the plan: alpha* = 1, K_exec = s = 50
+        ag.observe(t, x, p + np.array([0.0, 0.002 * t, 0.0]))
+        ag.trigger(t)
+        a = ag.act(t, ag.sched.action(t))
+        assert a[1] == pytest.approx(orx.ppc_profile(50)[0] * 0.002 / orx.G_POS)  # (1 - F_1 / F_101) v_perp
+
+
+def test_ppc9_still_object_clears_the_tail_of_a_jump():
+    x, p = np.zeros(3), np.array([0.10, 0.0, 0.0])
+    ag = _ppc_agent(p, x, "PPC9")
+    ag.observe(1, x, p + np.array([0.0, 0.02, 0.0]))  # a single jump
+    ag.trigger(1)
+    assert ag.act(1, ag.sched.action(1))[1] > 0
+    ag.observe(2, x, p + np.array([0.0, 0.02, 0.0]))  # then still
+    ag.trigger(2)
+    assert np.array_equal(ag.act(2, ag.sched.action(2)), ag.sched.action(2))
