@@ -8,11 +8,14 @@ Pod: MUJOCO_GL=egl ... --vector async --n-envs 16 --device cuda
 
 import argparse
 import json
+import os
 import sys
 import time
+import traceback
 from pathlib import Path
 
 import gymnasium as gym
+import mujoco
 import numpy as np
 import torch
 
@@ -58,13 +61,15 @@ if Path(args.out).exists():
     if text and not text.endswith("\n"):  # a half-written last line: cut it, or the next record is glued onto it
         print(f"warning: dropping a half-written last line of {args.out}: {text[text.rfind(chr(10)) + 1:][:80]!r}", flush=True)
         text = text[: text.rfind("\n") + 1]
-        Path(args.out).write_text(text)
+        os.truncate(args.out, len(text.encode()))
     for line in text.splitlines():
         try:
             r = json.loads(line)
         except json.JSONDecodeError:
             print(f"warning: skipping a malformed line in {args.out}: {line[:80]!r}", flush=True)
             continue
+        assert (r["t_ramp"], r["k_p"]) == (args.t_ramp, args.k_p), \
+            f"{args.out} was written with other coefficients: t_ramp={r['t_ramp']}, k_p={r['k_p']}"
         done.add((r["suite"], r["task"], r["init"], r["kind"], r["cell"], r["method"]))
 
 cfg = PreTrainedConfig.from_pretrained(args.policy)
@@ -106,6 +111,8 @@ class ShiftEnv(LiberoEnv):
         name, _, _ = self._target()
         info["obj_pos"] = np.array(e.sim.data.body_xpos[e.obj_body_id[name]])
         info["eef_pos"] = np.array(e.sim.data.site_xpos[e.robots[0].eef_site_id])
+        # MuJoCo resets the state silently on a bad acceleration; the counter lives since the (hard) reset
+        info["bad_qacc"] = int(e.sim.data._data.warning[mujoco.mjtWarning.mjWARN_BADQACC].number)
         return info
 
     def reset(self, seed=None, **kw):
@@ -136,7 +143,8 @@ def make_vec(suite, task):
                             obs_type="pixels_agent_pos", observation_width=360, observation_height=360)
            for _ in range(args.n_envs)]
     kw = {"autoreset_mode": gym.vector.AutoresetMode.DISABLED}
-    return gym.vector.AsyncVectorEnv(fns, **kw) if args.vector == "async" else gym.vector.SyncVectorEnv(fns, **kw)
+    # fork: the env factories are closures in __main__, and spawn/forkserver would re-run this script per worker
+    return gym.vector.AsyncVectorEnv(fns, context="fork", **kw) if args.vector == "async" else gym.vector.SyncVectorEnv(fns, **kw)
 
 
 def raw_state(obs, i):
@@ -147,24 +155,29 @@ def raw_state(obs, i):
     return np.concatenate([rs["eef"]["pos"][i], aa, rs["gripper"]["qpos"][i]])
 
 
-def brain(vec, obs, idx, noises, j_idx=()):
-    """Raw-unit chunks (len(idx), H, 7) for the envs in idx, each with its own fixed noise; for envs in j_idx also
-    the raw J by state at every chunk position, (H, 7, 8) (GJ row, CUDA/CPU only)."""
-    b = env_pre(preprocess_observation(obs))
-    task = vec.call("task_description")
-    sub = pre({k: v[idx] for k, v in b.items() if torch.is_tensor(v)} | {"task": [task[i] for i in idx]})
+def rows(x, idx):
+    """The rows idx of a (nested) batched observation, as copies."""
+    return {k: rows(v, idx) for k, v in x.items()} if isinstance(x, dict) else x[idx]
+
+
+def brain(obs, desc, noises, j_rows=()):
+    """Raw-unit chunks (B, H, 7) for B env observations (already sliced to the calling envs) with their task
+    descriptions, each with its own fixed noise; for the rows in j_rows also the raw J by state at every chunk
+    position, (H, 7, 8) (GJ row, CUDA/CPU only)."""
+    b = preprocess_observation(obs)
+    b["task"] = list(desc)
+    sub = pre(env_pre(b))
     nz = torch.cat(noises).to(dev)
     with torch.no_grad():
         ch = policy.predict_action_chunk(sub, noise=nz)
     js = {}
-    if j_idx:
+    if j_rows:
         import c1e2_j  # noqa: PLC0415  (only the GJ row needs it)
 
-        for pos, i in enumerate(idx):
-            if i in j_idx:
-                one = {k: (v[[pos]] if torch.is_tensor(v) else [v[pos]] if isinstance(v, list) else v) for k, v in sub.items()}
-                J = c1e2_j.jacobian_all_positions(policy, one, nz[pos: pos + 1]).float().cpu().numpy()
-                js[i] = STD_A[None, :, None] * J / STD_S[None, None, :]
+        for pos in j_rows:
+            one = {k: (v[[pos]] if torch.is_tensor(v) else [v[pos]] if isinstance(v, list) else v) for k, v in sub.items()}
+            J = c1e2_j.jacobian_all_positions(policy, one, nz[pos: pos + 1]).float().cpu().numpy()
+            js[pos] = STD_A[None, :, None] * J / STD_S[None, None, :]
     return post(ch).cpu().numpy(), js
 
 
@@ -190,13 +203,14 @@ def run_batch(vec, eps):
     vec.set_attr("keep_px", keep)
     # one reset seed for every slot: LIBERO seeds numpy with it and places the fixtures (cabinet, stove, rack) from it
     obs, info = vec.reset(seed=[0] * n)
+    desc = vec.call("task_description")
     agents = [orx.Agent(e["method"], *orx.CELLS[e["cell"]], t_ramp=args.t_ramp, k_p=args.k_p) for e in pad]
     perts = [orx.Perturbation(e["ep"]) for e in pad]
     gens = [torch.Generator().manual_seed(e["ep"].seed) for e in pad]
     t_max = vec.get_attr("_max_episode_steps")[0]
     live, succ = np.ones(n, bool), np.zeros(n, bool)
     live[len(eps):] = False  # padding envs only step no-ops: no brain calls, no J
-    steps_ok, hr = [None] * n, [None] * n
+    steps_ok, hr, bad = [None] * n, [None] * n, info["bad_qacc"].copy()
     xs, acts, objs = [[] for _ in range(n)], [[] for _ in range(n)], [[] for _ in range(n)]
     pend_j = {}
 
@@ -223,12 +237,12 @@ def run_batch(vec, eps):
                 installed(i)
         want = [i for i in range(n) if live[i] and agents[i].sched.wants_call(t, agents[i].trigger(t))]
         if want:
-            j_idx = [i for i in want if pad[i]["method"] == "GJ"]
+            j_rows = [pos for pos, i in enumerate(want) if pad[i]["method"] == "GJ"]
             nz = [torch.randn(1, orx.H, cfg.max_action_dim, generator=gens[i]) for i in want]
-            chunks, js = brain(vec, obs, want, nz, j_idx)
-            for i, ch in zip(want, chunks):
-                if i in js:
-                    pend_j[(i, t)] = js[i]
+            chunks, js = brain(rows(obs, want), [desc[i] for i in want], nz, j_rows)
+            for pos, (i, ch) in enumerate(zip(want, chunks)):
+                if pos in js:
+                    pend_j[(i, t)] = js[pos]
                 agents[i].sched.issue(t, ch)
                 if agents[i].sched.arrive(t):
                     installed(i)
@@ -240,18 +254,21 @@ def run_batch(vec, eps):
                 xs[i].append(eef[i])
                 acts[i].append(a[i])
                 objs[i].append(obj[i])
-        vec.set_attr("pending_dq", dqs)
+        if any(dq is not None for dq in dqs):  # ShiftEnv clears it after applying
+            vec.set_attr("pending_dq", dqs)
         prev_obs = obs
         obs, _, _, _, info = vec.step(a)
         for i in range(n):  # C1-E1 headroom on the same state: the brain's fresh plan before vs after the step shift
             if keep[i] and perts[i].t_fire == t:
                 z = torch.randn(1, orx.H, cfg.max_action_dim, generator=torch.Generator().manual_seed(pad[i]["ep"].seed + 1))
-                shifted = {**prev_obs, "pixels": {k: v.copy() for k, v in prev_obs["pixels"].items()}}
+                one = rows(prev_obs, [i])
+                c0 = brain(one, [desc[i]], [z])[0][0]
                 for k, px in vec.get_attr("shift_px")[i].items():
-                    shifted["pixels"][k][i] = px
-                c0, c1 = brain(vec, prev_obs, [i], [z])[0][0], brain(vec, shifted, [i], [z])[0][0]
+                    one["pixels"][k][0] = px
+                c1 = brain(one, [desc[i]], [z])[0][0]
                 hr[i] = {"ratio": orx.headroom(c0, c1, pad[i]["ep"].delta),
                          "dist_m": float(np.linalg.norm(eef[i] - obj[i]))}
+        bad = np.maximum(bad, info["bad_qacc"])
         for i in range(n):
             if live[i] and bool(info["is_success"][i]):
                 succ[i], steps_ok[i], live[i] = True, t + 1, False
@@ -265,12 +282,12 @@ def run_batch(vec, eps):
                "t_ramp": args.t_ramp, "k_p": args.k_p,
                "success": bool(succ[i]), "steps_to_success": steps_ok[i], "steps": len(acts[i]),
                "calls_sched": ag.sched.n_sched, "calls_trig": ag.sched.n_trig, "t_fire": pt.t_fire,
-               "g_on": ag.g_on, "headroom": hr[i]}
+               "g_on": ag.g_on, "headroom": hr[i], "bad_qacc": int(bad[i])}
         rec |= orx.episode_metrics(xs[i], acts[i], objs[i])
         o, tc = np.asarray(objs[i]), rec["t_close"]
         # signed grasp miss along the shift (spec §9 overshoot): > 0 when the gripper closed beyond the object
         rec["grasp_miss_along_m"] = (float((xs[i][tc] - o[tc])[:2] @ ep.delta[:2]) / ep.mag
-                                     if ep.kind != "control" and ep.mag > 0 and tc is not None else None)
+                                     if pt.t_fire is not None and ep.mag > 0 and tc is not None else None)
         # pushes before the shift, up to its last pre-shift observation; with no shift, up to the first close command
         end = pt.t_fire if pt.t_fire is not None else tc
         w = o if end is None else o[: end + 1]
@@ -298,7 +315,14 @@ for st, tk in tasks:
     for key in sorted({(e["cell"], e["ep"].kind) for e in todo}):
         group = [e for e in todo if (e["cell"], e["ep"].kind) == key]
         for j in range(0, len(group), args.n_envs):
-            recs = run_batch(vec, group[j: j + args.n_envs])
+            try:
+                recs = run_batch(vec, group[j: j + args.n_envs])
+            except Exception as exc:  # spec §8: a fallen batch is skipped here; a rerun with resume retries it
+                print(f"FAILED {st}:{tk} {key[0]},{key[1]} [{j}:{j + args.n_envs}]: {exc!r}", flush=True)
+                traceback.print_exc()
+                vec.close(terminate=True)
+                vec = make_vec(st, tk)
+                continue
             with open(args.out, "a") as f:
                 for rec in recs:
                     f.write(json.dumps(rec) + "\n")
