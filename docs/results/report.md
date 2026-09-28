@@ -1,6 +1,6 @@
 # JIT Reflex: linearizing a frozen action-chunking policy between its calls
 
-*Aleksandr Karpov · Phase A report, with phase B1 in [§8](#8-phase-b1-stale-plans-and-imperfect-predictors), the offline part of B2 in [§9](#9-phase-b2-offline-a-cheaper-reflex-package), and the B2+B5 GPU run in [§10](#10-phase-b2b5-the-cheaper-package-in-closed-loop-and-a-price-comparison) · Kinetix (12 levels) · September 2026. Lab notes in Russian: [E1 memo](probe.md), [E2 / Gate 2 memo](closed-loop.md), [B1 memo](b1.md), [B2 offline memo](b2-offline.md), [B2+B5 memo](b2b5.md), and the [design spec](../superpowers/specs/2026-09-23-jit-reflex-phase-a-design.md) with its changelog.*
+*Aleksandr Karpov · Phase A report, with phase B1 in [§8](#8-phase-b1-stale-plans-and-imperfect-predictors), the offline part of B2 in [§9](#9-phase-b2-offline-a-cheaper-reflex-package), the B2+B5 GPU run in [§10](#10-phase-b2b5-the-cheaper-package-in-closed-loop-and-a-price-comparison), and the A2C2 rerun in [§11](#11-a2c2-reproduced-a-report-only-rerun) · Kinetix (12 levels) · September 2026. Lab notes in Russian: [E1 memo](probe.md), [E2 / Gate 2 memo](closed-loop.md), [B1 memo](b1.md), [B2 offline memo](b2-offline.md), [B2+B5 memo](b2b5.md), [A2C2 rerun memo](a2c2-fix.md), and the [design spec](../superpowers/specs/2026-09-23-jit-reflex-phase-a-design.md) with its changelog.*
 
 ## TL;DR
 
@@ -15,6 +15,7 @@
 - **Phase B1 (§8)** replaced the oracle with wrong physics and a learned world model. The pre-registered verdict is SURVIVES, narrowly. With the learned model, reflex ≈ oracle reflex, and all of its gain over RTC appears only when `J` is switched on. Latency is still 1.8–1.9× RTC.
 - **Phase B2, offline (§9).** A rule written before the data sends two shallower packages to the GPU run: `J` through only the last 3 of 5 flow steps (T3), and a 3-step flow (M3). Only T3 holds up in every check: it keeps a median 94% of the exact `J`'s offline gain and beats `pred` on all 12 levels. But it cuts depth by only 20%, so latency will likely stay around 1.5× RTC.
 - **Phase B2+B5 (§10).** On the GPU, T3 keeps the exact reflex's closed-loop gain and even beats it (+1.8 pp). Its latency is 1.54× RTC, and on one GPU no reflex variant fits a latency-fair grid. When the link sets one delay for everyone, T3 beats every untrained rival by +5.6…+8.7 pp. The surprise is a report-only baseline: a small residual head **distilled from fresh calls of the policy itself** beats every `J` variant in 8 of 9 cells and dominates the latency-fair frontier. It needs training and a simulator, and it fails badly on 2 of 12 levels.
+- **A2C2 reproduced (§11).** §10's A2C2 was a weak reproduction. Trained on the BC policy's own states with the paper's wider network, A2C2 becomes the strongest method in the grid. It solves about 95% in every cell and beats T3 by 14–18 pp on every level and seed. It also dominates the latency-fair frontier, the distilled head included. Its price is an expert that solves each level. `J` needs no data, training or expert, only a predictor for ô.
 
 ## 1. Hypothesis
 
@@ -367,11 +368,11 @@ One run on an RTX 4090 answered two questions. B2 asks whether the shallower pac
   - It collapses on grasp_easy (−37, below its own naive chunk) and mjc_walker (−32).
 - **Against RTC the intervals exclude zero:** +4.8 pp at D1, +13.4 at (3,5), +18.9 at (4,4).
 - **The gap to T3 grows with the execute horizon s, not with d.** The head sees the real observation at every step, while T3's nominal action and `J` rest on a world-model forecast d + s − 1 steps long.
-- **It dominates the latency-fair frontier.** It runs on naive's cheap chunk, plus a 0.07 ms head per step on the CPU. At base d = 2–4 only naive and the distilled head are non-dominated in GPU-ms per step. At base d = 3 it solves 86.2% at 0.44 GPU-ms per step, against RTC's 74.8% at 0.60.
+- **It dominates the latency-fair frontier among §10's methods** (§11's fixed A2C2 dominates it in turn). It runs on naive's cheap chunk, plus a 0.07 ms head per step on the CPU. At base d = 2–4 only naive and the distilled head are non-dominated in GPU-ms per step. At base d = 3 it solves 86.2% at 0.44 GPU-ms per step, against RTC's 74.8% at 0.60.
 - **Its price is training.** It needs 1M simulator transitions and 0.36 PFLOP per level, about 28× the world model's training compute. It was also trained with 2–11% fewer steps than the protocol asked for, which works against it.
 - **It is exploratory.** B5's rules only counted untrained methods as rivals, so this result needs its own test with a rule written in advance.
 
-**A2C2, the bt-kinetix variant.**
+**A2C2, the bt-kinetix variant.** This row is kept as run. §11 reproduces A2C2 properly and supersedes it as the A2C2 baseline.
 - **Its profile is flat:** 75.8–76.8% in every cell, whatever the delay. It is below RTC at d = 1 (−4.8 pp) and above it at d = 4 (+15.2).
 - **The mean hides extremes.** A2C2 solves at least 91% on 8 levels, but only 0–7% on mjc_walker and trampoline, where its naive base chunk solves 39% and 82% at d = 1.
 - **The paper's scale is visible on 10 of 12 levels.** Without those two levels A2C2 is +28.5 pp over RTC at d = 4. The paper reports +23 over RTC on Kinetix, and we did not reproduce its settings.
@@ -387,3 +388,55 @@ One run on an RTX 4090 answered two questions. B2 asks whether the shallower pac
 - The world models are the Mac-trained ones of §9.
 
 **Next,** to be discussed separately: the literature on distilling re-queries, and a `J` + distillation hybrid. The two fail on opposite levels. The distilled head fails on grasp_easy and mjc_walker, where T3 is strong. T3 is weak on catapult, h17_unicycle and catcher_v3, where the head is strong.
+
+## 11. A2C2 reproduced: a report-only rerun
+
+The bt-kinetix A2C2 of §10 collapsed on two levels. Exploratory checks on the Mac found why ([Russian note](b2b5-checks.md), checks (а)–(а3)). A short pod rerun of A2C2 alone followed, with a spec written before the data ([spec](../superpowers/specs/2026-09-28-a2c2-fix-design.md), [Russian memo](a2c2-fix.md), data and head weights in `results/b2b5_fix/`). It is a baseline for the report, not a rule, and §10's A2C2 row stays as run.
+
+- **Data and labels, shared by both variants.** Each level gets 262,144 transitions of the BC policy itself (naive at d = 0, s = 8). Each transition is labelled with the action mode of one PPO expert per level. The expert was chosen in advance from its training statistics.
+- **Two heads:**
+  - **`a2c2_paper`**, the paper's head as written: two hidden layers of 512 with LayerNorm, on the expert's observation (4 frames plus the last action, 2722 dimensions);
+  - **`a2c2_wide`**, the same network on one frame (679 dimensions), the input of §10's A2C2 and of the distilled head. It was chosen by an exploratory check on **one level**.
+- **Scale:** 2 heads × 16 cells × seeds 20–22 × 12 levels × 256 episodes. Training the 24 heads took 29 min and the grid 35 min.
+- **Checks:**
+  - no configuration is missing, and the archive's manifest and the heads' SHA-256 lock were verified on the Mac;
+  - every head's held-out error is below the uncorrected chunk's on all 12 levels;
+  - a zero head reproduces naive bit for bit.
+- **Development levels.** The variants were chosen on trampoline, mjc_walker and car_launch. The table gives every row for all 12 levels and for the other 9.
+
+Differences in pp at D1 / (3,5) / (4,4). Every row has the same sign on all three seeds.
+
+| row | all 12 levels | 9 levels, development excluded |
+|---|---|---|
+| `a2c2_paper` − T3 | +14.3 / +18.5 / +17.1 | +13.5 / +16.2 / +14.4 |
+| `a2c2_paper` − RTC | +14.4 / +27.2 / +33.3 | +11.5 / +26.1 / +32.5 |
+| `a2c2_paper` − A2C2-distill *(unequal: input and network)* | +9.6 / +13.8 / +14.4 | +6.1 / +8.9 / +9.4 |
+| `a2c2_paper` − §10's A2C2 | +19.2 / +19.4 / +18.1 | +5.3 / +5.5 / +4.2 |
+| `a2c2_wide` − T3 | +11.7 / +16.0 / +15.5 | +10.6 / +13.5 / +12.7 |
+| `a2c2_wide` − A2C2-distill *(unequal: network and teacher)* | +7.1 / +11.2 / +12.9 | +3.3 / +6.3 / +7.7 |
+| `a2c2_wide` − `a2c2_paper` | −2.6 / −2.5 / −1.5 | −2.8 / −2.7 / −1.7 |
+
+All level × seed intervals exclude zero except one: `a2c2_wide` − A2C2-distill at D1 on the 9 levels, −0.04…6.99.
+
+- **The fixed A2C2 is the strongest method in the grid.**
+  - `a2c2_paper` solves 94.7–95.8% in every cell, at any delay.
+  - It is ahead of T3 and RTC on every one of the 12 levels.
+  - On the latency-fair frontier, at every base delay, only naive and the two new heads are non-dominated. RTC (1,1), §10's best configuration, and the distilled head are now dominated.
+- **The paper's scale is reached.** At (4,4) our naive (48.6%) and RTC (61.4%) are close to the paper's 51.2 and 62.9. `a2c2_paper` solves 94.7%, +33.3 pp over RTC, against the paper's +23.6. The settings differ: our data are labelled BC rollouts, not a demonstration dataset.
+- **What broke, and what fixes it** (exploratory, 64 environments, one cell):
+  - the narrow network: on trampoline the wider one lifts a one-frame head from 0.08 to 1.00;
+  - training on the expert's states: on mjc_walker, labelling the BC policy's own states lifts the old network from 0.03 to 0.77;
+  - mixing experts was not the cause, and frame history adds only about 2.5 pp on the full grid.
+- **Offline error does not predict the closed loop.** On trampoline, four heads with held-out MSE 0.002–0.007 solve between 0.08 and 1.00.
+- **The paper's parameter count is inconsistent with its text.** 0.31M is exactly the bt-kinetix head on one frame (310,790). The network as written has 1,666,054 parameters on the 2722-dimensional input and 620,038 on one frame. We ran both readings.
+- **The comparison with the distilled head is unequal.** `a2c2_wide` shares its input, but it differs in the network, the teacher (an expert versus a fresh call of the policy) and the data (262k transitions against 1M). A distilled head with the same network is left for future work.
+- **Where `J` stands.**
+  - `J` itself needs no data, no training and no expert, and works at once.
+  - The reflex also needs a prediction ô. Here that is a world model trained on 32,768 transitions (13 TFLOP per level): 8–9× fewer transitions than the fixed A2C2, and no expert.
+  - The fixed A2C2 needs an expert that solves each level (its PPO training is not counted), plus 262k labelled transitions and 25–50 TFLOP per level.
+  - Among rivals without a trained head, T3 stays ahead (B5-R3).
+- **Caveats.**
+  - Report only.
+  - The variants were not chosen blind, hence the development split.
+  - One expert per level.
+  - d ≤ 4, H = 8, three seeds, and a naive chunk under the head.
