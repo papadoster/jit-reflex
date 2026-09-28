@@ -104,6 +104,10 @@ def test_schedule_rejects_chunk_overrun():
         orx.Schedule(10, 30)
 
 
+def test_cells_leave_the_brain_free_between_calls():
+    assert all(d < s and s + d <= orx.H for s, d in orx.CELLS.values())
+
+
 def test_schedule_saturated_brain_when_delay_exceeds_period():
     s = orx.Schedule(10, 20)
     calls, max_idx = [], 0
