@@ -81,3 +81,37 @@ class Perturbation:
         if self.ep.kind == "step":
             return self.ep.delta if k == 0 else None
         return self.ep.delta / SMOOTH_STEPS if k < SMOOTH_STEPS and not grasp_started else None
+
+
+class Schedule:
+    """Brain calls every s steps; the answer to a call observed at t arrives at t + d (spec §4). The first call
+    of an episode arrives at once. A triggered call resets the schedule; no call while one is in flight."""
+
+    def __init__(self, s, d):
+        assert s >= 1 and d >= 0 and s + d <= H, (s, d)
+        self.s, self.d = s, d
+        self.next_call, self.in_flight = 0, None  # in_flight: (t_obs, arrival, chunk)
+        self.chunk, self.t_obs = None, None
+        self.n_sched = self.n_trig = 0
+
+    def wants_call(self, t, trigger):
+        return self.in_flight is None and (t >= self.next_call or trigger)
+
+    def issue(self, t, chunk):
+        """Issue a call observed at t; it counts as scheduled if t reached next_call, else as triggered."""
+        scheduled = t >= self.next_call
+        self.n_sched += scheduled
+        self.n_trig += not scheduled
+        self.in_flight = (t, t + (0 if self.chunk is None else self.d), chunk)
+        self.next_call = t + self.s
+
+    def arrive(self, t):
+        """Install the answer if it arrives at t; True when a new chunk starts being used."""
+        if self.in_flight is None or self.in_flight[1] != t:
+            return False
+        self.t_obs, _, self.chunk = self.in_flight
+        self.in_flight = None
+        return True
+
+    def action(self, t):
+        return np.array(self.chunk[t - self.t_obs], dtype=float)
