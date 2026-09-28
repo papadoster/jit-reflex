@@ -117,3 +117,78 @@ class Schedule:
 
     def action(self, t):
         return np.array(self.chunk[t - self.t_obs], dtype=float)
+
+
+class Agent:
+    """One episode's controller: the call schedule plus the method's reflex (spec §5, G in command form, Task 0).
+
+    U(t): shift of the object that the executing plan does not know: p(t) - p(t_obs), or p(t) - p_pre for
+    Gpost once the perturbation fired. E(t) = C(t) - C(t_obs): extra displacement already commanded since that
+    plan's observation. G adds e = K_p (U - E), |e| <= |U| / T_ramp, converted to action units by G_POS.
+    """
+
+    METHODS = ("none", "T0", "G", "GT", "PPC", "Gpost", "GJ")
+
+    def __init__(self, method, s, d, t_ramp=5, k_p=1.0):
+        assert method in self.METHODS, method
+        self.method, self.sched = method, Schedule(s, d)
+        self.t_ramp, self.k_p = t_ramp, k_p
+        self.p_hist, self.c_hist = {}, {}  # object position and cumulative extra (m) by step
+        self.c = np.zeros(3)
+        self.p_pre = None  # set by the runner when the perturbation fires (Gpost anchor)
+        self.grasp_started = False
+        self.g_on = False  # G has acted at least once (report: false triggers in control)
+        self.ppc_next, self.ppc_off = math.inf, {}
+        self.j_corr, self.o_raw = None, {}  # GJ: callable(t, k) -> J_k (o_t - o_hat_k); raw states by step
+
+    def on_new_chunk(self):
+        """Called when a new chunk starts being used (G's anchor moves with sched.t_obs by itself)."""
+        self.ppc_next = math.inf
+
+    def observe(self, t, eef, obj):
+        self.x, self.p_hist[t], self.c_hist[t] = np.array(eef, float), np.array(obj, float), self.c.copy()
+
+    def unknown_shift(self, t):
+        if self.method == "Gpost" and self.p_pre is not None:
+            return self.p_hist[t] - self.p_pre
+        return self.p_hist[t] - self.p_hist[self.sched.t_obs]
+
+    def trigger(self, t):
+        """An unscheduled brain call at step t (T0, the T switch of GT, PPC's shorter horizon)."""
+        if self.grasp_started or self.sched.chunk is None:
+            return False
+        u = np.linalg.norm(self.unknown_shift(t))
+        if self.method == "T0":
+            return u >= T0_THR
+        if self.method == "GT":
+            return u > T_THR
+        if self.method == "PPC":
+            return t >= self.ppc_next
+        return False
+
+    def act(self, t, a):
+        a = np.array(a, dtype=float)
+        if not self.grasp_started:
+            if self.method in ("G", "GT", "Gpost", "GJ"):
+                a = self._g(t, a)
+            if self.method == "GJ" and self.j_corr is not None:
+                a = np.clip(a + np.clip(self.j_corr(t, t - self.sched.t_obs), -1, 1), -1, 1)
+            if self.method == "PPC":
+                a = self._ppc(t, a)
+        if a[6] > 0:
+            self.grasp_started = True
+        return a
+
+    def _g(self, t, a):
+        u = self.unknown_shift(t)
+        if np.linalg.norm(u) <= EPS:
+            return a
+        self.g_on = True
+        e = self.k_p * (u - (self.c - self.c_hist[self.sched.t_obs]))
+        cap = np.linalg.norm(u) / self.t_ramp
+        if np.linalg.norm(e) > cap:
+            e *= cap / np.linalg.norm(e)
+        new = np.clip(a[:3] + e / G_POS, -1, 1)
+        self.c = self.c + G_POS * (new - a[:3])
+        a[:3] = new
+        return a

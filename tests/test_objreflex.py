@@ -119,3 +119,124 @@ def test_schedule_saturated_brain_when_delay_exceeds_period():
             assert not s.wants_call(t, True)  # a trigger cannot get through: the brain is saturated
     assert calls == [0, 10, 30, 50, 70] and s.n_trig == 0 and s.n_sched == 5
     assert max_idx == 39
+
+
+def _brain(x, p_seen, n=50):  # a chunk that walks the arm straight to p_seen, 1 cm per step at most
+    ch, xx = np.zeros((n, 7)), x.copy()
+    for j in range(n):
+        a = np.clip((p_seen - xx) / orx.G_POS, -1, 1)
+        ch[j, :3], ch[j, 6] = a, -1.0
+        xx = xx + orx.G_POS * a
+    return ch
+
+
+def _run(method, s=50, d=0, shift=np.array([0.03, 0.0, 0.0]), t_shift=5, steps=50, t_ramp=5, k_p=1.0):
+    ag = orx.Agent(method, s, d, t_ramp=t_ramp, k_p=k_p)
+    x, p, acts = np.zeros(3), np.array([0.10, 0.0, 0.0]), []
+    for t in range(steps):
+        if t == t_shift:
+            ag.p_pre = p.copy()
+            p = p + shift
+        ag.observe(t, x, p)
+        if ag.sched.arrive(t):
+            ag.on_new_chunk()
+        if ag.sched.wants_call(t, ag.trigger(t)):
+            ag.sched.issue(t, _brain(x, p))
+            if ag.sched.arrive(t):
+                ag.on_new_chunk()
+        a = ag.act(t, ag.sched.action(t))
+        acts.append(a)
+        x = x + orx.G_POS * a[:3]
+    return x, p, np.array(acts), ag
+
+
+def test_none_goes_to_the_old_place_and_g_to_the_new_one():
+    x_none, p, _, _ = _run("none")
+    x_g, _, _, ag = _run("G")
+    assert abs(x_none[0] - 0.10) < 1e-6  # the brain never re-looks (s = 50) and misses by 3 cm
+    assert np.linalg.norm(x_g - p) < 1e-3  # geometry follows the shift
+    assert ag.sched.n_trig == 0
+
+
+def test_g_is_identity_without_shift_and_inside_dead_band():
+    _, _, a_none, _ = _run("none", shift=np.zeros(3))
+    _, _, a_g, _ = _run("G", shift=np.zeros(3))
+    assert np.array_equal(a_none, a_g)
+    _, _, a_g4, _ = _run("G", shift=np.array([0.004, 0, 0]))
+    _, _, a_n4, _ = _run("none", shift=np.array([0.004, 0, 0]))
+    assert np.array_equal(a_n4, a_g4)
+
+
+def test_g_ramp_limits_the_step_and_delivers_the_whole_shift():
+    # s = 50: both runs execute the same chunk, so a_G - a_none is exactly G's extra command
+    _, _, a_none, _ = _run("none", t_ramp=10, k_p=1.0)
+    _, _, a_g, _ = _run("G", t_ramp=10, k_p=1.0)
+    extra = orx.G_POS * (a_g[:, 0] - a_none[:, 0])
+    assert extra.max() <= 0.03 / 10 + 1e-9  # at most |U| / T_ramp per step
+    assert extra.sum() == pytest.approx(0.03, abs=1e-6)
+
+
+def test_t0_requeries_and_then_reaches_the_new_place():
+    x, p, _, ag = _run("T0")
+    assert ag.sched.n_trig == 1 and np.linalg.norm(x - p) < 1e-3
+
+
+def test_gt_switch_only_for_big_shifts():
+    _, _, _, small = _run("GT", shift=np.array([0.03, 0, 0]))
+    _, _, _, big = _run("GT", shift=np.array([0.06, 0, 0]))
+    assert small.sched.n_trig == 0 and big.sched.n_trig == 1
+
+
+def test_g_off_after_close_command():
+    ag = orx.Agent("G", 50, 0, t_ramp=1, k_p=1.0)
+    ag.observe(0, np.zeros(3), np.zeros(3))
+    ag.sched.issue(0, np.zeros((50, 7)))
+    ag.sched.arrive(0)
+    ag.act(0, np.array([0, 0, 0, 0, 0, 0, 1.0]))  # close
+    ag.observe(1, np.zeros(3), np.array([0.03, 0, 0]))
+    assert np.array_equal(ag.act(1, np.zeros(7)), np.zeros(7))
+
+
+def test_gpost_keeps_shifting_new_chunks_and_g_does_not():
+    # the brain re-looks every 10 steps but "ignores" the shift: it keeps aiming at the pre-shift place
+    def run(method):
+        ag = orx.Agent(method, 10, 0, t_ramp=1, k_p=1.0)
+        x, p0 = np.zeros(3), np.array([0.10, 0.0, 0.0])
+        p = p0
+        for t in range(60):
+            if t == 5:
+                ag.p_pre, p = p.copy(), p0 + np.array([0.03, 0, 0])
+            ag.observe(t, x, p)
+            if ag.sched.arrive(t):
+                ag.on_new_chunk()
+            if ag.sched.wants_call(t, ag.trigger(t)):
+                ag.sched.issue(t, _brain(x, p0))
+                if ag.sched.arrive(t):
+                    ag.on_new_chunk()
+            x = x + orx.G_POS * ag.act(t, ag.sched.action(t))[:3]
+        return x, p
+    xg, p = run("G")
+    xp, _ = run("Gpost")
+    assert np.linalg.norm(xg - np.array([0.10, 0, 0])) < 2e-3  # G re-anchors and follows the stale brain
+    assert np.linalg.norm(xp - p) < 2e-3
+
+
+def test_g_counts_only_the_extra_actually_sent_under_saturation():
+    ag = orx.Agent("G", 50, 0, t_ramp=1, k_p=1.0)
+    x, target = np.zeros(3), np.array([0.30, 0.0, 0.0])  # far: the plan runs at +1 for ~27 steps
+    p = target.copy()
+    for t in range(50):
+        if t == 5:
+            ag.p_pre, p = p.copy(), target + np.array([0.03, 0, 0])
+        ag.observe(t, x, p)
+        if ag.sched.arrive(t):
+            ag.on_new_chunk()
+        if ag.sched.wants_call(t, ag.trigger(t)):
+            ag.sched.issue(t, _brain(x, target))
+            if ag.sched.arrive(t):
+                ag.on_new_chunk()
+        a = ag.act(t, ag.sched.action(t))
+        if t == 10:
+            assert ag.c[0] == 0.0  # saturated at +1: nothing sent, nothing counted in E
+        x = x + orx.G_POS * a[:3]
+    assert np.linalg.norm(x - p) < 1e-3  # the whole shift arrives once the plan leaves saturation
