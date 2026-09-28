@@ -32,6 +32,7 @@ def test_split_path_value_and_forward_jacobian(monkeypatch):
     cfg.device, cfg.load_vlm_weights, cfg.resize_imgs_with_padding = "cpu", False, (128, 128)
     torch.manual_seed(0)
     policy = SmolVLAPolicy(cfg).float().eval().requires_grad_(False)  # as the runner
+    assert policy.model.vlm_with_expert.num_vlm_layers == 4  # the shrink took effect (not the full 500M model)
     batch = {"observation.images.image": torch.rand(1, 3, 96, 96), "observation.images.image2": torch.rand(1, 3, 96, 96),
              OBS_STATE: torch.randn(1, 8), OBS_LANGUAGE_TOKENS: torch.randint(0, 1000, (1, 7)),
              OBS_LANGUAGE_ATTENTION_MASK: torch.tensor([[1, 1, 1, 1, 1, 0, 0]], dtype=torch.bool)}  # right padding
@@ -39,8 +40,10 @@ def test_split_path_value_and_forward_jacobian(monkeypatch):
 
     s, f = c1e2_j.split_path(policy, batch, noise)
     with torch.no_grad():
-        err_value = float((f(s)[0] - policy.predict_action_chunk(dict(batch), noise=noise)[0]).abs().max())
-    J = c1e2_j.jacobian_all_positions(policy, batch, noise)
+        stock = policy.predict_action_chunk(dict(batch), noise=noise)[0]
+        err_value = float((f(s)[0] - stock).abs().max())
+    J, a_norm = c1e2_j.jacobian_all_positions(policy, batch, noise)
+    err_primal = float((a_norm - stock).abs().max())  # what the runner checks on every J call (at 1e-3)
     # reference: reverse mode through the whole stock path; fp32 central differences are roundoff-bound here
     # (rel. 2.4e-2 at step 1e-3, 2.3e-3 at 1e-2: this random net's J is small, ~1e-3 per entry)
     st = policy.prepare_state(batch).requires_grad_(True)
@@ -48,7 +51,8 @@ def test_split_path_value_and_forward_jacobian(monkeypatch):
                                       batch[OBS_LANGUAGE_ATTENTION_MASK], st, noise=noise)[0, :, :7].reshape(-1)
     J_rev = torch.autograd.grad(out, st, torch.eye(out.numel()), is_grads_batched=True)[0][:, 0, :8]
     err_J = float((J.reshape(-1, 8) - J_rev).norm() / J_rev.norm())
-    print(f"value max abs {err_value:.2e}, J fwd vs rev rel {err_J:.2e}, |J| {float(J.norm()):.3f}")
+    print(f"value max abs {err_value:.2e}, primal {err_primal:.2e}, J fwd vs rev rel {err_J:.2e}, |J| {float(J.norm()):.3f}")
     assert J.shape == (cfg.chunk_size, 7, 8)
     assert err_value <= 1e-4
+    assert a_norm.shape == stock.shape and err_primal <= 1e-4
     assert err_J <= 1e-4

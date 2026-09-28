@@ -13,10 +13,12 @@ from lerobot.policies.smolvla.smolvlm_with_expert import apply_rope
 from lerobot.utils.constants import OBS_LANGUAGE_ATTENTION_MASK, OBS_LANGUAGE_TOKENS
 
 
-def split_path(policy, batch, noise, sd=8):
+def split_path(policy, batch, noise):
     """-> (s, f): s (1, sd) the normalised state; f(s8) the normalised chunk (B, H, A) with s8 (B, sd) in place of s."""
     m, vwe, cfg = policy.model, policy.model.vlm_with_expert, policy.config
-    assert not cfg.adapt_to_pi_aloha and cfg.rtc_config is None  # predict_action_chunk would post-process otherwise
+    # predict_action_chunk would post-process otherwise; the split path mirrors only the cached stock route
+    assert not cfg.adapt_to_pi_aloha and cfg.rtc_config is None and cfg.use_cache
+    sd = cfg.robot_state_feature.shape[0]
     state = policy.prepare_state(batch)
     with torch.no_grad():
         embs, pad, att = m.embed_prefix(*policy.prepare_images(batch), batch[OBS_LANGUAGE_TOKENS],
@@ -51,10 +53,13 @@ def split_path(policy, batch, noise, sd=8):
     return state[:, :sd], f
 
 
-@torch.no_grad()  # no reverse graph needed; grad mode does not affect forward AD
-def jacobian_all_positions(policy, batch, noise, sd=8):
-    """(H, A, sd) d a_norm / d s_norm at every chunk position for one env's preprocessed batch (B = 1) and its noise."""
-    s, f = split_path(policy, batch, noise, sd)
+@torch.no_grad()  # no reverse graph needed; forward AD ignores grad mode (inference_mode would disable it)
+def jacobian_all_positions(policy, batch, noise):
+    """-> (J, a_norm) for one env's preprocessed batch (B = 1) and its noise: J (H, A, sd) d a_norm / d s_norm at every
+    chunk position; a_norm (H, A) the split path's own normalised chunk, for the caller to check against the stock one."""
+    s, f = split_path(policy, batch, noise)
+    sd = s.shape[1]
     with fwAD.dual_level():
         s8 = fwAD.make_dual(s.expand(sd, -1).contiguous(), torch.eye(sd, dtype=s.dtype, device=s.device))
-        return fwAD.unpack_dual(f(s8)).tangent.permute(1, 2, 0)
+        out = fwAD.unpack_dual(f(s8))
+        return out.tangent.permute(1, 2, 0), out.primal[0]

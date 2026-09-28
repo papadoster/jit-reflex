@@ -176,8 +176,11 @@ def brain(obs, desc, noises, j_rows=()):
 
         for pos in j_rows:
             one = {k: (v[[pos]] if torch.is_tensor(v) else [v[pos]] if isinstance(v, list) else v) for k, v in sub.items()}
-            J = c1e2_j.jacobian_all_positions(policy, one, nz[pos: pos + 1]).float().cpu().numpy()
-            js[pos] = STD_A[None, :, None] * J / STD_S[None, None, :]
+            J, a_norm = c1e2_j.jacobian_all_positions(policy, one, nz[pos: pos + 1])
+            err = float((a_norm - ch[pos]).abs().max())  # both normalised, unpadded (H, 7): real-model check of J
+            if err > 1e-3:
+                raise AssertionError(f"GJ split path vs stock chunk, env {pos}: max abs {err:.2e} > 1e-3")
+            js[pos] = STD_A[None, :, None] * J.float().cpu().numpy() / STD_S[None, None, :]
     return post(ch).cpu().numpy(), js
 
 
