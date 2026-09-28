@@ -119,6 +119,24 @@ class Schedule:
         return np.array(self.chunk[t - self.t_obs], dtype=float)
 
 
+def ppc_profile(k):
+    """PPC path weights (1 - F_{2j+1} / F_{2k+1}), j = 0..k-1 (Fibonacci numbers, F_1 = F_2 = 1)."""
+    f = [0, 1]
+    while len(f) <= 2 * k + 1:
+        f.append(f[-1] + f[-2])
+    return [1 - f[2 * j + 1] / f[2 * k + 1] for j in range(k)]
+
+
+def ppc_pace(v, dp, s):
+    """PPC pace: alpha* = 1 + |v| cos(theta) / |dp| and the execution horizon max(K, min(ceil(s / alpha), s))."""
+    ndp = np.linalg.norm(dp)
+    if ndp < 1e-9:
+        return 1.0, s
+    alpha = 1 + float(v @ (dp / ndp)) / ndp  # |v| cos(theta) / |dp|
+    k_exec = s if alpha <= 1 else max(PPC_K, min(math.ceil(s / alpha), s))
+    return alpha, k_exec
+
+
 class Agent:
     """One episode's controller: the call schedule plus the method's reflex (spec §5, G in command form, Task 0).
 
@@ -158,13 +176,13 @@ class Agent:
         """An unscheduled brain call at step t (T0, the T switch of GT, PPC's shorter horizon)."""
         if self.grasp_started or self.sched.chunk is None:
             return False
+        if self.method == "PPC":
+            return t >= self.ppc_next
         u = np.linalg.norm(self.unknown_shift(t))
         if self.method == "T0":
             return u >= T0_THR
         if self.method == "GT":
             return u > T_THR
-        if self.method == "PPC":
-            return t >= self.ppc_next
         return False
 
     def act(self, t, a):
@@ -193,4 +211,27 @@ class Agent:
         new = np.clip(base + e / G_POS, -1, 1)
         self.c = self.c + G_POS * (new - base)
         a[:3] = new
+        return a
+
+    def _ppc(self, t, a):
+        """Our PPC (paper §3, arXiv 2605.11459): velocity v(t) = p(t) - p(t-1) from the oracle tracker; pace
+        shortens the executing chunk (an earlier call), path adds (1 - F_{2k+1}/F_{2K+1}) v_perp over the next K
+        steps. Reset (no correction) within R_GRIP of the object. The 2-EMA latch stabiliser is not implemented."""
+        p, x = self.p_hist[t], self.x
+        if np.linalg.norm(x - p) < R_GRIP:
+            self.ppc_next, self.ppc_off = math.inf, {}
+            return a
+        if t - 1 in self.p_hist:
+            v = p - self.p_hist[t - 1]
+            if np.linalg.norm(v) > PPC_V_MIN:
+                dp = G_POS * a[:3]
+                _, k_exec = ppc_pace(v, dp, self.sched.s)
+                self.ppc_next = min(self.ppc_next, self.sched.t_obs + k_exec)
+                ndp = np.linalg.norm(dp)
+                v_perp = v - (v @ dp) / ndp**2 * dp if ndp > 1e-9 else v
+                for j, w in enumerate(ppc_profile(PPC_K)):
+                    self.ppc_off[t + j] = self.ppc_off.get(t + j, 0) + w * v_perp
+        off = self.ppc_off.pop(t, None)
+        if off is not None:
+            a[:3] = np.clip(a[:3] + off / G_POS, -1, 1)
         return a

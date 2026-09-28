@@ -301,3 +301,35 @@ def test_g_carries_its_extra_across_a_delayed_reanchor():
                     ag.on_new_chunk()
             ag.act(t, ag.sched.action(t))
         assert ag.c[0] == pytest.approx(0.03)  # sent once, not again after the chunk observed at 10 arrives
+
+
+def test_ppc_fibonacci_profile_and_pace():
+    assert orx.ppc_profile(2) == pytest.approx([0.8, 0.6])
+    alpha, k_exec = orx.ppc_pace(v=np.array([0.02, 0, 0]), dp=np.array([0.01, 0, 0]), s=50)
+    assert alpha == pytest.approx(3.0) and k_exec == 17  # ceil(50 / 3)
+    alpha, k_exec = orx.ppc_pace(v=np.array([-0.02, 0, 0]), dp=np.array([0.01, 0, 0]), s=50)
+    assert k_exec == 50  # moving against the plan: no pace change
+
+
+def test_ppc_calls_earlier_and_offsets_sideways():
+    ag = orx.Agent("PPC", 50, 0)
+    x, p = np.zeros(3), np.array([0.10, 0.0, 0.0])
+    ag.observe(0, x, p)
+    ag.sched.issue(0, np.tile([0.7, 0, 0, 0, 0, 0, -1.0], (50, 1)))
+    ag.sched.arrive(0)
+    ag.act(0, ag.sched.action(0))
+    ag.observe(1, x, p + np.array([0.02, 0.02, 0.0]))  # a jump with a component along the plan and across it
+    a = ag.act(1, ag.sched.action(1))
+    assert ag.ppc_next < 50 and a[1] > 0  # an earlier call and a sideways offset toward +y
+    assert ag.trigger(ag.ppc_next)
+
+
+def test_ppc_resets_near_the_object():
+    ag = orx.Agent("PPC", 50, 0)
+    ag.observe(0, np.zeros(3), np.array([0.02, 0, 0]))
+    ag.sched.issue(0, np.tile([0.7, 0, 0, 0, 0, 0, -1.0], (50, 1)))
+    ag.sched.arrive(0)
+    ag.act(0, ag.sched.action(0))
+    ag.observe(1, np.zeros(3), np.array([0.03, 0.01, 0]))
+    a = ag.act(1, ag.sched.action(1))
+    assert np.array_equal(a, ag.sched.action(1)) and ag.ppc_next == math.inf
