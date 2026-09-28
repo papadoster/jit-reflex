@@ -58,5 +58,32 @@ def experts():
         print(lp.split("/")[-1][:-5], expert_path(lp), expert_url(lp))
 
 
+def _paper_head(obs_dim: int, action_dim: int):
+    return a2c2.Head(a2c2.HISTORY * obs_dim + action_dim, action_dim, **a2c2.PAPER_HEAD, rngs=nnx.Rngs(0))
+
+
+def latency(out_dir: str = OUT, level_path: str = probe.LEVELS[0], repeats: int = 200, warmup: int = 20):
+    """Spec §3: the a2c2_paper head's ms at batch 1 on the default device and on the CPU (B2+B5 §5.1: the head runs on
+    the CPU next to the GPU; if it misses the tact, d' grows by 1), and its GFLOP from a CPU copy (b2b5.cpu_gflop:
+    the GPU count misses matmuls). Writes head_latency.json."""
+    _, _, _, O, A = probe.setup([level_path])
+    OH, cpu = a2c2.HISTORY * O + A, jax.devices("cpu")[0]
+    args = (jnp.zeros((1, OH)), jnp.zeros((1, A)), a2c2.time_feature(jnp.zeros(1, jnp.int32), a2c2.H))
+    head = _paper_head(O, A)
+    h = jax.jit(lambda o, a, t: head.apply_residual(o, a, t))
+    with jax.default_device(cpu):
+        head_cpu = _paper_head(O, A)
+        h_cpu = jax.jit(lambda o, a, t: head_cpu.apply_residual(o, a, t))
+        cargs = jax.device_put(args, cpu)
+        gflop = b2b5._flops(h_cpu, *cargs) / 1e9
+    info = {"device": str(jax.devices()[0]), "head": METHOD, "in_dim": OH + A + 2,
+            "head_ms_gpu": b2b5._time(h, args, repeats, warmup), "head_ms_cpu": b2b5._time(h_cpu, cargs, repeats, warmup),
+            "head_gflop": gflop}
+    out = pathlib.Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "head_latency.json").write_text(json.dumps(info, indent=1))
+    print(json.dumps(info, indent=1))
+
+
 if __name__ == "__main__":
-    tyro.extras.subcommand_cli_from_dict({"experts": experts})
+    tyro.extras.subcommand_cli_from_dict({"experts": experts, "latency": latency})
