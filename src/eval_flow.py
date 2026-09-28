@@ -60,6 +60,9 @@ class ReflexMethodConfig:
 @dataclasses.dataclass(frozen=True)
 class HeadMethodConfig:
     head: str = "a2c2"  # B2+B5 §9: naive chunk + a per-step residual head (a2c2.Head) from <heads_root>/<head>/
+    history: bool = False  # the head sees the experts' obs (a2c2.history_env: 4 frames + last action); pi sees one frame
+    hidden: tuple = (256, 512)  # a2c2.Head widths and LayerNorm (a2c2.PAPER_HEAD: the A2C2 paper's text)
+    layer_norm: bool = False
 
 
 @dataclasses.dataclass(frozen=True)
@@ -97,9 +100,15 @@ def eval(
     base_env = env
     if config.kick_prob > 0:
         env = train_expert.KickWrapper(env, config.kick_prob, config.kick_std)
+    history = isinstance(config.method, HeadMethodConfig) and config.method.history
     env = train_expert.BatchEnvWrapper(
-        wrappers.LogWrapper(wrappers.AutoReplayWrapper(train_expert.NoisyActionWrapper(env))), config.num_evals
+        wrappers.LogWrapper(a2c2.history_env(env) if history else wrappers.AutoReplayWrapper(
+            train_expert.NoisyActionWrapper(env))), config.num_evals
     )
+
+    def pobs(obs):  # what the policy sees: the current frame of a history obs [..., 4 O + A]
+        return a2c2.last_frame(obs, (obs.shape[-1] - policy.action_dim) // a2c2.HISTORY) if history else obs
+
     # the reflex's (oracle) predictor: raw physics, no noise, no kicks, and no auto-reset, so a predicted solve
     # doesn't turn the rest of the prediction into the level's initial observation
     nominal_step = jax.vmap(base_env.step_env, in_axes=(None, 0, 0, None))
@@ -221,7 +230,7 @@ def eval(
             )
             new_pkg = {"nom": nom, "ref": ref} | ({} if gain is None else {"gain": gain})
         elif isinstance(config.method, HeadMethodConfig):  # the base chunk is naive's (same key, same chunk)
-            next_action_chunk = policy.action(key, obs, config.num_flow_steps)
+            next_action_chunk = policy.action(key, pobs(obs), config.num_flow_steps)
         else:
             raise ValueError(f"Unknown method: {config.method}")
 
@@ -252,7 +261,7 @@ def eval(
     rng, key = jax.random.split(rng)
     obs, env_state = env.reset_to_level(key, level, env_params)
     rng, key = jax.random.split(rng)
-    action_chunk = policy.action(key, obs, config.num_flow_steps)  # [batch, horizon, action_dim]
+    action_chunk = policy.action(key, pobs(obs), config.num_flow_steps)  # [batch, horizon, action_dim]
     n = jnp.ones(action_chunk.shape[1], dtype=jnp.int32)
     pkg = None
     if is_reflex:  # the first d steps of the first chunk run open-loop
@@ -306,6 +315,11 @@ METHODS = {
     "realtime10": RealtimeMethodConfig(),  # RTC with 10 flow steps, see FLOW_STEPS
     "a2c2": HeadMethodConfig("a2c2"),
     "a2c2_distill": HeadMethodConfig("a2c2_distill"),
+    # docs/results/b2b5-checks.md (a2): A2C2 on the BC policy's states labelled by one PPO expert (mode), by a mixture
+    # of experts (samples, as generate_data), and the paper's text variant (512 x 512 LayerNorm, history obs)
+    "a2c2_relabel": HeadMethodConfig("a2c2_relabel"),
+    "a2c2_mix": HeadMethodConfig("a2c2_mix"),
+    "a2c2_paper": HeadMethodConfig("a2c2_paper", history=True, hidden=a2c2.PAPER_HEAD["hidden"], layer_norm=True),
 }
 
 FLOW_STEPS = {"realtime10": 10}  # B2+B5: methods whose chunk (and first chunk) use more flow steps
@@ -478,7 +492,11 @@ def main(
             weak_policy = nnx.merge(graphdef, state)
         else:
             weak_policy = None
-        head = None if head_state is None else a2c2.make_head(head_state, obs_dim, action_dim)
+        m = config.method
+        head = None if head_state is None else a2c2.make_head(
+            head_state, a2c2.HISTORY * obs_dim + action_dim if m.history else obs_dim, action_dim,
+            hidden=m.hidden, layer_norm=m.layer_norm,
+        )
         eval_info, _ = eval(
             config, env, rng, level, policy, env_params, static_env_params, weak_policy, world_model, head, e_std, edges
         )

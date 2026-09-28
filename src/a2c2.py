@@ -46,16 +46,15 @@ H = 8  # action chunk size of these policies
 
 
 class Head(nnx.Module):
-    """bt-kinetix ResidualPolicy: [obs, base action, (cos, sin) of the chunk index] -> 256 -> 512 -> residual."""
+    """bt-kinetix ResidualPolicy: [obs, base action, (cos, sin) of the chunk index] -> 256 -> 512 -> residual.
+    hidden and layer_norm give the A2C2 paper's text variant (512, 512 with LayerNorm); the defaults are bt-kinetix's."""
 
-    def __init__(self, obs_dim: int, action_dim: int, *, rngs: nnx.Rngs):
-        self.residual_policy = nnx.Sequential(
-            nnx.Linear(obs_dim + action_dim + 2, 256, rngs=rngs),
-            nnx.relu,
-            nnx.Linear(256, 512, rngs=rngs),
-            nnx.relu,
-            nnx.Linear(512, action_dim, rngs=rngs),
-        )
+    def __init__(self, obs_dim: int, action_dim: int, hidden=(256, 512), layer_norm: bool = False, *, rngs: nnx.Rngs):
+        layers, width = [], obs_dim + action_dim + 2
+        for h in hidden:
+            layers += [nnx.Linear(width, h, rngs=rngs), *([nnx.LayerNorm(h, rngs=rngs)] if layer_norm else []), nnx.relu]
+            width = h
+        self.residual_policy = nnx.Sequential(*layers, nnx.Linear(width, action_dim, rngs=rngs))
 
     def apply_residual(self, obs, base_action, time_feature):
         return base_action + self.residual_policy(jnp.concatenate([obs, base_action, time_feature], axis=-1))
@@ -71,8 +70,8 @@ def time_feature(k, chunk_size: int):
     return jnp.stack([jnp.cos(x), jnp.sin(x)], axis=-1)
 
 
-def make_head(state_dict, obs_dim: int, action_dim: int) -> Head:
-    head = Head(obs_dim, action_dim, rngs=nnx.Rngs(0))
+def make_head(state_dict, obs_dim: int, action_dim: int, **head_kw) -> Head:
+    head = Head(obs_dim, action_dim, **head_kw, rngs=nnx.Rngs(0))
     graphdef, state = nnx.split(head)
     state.replace_by_pure_dict(state_dict)
     return nnx.merge(graphdef, state)
@@ -88,7 +87,7 @@ def load_heads(root: str, name: str, level_paths: Sequence[str]):
 
 
 def fit(rng, obs_dim: int, action_dim: int, batch_fn, data, n_items: int, num_epochs: int = EPOCHS,
-        batch_size: int = BATCH):
+        batch_size: int = BATCH, head_kw: dict | None = None):
     """bt-kinetix train_residual for one level; rng = the level's key (bt-kinetix: split(key(seed), 12)[level]).
 
     batch_fn(data, key, idx [B]) -> (obs, base, time_feature, target). data goes into jit as an argument, as in
@@ -97,7 +96,7 @@ def fit(rng, obs_dim: int, action_dim: int, batch_fn, data, n_items: int, num_ep
     Returns (Head, mean loss per epoch).
     """
     rng, key = jax.random.split(rng)  # bt-kinetix init
-    head = Head(obs_dim, action_dim, rngs=nnx.Rngs(key))
+    head = Head(obs_dim, action_dim, **(head_kw or {}), rngs=nnx.Rngs(key))
     opt = nnx.Optimizer(head, optax.chain(
         optax.clip_by_global_norm(CLIP),
         optax.adamw(optax.warmup_constant_schedule(0, LR, WARMUP), weight_decay=WD),
@@ -308,5 +307,127 @@ def synth(level_path: str, out_dir: str, run_path: str = "checkpoints/bc", num_e
              obs=steps_envs(obs), action=steps_envs(chunk), done=steps_envs(done))
 
 
+HISTORY = 4  # the experts' observation (src/generate_data.py): 4 stacked frames, then the last action
+
+
+def history_env(raw_env):
+    """The experts' observation, 4 O + A dims (src/generate_data.py), with the eval env's action noise and auto-reset."""
+    return wrappers.AutoReplayWrapper(train_expert.ActionHistoryWrapper(
+        train_expert.ObsHistoryWrapper(train_expert.NoisyActionWrapper(raw_env), HISTORY)))
+
+
+def last_frame(obs, obs_dim: int):
+    """The current frame of a history obs [..., 4 O + A] -> [..., O]: what the BC policy sees."""
+    return obs[..., (HISTORY - 1) * obs_dim: HISTORY * obs_dim]
+
+
+def load_expert(path, obs_dim: int, action_dim: int):
+    """A PPO expert of gs://rtc-assets/expert/seed_<s>/<step>/policies (train_expert.Agent), as generate_data loads it."""
+    agent = train_expert.Agent(obs_dim, action_dim, 1, rngs=nnx.Rngs(0))
+    graphdef, state = nnx.split(agent)
+    with open(path, "rb") as f:
+        state.replace_by_pure_dict(pickle.load(f))
+    return nnx.merge(graphdef, state)
+
+
+def expert_action(agent, obs, key=None):
+    """key None: the mode (tanh / sigmoid of the mean); else a sample of the squashed normal, as generate_data acts."""
+    mean, std = agent.action(obs)
+    nmb = train_expert.LARGE_ENV_PARAMS["num_motor_bindings"]
+    if key is None:
+        return jnp.concatenate([jnp.tanh(mean[..., :nmb]), jax.nn.sigmoid(mean[..., nmb:])], axis=-1)
+    return train_expert.make_squashed_normal_diag(mean, std, nmb).sample(seed=key)
+
+
+def history_data(env, env_params, policy, level, key, num_envs: int, num_chunks: int, n_experts: int, obs_dim: int,
+                 num_steps: int = 5):
+    """distill_data's naive rollouts (d = 0, s = H) in the experts' observation (env = history_env): per window the
+    history obs before each step [W, H, 4 O + A], the chunk, done and the episode's expert [W, H] (drawn at each reset,
+    as generate_data draws its experts)."""
+    Hh, A = policy.action_chunk_size, policy.action_dim
+    k_reset, k_who, k_run = jax.random.split(key, 3)
+    obs, state = jax.vmap(env.reset_to_level, in_axes=(0, None, None))(
+        jax.random.split(k_reset, num_envs), level, env_params
+    )
+    env_step = jax.vmap(env.step, in_axes=(0, 0, 0, None))
+
+    def run_chunk(carry, key):
+        obs, state, who = carry
+        k_z, k_env = jax.random.split(key)
+        chunk = policy.action_from_noise(jax.random.normal(k_z, (num_envs, Hh, A)), last_frame(obs, obs_dim),
+                                         num_steps)
+
+        def one_step(c, xs):
+            obs, state, who = c
+            a, k = xs
+            k_step, k_new = jax.random.split(k)
+            nobs, state, _, done, _ = env_step(jax.random.split(k_step, num_envs), state, a, env_params)
+            nwho = jnp.where(done, jax.random.randint(k_new, (num_envs,), 0, n_experts), who)
+            return (nobs, state, nwho), (obs, done, who)
+
+        (obs, state, who), (o, done, w) = jax.lax.scan(
+            one_step, (obs, state, who), (chunk.swapaxes(0, 1), jax.random.split(k_env, Hh))
+        )
+        return (obs, state, who), (o.swapaxes(0, 1), chunk, done.swapaxes(0, 1), w.swapaxes(0, 1))
+
+    who = jax.random.randint(k_who, (num_envs,), 0, n_experts)
+    _, out = jax.lax.scan(run_chunk, (obs, state, who), jax.random.split(k_run, num_chunks))
+    return jax.tree.map(lambda x: x.reshape(-1, *x.shape[2:]), out)
+
+
+PAPER_HEAD = {"hidden": (512, 512), "layer_norm": True}  # the A2C2 paper's text: 3 layers, 512 wide, LayerNorm
+
+
+def relabel(level_path: str, experts: Sequence[str], out_dir: str, mode: str = "one", paper: bool = False,
+            run_path: str = "checkpoints/bc", num_envs: int = 128, num_chunks: int = 192, seed: int = 6000,
+            num_epochs: int = EPOCHS):
+    """A2C2 on the BC policy's own states (docs/results/b2b5-checks.md (a2)): naive rollouts at d = 0, s = H labelled
+    by PPO experts. mode "one": the first expert's mode; "mix": a sample of the episode's expert, as generate_data
+    labels. paper: PAPER_HEAD on the history obs (4 frames + last action) instead of bt-kinetix's head on one frame.
+    The MSE check is on 10% extra held-out windows."""
+    start = time.time()
+    env, env_params, level, policy, O, A, i = _env_and_dims(run_path, level_path)
+    OH = HISTORY * O + A
+    agents = [load_expert(p, OH, A) for p in experts]
+    n_exp = 1 if mode == "one" else len(agents)
+    henv = history_env(env._env)
+    k_data, k_val, k_lab, k_fit = jax.random.split(jax.random.key(seed + i), 4)
+
+    @jax.jit
+    def label(obs, who, key):  # agents go in the closure (nnx modules, not jit arguments)
+        if mode == "one":
+            return expert_action(agents[0], obs)
+        acts = jnp.stack([expert_action(a, obs, k) for a, k in zip(agents, jax.random.split(key, n_exp))])
+        return jnp.take_along_axis(acts, who[None, :, None], axis=0)[0]
+
+    def items(k, chunks):
+        obs, chunk, done, who = jax.jit(
+            lambda kk: history_data(henv, env_params, policy, level, kk, num_envs, chunks, n_exp, O)
+        )(k)
+        W = obs.shape[0]
+        tgt = label(obs.reshape(W * H, OH), who.reshape(-1), jax.random.fold_in(k_lab, chunks)).reshape(W, H, A)
+        it = distill_items(obs, chunk, done, tgt)
+        if not paper:
+            it["obs"] = last_frame(it["obs"], O)
+        return it, W * H
+
+    train, n_trans = items(k_data, num_chunks)
+    val, _ = items(k_val, max(1, num_chunks // 10))
+    n = len(train["k"])
+
+    def batch(d, key, idx):
+        return d["obs"][idx], d["base"][idx], time_feature(d["k"][idx], H), d["target"][idx]
+
+    head, losses = fit(k_fit, OH if paper else O, A, batch, train, n, num_epochs, head_kw=PAPER_HEAD if paper else None)
+    mse, mse_base = _mse(head, val["obs"], val["base"], time_feature(val["k"], H), val["target"])
+    _save(head, out_dir, level_path, {
+        "level": level_path, "mode": mode, "paper": paper, "experts": "|".join(pathlib.Path(p).name for p in experts),
+        "transitions": n_trans, "items": n, "steps": num_epochs * (n // BATCH), "loss_first": losses[0],
+        "loss_last": losses[-1], "mse": mse, "mse_base": mse_base, "check": "held-out",
+        "seconds": round(time.time() - start),
+    })
+
+
+
 if __name__ == "__main__":
-    tyro.extras.subcommand_cli_from_dict({"expert": expert, "distill": distill, "synth": synth})
+    tyro.extras.subcommand_cli_from_dict({"expert": expert, "distill": distill, "synth": synth, "relabel": relabel})
