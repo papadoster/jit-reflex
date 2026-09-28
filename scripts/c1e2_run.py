@@ -42,6 +42,8 @@ p.add_argument("--policy", default="HuggingFaceVLA/smolvla_libero")
 p.add_argument("--out", required=True)
 args = p.parse_args()
 dev = torch.device(args.device)
+torch.backends.cuda.matmul.allow_tf32 = False  # literal fp32 on CUDA (spec §4)
+torch.backends.cudnn.allow_tf32 = False
 
 
 def span(txt):
@@ -52,8 +54,17 @@ def span(txt):
 tasks = orx.TASKS if args.tasks == "all" else [(t.split(":")[0], int(t.split(":")[1])) for t in args.tasks.split(",")]
 done = set()  # resume: skip episodes already written
 if Path(args.out).exists():
-    for line in Path(args.out).read_text().splitlines():
-        r = json.loads(line)
+    text = Path(args.out).read_text()
+    if text and not text.endswith("\n"):  # a half-written last line: cut it, or the next record is glued onto it
+        print(f"warning: dropping a half-written last line of {args.out}: {text[text.rfind(chr(10)) + 1:][:80]!r}", flush=True)
+        text = text[: text.rfind("\n") + 1]
+        Path(args.out).write_text(text)
+    for line in text.splitlines():
+        try:
+            r = json.loads(line)
+        except json.JSONDecodeError:
+            print(f"warning: skipping a malformed line in {args.out}: {line[:80]!r}", flush=True)
+            continue
         done.add((r["suite"], r["task"], r["init"], r["kind"], r["cell"], r["method"]))
 
 cfg = PreTrainedConfig.from_pretrained(args.policy)
@@ -166,7 +177,7 @@ class JCorr:
 
     def __call__(self, t, k):
         o_hat = self.o_obs.copy()
-        o_hat[:3] += orx.G_POS * self.chunk[:k, :3].sum(0) + (self.ag.c - self.ag.c_hist[self.t_obs])
+        o_hat[:3] += orx.G_POS * np.clip(self.chunk[:k, :3], -1, 1).sum(0) + (self.ag.c - self.ag.c_hist[self.t_obs])
         return self.J[k] @ (self.ag.o_raw[t] - o_hat)
 
 
@@ -184,6 +195,7 @@ def run_batch(vec, eps):
     gens = [torch.Generator().manual_seed(e["ep"].seed) for e in pad]
     t_max = vec.get_attr("_max_episode_steps")[0]
     live, succ = np.ones(n, bool), np.zeros(n, bool)
+    live[len(eps):] = False  # padding envs only step no-ops: no brain calls, no J
     steps_ok, hr = [None] * n, [None] * n
     xs, acts, objs = [[] for _ in range(n)], [[] for _ in range(n)], [[] for _ in range(n)]
     pend_j = {}
@@ -249,17 +261,23 @@ def run_batch(vec, eps):
     for i, e in enumerate(eps):
         ag, pt, ep = agents[i], perts[i], e["ep"]
         rec = {"suite": ep.suite, "task": ep.task, "init": ep.init, "kind": ep.kind, "cell": e["cell"], "method": e["method"],
-               "seed": ep.seed, "mag_class": ep.mag_class, "mag": ep.mag, "r": ep.r, "t_ramp": args.t_ramp, "k_p": args.k_p,
+               "seed": ep.seed, "mag_class": ep.mag_class, "mag": ep.mag, "angle": ep.angle, "r": ep.r,
+               "t_ramp": args.t_ramp, "k_p": args.k_p,
                "success": bool(succ[i]), "steps_to_success": steps_ok[i], "steps": len(acts[i]),
                "calls_sched": ag.sched.n_sched, "calls_trig": ag.sched.n_trig, "t_fire": pt.t_fire,
                "g_on": ag.g_on, "headroom": hr[i]}
         rec |= orx.episode_metrics(xs[i], acts[i], objs[i])
-        o = np.asarray(objs[i])
-        n_pre = pt.t_fire if pt.t_fire is not None else len(o)  # steps before the shift (all steps in control)
-        rec["pushed_before_fire"] = bool(n_pre > 1 and np.linalg.norm(o[:n_pre] - o[0], axis=1).max() > orx.EPS)
+        o, tc = np.asarray(objs[i]), rec["t_close"]
+        # signed grasp miss along the shift (spec §9 overshoot): > 0 when the gripper closed beyond the object
+        rec["grasp_miss_along_m"] = (float((xs[i][tc] - o[tc])[:2] @ ep.delta[:2]) / ep.mag
+                                     if ep.kind != "control" and ep.mag > 0 and tc is not None else None)
+        # pushes before the shift, up to its last pre-shift observation; with no shift, up to the first close command
+        end = pt.t_fire if pt.t_fire is not None else tc
+        w = o if end is None else o[: end + 1]
+        rec["pushed_before_fire"] = bool(len(w) > 1 and np.linalg.norm(w - w[0], axis=1).max() > orx.EPS)
         # unstable shift: the object moved another > 1 cm, seen 20 steps after the shift or at the first close command
         # if that comes earlier (a grasp moves the object too)
-        k = None if pt.t_fire is None else min(pt.t_fire + 21, len(o) if rec["t_close"] is None else rec["t_close"])
+        k = None if pt.t_fire is None else min(pt.t_fire + 21, len(o) if tc is None else tc)
         rec["unstable"] = bool(ep.kind == "step" and k is not None and pt.t_fire < k < len(o)
                                and np.linalg.norm(o[k] - (pt.p_pre + ep.delta)) > 0.01)
         out.append(rec)
