@@ -21,6 +21,7 @@ PPC_V_MIN = 0.001  # object speed counted by PPC, m/step
 H = 50  # SmolVLA chunk length
 SMOOTH_STEPS = 20
 
+# cell: (s = call period, d = inference delay)
 CELLS = {"A": (10, 0), "B": (25, 0), "C": (50, 0), "D": (10, 10), "E": (40, 10), "F": (10, 20), "Gp": (30, 20)}
 TASKS = ([("libero_spatial", i) for i in range(10)] + [("libero_object", i) for i in range(10)]
          + [("libero_goal", i) for i in (1, 2, 4, 6, 8, 9)])
@@ -46,6 +47,7 @@ class Episode:
 
 def make_episode(suite, task, init, kind):
     """Everything drawn from the episode seed; identical for all methods and cells (spec §4)."""
+    assert kind in ("step", "smooth", "control"), kind
     seed = int.from_bytes(hashlib.sha256(f"c1e2/{suite}/{task}/{init}/{kind}".encode()).digest()[:4], "little")
     rng = np.random.default_rng(seed)
     r, angle = float(rng.uniform(0.08, 0.20)), float(rng.uniform(0.0, 2 * math.pi))
@@ -61,7 +63,8 @@ def make_episode(suite, task, init, kind):
 
 class Perturbation:
     """When and how the object is moved (spec §4): once, at the first step with no close command yet and
-    |EEF - object| < r; a step shift at once, a smooth one over SMOOTH_STEPS steps."""
+    |EEF - object| < r; a step shift at once, a smooth one over SMOOTH_STEPS steps,
+    stopped by the first close command."""
 
     def __init__(self, ep):
         self.ep, self.t_fire, self.p_pre = ep, None, None
@@ -77,4 +80,4 @@ class Perturbation:
         k = t - self.t_fire
         if self.ep.kind == "step":
             return self.ep.delta if k == 0 else None
-        return self.ep.delta / SMOOTH_STEPS if k < SMOOTH_STEPS else None
+        return self.ep.delta / SMOOTH_STEPS if k < SMOOTH_STEPS and not grasp_started else None
