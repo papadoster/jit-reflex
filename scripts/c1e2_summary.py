@@ -46,6 +46,15 @@ SHARES = [
     ("unstable_of_fired", lambda r: r["unstable"] if r["kind"] == "step" and r["t_fire"] is not None else None),
     ("bad_qacc", lambda r: r["bad_qacc"] > 0),
 ]
+# spec §8 predicates on diff_pp output; "> 0" is strict
+RULES = {"R1": lambda x: x["diff_pp"] >= 5 - TOL and x["lo2.5"] > 0,
+         "R2": lambda x: x["lo5_one_sided"] >= -2 - TOL,
+         "R3": lambda x: x["lo5_one_sided"] >= -5 - TOL,
+         "R4": lambda x: x["diff_pp"] >= 5 - TOL and x["lo2.5"] > 0}
+
+
+def r5_category(lo):
+    return None if lo is None else "ЛУЧШЕ" if lo > 0 else "НЕ ХУЖЕ" if lo >= -2 - TOL else "ХУЖЕ"
 
 
 def load(path):
@@ -120,6 +129,11 @@ def versus(idx, cell, a, b):
 
 def summarize(raw, baseline, override=None):
     key = lambda r: (r["kind"], r["cell"], r["method"], r["suite"], r["task"], r["init"])  # noqa: E731
+    succ = defaultdict(set)
+    for r in raw:
+        succ[key(r)].add(r["success"])
+    if conflict := [k for k, v in succ.items() if len(v) > 1]:
+        raise SystemExit(f"{len(conflict)} episodes recorded twice with different success, e.g. {conflict[0]}")
     have, want, missing = {key(r) for r in raw}, set(), {}
     for k, c, m, inits in EXPECTED:
         group = {(k, c, m, s, t, i) for s, t in orx.TASKS for i in inits}
@@ -127,6 +141,9 @@ def summarize(raw, baseline, override=None):
         if n := len(group - have):
             missing[f"{k}/{c}/{m}"] = n
     rs = list({key(r): r for r in raw if key(r) in want}.values())  # the §6 grid only, one record per episode
+    coef = sorted({(r.get("t_ramp"), r.get("k_p")) for r in rs}, key=str)
+    if len(coef) > 1:
+        raise SystemExit(f"grid records mix coefficients (t_ramp, k_p): {coef}")
     idx = defaultdict(dict)
     for r in rs:
         idx[r["kind"], r["cell"], r["method"]][r["suite"], r["task"], r["init"]] = r
@@ -150,27 +167,22 @@ def summarize(raw, baseline, override=None):
          "R3": diff_pp(pairs(idx, "step", [(("C", "GT"), ("A", "none"))])),
          "R4": diff_pp(pairs(idx, "step", same(["F", "Gp"], "GT", "T0"))),
          "R5": diff_pp(pairs(idx, "step", same(CELLS, "GT", "PPC")))}
-    ok = {"R1": lambda x: x["diff_pp"] >= 5 - TOL and x["lo2.5"] > 0,
-          "R2": lambda x: x["lo5_one_sided"] >= -2 - TOL,
-          "R3": lambda x: x["lo5_one_sided"] >= -5 - TOL,
-          "R4": lambda x: x["diff_pp"] >= 5 - TOL and x["lo2.5"] > 0}
     test = {"R1": "step, 7 cells: G - none >= +5 pp and lo2.5 > 0",
             "R2": "control, 7 cells: G - none, one-sided lo5 >= -2 pp",
             "R3": "step: C-GT - A-none (inits 0-39), one-sided lo5 >= -5 pp",
             "R4": "step, F and Gp: GT - T0 >= +5 pp and lo2.5 > 0",
             "R5": "step, 7 cells: GT - PPC (our implementation); lo2.5 > 0 ЛУЧШЕ, >= -2 pp НЕ ХУЖЕ, else ХУЖЕ"}
-    rules = {r: {"test": test[r], **rnd(d[r] or {}), "pass": d[r] is not None and ok[r](d[r])} for r in ok}
-    lo = d["R5"] and d["R5"]["lo2.5"]
-    rules["R5"] = {"test": test["R5"], **rnd(d["R5"] or {}),
-                   "category": None if lo is None else "ЛУЧШЕ" if lo > 0 else "НЕ ХУЖЕ" if lo >= -2 - TOL else "ХУЖЕ"}
+    rules = {r: {"test": test[r], **rnd(d[r] or {}), "pass": d[r] is not None and RULES[r](d[r])} for r in RULES}
+    rules["R5"] = {"test": test["R5"], **rnd(d["R5"] or {}), "category": r5_category(d["R5"] and d["R5"]["lo2.5"])}
     rules["R3"]["rates"] = {"C-GT": agg(idx["step", "C", "GT"].values(), itemgetter("success")),
                             "A-none": agg(idx["step", "A", "none"].values(), itemgetter("success"))}
     p = {r: v.get("pass") for r, v in rules.items()}
     verdict = ("НЕТ ДЕМО: рефлекс по геометрии в этой постановке не работает (R1 не прошёл)" if not p["R1"]
                else "НЕТ ДЕМО: R2 (без вреда) не прошёл" if not p["R2"]
                else "ДЕМО ЕСТЬ, ГЛАВНАЯ ОСЬ ПОДТВЕРЖДЕНА" if p["R3"] and p["R4"] else "ДЕМО ЕСТЬ")
-    res |= {"verdict": verdict, "rules": rules,
-            "t_ramp_k_p": sorted({(r.get("t_ramp"), r.get("k_p")) for r in rs}, key=str), "report": report(rs, idx)}
+    if "override" in gate:
+        verdict = "ОТСТУПЛЕНИЕ (проверка перед чтением не пройдена, см. read_gate.override): " + verdict
+    res |= {"verdict": verdict, "rules": rules, "t_ramp_k_p": coef, "report": report(rs, idx)}
     return res
 
 
@@ -192,9 +204,17 @@ def report(rs, idx):
         "shares": nest(core, [("kind", KINDS), ("method", METHODS)], lambda x: profile(x, SHARES)),
         "headroom_median": nest(hr, [stage], lambda x: profile(x, ratio, np.median)),
         "headroom_median_by_class": nest(hr, [stage, ("mag_class", (0, 1, 2))], lambda x: profile(x, ratio, np.median)),
+        "headroom_median_by_cell": nest(hr, [("cell", ("A", "C")), stage], lambda x: profile(x, ratio, np.median)),
+        "headroom_G": "≈ 1 after T_ramp by construction (spec §9); not measured",
         "gpost_vs_g_C": versus(idx, "C", "Gpost", "G"),
         "gj_vs_g_A": versus(idx, "A", "GJ", "G"),
     }
+
+
+def dump(res):
+    """JSON with innermost lists ([value, n]) on one line; real newlines only, so string values stay intact."""
+    text = json.dumps(res, indent=1, ensure_ascii=False)
+    return re.sub(r"\[\n\s+([^\[\]{}]*?)\n\s+\]", lambda m: "[" + re.sub(r"\n\s+", " ", m.group(1)) + "]", text)
 
 
 def selftest():
@@ -217,17 +237,35 @@ def selftest():
                                if k == "step" and m == "none" and i < 10 else None})
         return rs
 
+    # rule thresholds, directly: equality passes, beyond fails, "> 0" strict
+    x = lambda d=0.0, lo2=-9.0, lo5=-9.0: {"diff_pp": d, "lo2.5": lo2, "lo5_one_sided": lo5}  # noqa: E731
+    for r, t in (("R2", -2.0), ("R3", -5.0)):
+        assert RULES[r](x(lo5=t)) and not RULES[r](x(lo5=t - 0.01)), r
+    for r in ("R1", "R4"):
+        assert [RULES[r](x(d, lo2)) for d, lo2 in ((5.0, -9.0), (5.0, 0.1), (4.99, 0.1), (5.0, 0.0))] == \
+               [False, True, False, False], r
+    assert [r5_category(lo) for lo in (-2.0, -2.01, 0.0, 0.01)] == ["НЕ ХУЖЕ", "ХУЖЕ", "НЕ ХУЖЕ", "ЛУЧШЕ"]
+
     base = {"s10": 0.5}
-    good = grid({("step", "none"): 0.3, ("step", "T0"): 0.35, ("step", "PPC"): 0.4, ("step", "G"): 0.6,
-                 ("step", "GT"): 0.6})
+    pg = {("step", "none"): 0.3, ("step", "T0"): 0.35, ("step", "PPC"): 0.4, ("step", "G"): 0.6, ("step", "GT"): 0.6}
+    good = grid(pg)
     res = summarize(good, base)
     g, rl = res["read_gate"], res["rules"]
     assert g["pass"] and g["missing"] == 0 and g["expected"] == len(good) == 14456, g
     assert all(rl[r]["pass"] for r in ("R1", "R2", "R3", "R4")) and rl["R5"]["category"] == "ЛУЧШЕ", rl
-    assert res["verdict"] == "ДЕМО ЕСТЬ, ГЛАВНАЯ ОСЬ ПОДТВЕРЖДЕНА" and rl["R3"]["pairs"] == 1040, res["verdict"]
+    assert [rl[r]["pairs"] for r in ("R1", "R2", "R3", "R4", "R5")] == [1820, 728, 1040, 520, 1820], rl
+    assert res["verdict"] == "ДЕМО ЕСТЬ, ГЛАВНАЯ ОСЬ ПОДТВЕРЖДЕНА", res["verdict"]
     rep = res["report"]
     assert rep["headroom_median"]["near"]["10"][0] == 0.03 and "PPC9" in rep["by_cell"]["smooth"]["C"], rep
+    assert set(rep["headroom_median_by_cell"]) == {"A", "C"}, rep["headroom_median_by_cell"]
     json.dumps(res)
+
+    # the other verdict branches: only R2 fails; only R4 fails; only R3 fails
+    for p, fails, verdict in (({("control", "G"): 0.4}, {"R2"}, "НЕТ ДЕМО: R2 (без вреда) не прошёл"),
+                              ({("step", "F", "GT"): 0.35, ("step", "Gp", "GT"): 0.35}, {"R4"}, "ДЕМО ЕСТЬ"),
+                              ({("step", "C", "GT"): 0.2}, {"R3"}, "ДЕМО ЕСТЬ")):
+        res = summarize(grid(pg | p), base)
+        assert {r for r in RULES if not res["rules"][r]["pass"]} == fails and res["verdict"] == verdict, res["rules"]
 
     bad = grid({("step", "none"): 0.5, ("step", "A", "none"): 0.65, ("step", "G"): 0.53, ("step", "GT"): 0.45,
                 ("step", "T0"): 0.45, ("step", "PPC"): 0.45, ("control", "G"): 0.4})
@@ -255,8 +293,20 @@ def selftest():
     g = summarize(drop90, base)["read_gate"]
     assert not g["complete"] and not g["pass"] and g["missing"] == len(good) - len(drop90), g
     assert summarize(drop110, base)["read_gate"]["pass"]
-    res = summarize(drop90, base, "journal 2026-09-29: test")
-    assert res["read_gate"]["override"] == "journal 2026-09-29: test" and "rules" in res
+    note = "journal 2026-09-29: см. [ §8 ,   п. 2 ]"
+    res = summarize(drop90, base, note)
+    assert res["read_gate"]["override"] == note and "rules" in res and res["verdict"] == \
+        "ОТСТУПЛЕНИЕ (проверка перед чтением не пройдена, см. read_gate.override): ДЕМО ЕСТЬ, ГЛАВНАЯ ОСЬ ПОДТВЕРЖДЕНА"
+    assert json.loads(dump(res)) == json.loads(json.dumps(res))  # compaction leaves strings (the note) intact
+
+    # integrity stops: the same episode with another success; mixed coefficients
+    for raw, msg in ((good + [dict(good[0], success=not good[0]["success"])], "different success"),
+                     (good[1:] + [dict(good[0], t_ramp=8)], "mix coefficients")):
+        try:
+            summarize(raw, base)
+            raise AssertionError(msg)
+        except SystemExit as e:
+            assert msg in str(e), e
 
     # report on records with only the required fields, plus one duplicate and one record outside the grid
     need = ("suite", "task", "init", "kind", "cell", "method", "success")
@@ -281,9 +331,6 @@ if __name__ == "__main__":
     if not (a.grid and a.baseline):
         ap.error("grid and --baseline are required")
     src = Path(a.grid)
-    text = json.dumps(summarize(load(src), json.loads(Path(a.baseline).read_text()), a.override_gate),
-                      indent=1, ensure_ascii=False)
-    # innermost lists ([value, n]) on one line
-    text = re.sub(r"\[\s+([^\[\]{}]*?)\s+\]", lambda m: "[" + " ".join(m.group(1).split()) + "]", text)
+    text = dump(summarize(load(src), json.loads(Path(a.baseline).read_text()), a.override_gate))
     (src.parent / "summary.json").write_text(text + "\n")
     print(text)
