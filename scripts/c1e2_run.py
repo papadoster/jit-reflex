@@ -268,7 +268,7 @@ def run_batch(vec, eps):
                 c1 = brain(one, [desc[i]], [z])[0][0]
                 hr[i] = {"ratio": orx.headroom(c0, c1, pad[i]["ep"].delta),
                          "dist_m": float(np.linalg.norm(eef[i] - obj[i]))}
-        bad = np.maximum(bad, info["bad_qacc"])
+        bad[live] = np.maximum(bad[live], info["bad_qacc"][live])  # live steps only
         for i in range(n):
             if live[i] and bool(info["is_success"][i]):
                 succ[i], steps_ok[i], live[i] = True, t + 1, False
@@ -320,7 +320,11 @@ for st, tk in tasks:
             except Exception as exc:  # spec §8: a fallen batch is skipped here; a rerun with resume retries it
                 print(f"FAILED {st}:{tk} {key[0]},{key[1]} [{j}:{j + args.n_envs}]: {exc!r}", flush=True)
                 traceback.print_exc()
-                vec.close(terminate=True)
+                try:
+                    vec.close(terminate=True)
+                except Exception:  # an async worker died natively: kill the rest directly
+                    for pr in getattr(vec, "processes", []):
+                        pr.terminate()
                 vec = make_vec(st, tk)
                 continue
             with open(args.out, "a") as f:
