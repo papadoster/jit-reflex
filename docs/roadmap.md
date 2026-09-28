@@ -70,7 +70,9 @@ E1 shows ρ falling as the deviation grows, with the mean dominated by rare cont
 - **Expected:** A2C2 wins on solve rate. The honest position then becomes training-free versus trained.
 - A systematic literature review, before phase C.
 
-**Status: A2C2 run in B2+B5, 2026-09-27** (report-only baseline, [report §10](results/report.md#10-phase-b2b5-the-cheaper-package-in-closed-loop-and-a-price-comparison)). The bt-kinetix variant is flat at about 76% at every delay and does not beat T3. Its mean hides two collapsed levels; on the other 10 it is +28.5 pp over RTC at d = 4. The expectation above held only in part. A distilled variant, the same head trained on fresh calls of the policy itself, beat every `J` variant in 8 of 9 cells, unevenly across levels. The literature review is still open.
+**Status: A2C2 run in B2+B5, 2026-09-27** (report-only baseline, [report §10](results/report.md#10-phase-b2b5-the-cheaper-package-in-closed-loop-and-a-price-comparison)). The bt-kinetix variant is flat at about 76% at every delay and does not beat T3. Its mean hides two collapsed levels; on the other 10 it is +28.5 pp over RTC at d = 4. The expectation above held only in part. A distilled variant, the same head trained on fresh calls of the policy itself, beat every `J` variant in 8 of 9 cells, unevenly across levels.
+
+**Status: A2C2 reproduced, 2026-09-28** (report-only rerun, [report §11](results/report.md#11-a2c2-reproduced-a-report-only-rerun), [Russian memo](results/a2c2-fix.md), [spec](superpowers/specs/2026-09-28-a2c2-fix-design.md)). Trained on the BC policy's own states, labelled by one PPO expert, with the paper's wider network, A2C2 solves about 95% in every cell. It beats T3 by 14–18 pp on every level and seed, and the distilled head too (unequal comparison). **The expectation above now holds:** the honest position is training-free versus trained. `J` needs no data, training or expert; A2C2 needs an expert that solves each level. The literature review is done: [related work](results/related-work.md).
 
 ## B5. Compute-matched comparison (only after B2)
 
@@ -78,7 +80,7 @@ Does "call a big policy rarely, plus a cheap reflex" beat "call it often" at equ
 - reflex with s = 6 costs 525 / 6 ≈ 88 network evaluations per step and solves 77.3%;
 - RTC with s = 2 costs 7.5 per step and solves 84.1%.
 
-**Status: done 2026-09-27** (in the same GPU run as B2). At honest latency on one GPU no reflex variant fits: computing `J` alongside the next call slows it 2.15×, and M3 misses by 3.8% (NOT FEASIBLE). When one delay is imposed on everyone, T3 beats naive, RTC, 10-step RTC and pred by +5.6…+8.7 pp (PASS). On the latency-fair frontier the distilled head dominates at base delays 2–4.
+**Status: done 2026-09-27** (in the same GPU run as B2). At honest latency on one GPU no reflex variant fits: computing `J` alongside the next call slows it 2.15×, and M3 misses by 3.8% (NOT FEASIBLE). When one delay is imposed on everyone, T3 beats naive, RTC, 10-step RTC and pred by +5.6…+8.7 pp (PASS). On the latency-fair frontier the distilled head dominates at base delays 2–4; the fixed A2C2 of B4 (2026-09-28) dominates it in turn at every base delay.
 
 ## C1. A real VLA action head
 
