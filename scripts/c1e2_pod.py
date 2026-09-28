@@ -10,7 +10,6 @@ import json
 import re
 import sys
 import tempfile
-from fractions import Fraction
 from pathlib import Path
 
 N_TASKS, N_EP, N_PILOT = 26, 10, 104
@@ -36,20 +35,27 @@ def baseline(dirs):
 
 
 def pilot(files):
-    """The spec §7 choice (T_ramp, K_p): highest success; ties -> larger T_ramp, then smaller K_p."""
-    res = {}
+    """The spec §7 choice (T_ramp, K_p): highest success; ties -> larger T_ramp, then smaller K_p. §7 compares the six
+    combos on the same episodes: stops unless each has the same N_PILOT distinct episodes (the owner decides)."""
+    res, eps = {}, {}
     for f in files:
         rs = [json.loads(line) for line in Path(f).read_text().splitlines() if line.strip()]
         pair = {(r["t_ramp"], r["k_p"]) for r in rs}
         if len(pair) != 1:
             sys.exit(f"!!! {f}: coefficients {pair}")
-        res[pair.pop()] = (sum(r["success"] for r in rs), len(rs))
+        c = pair.pop()
+        if c in res:
+            sys.exit(f"!!! {f}: a second file with T_ramp={c[0]} K_p={c[1]}")
+        res[c] = (sum(r["success"] for r in rs), len(rs))
+        eps[c] = {(r["suite"], r["task"], r["init"], r["kind"], r["cell"], r["method"]) for r in rs}
     if set(res) != PILOT:
         sys.exit(f"!!! pilot combos {sorted(res)}, expected {sorted(PILOT)}")
     for (tr, kp), (k, n) in sorted(res.items()):
-        warn = "" if n == N_PILOT else f"   !!! only {n} of {N_PILOT} episodes"
-        print(f"T_ramp={tr:<3} K_p={kp:<4} success {k}/{n} = {k / n:.3f}{warn}")
-    return max(res, key=lambda c: (Fraction(*res[c]), c[0], -c[1]))
+        print(f"T_ramp={tr:<3} K_p={kp:<4} success {k}/{n} = {k / n:.3f} ({len(eps[tr, kp])} distinct episodes)")
+    if any(n != N_PILOT or len(eps[c]) != N_PILOT or eps[c] != eps[1, 0.3] for c, (_, n) in res.items()):
+        sys.exit(f"!!! spec §7 compares the six combos on the same {N_PILOT} episodes, and these are not (above). "
+                 "The owner decides, e.g. rerun the pilot: it resumes and retries failed batches")
+    return max(res, key=lambda c: (res[c][0], c[0], -c[1]))
 
 
 def stops(f, *a):
@@ -64,21 +70,38 @@ def selftest():
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
 
-        def run_pilot(scores):  # {(tr, kp): (successes, episodes)}
+        def run_pilot(scores):  # {(tr, kp): (successes, episodes)}; episode i: task i // 4, init 44 + i % 4
             for f in tmp.glob("*.jsonl"):
                 f.unlink()
             for (tr, kp), (k, n) in scores.items():
-                (tmp / f"pilot_tr{tr}_kp{kp}.jsonl").write_text(
-                    "".join(json.dumps({"t_ramp": tr, "k_p": kp, "success": i < k}) + "\n" for i in range(n)))
+                (tmp / f"pilot_tr{tr}_kp{kp}.jsonl").write_text("".join(json.dumps(
+                    {"suite": "libero_spatial", "task": i // 4, "init": 44 + i % 4, "kind": "step", "cell": "C",
+                     "method": "G", "t_ramp": tr, "k_p": kp, "success": i < k}) + "\n" for i in range(n)))
             return pilot(sorted(tmp.glob("*.jsonl")))
+
+        def edited(old, new, files="pilot_tr5_kp0.3.jsonl"):  # the six files of a tie, one line edited in files
+            run_pilot(tie)
+            for f in tmp.glob(files):
+                f.write_text(f.read_text().replace(old, new, 1))
+            return sorted(tmp.glob("*.jsonl"))
 
         tie = {c: (60, N_PILOT) for c in PILOT}
         assert run_pilot(tie) == (10, 0.3)  # all equal: larger T_ramp, then smaller K_p
         assert run_pilot(tie | {(10, 0.3): (59, N_PILOT)}) == (10, 1.0)  # T_ramp decides before K_p
         assert run_pilot(tie | {(10, 0.3): (59, N_PILOT), (10, 1.0): (59, N_PILOT)}) == (5, 0.3)
         assert run_pilot(tie | {(1, 1.0): (61, N_PILOT)}) == (1, 1.0)  # success first
-        assert run_pilot(tie | {(1, 1.0): (58, 96)}) == (1, 1.0)  # a rate, not a count: 58/96 > 60/104
         assert stops(run_pilot, {(1, 0.3): (1, N_PILOT)})  # a missing combo stops the choice
+        # not the same N_PILOT episodes in every combo (§7) stops: fewer, more, another episode, a duplicate
+        assert stops(run_pilot, tie | {(1, 1.0): (58, 96)}) and stops(run_pilot, tie | {(5, 1.0): (60, N_PILOT + 1)})
+        assert stops(pilot, edited('"init": 47', '"init": 48')) and stops(pilot, edited('"init": 47', '"init": 46'))
+        assert stops(pilot, edited('"init": 47', '"init": 46', "*.jsonl"))  # the same duplicate in all six
+        assert pilot(fs := edited("", "")) == (10, 0.3)  # the unedited files pass
+        fs[0].write_text(fs[0].read_text() + fs[0].read_text().splitlines()[0] + "\n")  # one record written twice
+        assert stops(pilot, fs)
+        # two files with the same (T_ramp, K_p) stop
+        run_pilot(tie)
+        (tmp / "pilot_tr5_kp0.3_copy.jsonl").write_text((tmp / "pilot_tr5_kp0.3.jsonl").read_text())
+        assert stops(pilot, sorted(tmp.glob("*.jsonl")))
         # eval_info.json as lerobot_eval.eval_main writes it (per_group and overall are not read)
         for s, ks in (("s1", (7, 7, 7)), ("s10", (9, 8, 5))):
             for (suite, ids), k in zip((("libero_spatial", range(10)), ("libero_object", range(10)),
