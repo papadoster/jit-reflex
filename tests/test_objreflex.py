@@ -333,3 +333,15 @@ def test_ppc_resets_near_the_object():
     ag.observe(1, np.zeros(3), np.array([0.03, 0.01, 0]))
     a = ag.act(1, ag.sched.action(1))
     assert np.array_equal(a, ag.sched.action(1)) and ag.ppc_next == math.inf
+
+
+def test_ppc_offsets_are_replanned_not_summed():
+    ag, x, p = orx.Agent("PPC", 50, 0), np.zeros(3), np.array([0.10, 0.0, 0.0])
+    ag.observe(0, x, p)
+    ag.sched.issue(0, np.tile([0.7, 0, 0, 0, 0, 0, -1.0], (50, 1)))
+    ag.sched.arrive(0)
+    ag.act(0, ag.sched.action(0))
+    for t in (1, 2, 3):  # the object moves +2 mm/step across the plan
+        ag.observe(t, x, p + np.array([0.0, 0.002 * t, 0.0]))
+        a = ag.act(t, ag.sched.action(t))
+        assert a[1] == pytest.approx(0.8 * 0.002 / orx.G_POS)  # the latest 0.8 v_perp, not 0.8 + 0.6

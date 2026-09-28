@@ -162,7 +162,7 @@ class Agent:
 
     def on_new_chunk(self):
         """Called when a new chunk starts being used (G's anchor moves with sched.t_obs by itself)."""
-        self.ppc_next = math.inf
+        self.ppc_next, self.ppc_off = math.inf, {}  # PPC: the next chunk starts unbiased (delta_K = 0)
 
     def observe(self, t, eef, obj):
         self.x, self.p_hist[t], self.c_hist[t] = np.array(eef, float), np.array(obj, float), self.c.copy()
@@ -216,7 +216,9 @@ class Agent:
     def _ppc(self, t, a):
         """Our PPC (paper §3, arXiv 2605.11459): velocity v(t) = p(t) - p(t-1) from the oracle tracker; pace
         shortens the executing chunk (an earlier call), path adds (1 - F_{2k+1}/F_{2K+1}) v_perp over the next K
-        steps. Reset (no correction) within R_GRIP of the object. The 2-EMA latch stabiliser is not implemented."""
+        steps. Our interpretation: dp is the step of the clipped plan action (as in G); the offsets are re-planned
+        at each velocity measurement (the latest one wins, no summing) and cleared at a new chunk. Reset (no
+        correction) within R_GRIP of the object. The 2-EMA latch stabiliser is not implemented."""
         p, x = self.p_hist[t], self.x
         if np.linalg.norm(x - p) < R_GRIP:
             self.ppc_next, self.ppc_off = math.inf, {}
@@ -224,13 +226,12 @@ class Agent:
         if t - 1 in self.p_hist:
             v = p - self.p_hist[t - 1]
             if np.linalg.norm(v) > PPC_V_MIN:
-                dp = G_POS * a[:3]
+                dp = G_POS * np.clip(a[:3], -1, 1)
                 _, k_exec = ppc_pace(v, dp, self.sched.s)
                 self.ppc_next = min(self.ppc_next, self.sched.t_obs + k_exec)
                 ndp = np.linalg.norm(dp)
                 v_perp = v - (v @ dp) / ndp**2 * dp if ndp > 1e-9 else v
-                for j, w in enumerate(ppc_profile(PPC_K)):
-                    self.ppc_off[t + j] = self.ppc_off.get(t + j, 0) + w * v_perp
+                self.ppc_off = {t + j: w * v_perp for j, w in enumerate(ppc_profile(PPC_K))}
         off = self.ppc_off.pop(t, None)
         if off is not None:
             a[:3] = np.clip(a[:3] + off / G_POS, -1, 1)
