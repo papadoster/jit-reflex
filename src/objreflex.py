@@ -188,7 +188,8 @@ class Agent:
         cap = np.linalg.norm(u) / self.t_ramp
         if np.linalg.norm(e) > cap:
             e *= cap / np.linalg.norm(e)
-        new = np.clip(a[:3] + e / G_POS, -1, 1)
-        self.c = self.c + G_POS * (new - a[:3])
+        base = np.clip(a[:3], -1, 1)  # what the arm gets from the plan alone
+        new = np.clip(base + e / G_POS, -1, 1)
+        self.c = self.c + G_POS * (new - base)
         a[:3] = new
         return a

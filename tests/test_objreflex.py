@@ -240,3 +240,46 @@ def test_g_counts_only_the_extra_actually_sent_under_saturation():
             assert ag.c[0] == 0.0  # saturated at +1: nothing sent, nothing counted in E
         x = x + orx.G_POS * a[:3]
     assert np.linalg.norm(x - p) < 1e-3  # the whole shift arrives once the plan leaves saturation
+
+
+def test_g_does_not_count_phantom_extra_beyond_the_action_limit():
+    ag = orx.Agent("G", 50, 0, t_ramp=1, k_p=1.0)
+    p = np.array([0.10, 0.0, 0.0])
+    ag.observe(0, np.zeros(3), p)
+    ag.sched.issue(0, np.tile([1.3, 0, 0, 0, 0, 0, -1.0], (50, 1)))  # the brain emits beyond the +1 limit
+    ag.sched.arrive(0)
+    ag.act(0, ag.sched.action(0))
+    ag.p_pre, p = p.copy(), p + np.array([0.03, 0, 0])
+    for t in range(1, 5):
+        ag.observe(t, np.zeros(3), p)
+        ag.act(t, ag.sched.action(t))
+    assert ag.c[0] == 0.0  # nothing sent beyond +1, nothing counted
+
+
+def test_triggers_off_after_close_command():
+    ag = orx.Agent("T0", 50, 0)
+    ag.observe(0, np.zeros(3), np.zeros(3))
+    ag.sched.issue(0, np.zeros((50, 7)))
+    ag.sched.arrive(0)
+    ag.act(0, np.array([0, 0, 0, 0, 0, 0, 1.0]))  # close
+    ag.observe(1, np.zeros(3), np.array([0.03, 0, 0]))
+    assert ag.trigger(1) is False
+
+
+def test_g_leaves_rotation_and_gripper_untouched():
+    ag = orx.Agent("G", 50, 0, t_ramp=1, k_p=1.0)
+    x, p = np.zeros(3), np.array([0.10, 0.0, 0.0])
+    ch = _brain(x, p)
+    ch[:, 3:6] = [0.2, -0.3, 0.4]
+    for t in range(20):
+        if t == 5:
+            ag.p_pre, p = p.copy(), p + np.array([0.03, 0, 0])
+        ag.observe(t, x, p)
+        if t == 0:
+            ag.sched.issue(0, ch)
+            ag.sched.arrive(0)
+        plan = ag.sched.action(t)
+        a = ag.act(t, plan)
+        assert np.array_equal(a[3:7], plan[3:7])
+        x = x + orx.G_POS * a[:3]
+    assert ag.g_on
