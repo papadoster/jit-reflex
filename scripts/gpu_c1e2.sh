@@ -14,11 +14,13 @@
 #   ./scripts/gpu_c1e2.sh grid TR KP spec 11(c), section 6: 14456 episodes into results/c1-e2/grid.jsonl. Refuses unless
 #                                    the spec at HEAD and the pilot's pilot_choice.txt carry that line, HEAD is pushed,
 #                                    base ran on this pod and the runner code is the pilot's (results/c1-e2/CODE)
-# Every stage first sets up (idempotent: venv/ with pinned versions, LIBERO config and assets, CUDA and EGL checks). On
-# every exit, an error or Ctrl-C included, it appends its environment to results/c1-e2/pod_env_<stage>.txt, refreshes
+# Every stage first refuses a checkout where git tracks results/c1-e2 (a new clone would skip base and resume the grid
+# to 0 episodes), then sets up (idempotent: venv/ with pinned versions, LIBERO config and assets, CUDA and EGL checks).
+# On every exit, an error or Ctrl-C included, it appends its environment to results/c1-e2/pod_env_<stage>.txt, refreshes
 # results/c1-e2/MANIFEST.sha256 and packs results/c1-e2 into c1e2_results.tgz. Logs: results/c1-e2/logs/.
-# Every grid and pilot line runs twice: pass 2 resumes (the runner skips finished episodes) and retries failed batches,
-# 2 envs at a time if pass 1 ran to its end. A runner or lerobot-eval whose log has not grown for STALL seconds (default
+# Every grid and pilot line gets a pass 2 unless pass 1 exited cleanly without a FAILED line (the runner logs a failed
+# batch and goes on): pass 2 resumes (the runner skips finished episodes) and retries failed batches, 2 envs at a time
+# after 1-3 FAILED lines and a clean exit. A runner or lerobot-eval whose log has not grown for STALL seconds (default
 # 1200, e.g. STALL=1800 ./scripts/gpu_c1e2.sh grid ..) is killed with its whole process group: a wedged env worker or EGL
 # blocks forever while the pod bills. Resume: rerun the same stage.
 # Download (e.g. scp -P <port> root@<pod ip>:/workspace/jit-reflex/c1e2_results.tgz . or runpodctl send), then on the Mac:
@@ -141,6 +143,7 @@ wd() {
   trap "kill -KILL -- -$pid 2>/dev/null; exit 130" INT TERM HUP
   while kill -0 $pid 2>/dev/null; do
     sleep 5
+    kill -0 $pid 2>/dev/null || break  # ended in this window: not a stall
     m=$(wc -c < "$log")
     [ "$m" = "$n" ] || { n=$m; t=$SECONDS; }
     if [ $((SECONDS - t)) -ge "$STALL" ]; then
@@ -154,17 +157,24 @@ wd() {
   return $rc
 }
 
-run2() {  # run2 <log> <runner args>: every line twice; pass 2 resumes and retries failed batches, 2 envs at a time when
-  # pass 1 ran to its end (a deterministic failure then costs 2 episodes; the runner pads an odd remainder with an idle env)
-  local log=$LOG/$1.log pass small=; shift
-  for pass in 1 2; do
-    echo "[$(date +%T)] pass $pass: $* $small" | tee -a "$log"
-    if wd "$log" $P scripts/c1e2_run.py --vector async --device cuda "$@" $small; then
-      small="--n-envs 2"  # argparse keeps the last --n-envs
-    else
-      echo "!!! runner exited with an error (pass $pass)" | tee -a "$log"
-    fi
-  done
+run2() {  # run2 <name> <runner args>: pass 1, then pass 2 sized by the FAILED lines pass 1 added to $LOG/<name>.log (the
+  # runner catches a failed batch and still exits 0): none and exit 0 -> skipped; 1-3 and exit 0 -> 2 envs at a time (a
+  # deterministic failure then costs 2 episodes; the runner pads an odd remainder with an idle env); more, or an error
+  # or stall -> the line's own batch size. Pass 1's last rate goes to $LOG/<name>.rates (the pilot's forecast).
+  local log=$LOG/$1.log rates=$LOG/$1.rates n rc f r small=; shift
+  : >> "$log"; n=$(wc -c < "$log")
+  echo "[$(date +%T)] pass 1: $*" | tee -a "$log"
+  wd "$log" $P scripts/c1e2_run.py --vector async --device cuda "$@"; rc=$?
+  f=$(tail -c +$((n + 1)) "$log" | grep -c FAILED)
+  r=$(tail -c +$((n + 1)) "$log" | rate -); [ -z "$r" ] || echo "${r% s/episode}" >> "$rates"
+  [ $rc = 0 ] || echo "!!! runner exited with an error (pass 1)" | tee -a "$log"
+  if [ $rc = 0 ] && [ "$f" = 0 ]; then
+    echo "[$(date +%T)] pass 2 skipped: pass 1 exited cleanly, no failed batch" | tee -a "$log"; return
+  fi
+  [ $rc = 0 ] && [ "$f" -le 3 ] && small="--n-envs 2"  # argparse keeps the last --n-envs
+  echo "[$(date +%T)] pass 2 ($f failed batches in pass 1, exit $rc): $* $small" | tee -a "$log"
+  wd "$log" $P scripts/c1e2_run.py --vector async --device cuda "$@" $small \
+    || echo "!!! runner exited with an error (pass 2)" | tee -a "$log"
 }
 
 rate() { grep -o '[0-9.]* s/episode' "$1" | tail -1; }
@@ -173,6 +183,10 @@ case "${1:-}" in
   smoke | base | pilot | grid) ;;
   *) echo "usage: $0 smoke | base | pilot | grid T_RAMP K_P"; exit 1 ;;
 esac
+# results committed to the branch would make a new clone skip base (eval_info.json exists) and resume the grid to 0
+[ -z "$(git ls-files $O)" ] || { echo "!!! git tracks results of an earlier run under $O: base would skip and the grid"
+  echo "    would resume to 0 episodes, measuring nothing. Run from a commit without them, or move them away"
+  echo "    (git rm -r --cached $O and a new commit), as the owner decides."; exit 1; }
 setup 2>&1 | tee -a $LOG/setup.log
 [ "${PIPESTATUS[0]}" = 0 ] || exit 1
 STAGE=$1
@@ -223,10 +237,11 @@ case "$STAGE" in
     # its line "C1-E2 coefficients: T_ramp=.. K_p=.." is what the grid checks
     $P scripts/c1e2_pod.py pilot $O/pilot_tr*_kp*.jsonl 2>&1 | tee $O/pilot_choice.txt
     [ "${PIPESTATUS[0]}" = 0 ] || exit 1
-    r=$(rate $LOG/pilot.log); r=${r% s/episode}
+    r=$(awk '{ s += $1; n++ } END { if (n) printf "%.2f", s / n }' $LOG/pilot.rates 2>/dev/null)  # pass 1 only
     h=$(awk -v r="${r:-0}" 'BEGIN { printf "%.1f", r * 14456 / 3600 }')
-    echo "Rough grid forecast: ${r:-?} s/episode x 14456 = $h h (rough: the pilot batches 4 envs, the grid 10-16;" \
-      "the G+J line is slower, spec: about +0.5 h). Spec 11 fuse: > 10 h -> the owner cuts lines." \
+    echo "Rough grid forecast: ${r:-?} s/episode (mean of the pilot's first passes) x 14456 = $h h (rough: the pilot" \
+      "batches 4 envs, the grid 10-16; the G+J line is slower, spec: about +0.5 h). Spec 11 fuse: > 10 h -> the owner" \
+      "cuts lines." \
       | tee -a $O/pilot_choice.txt
     ;;
   grid)
@@ -239,6 +254,8 @@ case "$STAGE" in
       echo "    Journal the pilot's line in the spec on the Mac, commit, push, then here: git pull"; exit 1; }
     c=$(grep -oE "$mark" $O/pilot_choice.txt 2>/dev/null | tail -1)
     [ "$c" = "$want" ] || { echo "!!! the pilot on this pod chose '${c:-nothing}' ($O/pilot_choice.txt), not '$want'"
+      exit 1; }
+    git rev-parse -q --verify @{u} >/dev/null 2>&1 || { echo "!!! no upstream branch: git checkout c1-e2 && git pull"
       exit 1; }
     git fetch -q && git merge-base --is-ancestor HEAD @{u} || {
       echo "!!! HEAD is not pushed (not in its upstream): push the journal commit from the Mac, then here: git pull"; exit 1; }

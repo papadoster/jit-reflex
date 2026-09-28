@@ -270,6 +270,12 @@ def test_triggers_off_after_close_command():
     assert ag.trigger(1) is False
 
 
+def test_gj_only_without_delay():
+    orx.Agent("GJ", *orx.CELLS["A"])
+    with pytest.raises(AssertionError):
+        orx.Agent("GJ", *orx.CELLS["D"])
+
+
 def test_g_leaves_rotation_and_gripper_untouched():
     ag = orx.Agent("G", 50, 0, t_ramp=1, k_p=1.0)
     x, p = np.zeros(3), np.array([0.10, 0.0, 0.0])

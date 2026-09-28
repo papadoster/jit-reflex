@@ -148,6 +148,8 @@ class Agent:
 
     def __init__(self, method, s, d, t_ramp=5, k_p=1.0):
         assert method in self.METHODS, method
+        # GJ's o_hat assumes the chunk executes from its own observation step: true only at d = 0 (spec: cell A)
+        assert method != "GJ" or d == 0, "GJ needs d = 0"
         self.method, self.sched = method, Schedule(s, d)
         self.t_ramp, self.k_p = t_ramp, k_p
         self.p_hist, self.c_hist = {}, {}  # object position and cumulative extra (m) by step
