@@ -283,3 +283,21 @@ def test_g_leaves_rotation_and_gripper_untouched():
         assert np.array_equal(a[3:7], plan[3:7])
         x = x + orx.G_POS * a[:3]
     assert ag.g_on
+
+
+def test_g_carries_its_extra_across_a_delayed_reanchor():
+    # the shift lands while a pre-shift call is in flight; the brain never moves, so the arm moves only by G's extra
+    for s, d in ((10, 10), (10, 20)):
+        ag, p = orx.Agent("G", s, d, t_ramp=5, k_p=1.0), np.array([0.10, 0, 0])
+        for t in range(60):
+            if t == 12:
+                p = p + np.array([0.03, 0, 0])
+            ag.observe(t, np.zeros(3), p)
+            if ag.sched.arrive(t):
+                ag.on_new_chunk()
+            if ag.sched.wants_call(t, ag.trigger(t)):
+                ag.sched.issue(t, np.zeros((50, 7)))
+                if ag.sched.arrive(t):
+                    ag.on_new_chunk()
+            ag.act(t, ag.sched.action(t))
+        assert ag.c[0] == pytest.approx(0.03)  # sent once, not again after the chunk observed at 10 arrives

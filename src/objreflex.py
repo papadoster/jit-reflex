@@ -137,7 +137,8 @@ class Agent:
         self.c = np.zeros(3)
         self.p_pre = None  # set by the runner when the perturbation fires (Gpost anchor)
         self.grasp_started = False
-        self.g_on = False  # G has acted at least once (report: false triggers in control)
+        # G engaged at least once (|U| > EPS), even if clipping sent nothing (report: false triggers in control)
+        self.g_on = False
         self.ppc_next, self.ppc_off = math.inf, {}
         self.j_corr, self.o_raw = None, {}  # GJ: callable(t, k) -> J_k (o_t - o_hat_k); raw states by step
 
@@ -169,10 +170,10 @@ class Agent:
     def act(self, t, a):
         a = np.array(a, dtype=float)
         if not self.grasp_started:
-            if self.method in ("G", "GT", "Gpost", "GJ"):
-                a = self._g(t, a)
             if self.method == "GJ" and self.j_corr is not None:
                 a = np.clip(a + np.clip(self.j_corr(t, t - self.sched.t_obs), -1, 1), -1, 1)
+            if self.method in ("G", "GT", "Gpost", "GJ"):
+                a = self._g(t, a)
             if self.method == "PPC":
                 a = self._ppc(t, a)
         if a[6] > 0:
