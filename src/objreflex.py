@@ -247,3 +247,26 @@ class Agent:
         if off is not None:
             a[:3] = np.clip(np.clip(a[:3], -1, 1) + off / G_POS, -1, 1)
         return a
+
+
+def episode_metrics(xs, acts, objs, lift=0.03):
+    """Report metrics (spec §9) from per-step EEF positions, executed actions and object positions."""
+    xs, acts, objs = (np.asarray(v, float) for v in (xs, acts, objs))
+    closed = acts[:, 6] > 0
+    first = int(np.argmax(closed)) if closed.any() else None
+    lifted = (objs[:, 2] - objs[0, 2] >= lift) & np.maximum.accumulate(closed)
+    return {
+        "path_m": float(np.linalg.norm(np.diff(xs, axis=0), axis=1).sum()),
+        "jerk": float((np.diff(acts, axis=0) ** 2).sum()),
+        "grasp_miss_m": None if first is None else float(np.linalg.norm((xs[first] - objs[first])[:2])),
+        "grasp_ok": bool(lifted.any()),
+        "t_close": first,
+    }
+
+
+def headroom(ch_before, ch_after, delta):
+    """C1-E1 headroom on the same state: the share of the shift the brain's own fresh plan follows over h steps."""
+    d = np.asarray(ch_after, float) - np.asarray(ch_before, float)
+    delta = np.asarray(delta, float)
+    u = delta / np.linalg.norm(delta)
+    return {h: float(G_POS * d[:h, :3].sum(0) @ u / np.linalg.norm(delta)) for h in (10, 25, 50)}

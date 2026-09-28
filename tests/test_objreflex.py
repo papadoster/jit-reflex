@@ -409,3 +409,25 @@ def test_ppc9_still_object_clears_the_tail_of_a_jump():
     ag.observe(2, x, p + np.array([0.0, 0.02, 0.0]))  # then still
     ag.trigger(2)
     assert np.array_equal(ag.act(2, ag.sched.action(2)), ag.sched.action(2))
+
+
+def test_episode_metrics():
+    xs = np.array([[0, 0, 0], [0.01, 0, 0], [0.02, 0, 0], [0.02, 0.01, 0]], float)
+    acts = np.array([[1, 0, 0, 0, 0, 0, -1], [1, 0, 0, 0, 0, 0, -1], [0, 1, 0, 0, 0, 0, 1], [0, 1, 0, 0, 0, 0, 1]], float)
+    objs = np.array([[0.03, 0, 0.90]] * 3 + [[0.03, 0, 0.95]], float)
+    m = orx.episode_metrics(xs, acts, objs)
+    assert m["path_m"] == pytest.approx(0.03)
+    assert m["jerk"] == pytest.approx(2 + 4)  # |a1-a0|^2 = 0, |a2-a1|^2 = 1+1+4, |a3-a2|^2 = 0
+    assert m["grasp_miss_m"] == pytest.approx(0.01)  # at the first close command (step 2): xy distance
+    assert m["grasp_ok"]  # lifted 5 cm with the gripper closed
+    assert m["t_close"] == 2
+    m = orx.episode_metrics(xs, np.where(np.arange(7) == 6, -1.0, acts), objs)  # never closes
+    assert m["t_close"] is None and m["grasp_miss_m"] is None and not m["grasp_ok"]
+
+
+def test_headroom_ratio():
+    ch0 = np.zeros((50, 7))
+    ch1 = np.zeros((50, 7))
+    ch1[:10, 0] = 0.5  # the fresh plan moves 10 * 0.5 * 11 mm = 5.5 cm along +x over 10 steps
+    r = orx.headroom(ch0, ch1, np.array([0.055, 0, 0]))
+    assert r[10] == pytest.approx(1.0) and r[50] == pytest.approx(1.0)
