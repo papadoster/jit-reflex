@@ -379,12 +379,14 @@ PAPER_HEAD = {"hidden": (512, 512), "layer_norm": True}  # the A2C2 paper's text
 
 
 def relabel(level_path: str, experts: Sequence[str], out_dir: str, mode: str = "one", paper: bool = False,
-            run_path: str = "checkpoints/bc", num_envs: int = 128, num_chunks: int = 192, seed: int = 6000,
-            num_epochs: int = EPOCHS):
+            history: bool = False, wide: bool = False, run_path: str = "checkpoints/bc", num_envs: int = 128,
+            num_chunks: int = 192, seed: int = 6000, num_epochs: int = EPOCHS):
     """A2C2 on the BC policy's own states (docs/results/b2b5-checks.md (a2)): naive rollouts at d = 0, s = H labelled
     by PPO experts. mode "one": the first expert's mode; "mix": a sample of the episode's expert, as generate_data
     labels. paper: PAPER_HEAD on the history obs (4 frames + last action) instead of bt-kinetix's head on one frame.
-    The MSE check is on 10% extra held-out windows."""
+    The MSE check is on 10% extra held-out windows. history: the head sees the history obs (4 frames + last action);
+    wide: PAPER_HEAD (512 x 512 with LayerNorm) instead of bt-kinetix's 256 -> 512; paper = history and wide."""
+    history, wide = history or paper, wide or paper
     start = time.time()
     env, env_params, level, policy, O, A, i = _env_and_dims(run_path, level_path)
     OH = HISTORY * O + A
@@ -407,7 +409,7 @@ def relabel(level_path: str, experts: Sequence[str], out_dir: str, mode: str = "
         W = obs.shape[0]
         tgt = label(obs.reshape(W * H, OH), who.reshape(-1), jax.random.fold_in(k_lab, chunks)).reshape(W, H, A)
         it = distill_items(obs, chunk, done, tgt)
-        if not paper:
+        if not history:
             it["obs"] = last_frame(it["obs"], O)
         return it, W * H
 
@@ -418,11 +420,11 @@ def relabel(level_path: str, experts: Sequence[str], out_dir: str, mode: str = "
     def batch(d, key, idx):
         return d["obs"][idx], d["base"][idx], time_feature(d["k"][idx], H), d["target"][idx]
 
-    head, losses = fit(k_fit, OH if paper else O, A, batch, train, n, num_epochs, head_kw=PAPER_HEAD if paper else None)
+    head, losses = fit(k_fit, OH if history else O, A, batch, train, n, num_epochs, head_kw=PAPER_HEAD if wide else None)
     mse, mse_base = _mse(head, val["obs"], val["base"], time_feature(val["k"], H), val["target"])
     _save(head, out_dir, level_path, {
-        "level": level_path, "mode": mode, "paper": paper, "experts": "|".join(pathlib.Path(p).name for p in experts),
-        "transitions": n_trans, "items": n, "steps": num_epochs * (n // BATCH), "loss_first": losses[0],
+        "level": level_path, "mode": mode, "history": history, "wide": wide,
+        "experts": "|".join(pathlib.Path(p).name for p in experts), "transitions": n_trans, "items": n, "steps": num_epochs * (n // BATCH), "loss_first": losses[0],
         "loss_last": losses[-1], "mse": mse, "mse_base": mse_base, "check": "held-out",
         "seconds": round(time.time() - start),
     })

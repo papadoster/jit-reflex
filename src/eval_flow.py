@@ -320,6 +320,9 @@ METHODS = {
     "a2c2_relabel": HeadMethodConfig("a2c2_relabel"),
     "a2c2_mix": HeadMethodConfig("a2c2_mix"),
     "a2c2_paper": HeadMethodConfig("a2c2_paper", history=True, hidden=a2c2.PAPER_HEAD["hidden"], layer_norm=True),
+    # docs/results/b2b5-checks.md (a3), exploratory: which half of a2c2_paper matters, the history obs or the network
+    "a2c2_hist": HeadMethodConfig("a2c2_hist", history=True),
+    "a2c2_wide": HeadMethodConfig("a2c2_wide", hidden=a2c2.PAPER_HEAD["hidden"], layer_norm=True),
 }
 
 FLOW_STEPS = {"realtime10": 10}  # B2+B5: methods whose chunk (and first chunk) use more flow steps
