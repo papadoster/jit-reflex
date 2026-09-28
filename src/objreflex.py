@@ -254,7 +254,7 @@ def episode_metrics(xs, acts, objs, lift=0.03):
     xs, acts, objs = (np.asarray(v, float) for v in (xs, acts, objs))
     closed = acts[:, 6] > 0
     first = int(np.argmax(closed)) if closed.any() else None
-    lifted = (objs[:, 2] - objs[0, 2] >= lift) & np.maximum.accumulate(closed)
+    lifted = (objs[:, 2] - objs[0, 2] >= lift) & closed
     return {
         "path_m": float(np.linalg.norm(np.diff(xs, axis=0), axis=1).sum()),
         "jerk": float((np.diff(acts, axis=0) ** 2).sum()),
