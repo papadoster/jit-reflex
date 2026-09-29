@@ -11,7 +11,8 @@
 #   ./scripts/gpu_c1e2.sh base       spec 11(a): stock lerobot-eval, 26 tasks x inits 0-9, s=1 and s=10 -> baseline.json
 #   ./scripts/gpu_c1e2.sh pilot      spec 11(b), section 7: T_ramp x K_p on inits 44-47; prints the chosen pair
 #   on the Mac: journal the printed line "C1-E2 coefficients: T_ramp=.. K_p=.." in the spec, commit, push; here: git pull
-#   ./scripts/gpu_c1e2.sh grid TR KP spec 11(c), section 6: 14456 episodes into results/c1-e2/grid.jsonl. Refuses unless
+#   ./scripts/gpu_c1e2.sh grid TR KP spec 11(c), section 6: 14456 episodes in two parallel lanes into results/c1-e2/
+#                                    grid.jsonl and grid_b.jsonl, joined into grid_all.jsonl at the end. Refuses unless
 #                                    the spec at HEAD and the pilot's pilot_choice.txt carry that line, HEAD is pushed,
 #                                    base ran on this pod and the runner code is the pilot's (results/c1-e2/CODE)
 # Every stage first refuses a checkout where git tracks results/c1-e2 (a new clone would skip base and resume the grid
@@ -118,7 +119,7 @@ check_code() {  # check_code record|require: pilot and grid run the same code, r
   [ -z "$(git status --porcelain -- $CODE_PATHS)" ] || { git status --short -- $CODE_PATHS
     echo "!!! uncommitted or untracked files in the runner code (above): commit them on the Mac and pull, or remove them"
     exit 1; }
-  old=$(ls -d $O/pilot_* $O/grid.jsonl $O/CODE 2>/dev/null | tr '\n' ' ')
+  old=$(ls -d $O/pilot_* $O/grid*.jsonl $O/CODE 2>/dev/null | tr '\n' ' ')
   if [ -f $O/CODE ]; then
     [ "$(cat $O/CODE)" = "$h" ] || why="the runner code changed since the pilot ($O/CODE)"
   elif [ "$1" = record ] && [ -z "$old" ]; then
@@ -261,19 +262,42 @@ case "$STAGE" in
       echo "!!! HEAD is not pushed (not in its upstream): push the journal commit from the Mac, then here: git pull"; exit 1; }
     [ -s $O/baseline.json ] || { echo "!!! no $O/baseline.json: run base on this pod first (spec section 8)"; exit 1; }
     check_code require
+    # a one-lane run (before 2026-09-29) past its first line left lane B's episodes in grid.jsonl: they would run twice
+    grep -qE '"kind": "(smooth|step", "cell": "(B|D|E|F|Gp)")|"method": "Gpost"' $O/grid.jsonl 2>/dev/null && {
+      echo "!!! $O/grid.jsonl holds lane B episodes (an old one-lane run past its first line): they would run twice"
+      exit 1; }
     # --n-envs: the largest divisor <= 16 of the line's group (methods x inits per task, cell and kind): no idle envs.
     # Headroom (spec section 9) only in cells A and C: the summary reads only these.
-    CO=(--t-ramp "$TR" --k-p "$KP" --out $O/grid.jsonl)
-    run2 grid --kinds step --cells A,C --methods none,T0,G,GT,PPC --inits 0-9 --headroom --n-envs 10 "${CO[@]}"
-    run2 grid --kinds step --cells B,D,E,F,Gp --methods none,T0,G,GT,PPC --inits 0-9 --n-envs 10 "${CO[@]}"
-    run2 grid --kinds step --cells A --methods none --inits 10-39 --n-envs 15 "${CO[@]}"
-    run2 grid --kinds step --cells C --methods GT --inits 10-39 --n-envs 15 "${CO[@]}"
-    run2 grid --kinds control --cells A,B,C,D,E,F,Gp --methods none,G,T0,PPC --inits 40-43 --n-envs 16 "${CO[@]}"
-    run2 grid --kinds step --cells C --methods Gpost --inits 0-9 --n-envs 10 "${CO[@]}"
-    run2 grid --kinds smooth --cells C --methods none,G,T0,PPC,PPC9 --inits 0-3 --n-envs 10 "${CO[@]}"
-    run2 grid --kinds step --cells A --methods GJ --inits 0-3 --n-envs 4 "${CO[@]}"
-    echo "[$(date +%T)] grid.jsonl: $(cat $O/grid.jsonl 2>/dev/null | wc -l) of 14456 records (the summary checks each)"
+    # Two lanes at once (spec journal 2026-09-29): one runner alternates brain calls and env steps and leaves the GPU and
+    # most CPUs idle. Disjoint lines, one output file and log per lane (appends of two processes to one file on the
+    # network /workspace could interleave), about 7.2k episodes each; the cut candidates of section 11 run last in each.
+    CO=(--t-ramp "$TR" --k-p "$KP")
+    lane_a() {
+      local C=("${CO[@]}" --out $O/grid.jsonl)
+      run2 grid --kinds step --cells A,C --methods none,T0,G,GT,PPC --inits 0-9 --headroom --n-envs 10 "${C[@]}"
+      run2 grid --kinds step --cells A --methods none --inits 10-39 --n-envs 15 "${C[@]}"
+      run2 grid --kinds step --cells C --methods GT --inits 10-39 --n-envs 15 "${C[@]}"
+      run2 grid --kinds control --cells A,B,C,D,E,F,Gp --methods none,G,T0,PPC --inits 40-43 --n-envs 16 "${C[@]}"
+      run2 grid --kinds step --cells A --methods GJ --inits 0-3 --n-envs 4 "${C[@]}"
+    }
+    lane_b() {
+      local C=("${CO[@]}" --out $O/grid_b.jsonl)
+      run2 grid_b --kinds step --cells B,D,E,F,Gp --methods none,T0,G,GT,PPC --inits 0-9 --n-envs 10 "${C[@]}"
+      run2 grid_b --kinds step --cells C --methods Gpost --inits 0-9 --n-envs 10 "${C[@]}"
+      run2 grid_b --kinds smooth --cells C --methods none,G,T0,PPC,PPC9 --inits 0-3 --n-envs 10 "${C[@]}"
+    }
+    # a background lane ignores SIGINT (no job control), so Ctrl-C reaches it as TERM from here; wd's trap in the lane
+    # then kills its runner's process group
+    pa= pb=
+    trap 'kill -TERM $pa $pb 2>/dev/null; wait; exit 130' INT TERM HUP
+    lane_a & pa=$!
+    lane_b & pb=$!
+    wait $pa; wait $pb
+    trap - INT TERM HUP
+    cat $O/grid.jsonl $O/grid_b.jsonl > $O/grid_all.jsonl
+    echo "[$(date +%T)] grid_all.jsonl (grid.jsonl + grid_b.jsonl): $(wc -l < $O/grid_all.jsonl) of 14456 records" \
+      "(the summary checks each)"
     for f in $LOG/*.log; do echo "  $f: $(grep -c FAILED "$f") FAILED lines (first-pass failures included)"; done
-    echo "On the Mac: python scripts/c1e2_summary.py $O/grid.jsonl --baseline $O/baseline.json"
+    echo "On the Mac: python scripts/c1e2_summary.py $O/grid_all.jsonl --baseline $O/baseline.json"
     ;;
 esac
