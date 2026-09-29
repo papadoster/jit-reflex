@@ -266,7 +266,8 @@ case "$STAGE" in
     grep -qE '"kind": "(smooth|step", "cell": "(B|D|E|F|Gp)")|"method": "Gpost"' $O/grid.jsonl 2>/dev/null && {
       echo "!!! $O/grid.jsonl holds lane B episodes (an old one-lane run past its first line): they would run twice"
       exit 1; }
-    # --n-envs: the largest divisor <= 16 of the line's group (methods x inits per task, cell and kind): no idle envs.
+    # --n-envs: a divisor of the line's group (methods x inits per task, cell and kind): no idle envs. At most 10 per
+    # lane: each env's EGL context holds ~0.7 GB of GPU memory, and 2 lanes x 10 envs + 2 brains take ~21.5 GB of 24.
     # Headroom (spec section 9) only in cells A and C: the summary reads only these.
     # Two lanes at once (spec journal 2026-09-29): one runner alternates brain calls and env steps and leaves the GPU and
     # most CPUs idle. Disjoint lines, one output file and log per lane (appends of two processes to one file on the
@@ -275,9 +276,9 @@ case "$STAGE" in
     lane_a() {
       local C=("${CO[@]}" --out $O/grid.jsonl)
       run2 grid --kinds step --cells A,C --methods none,T0,G,GT,PPC --inits 0-9 --headroom --n-envs 10 "${C[@]}"
-      run2 grid --kinds step --cells A --methods none --inits 10-39 --n-envs 15 "${C[@]}"
-      run2 grid --kinds step --cells C --methods GT --inits 10-39 --n-envs 15 "${C[@]}"
-      run2 grid --kinds control --cells A,B,C,D,E,F,Gp --methods none,G,T0,PPC --inits 40-43 --n-envs 16 "${C[@]}"
+      run2 grid --kinds step --cells A --methods none --inits 10-39 --n-envs 10 "${C[@]}"
+      run2 grid --kinds step --cells C --methods GT --inits 10-39 --n-envs 10 "${C[@]}"
+      run2 grid --kinds control --cells A,B,C,D,E,F,Gp --methods none,G,T0,PPC --inits 40-43 --n-envs 8 "${C[@]}"
       run2 grid --kinds step --cells A --methods GJ --inits 0-3 --n-envs 4 "${C[@]}"
     }
     lane_b() {
