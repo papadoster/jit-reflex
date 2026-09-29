@@ -1,0 +1,2262 @@
+[08:57:31] pass 1: --cells C --methods G --kinds step --inits 44-47 --t-ramp 1 --k-p 0.3 --n-envs 4 --out results/c1-e2/pilot_tr1_kp0.3.jsonl
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+104 episodes to run
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=157851) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  self.pid = os.fork()
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+4/104 episodes, 4.65 s/episode, eta 0.13 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+8/104 episodes, 4.37 s/episode, eta 0.12 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+12/104 episodes, 4.30 s/episode, eta 0.11 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+16/104 episodes, 4.30 s/episode, eta 0.11 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+20/104 episodes, 4.31 s/episode, eta 0.10 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+24/104 episodes, 4.29 s/episode, eta 0.10 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+28/104 episodes, 4.28 s/episode, eta 0.09 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+32/104 episodes, 4.28 s/episode, eta 0.09 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+36/104 episodes, 4.27 s/episode, eta 0.08 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+40/104 episodes, 4.26 s/episode, eta 0.08 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+44/104 episodes, 4.21 s/episode, eta 0.07 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+48/104 episodes, 4.18 s/episode, eta 0.06 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+52/104 episodes, 4.14 s/episode, eta 0.06 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+56/104 episodes, 4.10 s/episode, eta 0.05 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+60/104 episodes, 4.06 s/episode, eta 0.05 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+64/104 episodes, 4.03 s/episode, eta 0.04 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+68/104 episodes, 4.00 s/episode, eta 0.04 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+72/104 episodes, 3.98 s/episode, eta 0.04 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+76/104 episodes, 3.97 s/episode, eta 0.03 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+80/104 episodes, 3.95 s/episode, eta 0.03 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+84/104 episodes, 3.93 s/episode, eta 0.02 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+88/104 episodes, 3.92 s/episode, eta 0.02 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+92/104 episodes, 3.91 s/episode, eta 0.01 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+96/104 episodes, 3.90 s/episode, eta 0.01 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+100/104 episodes, 3.89 s/episode, eta 0.00 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+104/104 episodes, 3.88 s/episode, eta 0.00 h
+[09:05:07] pass 2 skipped: pass 1 exited cleanly, no failed batch
+[09:05:07] pass 1: --cells C --methods G --kinds step --inits 44-47 --t-ramp 1 --k-p 1.0 --n-envs 4 --out results/c1-e2/pilot_tr1_kp1.0.jsonl
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+104 episodes to run
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=158706) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  self.pid = os.fork()
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+4/104 episodes, 4.84 s/episode, eta 0.13 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+8/104 episodes, 4.47 s/episode, eta 0.12 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+12/104 episodes, 4.33 s/episode, eta 0.11 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+16/104 episodes, 4.29 s/episode, eta 0.10 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+20/104 episodes, 4.26 s/episode, eta 0.10 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+24/104 episodes, 4.23 s/episode, eta 0.09 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+28/104 episodes, 4.20 s/episode, eta 0.09 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+32/104 episodes, 4.18 s/episode, eta 0.08 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+36/104 episodes, 4.17 s/episode, eta 0.08 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+40/104 episodes, 4.16 s/episode, eta 0.07 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+44/104 episodes, 4.11 s/episode, eta 0.07 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+48/104 episodes, 4.07 s/episode, eta 0.06 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+52/104 episodes, 4.04 s/episode, eta 0.06 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+56/104 episodes, 4.01 s/episode, eta 0.05 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+60/104 episodes, 3.97 s/episode, eta 0.05 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+64/104 episodes, 3.97 s/episode, eta 0.04 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+68/104 episodes, 3.95 s/episode, eta 0.04 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+72/104 episodes, 3.92 s/episode, eta 0.03 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+76/104 episodes, 3.90 s/episode, eta 0.03 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+80/104 episodes, 3.88 s/episode, eta 0.03 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+84/104 episodes, 3.81 s/episode, eta 0.02 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+88/104 episodes, 3.81 s/episode, eta 0.02 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+92/104 episodes, 3.81 s/episode, eta 0.01 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+96/104 episodes, 3.81 s/episode, eta 0.01 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+100/104 episodes, 3.80 s/episode, eta 0.00 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+104/104 episodes, 3.80 s/episode, eta 0.00 h
+[09:12:43] pass 2 skipped: pass 1 exited cleanly, no failed batch
+[09:12:43] pass 1: --cells C --methods G --kinds step --inits 44-47 --t-ramp 5 --k-p 0.3 --n-envs 4 --out results/c1-e2/pilot_tr5_kp0.3.jsonl
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+104 episodes to run
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=159579) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  self.pid = os.fork()
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+4/104 episodes, 4.68 s/episode, eta 0.13 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+8/104 episodes, 4.39 s/episode, eta 0.12 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+12/104 episodes, 4.29 s/episode, eta 0.11 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+16/104 episodes, 4.25 s/episode, eta 0.10 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+20/104 episodes, 4.25 s/episode, eta 0.10 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+24/104 episodes, 4.24 s/episode, eta 0.09 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+28/104 episodes, 4.21 s/episode, eta 0.09 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+32/104 episodes, 4.19 s/episode, eta 0.08 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+36/104 episodes, 4.17 s/episode, eta 0.08 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+40/104 episodes, 4.16 s/episode, eta 0.07 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+44/104 episodes, 4.12 s/episode, eta 0.07 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+48/104 episodes, 4.08 s/episode, eta 0.06 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+52/104 episodes, 4.06 s/episode, eta 0.06 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+56/104 episodes, 4.05 s/episode, eta 0.05 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+60/104 episodes, 4.01 s/episode, eta 0.05 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...Assets already downloaded at /root/.cache/libero/assets
+
+Assets already downloaded at /root/.cache/libero/assets
+64/104 episodes, 3.99 s/episode, eta 0.04 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+68/104 episodes, 3.96 s/episode, eta 0.04 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+72/104 episodes, 3.93 s/episode, eta 0.03 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+76/104 episodes, 3.90 s/episode, eta 0.03 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+80/104 episodes, 3.89 s/episode, eta 0.03 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+
+
+84/104 episodes, 3.82 s/episode, eta 0.02 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+88/104 episodes, 3.81 s/episode, eta 0.02 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+92/104 episodes, 3.80 s/episode, eta 0.01 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+96/104 episodes, 3.80 s/episode, eta 0.01 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+100/104 episodes, 3.79 s/episode, eta 0.00 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+104/104 episodes, 3.78 s/episode, eta 0.00 h
+[09:20:19] pass 2 skipped: pass 1 exited cleanly, no failed batch
+[09:20:19] pass 1: --cells C --methods G --kinds step --inits 44-47 --t-ramp 5 --k-p 1.0 --n-envs 4 --out results/c1-e2/pilot_tr5_kp1.0.jsonl
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+104 episodes to run
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=160434) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  self.pid = os.fork()
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+4/104 episodes, 4.84 s/episode, eta 0.13 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+8/104 episodes, 4.66 s/episode, eta 0.12 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+12/104 episodes, 4.48 s/episode, eta 0.11 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+16/104 episodes, 4.37 s/episode, eta 0.11 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+20/104 episodes, 4.34 s/episode, eta 0.10 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+24/104 episodes, 4.30 s/episode, eta 0.10 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+28/104 episodes, 4.27 s/episode, eta 0.09 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+32/104 episodes, 4.26 s/episode, eta 0.09 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+36/104 episodes, 4.26 s/episode, eta 0.08 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+40/104 episodes, 4.24 s/episode, eta 0.08 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+44/104 episodes, 4.18 s/episode, eta 0.07 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+48/104 episodes, 4.18 s/episode, eta 0.07 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Assets already downloaded at /root/.cache/libero/assets
+
+52/104 episodes, 4.22 s/episode, eta 0.06 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+56/104 episodes, 4.20 s/episode, eta 0.06 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+60/104 episodes, 4.18 s/episode, eta 0.05 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+64/104 episodes, 4.15 s/episode, eta 0.05 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+68/104 episodes, 4.12 s/episode, eta 0.04 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+72/104 episodes, 4.09 s/episode, eta 0.04 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+76/104 episodes, 4.05 s/episode, eta 0.03 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+80/104 episodes, 4.02 s/episode, eta 0.03 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+84/104 episodes, 3.94 s/episode, eta 0.02 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+88/104 episodes, 3.93 s/episode, eta 0.02 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+92/104 episodes, 3.93 s/episode, eta 0.01 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+96/104 episodes, 3.94 s/episode, eta 0.01 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...Assets already downloaded at /root/.cache/libero/assets
+
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+100/104 episodes, 3.95 s/episode, eta 0.00 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+104/104 episodes, 3.94 s/episode, eta 0.00 h
+[09:28:10] pass 2 skipped: pass 1 exited cleanly, no failed batch
+[09:28:10] pass 1: --cells C --methods G --kinds step --inits 44-47 --t-ramp 10 --k-p 0.3 --n-envs 4 --out results/c1-e2/pilot_tr10_kp0.3.jsonl
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+104 episodes to run
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=161316) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  self.pid = os.fork()
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+4/104 episodes, 4.74 s/episode, eta 0.13 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+8/104 episodes, 4.42 s/episode, eta 0.12 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+12/104 episodes, 4.33 s/episode, eta 0.11 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...Assets already downloaded at /root/.cache/libero/assets
+
+Assets already downloaded at /root/.cache/libero/assets
+16/104 episodes, 4.31 s/episode, eta 0.11 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+20/104 episodes, 4.30 s/episode, eta 0.10 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+24/104 episodes, 4.29 s/episode, eta 0.10 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+28/104 episodes, 4.27 s/episode, eta 0.09 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+32/104 episodes, 4.25 s/episode, eta 0.09 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+36/104 episodes, 4.24 s/episode, eta 0.08 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+40/104 episodes, 4.23 s/episode, eta 0.08 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+44/104 episodes, 4.18 s/episode, eta 0.07 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+48/104 episodes, 4.13 s/episode, eta 0.06 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+52/104 episodes, 4.09 s/episode, eta 0.06 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+56/104 episodes, 4.07 s/episode, eta 0.05 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+60/104 episodes, 4.03 s/episode, eta 0.05 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+64/104 episodes, 4.01 s/episode, eta 0.04 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+68/104 episodes, 3.98 s/episode, eta 0.04 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+72/104 episodes, 3.96 s/episode, eta 0.04 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+76/104 episodes, 3.93 s/episode, eta 0.03 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+80/104 episodes, 3.93 s/episode, eta 0.03 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...Assets already downloaded at /root/.cache/libero/assets
+
+Assets already downloaded at /root/.cache/libero/assets
+84/104 episodes, 3.91 s/episode, eta 0.02 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+88/104 episodes, 3.91 s/episode, eta 0.02 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+92/104 episodes, 3.90 s/episode, eta 0.01 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+96/104 episodes, 3.90 s/episode, eta 0.01 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+100/104 episodes, 3.89 s/episode, eta 0.00 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+104/104 episodes, 3.89 s/episode, eta 0.00 h
+[09:35:51] pass 2 skipped: pass 1 exited cleanly, no failed batch
+[09:35:51] pass 1: --cells C --methods G --kinds step --inits 44-47 --t-ramp 10 --k-p 1.0 --n-envs 4 --out results/c1-e2/pilot_tr10_kp1.0.jsonl
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+104 episodes to run
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=162174) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  self.pid = os.fork()
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+4/104 episodes, 4.99 s/episode, eta 0.14 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+8/104 episodes, 4.56 s/episode, eta 0.12 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+12/104 episodes, 4.45 s/episode, eta 0.11 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+16/104 episodes, 4.38 s/episode, eta 0.11 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+20/104 episodes, 4.37 s/episode, eta 0.10 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+24/104 episodes, 4.33 s/episode, eta 0.10 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+28/104 episodes, 4.30 s/episode, eta 0.09 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+32/104 episodes, 4.32 s/episode, eta 0.09 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+36/104 episodes, 4.30 s/episode, eta 0.08 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+40/104 episodes, 4.28 s/episode, eta 0.08 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+44/104 episodes, 4.22 s/episode, eta 0.07 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+48/104 episodes, 4.16 s/episode, eta 0.06 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+52/104 episodes, 4.13 s/episode, eta 0.06 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+56/104 episodes, 4.09 s/episode, eta 0.05 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+60/104 episodes, 4.05 s/episode, eta 0.05 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+64/104 episodes, 4.03 s/episode, eta 0.04 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+68/104 episodes, 4.01 s/episode, eta 0.04 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+72/104 episodes, 3.99 s/episode, eta 0.04 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+
+76/104 episodes, 3.98 s/episode, eta 0.03 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+80/104 episodes, 3.98 s/episode, eta 0.03 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+84/104 episodes, 4.01 s/episode, eta 0.02 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+88/104 episodes, 4.00 s/episode, eta 0.02 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+92/104 episodes, 3.99 s/episode, eta 0.01 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+96/104 episodes, 3.98 s/episode, eta 0.01 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+100/104 episodes, 3.97 s/episode, eta 0.00 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+104/104 episodes, 3.96 s/episode, eta 0.00 h
+[09:43:42] pass 2 skipped: pass 1 exited cleanly, no failed batch

@@ -1,0 +1,1314 @@
+{
+ "read_gate": {
+  "records": 14436,
+  "ignored_outside_grid": 0,
+  "duplicates": 0,
+  "expected": 14456,
+  "missing": 20,
+  "missing_by_group": {
+   "step/A/GJ": 20
+  },
+  "complete": true,
+  "control_A_none": 0.8076923076923077,
+  "control_A_none_n": 104,
+  "baseline_s10": 0.7961538461538461,
+  "baseline_ok": true,
+  "pass": true
+ },
+ "verdict": "ДЕМО ЕСТЬ",
+ "rules": {
+  "R1": {
+   "test": "step, 7 cells: G - none >= +5 pp and lo2.5 > 0",
+   "diff_pp": 11.593,
+   "lo2.5": 7.033,
+   "lo5_one_sided": 7.58,
+   "hi97.5": 16.648,
+   "pairs": 1820,
+   "clusters": 26,
+   "pass": true
+  },
+  "R2": {
+   "test": "control, 7 cells: G - none, one-sided lo5 >= -2 pp",
+   "diff_pp": -0.824,
+   "lo2.5": -1.374,
+   "lo5_one_sided": -1.374,
+   "hi97.5": -0.275,
+   "pairs": 728,
+   "clusters": 26,
+   "pass": true
+  },
+  "R3": {
+   "test": "step: C-GT - A-none (inits 0-39), one-sided lo5 >= -5 pp",
+   "diff_pp": -13.269,
+   "lo2.5": -18.849,
+   "lo5_one_sided": -17.981,
+   "hi97.5": -7.788,
+   "pairs": 1040,
+   "clusters": 26,
+   "pass": false,
+   "rates": {
+    "C-GT": [0.325, 1040],
+    "A-none": [0.4577, 1040]
+   }
+  },
+  "R4": {
+   "test": "step, F and Gp: GT - T0 >= +5 pp and lo2.5 > 0",
+   "diff_pp": 10.769,
+   "lo2.5": 4.615,
+   "lo5_one_sided": 5.577,
+   "hi97.5": 17.115,
+   "pairs": 520,
+   "clusters": 26,
+   "pass": true
+  },
+  "R5": {
+   "test": "step, 7 cells: GT - PPC (our implementation); lo2.5 > 0 ЛУЧШЕ, >= -2 pp НЕ ХУЖЕ, else ХУЖЕ",
+   "diff_pp": -0.165,
+   "lo2.5": -3.243,
+   "lo5_one_sided": -2.692,
+   "hi97.5": 2.692,
+   "pairs": 1820,
+   "clusters": 26,
+   "category": "ХУЖЕ"
+  }
+ },
+ "t_ramp_k_p": [
+  [5, 1.0]
+ ],
+ "report": {
+  "by_cell": {
+   "step": {
+    "A": {
+     "none": {
+      "success": [0.4654, 260],
+      "grasp_ok": [0.6115, 260],
+      "steps_to_success": [127.4959, 121],
+      "calls_sched": [21.35, 260],
+      "calls_trig": [0.0, 260],
+      "path_m": [1.2515, 260],
+      "jerk": [69.4083, 260],
+      "grasp_miss_m": [0.0514, 260],
+      "grasp_miss_along_m": [-0.0306, 244],
+      "no_close_command": [0.0, 260]
+     },
+     "T0": {
+      "success": [0.45, 260],
+      "grasp_ok": [0.5885, 260],
+      "steps_to_success": [126.0256, 117],
+      "calls_sched": [21.2731, 260],
+      "calls_trig": [1.3115, 260],
+      "path_m": [1.2567, 260],
+      "jerk": [69.4415, 260],
+      "grasp_miss_m": [0.0572, 260],
+      "grasp_miss_along_m": [-0.0227, 244],
+      "no_close_command": [0.0, 260]
+     },
+     "G": {
+      "success": [0.5577, 260],
+      "grasp_ok": [0.7115, 260],
+      "steps_to_success": [125.069, 145],
+      "calls_sched": [19.8538, 260],
+      "calls_trig": [0.0, 260],
+      "path_m": [1.2174, 260],
+      "jerk": [59.0175, 260],
+      "grasp_miss_m": [0.0469, 260],
+      "grasp_miss_along_m": [-0.0074, 244],
+      "no_close_command": [0.0, 260]
+     },
+     "GT": {
+      "success": [0.5154, 260],
+      "grasp_ok": [0.6346, 260],
+      "steps_to_success": [125.1866, 134],
+      "calls_sched": [20.45, 260],
+      "calls_trig": [0.4231, 260],
+      "path_m": [1.2334, 260],
+      "jerk": [65.5105, 260],
+      "grasp_miss_m": [0.0514, 260],
+      "grasp_miss_along_m": [-0.0174, 244],
+      "no_close_command": [0.0, 260]
+     },
+     "PPC": {
+      "success": [0.5538, 260],
+      "grasp_ok": [0.7115, 260],
+      "steps_to_success": [126.3056, 144],
+      "calls_sched": [19.7423, 260],
+      "calls_trig": [0.6308, 260],
+      "path_m": [1.2117, 260],
+      "jerk": [59.7417, 260],
+      "grasp_miss_m": [0.0552, 260],
+      "grasp_miss_along_m": [-0.0067, 244],
+      "no_close_command": [0.0, 260]
+     },
+     "GJ": {
+      "success": [0.5357, 84],
+      "grasp_ok": [0.6786, 84],
+      "steps_to_success": [138.5111, 45],
+      "calls_sched": [20.869, 84],
+      "calls_trig": [0.0, 84],
+      "path_m": [1.2625, 84],
+      "jerk": [66.588, 84],
+      "grasp_miss_m": [0.044, 84],
+      "grasp_miss_along_m": [-0.0158, 79],
+      "no_close_command": [0.0, 84]
+     }
+    },
+    "B": {
+     "none": {
+      "success": [0.3654, 260],
+      "grasp_ok": [0.5538, 260],
+      "steps_to_success": [123.2947, 95],
+      "calls_sched": [9.5769, 260],
+      "calls_trig": [0.0, 260],
+      "path_m": [1.3362, 260],
+      "jerk": [60.4652, 260],
+      "grasp_miss_m": [0.0545, 260],
+      "grasp_miss_along_m": [-0.0315, 241],
+      "no_close_command": [0.0, 260]
+     },
+     "T0": {
+      "success": [0.35, 260],
+      "grasp_ok": [0.5231, 260],
+      "steps_to_success": [115.6264, 91],
+      "calls_sched": [9.0308, 260],
+      "calls_trig": [1.2923, 260],
+      "path_m": [1.323, 260],
+      "jerk": [60.9773, 260],
+      "grasp_miss_m": [0.0588, 260],
+      "grasp_miss_along_m": [-0.0247, 241],
+      "no_close_command": [0.0, 260]
+     },
+     "G": {
+      "success": [0.5192, 260],
+      "grasp_ok": [0.7, 260],
+      "steps_to_success": [119.9852, 135],
+      "calls_sched": [8.4808, 260],
+      "calls_trig": [0.0, 260],
+      "path_m": [1.2505, 260],
+      "jerk": [46.9865, 260],
+      "grasp_miss_m": [0.0468, 260],
+      "grasp_miss_along_m": [0.0008, 241],
+      "no_close_command": [0.0, 260]
+     },
+     "GT": {
+      "success": [0.3885, 260],
+      "grasp_ok": [0.5692, 260],
+      "steps_to_success": [115.2574, 101],
+      "calls_sched": [9.0808, 260],
+      "calls_trig": [0.4269, 260],
+      "path_m": [1.3158, 260],
+      "jerk": [57.5052, 260],
+      "grasp_miss_m": [0.0525, 260],
+      "grasp_miss_along_m": [-0.0153, 241],
+      "no_close_command": [0.0, 260]
+     },
+     "PPC": {
+      "success": [0.4346, 260],
+      "grasp_ok": [0.6423, 260],
+      "steps_to_success": [119.4513, 113],
+      "calls_sched": [8.7462, 260],
+      "calls_trig": [0.45, 260],
+      "path_m": [1.2872, 260],
+      "jerk": [55.7234, 260],
+      "grasp_miss_m": [0.0569, 260],
+      "grasp_miss_along_m": [-0.003, 241],
+      "no_close_command": [0.0, 260]
+     }
+    },
+    "C": {
+     "none": {
+      "success": [0.2885, 260],
+      "grasp_ok": [0.4308, 260],
+      "steps_to_success": [112.7333, 75],
+      "calls_sched": [5.0615, 260],
+      "calls_trig": [0.0, 260],
+      "path_m": [1.3216, 260],
+      "jerk": [50.8949, 260],
+      "grasp_miss_m": [0.0567, 260],
+      "grasp_miss_along_m": [-0.0301, 241],
+      "no_close_command": [0.0, 260]
+     },
+     "T0": {
+      "success": [0.3115, 260],
+      "grasp_ok": [0.4346, 260],
+      "steps_to_success": [109.0988, 81],
+      "calls_sched": [4.3962, 260],
+      "calls_trig": [1.2962, 260],
+      "path_m": [1.372, 260],
+      "jerk": [50.8964, 260],
+      "grasp_miss_m": [0.0603, 260],
+      "grasp_miss_along_m": [-0.0247, 241],
+      "no_close_command": [0.0, 260]
+     },
+     "G": {
+      "success": [0.4308, 260],
+      "grasp_ok": [0.5923, 260],
+      "steps_to_success": [108.4911, 112],
+      "calls_sched": [4.5423, 260],
+      "calls_trig": [0.0, 260],
+      "path_m": [1.2456, 260],
+      "jerk": [42.0982, 260],
+      "grasp_miss_m": [0.056, 260],
+      "grasp_miss_along_m": [0.0076, 241],
+      "no_close_command": [0.0, 260]
+     },
+     "GT": {
+      "success": [0.3615, 260],
+      "grasp_ok": [0.5, 260],
+      "steps_to_success": [107.734, 94],
+      "calls_sched": [4.5654, 260],
+      "calls_trig": [0.5115, 260],
+      "path_m": [1.3133, 260],
+      "jerk": [46.3379, 260],
+      "grasp_miss_m": [0.0622, 260],
+      "grasp_miss_along_m": [-0.0073, 241],
+      "no_close_command": [0.0, 260]
+     },
+     "PPC": {
+      "success": [0.3654, 260],
+      "grasp_ok": [0.5192, 260],
+      "steps_to_success": [114.2842, 95],
+      "calls_sched": [4.4692, 260],
+      "calls_trig": [0.5192, 260],
+      "path_m": [1.3213, 260],
+      "jerk": [46.4837, 260],
+      "grasp_miss_m": [0.0522, 260],
+      "grasp_miss_along_m": [-0.0137, 241],
+      "no_close_command": [0.0, 260]
+     },
+     "Gpost": {
+      "success": [0.4192, 260],
+      "grasp_ok": [0.5731, 260],
+      "steps_to_success": [108.367, 109],
+      "calls_sched": [4.5808, 260],
+      "calls_trig": [0.0, 260],
+      "path_m": [1.2576, 260],
+      "jerk": [43.8691, 260],
+      "grasp_miss_m": [0.0465, 260],
+      "grasp_miss_along_m": [-0.0006, 241],
+      "no_close_command": [0.0, 260]
+     }
+    },
+    "D": {
+     "none": {
+      "success": [0.2577, 260],
+      "grasp_ok": [0.4385, 260],
+      "steps_to_success": [111.3284, 67],
+      "calls_sched": [12.1192, 260],
+      "calls_trig": [0.0, 260],
+      "path_m": [1.3588, 260],
+      "jerk": [82.7016, 260],
+      "grasp_miss_m": [0.0563, 260],
+      "grasp_miss_along_m": [-0.0276, 241],
+      "no_close_command": [0.0, 260]
+     },
+     "T0": {
+      "success": [0.2654, 260],
+      "grasp_ok": [0.45, 260],
+      "steps_to_success": [109.8841, 69],
+      "calls_sched": [11.8885, 260],
+      "calls_trig": [0.8192, 260],
+      "path_m": [1.3538, 260],
+      "jerk": [82.3096, 260],
+      "grasp_miss_m": [0.0598, 260],
+      "grasp_miss_along_m": [-0.0251, 241],
+      "no_close_command": [0.0, 260]
+     },
+     "G": {
+      "success": [0.3538, 260],
+      "grasp_ok": [0.5923, 260],
+      "steps_to_success": [106.6304, 92],
+      "calls_sched": [11.2346, 260],
+      "calls_trig": [0.0, 260],
+      "path_m": [1.3173, 260],
+      "jerk": [70.422, 260],
+      "grasp_miss_m": [0.0553, 260],
+      "grasp_miss_along_m": [0.0094, 241],
+      "no_close_command": [0.0, 260]
+     },
+     "GT": {
+      "success": [0.3462, 260],
+      "grasp_ok": [0.5962, 260],
+      "steps_to_success": [106.7111, 90],
+      "calls_sched": [11.2462, 260],
+      "calls_trig": [0.3077, 260],
+      "path_m": [1.317, 260],
+      "jerk": [70.71, 260],
+      "grasp_miss_m": [0.0539, 260],
+      "grasp_miss_along_m": [0.0083, 241],
+      "no_close_command": [0.0, 260]
+     },
+     "PPC": {
+      "success": [0.3538, 260],
+      "grasp_ok": [0.55, 260],
+      "steps_to_success": [108.7391, 92],
+      "calls_sched": [11.2077, 260],
+      "calls_trig": [0.3115, 260],
+      "path_m": [1.3026, 260],
+      "jerk": [75.7946, 260],
+      "grasp_miss_m": [0.0505, 260],
+      "grasp_miss_along_m": [-0.0074, 241],
+      "no_close_command": [0.0, 260]
+     }
+    },
+    "E": {
+     "none": {
+      "success": [0.2077, 260],
+      "grasp_ok": [0.3769, 260],
+      "steps_to_success": [108.8889, 54],
+      "calls_sched": [6.3654, 260],
+      "calls_trig": [0.0, 260],
+      "path_m": [1.415, 260],
+      "jerk": [65.2815, 260],
+      "grasp_miss_m": [0.0611, 260],
+      "grasp_miss_along_m": [-0.0258, 238],
+      "no_close_command": [0.0, 260]
+     },
+     "T0": {
+      "success": [0.2462, 260],
+      "grasp_ok": [0.4038, 260],
+      "steps_to_success": [108.7969, 64],
+      "calls_sched": [5.9654, 260],
+      "calls_trig": [0.8462, 260],
+      "path_m": [1.4208, 260],
+      "jerk": [60.5693, 260],
+      "grasp_miss_m": [0.0609, 260],
+      "grasp_miss_along_m": [-0.0255, 238],
+      "no_close_command": [0.0, 260]
+     },
+     "G": {
+      "success": [0.3115, 260],
+      "grasp_ok": [0.5654, 260],
+      "steps_to_success": [113.5309, 81],
+      "calls_sched": [6.0077, 260],
+      "calls_trig": [0.0, 260],
+      "path_m": [1.3622, 260],
+      "jerk": [56.3672, 260],
+      "grasp_miss_m": [0.0513, 260],
+      "grasp_miss_along_m": [0.0022, 238],
+      "no_close_command": [0.0, 260]
+     },
+     "GT": {
+      "success": [0.3154, 260],
+      "grasp_ok": [0.5769, 260],
+      "steps_to_success": [111.8415, 82],
+      "calls_sched": [5.8808, 260],
+      "calls_trig": [0.3038, 260],
+      "path_m": [1.369, 260],
+      "jerk": [54.9929, 260],
+      "grasp_miss_m": [0.0505, 260],
+      "grasp_miss_along_m": [0.0019, 238],
+      "no_close_command": [0.0, 260]
+     },
+     "PPC": {
+      "success": [0.2962, 260],
+      "grasp_ok": [0.5154, 260],
+      "steps_to_success": [112.7013, 77],
+      "calls_sched": [5.9115, 260],
+      "calls_trig": [0.45, 260],
+      "path_m": [1.3613, 260],
+      "jerk": [60.7164, 260],
+      "grasp_miss_m": [0.0517, 260],
+      "grasp_miss_along_m": [-0.0072, 238],
+      "no_close_command": [0.0, 260]
+     }
+    },
+    "F": {
+     "none": {
+      "success": [0.1846, 260],
+      "grasp_ok": [0.3654, 260],
+      "steps_to_success": [106.6667, 48],
+      "calls_sched": [10.6769, 260],
+      "calls_trig": [0.0, 260],
+      "path_m": [1.3779, 260],
+      "jerk": [75.6928, 260],
+      "grasp_miss_m": [0.0607, 260],
+      "grasp_miss_along_m": [-0.0252, 237],
+      "no_close_command": [0.0, 260]
+     },
+     "T0": {
+      "success": [0.1769, 260],
+      "grasp_ok": [0.3577, 260],
+      "steps_to_success": [105.8913, 46],
+      "calls_sched": [10.2615, 260],
+      "calls_trig": [0.5154, 260],
+      "path_m": [1.3815, 260],
+      "jerk": [78.2989, 260],
+      "grasp_miss_m": [0.0608, 260],
+      "grasp_miss_along_m": [-0.0254, 237],
+      "no_close_command": [0.0, 260]
+     },
+     "G": {
+      "success": [0.3077, 260],
+      "grasp_ok": [0.55, 260],
+      "steps_to_success": [109.8875, 80],
+      "calls_sched": [9.8154, 260],
+      "calls_trig": [0.0, 260],
+      "path_m": [1.3227, 260],
+      "jerk": [67.2446, 260],
+      "grasp_miss_m": [0.0481, 260],
+      "grasp_miss_along_m": [0.0002, 237],
+      "no_close_command": [0.0, 260]
+     },
+     "GT": {
+      "success": [0.2962, 260],
+      "grasp_ok": [0.55, 260],
+      "steps_to_success": [109.4286, 77],
+      "calls_sched": [9.7231, 260],
+      "calls_trig": [0.2038, 260],
+      "path_m": [1.3176, 260],
+      "jerk": [68.5418, 260],
+      "grasp_miss_m": [0.0517, 260],
+      "grasp_miss_along_m": [0.004, 237],
+      "no_close_command": [0.0, 260]
+     },
+     "PPC": {
+      "success": [0.2615, 260],
+      "grasp_ok": [0.4731, 260],
+      "steps_to_success": [109.0147, 68],
+      "calls_sched": [10.0269, 260],
+      "calls_trig": [0.1423, 260],
+      "path_m": [1.3389, 260],
+      "jerk": [71.0707, 260],
+      "grasp_miss_m": [0.0572, 260],
+      "grasp_miss_along_m": [-0.0012, 237],
+      "no_close_command": [0.0, 260]
+     }
+    },
+    "Gp": {
+     "none": {
+      "success": [0.1923, 260],
+      "grasp_ok": [0.3615, 260],
+      "steps_to_success": [111.76, 50],
+      "calls_sched": [8.8731, 260],
+      "calls_trig": [0.0, 260],
+      "path_m": [1.3856, 260],
+      "jerk": [71.8416, 260],
+      "grasp_miss_m": [0.0607, 260],
+      "grasp_miss_along_m": [-0.0261, 239],
+      "no_close_command": [0.0, 260]
+     },
+     "T0": {
+      "success": [0.2038, 260],
+      "grasp_ok": [0.3577, 260],
+      "steps_to_success": [107.8302, 53],
+      "calls_sched": [8.4269, 260],
+      "calls_trig": [0.4346, 260],
+      "path_m": [1.3661, 260],
+      "jerk": [72.0033, 260],
+      "grasp_miss_m": [0.0607, 260],
+      "grasp_miss_along_m": [-0.0259, 239],
+      "no_close_command": [0.0, 260]
+     },
+     "G": {
+      "success": [0.2923, 260],
+      "grasp_ok": [0.5385, 260],
+      "steps_to_success": [112.5921, 76],
+      "calls_sched": [8.3077, 260],
+      "calls_trig": [0.0, 260],
+      "path_m": [1.3329, 260],
+      "jerk": [63.9153, 260],
+      "grasp_miss_m": [0.0474, 260],
+      "grasp_miss_along_m": [-0.0026, 239],
+      "no_close_command": [0.0, 260]
+     },
+     "GT": {
+      "success": [0.3, 260],
+      "grasp_ok": [0.5308, 260],
+      "steps_to_success": [112.1026, 78],
+      "calls_sched": [8.1346, 260],
+      "calls_trig": [0.1769, 260],
+      "path_m": [1.3279, 260],
+      "jerk": [63.6591, 260],
+      "grasp_miss_m": [0.0553, 260],
+      "grasp_miss_along_m": [0.0064, 239],
+      "no_close_command": [0.0, 260]
+     },
+     "PPC": {
+      "success": [0.2692, 260],
+      "grasp_ok": [0.4654, 260],
+      "steps_to_success": [112.4714, 70],
+      "calls_sched": [8.3, 260],
+      "calls_trig": [0.1692, 260],
+      "path_m": [1.3354, 260],
+      "jerk": [69.1756, 260],
+      "grasp_miss_m": [0.053, 260],
+      "grasp_miss_along_m": [-0.0063, 239],
+      "no_close_command": [0.0, 260]
+     }
+    }
+   },
+   "control": {
+    "A": {
+     "none": {
+      "success": [0.8077, 104],
+      "grasp_ok": [0.8942, 104],
+      "steps_to_success": [116.6786, 84],
+      "calls_sched": [15.2115, 104],
+      "calls_trig": [0.0, 104],
+      "path_m": [1.0579, 104],
+      "jerk": [28.4884, 104],
+      "grasp_miss_m": [0.0374, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "T0": {
+      "success": [0.7596, 104],
+      "grasp_ok": [0.8558, 104],
+      "steps_to_success": [113.7342, 79],
+      "calls_sched": [15.7596, 104],
+      "calls_trig": [0.0481, 104],
+      "path_m": [1.0681, 104],
+      "jerk": [29.8986, 104],
+      "grasp_miss_m": [0.0376, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "G": {
+      "success": [0.7885, 104],
+      "grasp_ok": [0.8846, 104],
+      "steps_to_success": [114.878, 82],
+      "calls_sched": [15.375, 104],
+      "calls_trig": [0.0, 104],
+      "path_m": [1.0607, 104],
+      "jerk": [29.5546, 104],
+      "grasp_miss_m": [0.0374, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "PPC": {
+      "success": [0.7596, 104],
+      "grasp_ok": [0.875, 104],
+      "steps_to_success": [112.7468, 79],
+      "calls_sched": [15.6154, 104],
+      "calls_trig": [0.1154, 104],
+      "path_m": [1.0715, 104],
+      "jerk": [29.6259, 104],
+      "grasp_miss_m": [0.0376, 104],
+      "no_close_command": [0.0, 104]
+     }
+    },
+    "B": {
+     "none": {
+      "success": [0.6154, 104],
+      "grasp_ok": [0.7692, 104],
+      "steps_to_success": [118.7656, 64],
+      "calls_sched": [7.8077, 104],
+      "calls_trig": [0.0, 104],
+      "path_m": [1.2206, 104],
+      "jerk": [39.6922, 104],
+      "grasp_miss_m": [0.0389, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "T0": {
+      "success": [0.5962, 104],
+      "grasp_ok": [0.75, 104],
+      "steps_to_success": [118.5968, 62],
+      "calls_sched": [7.9038, 104],
+      "calls_trig": [0.0673, 104],
+      "path_m": [1.2202, 104],
+      "jerk": [39.8891, 104],
+      "grasp_miss_m": [0.0389, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "G": {
+      "success": [0.5865, 104],
+      "grasp_ok": [0.7692, 104],
+      "steps_to_success": [116.918, 61],
+      "calls_sched": [7.9615, 104],
+      "calls_trig": [0.0, 104],
+      "path_m": [1.2299, 104],
+      "jerk": [40.617, 104],
+      "grasp_miss_m": [0.0385, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "PPC": {
+      "success": [0.5962, 104],
+      "grasp_ok": [0.75, 104],
+      "steps_to_success": [115.5968, 62],
+      "calls_sched": [7.7692, 104],
+      "calls_trig": [0.125, 104],
+      "path_m": [1.205, 104],
+      "jerk": [40.6683, 104],
+      "grasp_miss_m": [0.0393, 104],
+      "no_close_command": [0.0, 104]
+     }
+    },
+    "C": {
+     "none": {
+      "success": [0.3846, 104],
+      "grasp_ok": [0.5288, 104],
+      "steps_to_success": [101.075, 40],
+      "calls_sched": [4.6442, 104],
+      "calls_trig": [0.0, 104],
+      "path_m": [1.2097, 104],
+      "jerk": [37.2936, 104],
+      "grasp_miss_m": [0.0443, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "T0": {
+      "success": [0.3846, 104],
+      "grasp_ok": [0.5385, 104],
+      "steps_to_success": [101.15, 40],
+      "calls_sched": [4.6058, 104],
+      "calls_trig": [0.0769, 104],
+      "path_m": [1.2135, 104],
+      "jerk": [37.4795, 104],
+      "grasp_miss_m": [0.0443, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "G": {
+      "success": [0.375, 104],
+      "grasp_ok": [0.5288, 104],
+      "steps_to_success": [101.2051, 39],
+      "calls_sched": [4.6827, 104],
+      "calls_trig": [0.0, 104],
+      "path_m": [1.2184, 104],
+      "jerk": [37.5585, 104],
+      "grasp_miss_m": [0.0442, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "PPC": {
+      "success": [0.4135, 104],
+      "grasp_ok": [0.5481, 104],
+      "steps_to_success": [101.4884, 43],
+      "calls_sched": [4.4135, 104],
+      "calls_trig": [0.1442, 104],
+      "path_m": [1.2148, 104],
+      "jerk": [39.3792, 104],
+      "grasp_miss_m": [0.0445, 104],
+      "no_close_command": [0.0, 104]
+     }
+    },
+    "D": {
+     "none": {
+      "success": [0.5096, 104],
+      "grasp_ok": [0.6538, 104],
+      "steps_to_success": [106.9434, 53],
+      "calls_sched": [9.9615, 104],
+      "calls_trig": [0.0, 104],
+      "path_m": [1.2319, 104],
+      "jerk": [54.2746, 104],
+      "grasp_miss_m": [0.0435, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "T0": {
+      "success": [0.5096, 104],
+      "grasp_ok": [0.6538, 104],
+      "steps_to_success": [106.9434, 53],
+      "calls_sched": [9.9615, 104],
+      "calls_trig": [0.0096, 104],
+      "path_m": [1.2333, 104],
+      "jerk": [54.9411, 104],
+      "grasp_miss_m": [0.0436, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "G": {
+      "success": [0.5, 104],
+      "grasp_ok": [0.6442, 104],
+      "steps_to_success": [104.5769, 52],
+      "calls_sched": [9.9808, 104],
+      "calls_trig": [0.0, 104],
+      "path_m": [1.2327, 104],
+      "jerk": [54.7013, 104],
+      "grasp_miss_m": [0.0434, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "PPC": {
+      "success": [0.5096, 104],
+      "grasp_ok": [0.6538, 104],
+      "steps_to_success": [109.0377, 53],
+      "calls_sched": [10.0096, 104],
+      "calls_trig": [0.0192, 104],
+      "path_m": [1.2444, 104],
+      "jerk": [56.5898, 104],
+      "grasp_miss_m": [0.0434, 104],
+      "no_close_command": [0.0, 104]
+     }
+    },
+    "E": {
+     "none": {
+      "success": [0.375, 104],
+      "grasp_ok": [0.5481, 104],
+      "steps_to_success": [100.5128, 39],
+      "calls_sched": [5.6058, 104],
+      "calls_trig": [0.0, 104],
+      "path_m": [1.3061, 104],
+      "jerk": [52.0172, 104],
+      "grasp_miss_m": [0.0436, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "T0": {
+      "success": [0.3558, 104],
+      "grasp_ok": [0.5385, 104],
+      "steps_to_success": [99.1351, 37],
+      "calls_sched": [5.6635, 104],
+      "calls_trig": [0.0288, 104],
+      "path_m": [1.3124, 104],
+      "jerk": [53.4701, 104],
+      "grasp_miss_m": [0.0438, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "G": {
+      "success": [0.375, 104],
+      "grasp_ok": [0.5481, 104],
+      "steps_to_success": [100.5128, 39],
+      "calls_sched": [5.6058, 104],
+      "calls_trig": [0.0, 104],
+      "path_m": [1.3064, 104],
+      "jerk": [51.5699, 104],
+      "grasp_miss_m": [0.0434, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "PPC": {
+      "success": [0.3654, 104],
+      "grasp_ok": [0.5481, 104],
+      "steps_to_success": [100.6579, 38],
+      "calls_sched": [5.6154, 104],
+      "calls_trig": [0.0577, 104],
+      "path_m": [1.3025, 104],
+      "jerk": [52.6952, 104],
+      "grasp_miss_m": [0.0437, 104],
+      "no_close_command": [0.0, 104]
+     }
+    },
+    "F": {
+     "none": {
+      "success": [0.3558, 104],
+      "grasp_ok": [0.5577, 104],
+      "steps_to_success": [107.1892, 37],
+      "calls_sched": [9.4423, 104],
+      "calls_trig": [0.0, 104],
+      "path_m": [1.3018, 104],
+      "jerk": [64.0374, 104],
+      "grasp_miss_m": [0.0441, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "T0": {
+      "success": [0.3462, 104],
+      "grasp_ok": [0.5481, 104],
+      "steps_to_success": [106.8889, 36],
+      "calls_sched": [9.4904, 104],
+      "calls_trig": [0.0192, 104],
+      "path_m": [1.3016, 104],
+      "jerk": [64.7246, 104],
+      "grasp_miss_m": [0.0442, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "G": {
+      "success": [0.3654, 104],
+      "grasp_ok": [0.5577, 104],
+      "steps_to_success": [110.7895, 38],
+      "calls_sched": [9.4231, 104],
+      "calls_trig": [0.0, 104],
+      "path_m": [1.3013, 104],
+      "jerk": [63.3787, 104],
+      "grasp_miss_m": [0.0437, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "PPC": {
+      "success": [0.3462, 104],
+      "grasp_ok": [0.5481, 104],
+      "steps_to_success": [106.6111, 36],
+      "calls_sched": [9.4135, 104],
+      "calls_trig": [0.0962, 104],
+      "path_m": [1.3037, 104],
+      "jerk": [63.9217, 104],
+      "grasp_miss_m": [0.0441, 104],
+      "no_close_command": [0.0, 104]
+     }
+    },
+    "Gp": {
+     "none": {
+      "success": [0.3365, 104],
+      "grasp_ok": [0.5288, 104],
+      "steps_to_success": [104.3143, 35],
+      "calls_sched": [7.9423, 104],
+      "calls_trig": [0.0, 104],
+      "path_m": [1.2955, 104],
+      "jerk": [58.407, 104],
+      "grasp_miss_m": [0.0441, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "T0": {
+      "success": [0.3269, 104],
+      "grasp_ok": [0.5096, 104],
+      "steps_to_success": [103.5, 34],
+      "calls_sched": [7.9808, 104],
+      "calls_trig": [0.0288, 104],
+      "path_m": [1.2946, 104],
+      "jerk": [58.886, 104],
+      "grasp_miss_m": [0.0441, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "G": {
+      "success": [0.3365, 104],
+      "grasp_ok": [0.5288, 104],
+      "steps_to_success": [104.3143, 35],
+      "calls_sched": [7.9423, 104],
+      "calls_trig": [0.0, 104],
+      "path_m": [1.2938, 104],
+      "jerk": [58.3741, 104],
+      "grasp_miss_m": [0.0439, 104],
+      "no_close_command": [0.0, 104]
+     },
+     "PPC": {
+      "success": [0.3269, 104],
+      "grasp_ok": [0.5192, 104],
+      "steps_to_success": [103.4412, 34],
+      "calls_sched": [7.9808, 104],
+      "calls_trig": [0.0192, 104],
+      "path_m": [1.2944, 104],
+      "jerk": [58.8769, 104],
+      "grasp_miss_m": [0.044, 104],
+      "no_close_command": [0.0, 104]
+     }
+    }
+   },
+   "smooth": {
+    "C": {
+     "none": {
+      "success": [0.4519, 104],
+      "grasp_ok": [0.5865, 104],
+      "steps_to_success": [105.7447, 47],
+      "calls_sched": [4.4327, 104],
+      "calls_trig": [0.0, 104],
+      "path_m": [1.2408, 104],
+      "jerk": [43.5684, 104],
+      "grasp_miss_m": [0.0446, 104],
+      "grasp_miss_along_m": [-0.0176, 98],
+      "no_close_command": [0.0, 104]
+     },
+     "T0": {
+      "success": [0.4712, 104],
+      "grasp_ok": [0.6058, 104],
+      "steps_to_success": [110.8367, 49],
+      "calls_sched": [3.7981, 104],
+      "calls_trig": [1.8365, 104],
+      "path_m": [1.2674, 104],
+      "jerk": [40.7979, 104],
+      "grasp_miss_m": [0.0426, 104],
+      "grasp_miss_along_m": [-0.0178, 98],
+      "no_close_command": [0.0, 104]
+     },
+     "G": {
+      "success": [0.5, 104],
+      "grasp_ok": [0.6538, 104],
+      "steps_to_success": [109.5192, 52],
+      "calls_sched": [4.3173, 104],
+      "calls_trig": [0.0, 104],
+      "path_m": [1.194, 104],
+      "jerk": [38.2818, 104],
+      "grasp_miss_m": [0.0416, 104],
+      "grasp_miss_along_m": [-0.0028, 98],
+      "no_close_command": [0.0, 104]
+     },
+     "PPC": {
+      "success": [0.4712, 104],
+      "grasp_ok": [0.6923, 104],
+      "steps_to_success": [111.9592, 49],
+      "calls_sched": [4.0962, 104],
+      "calls_trig": [0.3942, 104],
+      "path_m": [1.2416, 104],
+      "jerk": [40.7935, 104],
+      "grasp_miss_m": [0.0399, 104],
+      "grasp_miss_along_m": [-0.0045, 98],
+      "no_close_command": [0.0, 104]
+     },
+     "PPC9": {
+      "success": [0.5, 104],
+      "grasp_ok": [0.6827, 104],
+      "steps_to_success": [111.0577, 52],
+      "calls_sched": [3.9808, 104],
+      "calls_trig": [0.4038, 104],
+      "path_m": [1.2081, 104],
+      "jerk": [37.2154, 104],
+      "grasp_miss_m": [0.0398, 104],
+      "grasp_miss_along_m": [-0.001, 98],
+      "no_close_command": [0.0, 104]
+     }
+    }
+   }
+  },
+  "success_by_class": {
+   "0": {
+    "none": [0.4499, 609],
+    "T0": [0.4516, 609],
+    "G": [0.4943, 609],
+    "GT": [0.4811, 609],
+    "PPC": [0.4154, 609],
+    "Gpost": [0.5517, 87],
+    "GJ": [0.75, 28]
+   },
+   "1": {
+    "none": [0.2591, 602],
+    "T0": [0.2741, 602],
+    "G": [0.3588, 602],
+    "GT": [0.3654, 602],
+    "PPC": [0.4153, 602],
+    "Gpost": [0.3605, 86],
+    "GJ": [0.4815, 27]
+   },
+   "2": {
+    "none": [0.1314, 609],
+    "T0": [0.133, 609],
+    "G": [0.335, 609],
+    "GT": [0.2348, 609],
+    "PPC": [0.2562, 609],
+    "Gpost": [0.3448, 87],
+    "GJ": [0.3793, 29]
+   }
+  },
+  "success_by_suite": {
+   "step": {
+    "libero_spatial": {
+     "none": [0.2143, 700],
+     "T0": [0.2271, 700],
+     "G": [0.2771, 700],
+     "GT": [0.2514, 700],
+     "PPC": [0.2814, 700],
+     "Gpost": [0.35, 100],
+     "GJ": [0.3571, 28]
+    },
+    "libero_object": {
+     "none": [0.3114, 700],
+     "T0": [0.3114, 700],
+     "G": [0.5057, 700],
+     "GT": [0.45, 700],
+     "PPC": [0.44, 700],
+     "Gpost": [0.42, 100],
+     "GJ": [0.725, 40]
+    },
+    "libero_goal": {
+     "none": [0.3381, 420],
+     "T0": [0.3429, 420],
+     "G": [0.4119, 420],
+     "GT": [0.3929, 420],
+     "PPC": [0.3667, 420],
+     "Gpost": [0.5333, 60],
+     "GJ": [0.375, 16]
+    }
+   },
+   "control": {
+    "libero_spatial": {
+     "none": [0.4107, 280],
+     "T0": [0.3786, 280],
+     "G": [0.3964, 280],
+     "PPC": [0.3786, 280]
+    },
+    "libero_object": {
+     "none": [0.4929, 280],
+     "T0": [0.4857, 280],
+     "G": [0.4857, 280],
+     "PPC": [0.4964, 280]
+    },
+    "libero_goal": {
+     "none": [0.5893, 168],
+     "T0": [0.5893, 168],
+     "G": [0.5893, 168],
+     "PPC": [0.5952, 168]
+    }
+   },
+   "smooth": {
+    "libero_spatial": {
+     "none": [0.475, 40],
+     "T0": [0.425, 40],
+     "G": [0.5, 40],
+     "PPC": [0.375, 40],
+     "PPC9": [0.5, 40]
+    },
+    "libero_object": {
+     "none": [0.35, 40],
+     "T0": [0.425, 40],
+     "G": [0.45, 40],
+     "PPC": [0.55, 40],
+     "PPC9": [0.5, 40]
+    },
+    "libero_goal": {
+     "none": [0.5833, 24],
+     "T0": [0.625, 24],
+     "G": [0.5833, 24],
+     "PPC": [0.5, 24],
+     "PPC9": [0.5, 24]
+    }
+   }
+  },
+  "gt_minus_t0_by_d": {
+   "0": {
+    "diff_pp": 5.128,
+    "lo2.5": 1.795,
+    "lo5_one_sided": 2.429,
+    "hi97.5": 8.59,
+    "pairs": 780,
+    "clusters": 26
+   },
+   "10": {
+    "diff_pp": 7.5,
+    "lo2.5": 1.341,
+    "lo5_one_sided": 2.115,
+    "hi97.5": 14.231,
+    "pairs": 520,
+    "clusters": 26
+   },
+   "20": {
+    "diff_pp": 10.769,
+    "lo2.5": 4.615,
+    "lo5_one_sided": 5.577,
+    "hi97.5": 17.115,
+    "pairs": 520,
+    "clusters": 26
+   }
+  },
+  "shares": {
+   "step": {
+    "none": {
+     "no_fire": [0.0764, 1820],
+     "fire_at_step_0": [0.0, 1820],
+     "pushed_before_fire": [0.0, 1820],
+     "unstable_of_fired": [0.119, 1681],
+     "bad_qacc": [0.0, 1820]
+    },
+    "T0": {
+     "no_fire": [0.0764, 1820],
+     "fire_at_step_0": [0.0, 1820],
+     "pushed_before_fire": [0.0, 1820],
+     "unstable_of_fired": [0.1267, 1681],
+     "bad_qacc": [0.0, 1820]
+    },
+    "G": {
+     "no_fire": [0.0764, 1820],
+     "fire_at_step_0": [0.0, 1820],
+     "pushed_before_fire": [0.0, 1820],
+     "unstable_of_fired": [0.1523, 1681],
+     "bad_qacc": [0.0, 1820]
+    },
+    "GT": {
+     "no_fire": [0.0764, 1820],
+     "fire_at_step_0": [0.0, 1820],
+     "pushed_before_fire": [0.0, 1820],
+     "unstable_of_fired": [0.1559, 1681],
+     "bad_qacc": [0.0, 1820]
+    },
+    "PPC": {
+     "no_fire": [0.0764, 1820],
+     "fire_at_step_0": [0.0, 1820],
+     "pushed_before_fire": [0.0005, 1820],
+     "unstable_of_fired": [0.1434, 1681],
+     "bad_qacc": [0.0, 1820]
+    },
+    "Gpost": {
+     "no_fire": [0.0731, 260],
+     "fire_at_step_0": [0.0, 260],
+     "pushed_before_fire": [0.0, 260],
+     "unstable_of_fired": [0.1618, 241],
+     "bad_qacc": [0.0, 260]
+    },
+    "GJ": {
+     "no_fire": [0.0595, 84],
+     "fire_at_step_0": [0.0, 84],
+     "pushed_before_fire": [0.0, 84],
+     "unstable_of_fired": [0.1772, 79],
+     "bad_qacc": [0.0, 84]
+    }
+   },
+   "control": {
+    "none": {
+     "pushed_before_fire": [0.0907, 728],
+     "false_trigger": [0.0, 728],
+     "bad_qacc": [0.0, 728]
+    },
+    "T0": {
+     "pushed_before_fire": [0.1058, 728],
+     "false_trigger": [0.0288, 728],
+     "bad_qacc": [0.0, 728]
+    },
+    "G": {
+     "pushed_before_fire": [0.0907, 728],
+     "false_trigger": [0.0879, 728],
+     "bad_qacc": [0.0, 728]
+    },
+    "PPC": {
+     "pushed_before_fire": [0.114, 728],
+     "false_trigger": [0.0783, 728],
+     "bad_qacc": [0.0, 728]
+    }
+   },
+   "smooth": {
+    "none": {
+     "no_fire": [0.0577, 104],
+     "fire_at_step_0": [0.0, 104],
+     "smooth_cut_by_close": [0.8673, 98],
+     "pushed_before_fire": [0.0, 104],
+     "bad_qacc": [0.0, 104]
+    },
+    "T0": {
+     "no_fire": [0.0577, 104],
+     "fire_at_step_0": [0.0, 104],
+     "smooth_cut_by_close": [0.8163, 98],
+     "pushed_before_fire": [0.0, 104],
+     "bad_qacc": [0.0, 104]
+    },
+    "G": {
+     "no_fire": [0.0577, 104],
+     "fire_at_step_0": [0.0, 104],
+     "smooth_cut_by_close": [0.8878, 98],
+     "pushed_before_fire": [0.0, 104],
+     "bad_qacc": [0.0, 104]
+    },
+    "PPC": {
+     "no_fire": [0.0577, 104],
+     "fire_at_step_0": [0.0, 104],
+     "smooth_cut_by_close": [0.8571, 98],
+     "pushed_before_fire": [0.0, 104],
+     "bad_qacc": [0.0, 104]
+    },
+    "PPC9": {
+     "no_fire": [0.0577, 104],
+     "fire_at_step_0": [0.0, 104],
+     "smooth_cut_by_close": [0.8469, 98],
+     "pushed_before_fire": [0.0, 104],
+     "bad_qacc": [0.0, 104]
+    }
+   }
+  },
+  "headroom_median": {
+   "near": {
+    "10": [0.0246, 75],
+    "25": [0.0597, 75],
+    "50": [0.0672, 75]
+   },
+   "far": {
+    "10": [0.0508, 410],
+    "25": [0.0573, 410],
+    "50": [0.0629, 410]
+   }
+  },
+  "headroom_median_by_class": {
+   "near": {
+    "0": {
+     "10": [0.0638, 22],
+     "25": [0.0192, 22],
+     "50": [0.0029, 22]
+    },
+    "1": {
+     "10": [0.0229, 29],
+     "25": [0.0736, 29],
+     "50": [0.1245, 29]
+    },
+    "2": {
+     "10": [0.0239, 24],
+     "25": [0.0705, 24],
+     "50": [0.0204, 24]
+    }
+   },
+   "far": {
+    "0": {
+     "10": [0.0686, 139],
+     "25": [0.056, 139],
+     "50": [0.0435, 139]
+    },
+    "1": {
+     "10": [0.0551, 131],
+     "25": [0.0651, 131],
+     "50": [0.041, 131]
+    },
+    "2": {
+     "10": [0.0331, 140],
+     "25": [0.0531, 140],
+     "50": [0.0832, 140]
+    }
+   }
+  },
+  "headroom_median_by_cell": {
+   "A": {
+    "near": {
+     "10": [0.025, 38],
+     "25": [0.0693, 38],
+     "50": [0.0699, 38]
+    },
+    "far": {
+     "10": [0.0553, 206],
+     "25": [0.0573, 206],
+     "50": [0.0715, 206]
+    }
+   },
+   "C": {
+    "near": {
+     "10": [0.0229, 37],
+     "25": [0.0591, 37],
+     "50": [0.0603, 37]
+    },
+    "far": {
+     "10": [0.0445, 204],
+     "25": [0.0577, 204],
+     "50": [0.053, 204]
+    }
+   }
+  },
+  "headroom_G": "≈ 1 after T_ramp by construction (spec §9); not measured",
+  "gpost_vs_g_C": {
+   "Gpost-G": {
+    "diff_pp": -1.154,
+    "lo2.5": -3.846,
+    "lo5_one_sided": -3.462,
+    "hi97.5": 1.538,
+    "pairs": 260,
+    "clusters": 26
+   },
+   "Gpost": {
+    "success": [0.4192, 260],
+    "grasp_ok": [0.5731, 260],
+    "steps_to_success": [108.367, 109],
+    "calls_sched": [4.5808, 260],
+    "calls_trig": [0.0, 260],
+    "path_m": [1.2576, 260],
+    "jerk": [43.8691, 260],
+    "grasp_miss_m": [0.0465, 260],
+    "grasp_miss_along_m": [-0.0006, 241],
+    "no_close_command": [0.0, 260]
+   },
+   "G": {
+    "success": [0.4308, 260],
+    "grasp_ok": [0.5923, 260],
+    "steps_to_success": [108.4911, 112],
+    "calls_sched": [4.5423, 260],
+    "calls_trig": [0.0, 260],
+    "path_m": [1.2456, 260],
+    "jerk": [42.0982, 260],
+    "grasp_miss_m": [0.056, 260],
+    "grasp_miss_along_m": [0.0076, 241],
+    "no_close_command": [0.0, 260]
+   }
+  },
+  "gj_vs_g_A": {
+   "GJ-G": {
+    "diff_pp": -9.524,
+    "lo2.5": -20.238,
+    "lo5_one_sided": -19.048,
+    "hi97.5": 1.19,
+    "pairs": 84,
+    "clusters": 21
+   },
+   "GJ": {
+    "success": [0.5357, 84],
+    "grasp_ok": [0.6786, 84],
+    "steps_to_success": [138.5111, 45],
+    "calls_sched": [20.869, 84],
+    "calls_trig": [0.0, 84],
+    "path_m": [1.2625, 84],
+    "jerk": [66.588, 84],
+    "grasp_miss_m": [0.044, 84],
+    "grasp_miss_along_m": [-0.0158, 79],
+    "no_close_command": [0.0, 84]
+   },
+   "G": {
+    "success": [0.631, 84],
+    "grasp_ok": [0.75, 84],
+    "steps_to_success": [129.283, 53],
+    "calls_sched": [18.9524, 84],
+    "calls_trig": [0.0, 84],
+    "path_m": [1.2262, 84],
+    "jerk": [57.4968, 84],
+    "grasp_miss_m": [0.0409, 84],
+    "grasp_miss_along_m": [-0.0152, 78],
+    "no_close_command": [0.0, 84]
+   }
+  }
+ }
+}

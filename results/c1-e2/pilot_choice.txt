@@ -1,0 +1,11 @@
+T_ramp=1   K_p=0.3  success 40/104 = 0.385 (104 distinct episodes)
+T_ramp=1   K_p=1.0  success 41/104 = 0.394 (104 distinct episodes)
+T_ramp=5   K_p=0.3  success 37/104 = 0.356 (104 distinct episodes)
+T_ramp=5   K_p=1.0  success 41/104 = 0.394 (104 distinct episodes)
+T_ramp=10  K_p=0.3  success 38/104 = 0.365 (104 distinct episodes)
+T_ramp=10  K_p=1.0  success 33/104 = 0.317 (104 distinct episodes)
+chosen (spec §7: highest success; ties -> larger T_ramp, then smaller K_p): T_ramp=5 K_p=1.0
+Next: 1) on the Mac, add this exact line to the spec journal, commit and push:
+     C1-E2 coefficients: T_ramp=5 K_p=1.0
+  2) on the pod: git pull && ./scripts/gpu_c1e2.sh grid 5 1.0
+Rough grid forecast: 3.88 s/episode (mean of the pilot's first passes) x 14456 = 15.6 h (rough: the pilot batches 4 envs, the grid 10-16; the G+J line is slower, spec: about +0.5 h). Spec 11 fuse: > 10 h -> the owner cuts lines.
