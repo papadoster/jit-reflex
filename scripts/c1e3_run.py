@@ -66,7 +66,8 @@ CONF = {"t_ramp": args.t_ramp, "k_p": args.k_p, "tau_k": args.tau_k, "K": args.K
         "beta": args.beta, "eps_noise": args.eps_noise, "vmin_noise": args.vmin_noise, "pad": args.pad_brain}
 ARMS = args.methods.split(",")
 for arm in ARMS:
-    hf.parse_arm(arm)
+    # spec §5: the alpha brain does not combine with the return
+    assert hf.parse_arm(arm)[0] != "GRret" or args.alpha == 0, f"{arm} runs with --alpha 0 only"
 dev = torch.device(args.device)
 torch.backends.cuda.matmul.allow_tf32 = False  # literal fp32 on CUDA (spec §4)
 torch.backends.cudnn.allow_tf32 = False
@@ -273,8 +274,8 @@ def run_batch(vec, eps):
             if (args.save_images and pt.t_fire is not None and pad[i]["ep"].kind != "control"
                     and t in (pt.t_fire, pt.t_fire + 1) and (shot[i] or n_img < args.save_images)):
                 e = pad[i]
-                save_images(obs, i, f"{e['ep'].suite}_{e['ep'].task}_{e['ep'].init}_{e['cell']}_{e['arm']}_"
-                                    f"{'pre' if t == pt.t_fire else 'post'}")
+                save_images(obs, i, f"{e['ep'].suite}_{e['ep'].task}_{e['ep'].init}_{e['ep'].kind}_{e['cell']}_"
+                                    f"{e['arm']}_a{args.alpha:g}_{'pre' if t == pt.t_fire else 'post'}")
                 n_img += not shot[i]
                 shot[i] = True
             tobs[i].append(-1 if ag.sched.t_obs is None else ag.sched.t_obs)
@@ -326,6 +327,8 @@ def run_batch(vec, eps):
                "success": bool(succ[i]), "steps_to_success": steps_ok[i], "steps": len(acts[i]),
                "calls_sched": ag.sched.n_sched, "calls_trig": ag.sched.n_trig, "t_fire": pt.t_fire,
                "g_on": ag.g_on, "t_engage": ag.t_e, "t_lift": ag.t_lift, "bad_qacc": int(bad[i]),
+               # the return still unsent at the end (None: it never started): finished vs cut by the open command
+               "ret_left": None if ag.ret_left is None else np.round(ag.ret_left, 6).tolist(),
                "c_extra": np.round(ag.c, 6).tolist(),
                "kappa_log": [k | {"S": np.round(sb.s_at[k["t"]], 6).tolist()} for k in ag.kappa_log],
                "act_hash": hashlib.sha256(np.asarray(acts[i]).tobytes()).hexdigest()[:16]}
@@ -389,6 +392,7 @@ episodes = [{"ep": ep, "cell": c, "arm": m}
             if (st, tk, i, k, c, m, args.alpha) not in done]
 print(f"{len(episodes)} episodes to run", flush=True)
 t0, n_done = time.time(), 0
+n_try = n_fail = 0  # batches over the whole invocation: abort on a systematic failure, not on one bad task
 for st, tk in tasks:
     todo = [e for e in episodes if (e["ep"].suite, e["ep"].task) == (st, tk)]
     if not todo:
@@ -397,9 +401,11 @@ for st, tk in tasks:
     for key in sorted({(e["cell"], e["ep"].kind) for e in todo}):
         group = [e for e in todo if (e["cell"], e["ep"].kind) == key]
         for j in range(0, len(group), args.n_envs):
+            n_try += 1
             try:
                 recs = run_batch(vec, group[j: j + args.n_envs])
             except Exception as exc:  # spec §8: a fallen batch is skipped here; a rerun with resume retries it
+                n_fail += 1
                 print(f"FAILED {st}:{tk} {key[0]},{key[1]} [{j}:{j + args.n_envs}]: {exc!r}", flush=True)
                 traceback.print_exc()
                 try:
@@ -407,6 +413,9 @@ for st, tk in tasks:
                 except Exception:  # an async worker died natively: kill the rest directly
                     for pr in getattr(vec, "processes", []):
                         pr.terminate()
+                if n_fail >= 5 and n_fail > 0.2 * n_try:
+                    print(f"ABORT: systematic failure, {n_fail} of {n_try} batches failed", flush=True)
+                    sys.exit(1)
                 vec = make_vec(st, tk)
                 continue
             with open(args.out, "a") as f:
