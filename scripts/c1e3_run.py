@@ -107,9 +107,10 @@ if args.out and Path(args.out).exists():
 
 class ShiftEnv(LiberoEnv):
     """LiberoEnv plus a pending shift of the target object applied before the next physics step, and oracle data in
-    info: object of interest and EEF positions, robot-object contact, the placement target's position (spec §4). The
-    target is the first object of interest with a free joint. The MjSim is re-read on every call and the contact masks
-    and placement target on every reset: a hard reset rebuilds the sim."""
+    info: object of interest and EEF positions, robot-object contact, the placement target's position (spec §4); at
+    reset also the object's box (journal item 14). The target is the first object of interest with a free joint. The
+    MjSim is re-read on every call and the contact masks, box and placement target on every reset: a hard reset
+    rebuilds the sim."""
 
     pending_dq = None
 
@@ -135,6 +136,14 @@ class ShiftEnv(LiberoEnv):
         self._robot = np.array([bodies[b].startswith(("robot0_", "gripper0_")) for b in m.geom_bodyid])
         self._obj = np.array([under(b) for b in m.geom_bodyid])
         assert self._robot.any() and self._obj.any(), "no robot or object geoms"
+        # journal item 14: the world-axis-aligned box of the object's geoms (their local AABB corners in the world),
+        # attached to the body origin p as [centre offset c from p, half sides h]
+        d, g = e.sim.data._data, np.flatnonzero(self._obj)
+        signs = np.array(np.meshgrid(*[[-1.0, 1.0]] * 3)).T.reshape(-1, 3)
+        local = m.geom_aabb[g, None, :3] + signs * m.geom_aabb[g, None, 3:]  # (geoms, 8, 3)
+        pts = (d.geom_xpos[g, None] + np.einsum("gij,gkj->gki", d.geom_xmat[g].reshape(-1, 3, 3), local)).reshape(-1, 3)
+        lo, hi = pts.min(0) - d.xpos[root], pts.max(0) - d.xpos[root]
+        self._box = np.r_[(lo + hi) / 2, (hi - lo) / 2]
         self._goal = None  # spec §4: the last argument of the goal's On/In predicate whose first is the target object
         for pred in e.parsed_problem["goal_state"]:
             if len(pred) == 3 and pred[0].lower() in ("on", "in") and pred[1] == name:
@@ -164,6 +173,7 @@ class ShiftEnv(LiberoEnv):
     def reset(self, seed=None, **kw):
         obs, info = super().reset(seed=seed, **kw)
         self._setup()
+        info["box"] = self._box.copy()  # through info: an AsyncVectorEnv worker's attributes are out of reach
         return obs, self._oracle(info)
 
     def step(self, action):
@@ -203,7 +213,7 @@ def brain(obs, desc, noises):
     return post(ch).cpu().numpy()
 
 
-def make_agent(arm, cell, ep):
+def make_agent(arm, cell, ep, box):
     method, filt, noise = hf.parse_arm(arm)
     kw = {"t_ramp": args.t_ramp, "k_p": args.k_p, "tau_k": args.tau_k, "K": args.K}
     if noise:
@@ -211,7 +221,7 @@ def make_agent(arm, cell, ep):
         kw |= {"tracker": hf.Tracker(ep.seed, sigma, lag, q, args.beta), "eps": args.eps_noise,
                "ppc_v_min": args.vmin_noise}
     if filt:
-        kw["push"] = hf.PushFilter(filt, args.rc, bool(args.dir))
+        kw["push"] = hf.PushFilter(filt, args.rc, bool(args.dir), box)
     return hf.HAgent(method, *orx.CELLS[cell], **kw)
 
 
@@ -251,9 +261,9 @@ def run_batch(vec, eps):
     vec.set_attr("init_state_id", [e["ep"].init for e in pad])
     # one reset seed for every slot: LIBERO seeds numpy with it and places the fixtures (cabinet, stove, rack) from it
     obs, info = vec.reset(seed=[0] * n)
-    desc = vec.call("task_description")
-    agents = [make_agent(e["arm"], e["cell"], e["ep"]) for e in pad]
-    perts = [hf.Perturbation(e["ep"]) for e in pad]
+    desc, boxes = vec.call("task_description"), info["box"].copy()
+    agents = [make_agent(e["arm"], e["cell"], e["ep"], boxes[i]) for i, e in enumerate(pad)]
+    perts = [hf.Perturbation(e["ep"], boxes[i]) for i, e in enumerate(pad)]
     sbs = [hf.SeeingBrain(args.alpha, args.t_ramp) for _ in pad]
     gens = [torch.Generator().manual_seed(e["ep"].seed) for e in pad]
     t_max = vec.get_attr("_max_episode_steps")[0]
@@ -324,6 +334,7 @@ def run_batch(vec, eps):
         rec = {"suite": ep.suite, "task": ep.task, "init": ep.init, "kind": ep.kind, "cell": e["cell"],
                "arm": e["arm"], "method": method, "filter": filt, "noise": noise, "alpha": args.alpha, "conf": CONF,
                "seed": ep.seed, "mag_class": ep.mag_class, "mag": ep.mag, "angle": ep.angle, "r": ep.r,
+               "box": np.round(boxes[i], 5).tolist(),
                "success": bool(succ[i]), "steps_to_success": steps_ok[i], "steps": len(acts[i]),
                "calls_sched": ag.sched.n_sched, "calls_trig": ag.sched.n_trig, "t_fire": pt.t_fire,
                "g_on": ag.g_on, "t_engage": ag.t_e, "t_lift": ag.t_lift, "bad_qacc": int(bad[i]),
@@ -347,9 +358,9 @@ def run_batch(vec, eps):
         rec["unstable"] = bool(ep.kind != "control" and k is not None and pt.t_fire < k < len(o)
                                and np.linalg.norm(o[k] - (pt.p_pre + ep.delta)) > 0.01)
         # push marks per step before the first close (spec §9 filter report): surrogate at the grid's r_c and
-        # direction, contact oracle at t - 1 or t, both
+        # direction with the object's box, contact oracle at t - 1 or t, both
         last = len(o) if tc is None else tc
-        sf = [hf.surr_push(o[t], o[t - 1], x[t], x[t - 1], args.rc, bool(args.dir)) for t in range(1, last)]
+        sf = [hf.surr_push(o[t], o[t - 1], x[t], x[t - 1], args.rc, bool(args.dir), boxes[i]) for t in range(1, last)]
         cf = [bool(c[t - 1] or c[t]) for t in range(1, last)]
         rec["push_steps"] = [sum(sf), sum(cf), sum(a and b for a, b in zip(sf, cf))]
         rec["contact_at_shift"] = (bool(c[pt.t_fire: pt.t_fire + 2].any())
@@ -392,7 +403,8 @@ episodes = [{"ep": ep, "cell": c, "arm": m}
             if (st, tk, i, k, c, m, args.alpha) not in done]
 print(f"{len(episodes)} episodes to run", flush=True)
 t0, n_done = time.time(), 0
-n_try = n_fail = 0  # batches over the whole invocation: abort on a systematic failure, not on one bad task
+n_try = n_fail = 0  # batches over the whole invocation: abort on a systematic failure, never on one bad task
+failed_tasks = set()
 for st, tk in tasks:
     todo = [e for e in episodes if (e["ep"].suite, e["ep"].task) == (st, tk)]
     if not todo:
@@ -406,6 +418,7 @@ for st, tk in tasks:
                 recs = run_batch(vec, group[j: j + args.n_envs])
             except Exception as exc:  # spec §8: a fallen batch is skipped here; a rerun with resume retries it
                 n_fail += 1
+                failed_tasks.add((st, tk))
                 print(f"FAILED {st}:{tk} {key[0]},{key[1]} [{j}:{j + args.n_envs}]: {exc!r}", flush=True)
                 traceback.print_exc()
                 try:
@@ -413,8 +426,9 @@ for st, tk in tasks:
                 except Exception:  # an async worker died natively: kill the rest directly
                     for pr in getattr(vec, "processes", []):
                         pr.terminate()
-                if n_fail >= 5 and n_fail > 0.2 * n_try:
-                    print(f"ABORT: systematic failure, {n_fail} of {n_try} batches failed", flush=True)
+                if n_fail >= 5 and n_fail > 0.2 * n_try and len(failed_tasks) >= 3:
+                    print(f"ABORT: systematic failure, {n_fail} of {n_try} batches failed in {len(failed_tasks)} tasks",
+                          flush=True)
                     sys.exit(1)
                 vec = make_vec(st, tk)
                 continue

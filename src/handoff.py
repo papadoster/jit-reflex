@@ -28,7 +28,8 @@ LIFT = 0.03  # lifted: >= 3 cm above the object's height at the close command (s
 
 def make_episode(suite, task, init, kind):
     """spec §4: everything from the episode seed, identical for all methods and cells. kind: step; close (the shift
-    fires within r ~ U[3, 8] cm); control (no shift: the pseudo-shift moment and its direction are only recorded)."""
+    fires within r ~ U[3, 8] cm of the object's box, journal item 14); control (no shift: the pseudo-shift moment and
+    its direction are only recorded)."""
     assert kind in R_RANGE, kind
     seed = int.from_bytes(hashlib.sha256(f"c1e3/{suite}/{task}/{init}/{kind}".encode()).digest()[:4], "little")
     rng = np.random.default_rng(seed)
@@ -41,18 +42,32 @@ def make_episode(suite, task, init, kind):
     return orx.Episode(suite, task, init, kind, seed, r, mag, angle, cls)
 
 
-class Perturbation:
-    """spec §4: fires once, at the first step with no close command yet and |EEF - object| < r. A step shift (kinds step
-    and close) is applied before that step's physics, so the observation at t_fire is still pre-shift. In control only
-    t_fire and p_pre are recorded (pseudo-shift)."""
+def box_dist(eef, p, box=None):
+    """Distance from the EEF to the object's box at p (spec journal item 14): box = (c, h) as 6 numbers, the centre's
+    offset from p and the half sides of the world-axis-aligned box of the object's geoms at reset; 0 inside. No box:
+    the plain |eef - p|."""
+    d = np.asarray(eef, float) - np.asarray(p, float)
+    if box is None:
+        return float(np.linalg.norm(d))
+    c, h = np.asarray(box, float).reshape(2, 3)
+    return float(np.linalg.norm(np.maximum(np.abs(d - c) - h, 0.0)))
 
-    def __init__(self, ep):
+
+class Perturbation:
+    """spec §4: fires once, at the first step with no close command yet and the EEF within r of the object: kind close
+    measures to the object's box (journal item 14, box required), step and control to its origin |EEF - p| (as C1-E2).
+    A step shift (kinds step and close) is applied before that step's physics, so the observation at t_fire is still
+    pre-shift. In control only t_fire and p_pre are recorded (pseudo-shift)."""
+
+    def __init__(self, ep, box=None):
+        assert ep.kind != "close" or box is not None, "the close shift needs the object's box"
         self.ep, self.t_fire, self.p_pre = ep, None, None
+        self.box = box if ep.kind == "close" else None
 
     def dq(self, t, eef, obj, grasp_started):
         """Shift (m) to apply before this step's physics, or None."""
         if self.t_fire is None:
-            if grasp_started or np.linalg.norm(np.asarray(eef, float) - obj) >= self.ep.r:
+            if grasp_started or box_dist(eef, obj, self.box) >= self.ep.r:
                 return None
             self.t_fire, self.p_pre = t, np.array(obj, dtype=float)
         return self.ep.delta if t == self.t_fire and self.ep.kind != "control" else None
@@ -127,20 +142,20 @@ class Tracker:
         return self.est.copy()
 
 
-def surr_push(p, p0, eef, eef0, r_c, direction):
-    """Surrogate push flag for the step p0 -> p (spec §4): the arm is within r_c of the object's last position and, with
-    direction, the object moved the way the arm did."""
-    return bool(np.linalg.norm(eef - p0) < r_c and (not direction or (p - p0) @ (eef - eef0) > 0))
+def surr_push(p, p0, eef, eef0, r_c, direction, box=None):
+    """Surrogate push flag for the step p0 -> p (spec §4): the arm is within r_c of the object's box at its last
+    position (journal item 14; no box: of p0 itself) and, with direction, the object moved the way the arm did."""
+    return bool(box_dist(eef, p0, box) < r_c and (not direction or (p - p0) @ (eef - eef0) > 0))
 
 
 class PushFilter:
     """Contact filter (spec §4): object increments on steps marked as pushes add up in P; the reflex sees p - P.
     mode "contact": MuJoCo robot-object contact at t - 1 or t (the increment p(t) - p(t-1) comes from the physics
-    between the two observations); "surr": surr_push. flag: the last step's mark."""
+    between the two observations); "surr": surr_push with the object's box. flag: the last step's mark."""
 
-    def __init__(self, mode, r_c=0.05, direction=False):
+    def __init__(self, mode, r_c=0.05, direction=False, box=None):
         assert mode in ("contact", "surr"), mode
-        self.mode, self.r_c, self.dir = mode, r_c, direction
+        self.mode, self.r_c, self.dir, self.box = mode, r_c, direction, box
         self.prev, self.P, self.flag = None, np.zeros(3), False
 
     def __call__(self, p, eef, contact):
@@ -148,7 +163,8 @@ class PushFilter:
         self.flag = False
         if self.prev is not None:
             p0, e0, c0 = self.prev
-            self.flag = (c0 or bool(contact)) if self.mode == "contact" else surr_push(p, p0, eef, e0, self.r_c, self.dir)
+            self.flag = ((c0 or bool(contact)) if self.mode == "contact"
+                         else surr_push(p, p0, eef, e0, self.r_c, self.dir, self.box))
             if self.flag:
                 self.P = self.P + (p - p0)
         self.prev = (p, eef, bool(contact))

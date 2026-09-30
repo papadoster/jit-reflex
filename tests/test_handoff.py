@@ -1,3 +1,4 @@
+import dataclasses
 import hashlib
 from types import SimpleNamespace
 
@@ -90,13 +91,54 @@ def test_make_episode_kinds_and_seeds():
 def test_perturbation_close_shifts_once_and_control_only_records():
     for kind in ("close", "control"):
         ep = hf.make_episode("libero_spatial", 0, 0, kind)
-        pt, far, near = hf.Perturbation(ep), np.zeros(3), np.array([ep.r - 1e-3, 0, 0])
+        pt, far, near = hf.Perturbation(ep, np.zeros(6)), np.zeros(3), np.array([ep.r - 1e-3, 0, 0])  # a point box
         assert pt.dq(0, far + 1.0, far, False) is None and pt.t_fire is None
         out = [pt.dq(t, near, np.zeros(3), False) for t in (1, 2)]
         assert pt.t_fire == 1 and np.array_equal(pt.p_pre, np.zeros(3))
         assert (out[0] is None) == (kind == "control") and out[1] is None
     pt = hf.Perturbation(hf.make_episode("libero_spatial", 0, 0, "control"))
     assert pt.dq(0, np.zeros(3), np.zeros(3), True) is None and pt.t_fire is None  # not after a close command
+
+
+BOX = [0.0, 0.0, 0.026, 0.078, 0.079, 0.027]  # a bowl's box (Mac scratch): centre 2.6 cm above p, top at 5.3 cm
+
+
+def test_box_dist_inside_outside_and_no_box():
+    p = np.array([0.1, 0.2, 0.9])
+    assert hf.box_dist(p + [0.05, -0.07, 0.04], p, BOX) == 0.0  # inside
+    assert hf.box_dist(p + [0.10, 0.0, 0.10], p, BOX) == pytest.approx(np.hypot(0.10 - 0.078, 0.10 - 0.053))
+    assert hf.box_dist(p + [0.0, 0.0, -0.02], p, BOX) == pytest.approx(0.019)  # below the bottom at p - 1 mm
+    assert hf.box_dist(p + [0.03, 0.04, 0.0], p, None) == pytest.approx(0.05)  # no box: the origin
+
+
+def test_close_shift_fires_by_the_box_step_and_control_by_the_origin():
+    """Journal item 14: the same arm 8 cm above the object's origin, 2.7 cm above its box, radius 6 cm: only the close
+    shift fires. A close shift without the box is an error."""
+    p, eef = np.array([0.1, 0.2, 0.9]), np.array([0.1, 0.2, 0.98])
+    fired = {}
+    for kind in ("close", "step", "control"):
+        pt = hf.Perturbation(dataclasses.replace(hf.make_episode("libero_spatial", 0, 0, kind), r=0.06), BOX)
+        dq = pt.dq(0, eef, p, False)
+        fired[kind] = pt.t_fire == 0
+        assert (dq is not None) == (kind == "close")
+    assert fired == {"close": True, "step": False, "control": False}
+    with pytest.raises(AssertionError):
+        hf.Perturbation(hf.make_episode("libero_spatial", 0, 0, "close"))
+    hf.Perturbation(hf.make_episode("libero_spatial", 0, 0, "step"))  # step and control need no box
+
+
+def test_surrogate_and_push_filter_measure_to_the_box_at_the_last_position():
+    """The arm 8 cm above p(t - 1), 2.7 cm above its box: a push at r_c = 5 cm with the box, none without; the box
+    sits at p(t - 1), not at p(t)."""
+    p0, eef = np.array([0.1, 0.2, 0.9]), np.array([0.1, 0.2, 0.98])
+    p1 = p0 + [0.004, 0, 0]
+    assert hf.surr_push(p1, p0, eef, eef, 0.05, False, BOX) and not hf.surr_push(p1, p0, eef, eef, 0.05, False)
+    assert not hf.surr_push(p1, p0 - [0, 0, 0.03], eef, eef, 0.05, False, BOX)  # box top 5.7 cm below the arm
+    for box, flag in ((BOX, True), (None, False)):
+        f = hf.PushFilter("surr", 0.05, False, box)
+        f(p0, eef, False)
+        seen = f(p1, eef, False)
+        assert f.flag == flag and seen == pytest.approx(p0 if flag else p1)
 
 
 def test_plan_path_close_index_and_target_diff():
@@ -423,7 +465,7 @@ def test_tracker_dropout_holds_the_estimate_and_lag_with_warm_start():
     assert all(np.array_equal(lag(p), ref(ps[max(t - 3, 0)])) for t, p in enumerate(ps))
 
 
-def test_push_filter_contact_at_t_far_arm_and_distance_to_the_last_position():
+def test_push_filter_contact_at_t_far_arm_and_distance_to_the_last_position():  # no box: the origin p(t - 1)
     c = hf.PushFilter("contact")
     c(np.zeros(3), np.zeros(3), False)
     c(np.array([0.01, 0, 0]), np.zeros(3), True)  # contact at t alone marks the increment
