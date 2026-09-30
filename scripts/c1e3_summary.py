@@ -25,11 +25,11 @@ import objreflex as orx  # noqa: E402
 TOL, N_BOOT = e2.TOL, e2.N_BOOT
 T26, T10 = orx.TASKS, hf.TASKS10
 SUITES = ("libero_spatial", "libero_object", "libero_goal")
-I10, I20, I30, ALL, C56 = range(10), range(20), range(30), (0, 1, 2), (2,)
+I10, I20, I30, I40, ALL, C56 = range(10), range(20), range(30), range(40), (0, 1, 2), (2,)
 # spec §6 grid: (row, kind, cells, arms, alpha, inits, shift classes, tasks); row 6 went into row 3 (journal 2026-09-30);
-# "25x" is row 25's B and F on inits 10-19, the part the §11 fuse trims first
+# "25x" is row 25's B and F on inits 10-19, the part the §11 fuse trims first; row 2 at 0-39: Q1 on 0-29, Q1b on 0-39
 ROWS = [("1", "step", "ACF", ["none"], 0.0, I20, ALL, T26),
-        ("2", "step", "AB", ["G", "GR"], 0.0, I30, ALL, T26),
+        ("2", "step", "AB", ["G", "GR"], 0.0, I40, ALL, T26),
         ("3", "step", "CF", ["GR"], 0.0, I30, ALL, T26),
         ("4", "step", "AB", ["Gkeep"], 0.0, I10, ALL, T26),
         ("5", "step", "ABC", ["GRT"], 0.0, I30, C56, T26),
@@ -61,8 +61,9 @@ ROWS = [("1", "step", "ACF", ["none"], 0.0, I20, ALL, T26),
         ("28", "control", "ACF", ["GRret"], 0.0, I10, ALL, T26)]
 Q3A_ROW, HELD = "10", ("11", "12", "13", "14", "15", "25", "25x")  # spec §8: Q3a fails -> the others wait for the owner
 REPORT_ROWS = ("4", "8", "9", "14", "15", "17", "19", "22", "23", "24", "25", "25x", "26")  # the only rows §11 may cut
-# two pod lanes: rule rows first, report rows in reverse cut order (the first to cut runs last); lane B opens with Q3a
-LANES = {"A": "2 3 27 1 5 7 4 8 9 17 19 23 24 22 26".split(), "B": "10 11 12 13 16 21 28 18 20 25 14 25x 15".split()}
+# two pod lanes: rule rows first, report rows in reverse cut order (the first to cut runs last); lane B opens with Q3a;
+# row 9 in lane B keeps the lanes even (journal 16)
+LANES = {"A": "2 3 27 1 5 7 4 8 17 19 23 24 22 26".split(), "B": "10 11 12 13 16 21 28 18 20 25 14 25x 9 15".split()}
 
 
 def row_keys(row):
@@ -100,6 +101,18 @@ def prs(idx, kind, alpha, cells, a, b, inits=None, cls=None, keep=None):
     return out
 
 
+def early_prs(idx):
+    """Q1b's pairs (journal 16): (GR, G) at alpha 0, step, A + B, inits 0-39, in the §8 early-chunk subset: the first
+    plan observed after the shift arrives by t_fire + T_ramp. Chosen by the schedule and the pair's t_fire, the same for
+    G and G-R before the shift; a pair whose t_fire differs is a data error."""
+    for c in AB:
+        x, y = idx.get(("step", c, "GR", 0.0), {}), idx.get(("step", c, "G", 0.0), {})
+        if bad := [k for k in sorted(x.keys() & y.keys()) if x[k]["t_fire"] != y[k]["t_fire"]]:
+            raise SystemExit(f"Q1b: {len(bad)} G / G-R pairs in {c} differ in t_fire (data error), e.g. {bad[0]}")
+    return prs(idx, "step", 0.0, AB, "GR", "G", I40,
+               keep=lambda r: bool(hf.early(r["t_fire"], *orx.CELLS[r["cell"]], r["conf"]["t_ramp"])))
+
+
 def did(pf, pb):
     """Difference of paired differences, F - B, in pp; each bootstrap rep draws one set of task clusters for both."""
     keys = sorted({c for c, _, _ in pf + pb})
@@ -134,7 +147,9 @@ ACF, AB, ABC = "ACF", "AB", "ABC"
 # spec §8: rule -> (test, pairs(idx), predicate)
 RULES = {
     "Q1": ("alpha 0, step, A + B, 0-29: one-sided (GR - G) >= -2",
-           lambda i: prs(i, "step", 0.0, AB, "GR", "G"), ni(-2)),
+           lambda i: prs(i, "step", 0.0, AB, "GR", "G", I30), ni(-2)),
+    "Q1b": ("alpha 0, step, A + B, 0-39, early chunks (the first plan observed after the shift arrives by "
+            "t_fire + T_ramp): (GR - G) >= +2 and lo2.5 > 0", early_prs, sup(2)),
     "Q2a": ("alpha 0, class 5-6 cm, A + B + C, 0-19: (GRT - GT) >= +5 and lo2.5 > 0",
             lambda i: prs(i, "step", 0.0, ABC, "GRT", "GT", I20, C56), sup(5)),
     "Q2b": ("alpha 0, class 5-6 cm, A + B + C, 0-29: one-sided (GRT - GR) >= -4",
@@ -159,7 +174,7 @@ RULES = {
     "Q6b": ("control, A + C + F, 0-9: one-sided (GRret - GR) >= -2",
             lambda i: prs(i, "control", 0.0, ACF, "GRret", "GR"), ni(-2)),
 }
-VERDICTS = {"ПЕРЕДАЧА РАБОТАЕТ": ("Q1", "Q2a", "Q2b"),
+VERDICTS = {"ПЕРЕДАЧА РАБОТАЕТ": ("Q1", "Q1b", "Q2a", "Q2b"),
             "ДЛЯ ЗРЯЧЕГО МОЗГА ТОЖЕ": ("Q3a", "Q3b_gate", "Q3b"),
             "ЦЕНА ЗАДЕРЖКИ ИЗМЕРЕНА": ("Q3a", "Q3c"),
             "ФИЛЬТР КОНТАКТА РАБОТАЕТ": ("Q4a", "Q4b"),
@@ -445,11 +460,12 @@ def pair_noise(idx):
 # ---------------------------------------------------------------- self-test
 
 def selftest():
-    assert N_GRID == 31150, N_GRID  # spec §6: ≈ 31.2k
+    assert N_GRID == 32190, N_GRID  # spec §6: ≈ 32.2k (journal 16: row 2 at 0-39)
 
     def grid(p, drop=()):
         """Every §6 episode; success when a fixed per-seed number u < p[(kind, alpha, cell, arm)] or p[(kind, alpha,
-        arm)] or p[arm] (default 0.5): a coupling that keeps each paired difference close to p_a - p_b."""
+        arm)] or p[arm] (default 0.5; a callable gets (cell, t_fire)): a coupling that keeps each paired difference
+        close to p_a - p_b."""
         rs = []
         for key in sorted(set().union(*EXPECTED.values())):
             kind, c, arm, al, s, t, i = key
@@ -457,13 +473,14 @@ def selftest():
                 continue
             u = (hash_u(s, t, i, kind))
             pr = p.get((kind, al, c, arm), p.get((kind, al, arm), p.get(arm, 0.5)))
-            ok = u < pr
+            tf = None if i % 11 == 10 else 30 + i
+            ok = u < (pr(c, tf) if callable(pr) else pr)
             ep = hf.make_episode(s, t, i, kind)
             fam, cx = hf.parse_arm(arm)[0] in hf.HAgent.FAMILY, 0.01 * (1 + i % 3)
             rs.append({"suite": s, "task": t, "init": i, "kind": kind, "cell": c, "arm": arm, "alpha": al,
                        "method": hf.parse_arm(arm)[0], "success": ok, "mag_class": ep.mag_class, "angle": ep.angle,
                        "conf": {"K": 20, "tau_k": 0.01, "t_ramp": 5}, "grasp_ok": ok,
-                       "t_fire": None if i % 11 == 10 else 30 + i, "t_close": None if i % 7 == 6 else 40 + i + 3 * t,
+                       "t_fire": tf, "t_close": None if i % 7 == 6 else 40 + i + 3 * t,
                        "t_engage": 31 + i if fam and kind != "control" or (fam and i % 10 == 3) else None,
                        "t_lift": 60 if arm == "GRret" and i % 4 else None,
                        "c_extra": [cx * np.cos(ep.angle), cx * np.sin(ep.angle), 0] if fam else [0, 0, 0],
@@ -481,7 +498,7 @@ def selftest():
     x = lambda dd=0.0, lo2=-9.0, lo5=-9.0, hi=9.0: {"diff_pp": dd, "lo2.5": lo2, "lo5_one_sided": lo5, "hi97.5": hi}  # noqa: E731
     for n, t in (("Q1", -2), ("Q2b", -4), ("Q3b", -3), ("Q4a", -1), ("Q4b", -2), ("Q5b", -2), ("Q6b", -2)):
         assert RULES[n][2](x(lo5=t)) and not RULES[n][2](x(lo5=t - 0.01)), n
-    for n, t in (("Q2a", 5), ("Q3a", 4), ("Q3c", 5), ("Q5a", 5), ("Q6a", 3)):
+    for n, t in (("Q1b", 2), ("Q2a", 5), ("Q3a", 4), ("Q3c", 5), ("Q5a", 5), ("Q6a", 3)):
         assert [RULES[n][2](x(dd, lo2)) for dd, lo2 in ((t, -1), (t, 0.1), (t - 0.01, 0.1), (t, 0.0))] == \
                [False, True, False, False], n
     assert RULES["Q3b_gate"][2](x(hi=-0.01)) and not RULES["Q3b_gate"][2](x(hi=0.0))
@@ -491,7 +508,7 @@ def selftest():
           "GR+surr": 0.6, "GR+contact": 0.6, "PPC": 0.5, "GR@real": 0.6, "PPC@real": 0.5, "GRret": 0.7,
           ("control", 0.0, "none"): 0.8, ("control", 0.0, "GR"): 0.8, ("control", 0.0, "GR+surr"): 0.8,
           ("control", 0.0, "GR+contact"): 0.8, ("control", 0.0, "GR@real"): 0.8, ("control", 0.0, "GRret"): 0.8,
-          ("step", 0.0, "GT"): 0.45,
+          ("step", 0.0, "GT"): 0.45, ("step", 0.0, "GR"): 0.65,
           ("step", 1.0, "T0"): 0.5, ("step", 1.0, "Gkeep"): 0.4, ("step", 1.0, "B", "GRT"): 0.55,
           ("step", 1.0, "F", "GRT"): 0.7, ("step", 1.0, "F", "T0"): 0.4}
     good = grid(pg)
@@ -501,6 +518,12 @@ def selftest():
     assert all(v["pass"] for v in rl.values()), {k: (v.get("diff_pp"), v.get("lo2.5"), v["pass"]) for k, v in rl.items()}
     assert set(res["verdicts"].values()) == {"ДА"}, res["verdicts"]
     assert rl["Q1"]["pairs"] == 1560 and rl["Q3a"]["pairs"] == 520 and rl["Q6a"]["pairs"] == 2340, rl
+    # Q1b: t_fire = 30 + i (none when i % 11 == 10), T_ramp 5. A (s 10): the next call after t_fire is <= 5 steps away
+    # when i % 10 is 5-9, 20 of inits 0-39; B (s 25): only t_fire 45-49, inits 15-19. (20 + 5) x 26 tasks = 650
+    assert rl["Q1b"]["pairs"] == 650, rl["Q1b"]
+    # a pair outside the early subset never enters Q1b; Q1 keeps its pairs
+    late = index([r for r in good if not hf.early(r["t_fire"], *orx.CELLS[r["cell"]], 5)])
+    assert not early_prs(late) and prs(late, "step", 0.0, AB, "GR", "G", I30)
     assert rl["Q3c"]["pairs"] == 1040 and rl["Q3c"]["clusters"] == 26 and rl["Q6b"]["pairs"] == 780, rl["Q3c"]
     assert abs(rl["Q3c"]["diff_pp"] - (did_direct(good, "F") - did_direct(good, "B"))) < 1e-3  # rnd: 3 decimals
     pf = prs(index(good), "step", 1.0, "F", "GRT", "T0")  # one task draw for F and B: identical sets give exactly 0
@@ -539,7 +562,10 @@ def selftest():
     assert res["rules"]["Q3b"]["pass"] is None and res["verdicts"]["ДЛЯ ЗРЯЧЕГО МОЗГА ТОЖЕ"] == "НЕТ", res["rules"]
     assert res["verdicts"]["ЦЕНА ЗАДЕРЖКИ ИЗМЕРЕНА"] == "ДА"
     # each rule fails alone (the coupling makes each paired difference exact)
-    for p, fail in (({("step", 0.0, "GR"): 0.45}, "Q1"), ({("step", 0.0, "GT"): 0.67}, "Q2a"),
+    # Q1: G-R loses 15 pp on the late chunks, wins 5 on the early ones; Q1b: G-R = G
+    q1 = lambda c, tf: 0.65 if hf.early(tf, *orx.CELLS[c], 5) else 0.45  # noqa: E731
+    for p, fail in (({("step", 0.0, "GR"): q1}, "Q1"), ({("step", 0.0, "GR"): 0.6}, "Q1b"),
+                    ({("step", 0.0, "GT"): 0.67}, "Q2a"),
                     ({("step", 0.0, "GRT"): 0.55}, "Q2b"), ({("step", 1.0, "F", "GRT"): 0.58, ("step", 1.0, "F", "T0"): 0.5}, "Q3c"),
                     ({("control", 0.0, "GR+surr"): 0.7}, "Q4a"), ({("close", 0.0, "GR+surr"): 0.5}, "Q4b"),
                     ({("step", 0.0, "GR@real"): 0.32}, "Q5a"), ({("control", 0.0, "GR@real"): 0.7}, "Q5b"),
@@ -559,8 +585,10 @@ def selftest():
     res = summarize(drop90, base, note)
     assert res["read_gate"]["override"] == note and all(v.startswith("ОТСТУПЛЕНИЕ") for v in res["verdicts"].values())
     # integrity stops
+    j = next(j for j, r in enumerate(good) if KEY(r)[:4] == ("step", "B", "GR", 0.0) and r["t_fire"] is not None)
     for raw, msg in ((good + [dict(good[0], success=not good[0]["success"])], "different success"),
-                     (good[1:] + [dict(good[0], conf={"K": 10})], "mix settings")):
+                     (good[1:] + [dict(good[0], conf={"K": 10})], "mix settings"),
+                     (good + [dict(good[j], t_fire=good[j]["t_fire"] + 1)], "differ in t_fire")):
         try:
             summarize(raw, base)
             raise AssertionError(msg)
@@ -584,7 +612,7 @@ def selftest():
     assert sum(map(len, made)) == len(set().union(*made)) == N_GRID and set().union(*made) == set().union(*EXPECTED.values())
     assert all(len(m) == n for m, (_, n, _) in zip(made, lines)) and {r for r, _, _ in lines} == set(EXPECTED)
     na, nb = (sum(n for _, n, _ in plan(x)) for x in "AB")
-    assert (na, nb) == (15810, 15340) and plan("B")[0][0] == Q3A_ROW, (na, nb)
+    assert (na, nb) == (16070, 16120) and plan("B")[0][0] == Q3A_ROW, (na, nb)
     assert {r for r, _, _ in plan("B", hold=True)} == set(LANES["B"]) - set(HELD)
     assert {r for r, _, _ in plan("B", cut=["25"])} == set(LANES["B"]) - {"25", "25x"}
     try:
