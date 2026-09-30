@@ -1,3 +1,4 @@
+import hashlib
 from types import SimpleNamespace
 
 import numpy as np
@@ -28,23 +29,32 @@ BRAINS = {  # brain(x, p, t) -> chunk; they only differ after the shift
     "blind_rel": lambda x, p, t: TRAJ[t: t + 50],  # replays its delta commands: the arm's offset carries over
     "seeing": lambda x, p, t: _walk(x, p),  # aims at the object where it is
 }
+FAR = np.array([0.30, 0.0, 0.0])  # a far object (close at step 55): at d > 0, plans observed after the shift still count
+TRAJ_FAR = _walk(np.zeros(3), FAR, n=150)
+FAR_BRAINS = {
+    "blind_abs": lambda x, p, t: _walk(x, FAR),
+    "blind_rel": lambda x, p, t: TRAJ_FAR[t: t + 50],
+    "blind_rel_open": lambda x, p, t: np.where(np.arange(7) == 6, -1.0, TRAJ_FAR[t: t + 50]),  # never closes
+}
 
 
-def _episode(method, brain, s=10, d=0, alpha=0.0, moves=None, t_fire=5, steps=45, cls=hf.HAgent, **kw):
-    """Toy arm (x += G_POS a) and object in the runner's order. moves {t: dp}: object moves applied before step t's
-    physics, so observe(t + 1) is the first to see them (as the shift in LIBERO). Stops after the first close."""
+def _episode(method, brain, s=10, d=0, alpha=0.0, moves=None, t_fire=5, steps=45, cls=hf.HAgent, p0=P0, **kw):
+    """Toy arm (x += G_POS a) and object (at p0) in the runner's order. moves {t: dp}: object moves applied before step
+    t's physics, so observe(t + 1) is the first to see them (as the shift in LIBERO). Stops after the first close.
+    brain: a BRAINS key or a brain(x, p, t)."""
     moves = {5: np.array([0.0, 0.03, 0.0])} if moves is None else moves
+    brain = BRAINS[brain] if isinstance(brain, str) else brain
     ag = cls(method, s, d, **kw)
     sb = hf.SeeingBrain(alpha)
-    pert = SimpleNamespace(ep=SimpleNamespace(kind="step"), t_fire=t_fire, p_pre=P0.copy())
-    x, p, acts = np.zeros(3), P0.copy(), []
+    pert = SimpleNamespace(ep=SimpleNamespace(kind="step"), t_fire=t_fire, p_pre=p0.copy())
+    x, p, acts = np.zeros(3), p0.copy(), []
     for t in range(steps):
         ag.observe(t, x, p) if cls is orx.Agent else ag.observe(t, x, p, False)
         if ag.sched.arrive(t):
             ag.on_new_chunk()
         if ag.sched.wants_call(t, ag.trigger(t)):
             start = 0 if ag.sched.chunk is None else d
-            ag.sched.issue(t, sb.chunk(t, BRAINS[brain](x, p, t), pert, p, start, ag.grasp_started))
+            ag.sched.issue(t, sb.chunk(t, brain(x, p, t), pert, p, start, ag.grasp_started))
             if ag.sched.arrive(t):
                 ag.on_new_chunk()
         a = np.clip(ag.act(t, ag.sched.action(t)), -1, 1)
@@ -55,6 +65,10 @@ def _episode(method, brain, s=10, d=0, alpha=0.0, moves=None, t_fire=5, steps=45
         if a[6] > 0:
             break
     return x, p, ag, np.array(acts), sb
+
+
+def _far(method, brain, steps=150, **kw):
+    return _episode(method, FAR_BRAINS[brain], p0=FAR, steps=steps, **kw)
 
 
 def test_make_episode_kinds_and_seeds():
@@ -175,6 +189,8 @@ def test_hagent_matches_c1e2_agent_on_common_methods(method):
     _, _, _, a_new, _ = _episode(method, "blind_abs", **kw)
     _, _, _, a_old, _ = _episode(method, "blind_abs", cls=orx.Agent, **kw)
     assert np.array_equal(a_new, a_old)
+    kw |= dict(s=25, d=20)  # cell F, far object: the scheduled and triggered (T0, GT) plans arrive 20 steps late
+    assert np.array_equal(_far(method, "blind_abs", **kw)[3], _far(method, "blind_abs", cls=orx.Agent, **kw)[3])
 
 
 def test_noisy_eye_dead_bands_are_per_agent():
@@ -251,14 +267,14 @@ def test_filter_ignores_the_arm_pushing_and_noise_delays_engagement():
     assert (oracle, lagged) == (6, 9)
 
 
-def _carry(method, shift=0.03):
-    """Pick and place with a replaying brain: walk to P0, close, lift 4.4 cm, carry 5.5 cm along x, open at 47. The
-    shift lands before step 5's physics; after the close the object moves with the gripper. Returns the object's
-    offset from the place target at the first open command, and the agent."""
+def _carry(method, shift=0.03, dz=0.0, open_at=47):
+    """Pick and place with a replaying brain: walk to P0, close, lift 4.4 cm, carry 5.5 cm along x, open at open_at.
+    The shift (shift along y, dz up) lands before step 5's physics; after the close the object moves with the gripper.
+    Returns the object's offset from the place target at the first open command, and the agent."""
     traj = np.zeros((100, 7))
     traj[:, 6] = -1.0
     traj[:20] = _walk(np.zeros(3), P0, n=20)  # reaches P0 at index 18, closes at 19
-    traj[19:47, 6] = 1.0
+    traj[19:open_at, 6] = 1.0
     traj[20:28, 2], traj[28:38, 0] = 0.5, 0.5
     ag, x, p, held = hf.HAgent(method, 10, 0), np.zeros(3), P0.copy(), None
     for t in range(60):
@@ -271,7 +287,7 @@ def _carry(method, shift=0.03):
         if held is not None and a[6] <= 0:
             return p - (P0 + orx.G_POS * np.array([10 * 0.5, 0, 8 * 0.5])), ag  # the memorised place point
         if t == 5:
-            p = p + [0, shift, 0]
+            p = p + [0, shift, dz]
         x = x + orx.G_POS * a[:3]
         if a[6] > 0:
             held = p - x if held is None else held
@@ -292,5 +308,138 @@ def test_parse_arm():
     assert hf.parse_arm("GR") == ("GR", "", "")
     assert hf.parse_arm("GR+surr") == ("GR", "surr", "")
     assert hf.parse_arm("PPC@real") == ("PPC", "", "real")
-    with pytest.raises(AssertionError):
-        hf.parse_arm("GR@loud")
+    for bad in ("GR@loud", "GRret+surr", "GRret+contact", "GRret@real"):  # the return: oracle only (spec rows 27, 28)
+        with pytest.raises(AssertionError):
+            hf.parse_arm(bad)
+
+
+def test_engagement_on_an_arrival_step_is_checked_against_the_executing_plan():
+    """Journal item 3: the shift lands before step 9's physics, so observe(10) sees it first, on the step plan 10 is
+    observed and arrives (d = 0). Engagement is checked before plan 10 is installed, against plan 0: t_e = 10, R =
+    plan 0, and plan 10 is the first N. Against plan 10, U would be 0 and GR would never engage."""
+    kw = dict(moves={9: np.array([0.0, 0.03, 0.0])}, t_fire=9)
+    new = P0 + [0, 0.03, 0]
+    x, _, ag, _, _ = _episode("GR", "blind_rel", **kw)
+    assert ag.t_e == 10 and ag.ref[0] == 0 and np.array_equal(ag.p_ref, P0)
+    k = ag.kappa_log[0]
+    assert k["t"] == 10 and not k["fb"] and k["k_hat"] == 0.0 and k["d"] == pytest.approx([0, 0.03, 0])
+    assert np.linalg.norm(x - new) < 1e-6  # plan 10 replays the old motion from an unshifted arm: kappa_hat = 0
+    x, _, ag, _, _ = _episode("G", "blind_rel", **kw)
+    assert ag.t_e == 10 and np.linalg.norm(x - new) == pytest.approx(0.03)  # G re-anchors on plan 10: U = 0
+
+
+def test_kappa_at_d_positive_with_the_reference_in_flight_and_its_fallback():
+    """s = 10, d = 5, shift before step 12's physics: t_e = 13 on plan 0, R = plan 10 (observed pre-shift, in flight
+    until 15), N = plan 20 (arrives at 25, before the close at 55). A replaying brain carries G's 3 cm on the arm:
+    kappa_hat = 1 from the grasp points, and from the common time t_obs_N + K (every K) when no plan closes."""
+    kw = dict(s=10, d=5, moves={12: np.array([0.0, 0.03, 0.0])}, t_fire=12)
+    x, p, ag, _, _ = _far("GR", "blind_rel", **kw)
+    k = ag.kappa_log[0]
+    assert ag.t_e == 13 and ag.ref[0] == 10 and np.array_equal(ag.p_ref, FAR)
+    assert k["t"] == 20 and not k["fb"] and k["k_hat"] == 1.0 and np.linalg.norm(x - p) < 1e-6
+    x, p, ag, _, _ = _far("GR", "blind_rel_open", steps=60, **kw)
+    k = ag.kappa_log[0]
+    assert ag.t_e == 13 and ag.ref[0] == 10 and k["t"] == 20 and k["fb"] and k["k_hat"] == 1.0
+    assert k["m"] == {"10": 0.03, "20": 0.03, "30": 0.03} and np.linalg.norm(x - p) < 1e-6
+
+
+def test_journal_13_plan_path_counts_the_steps_the_arm_never_runs():
+    """Journal item 13, first effect (kept as in spec §5): the plan path starts at index 0, but at d = 5 the arm never
+    runs indices 0-4. The absolute-target brain pulls back to the old point there, so kappa_hat = 0 while the executed
+    part already carries the shift, and GR adds it again: G misses by -0.25 cm, GR and Gkeep overshoot by +2.25 cm."""
+    kw = dict(s=10, d=5, moves={12: np.array([0.0, 0.03, 0.0])}, t_fire=12)
+    y = {}
+    for m in ("none", "G", "GR", "Gkeep"):
+        x, p, ag, _, _ = _far(m, "blind_abs", **kw)
+        y[m] = (x - p)[1]
+        assert all(k["k_hat"] == 0.0 and not k["fb"] for k in ag.kappa_log)
+    assert y == pytest.approx({"none": -0.03, "G": -0.0025, "GR": 0.0225, "Gkeep": 0.0225}, abs=1e-9)
+
+
+def test_journal_13_seeing_brain_with_t_counts_the_shift_twice():
+    """Journal item 13, second effect (kept): s = 25, d = 20, alpha = 1, 6 cm shift before step 12's physics. T
+    re-queries at 13 with S = 0, so the seeing brain adds the whole shift from index d = 20; meanwhile the reflex
+    delivers it on plan 0, and plan 13 arrives at 33, before the close at 55: every T variant overshoots by 6 cm.
+    Without T the reflex and the brain land (Gkeep overshoots anyway: kappa = 0 re-adds what a seeing plan carries).
+    GRT's kappa_hat is 0: plan 0 has no close, and the fallback at K <= d compares only steps the arm never runs."""
+    kw = dict(s=25, d=20, alpha=1.0, moves={12: np.array([0.0, 0.06, 0.0])}, t_fire=12)
+    y, runs = {}, {}
+    for m in ("none", "T0", "G", "GR", "Gkeep", "GT", "GRT", "GkeepT"):
+        runs[m] = _far(m, "blind_rel", **kw)
+        y[m] = (runs[m][0] - runs[m][1])[1]
+    assert y == pytest.approx({"none": 0, "T0": 0, "G": 0, "GR": 0, "Gkeep": 0.06, "GT": 0.06, "GRT": 0.06,
+                               "GkeepT": 0.06}, abs=1e-9)
+    _, _, ag, _, sb = runs["GRT"]
+    k = ag.kappa_log[0]
+    assert ag.sched.n_trig == 1 and k["t"] == 13 and k["fb"] and k["k_hat"] == 0.0 and not sb.s_at[13].any()
+    assert k["m"] == {"10": 0.0, "20": 0.0, "30": 0.06}
+
+
+def test_seeing_brain_gating_and_copy():
+    """spec §4, journal item 8: a plan observed at t_fire is still pre-shift (no top-up); from t_fire + 1 the top-up
+    starts at the answer's first executed index (d on a running schedule, 0 on the first call); none after the first
+    close command or in control. chunk() hands out a copy: editing it in place cannot corrupt S."""
+    pert = SimpleNamespace(ep=SimpleNamespace(kind="step"), t_fire=10, p_pre=P0.copy())
+    raw, seen, sb = np.zeros((50, 7)), P0 + [0, 0.03, 0], hf.SeeingBrain(1.0)
+    raw[:, 6] = -1.0
+    out = sb.chunk(10, raw, pert, seen, 0, False)
+    a0 = out[0].copy()  # the arm gets the brain's action ...
+    out[0, :3] = 0.5  # ... and the handed-out chunk is edited in place afterwards
+    sb.executed(10, 10, a0, pert)
+    assert np.array_equal(a0, raw[0]) and not sb.S.any()
+    extra = orx.G_POS * (sb.chunk(11, raw, pert, seen, 5, False)[:, :3] - raw[:, :3])
+    assert np.allclose(extra[:5], 0) and extra[5, 1] == pytest.approx(0.006) and extra[:, 1].sum() == pytest.approx(0.03)
+    assert orx.G_POS * sb.chunk(12, raw, pert, seen, 0, False)[0, 1] == pytest.approx(0.006)
+    assert np.array_equal(sb.chunk(13, raw, pert, seen, 0, True), raw)  # after the first close command
+    ctl = SimpleNamespace(ep=SimpleNamespace(kind="control"), t_fire=10, p_pre=P0.copy())
+    assert np.array_equal(sb.chunk(14, raw, ctl, seen, 0, False), raw)
+
+
+def test_return_edge_cases():
+    """Open before the lift: no lift, nothing returned (as GR). Open mid-return (lift at 26, open at 27): one 6 mm ramp
+    step went back, 2.4 cm stay unsent and nothing more is sent. The lift counts from the object's height at the close
+    command: an object 2 cm lower (slid off its stand at the shift) lifts at 26; from the start height it never would
+    (4.4 cm of lift reach 2.4 cm)."""
+    off, ag = _carry("GRret", open_at=22)
+    assert ag.t_lift is None and ag.ret_left is None and ag.ret_cap is None and ag.released
+    assert off == pytest.approx(_carry("GR", open_at=22)[0])
+    off, ag = _carry("GRret", open_at=27)
+    assert ag.t_lift == 26 and ag.released and ag.ret_left == pytest.approx([0, -0.024, 0])
+    a = np.r_[np.zeros(6), 1.0]
+    assert np.array_equal(ag.act(28, a.copy()), a) and ag.ret_left == pytest.approx([0, -0.024, 0])
+    off, ag = _carry("GRret", dz=-0.02)
+    assert ag.z_close == pytest.approx(-0.02) and ag.t_lift == 26 and off == pytest.approx([0, 0, 0], abs=1e-6)
+
+
+def test_tracker_dropout_holds_the_estimate_and_lag_with_warm_start():
+    ps = [np.array([0.01 * t, 0, 0]) for t in range(20)]
+    out = [float(v[0]) for v in map(hf.Tracker(3, 0.0, 0, 0.5, beta=0.5), ps)]
+    held = [t for t in range(1, 20) if out[t] == out[t - 1]]  # the object moves: an update always changes the estimate
+    assert 0 < len(held) < 19 and all(out[t] != ps[t][0] for t in held)  # a drop holds the estimate, not p
+    assert all(out[t] == pytest.approx(0.5 * ps[t][0] + 0.5 * out[t - 1]) for t in range(1, 20) if t not in held)
+    tr = hf.Tracker(0, 0.0, 3, 0.0, 0.5)  # warm on p(0), lag clamped at the first step, then EMA of p(t - 3)
+    assert [float(tr(p)[0]) for p in ps[:8]] == pytest.approx([0, 0, 0, 0, 0.005, 0.0125, 0.02125, 0.030625])
+    lag, ref = hf.Tracker(5, 0.01, 3, 0.1, 0.3), hf.Tracker(5, 0.01, 0, 0.1, 0.3)  # one noise stream
+    assert all(np.array_equal(lag(p), ref(ps[max(t - 3, 0)])) for t, p in enumerate(ps))
+
+
+def test_push_filter_contact_at_t_far_arm_and_distance_to_the_last_position():
+    c = hf.PushFilter("contact")
+    c(np.zeros(3), np.zeros(3), False)
+    c(np.array([0.01, 0, 0]), np.zeros(3), True)  # contact at t alone marks the increment
+    assert c.flag and c.P == pytest.approx([0.01, 0, 0])
+    f = hf.PushFilter("surr", r_c=0.05)
+    f(np.zeros(3), np.array([0.20, 0, 0]), False)
+    assert not f.flag and f(np.array([0.01, 0, 0]), np.array([0.20, 0, 0]), False) == pytest.approx([0.01, 0, 0])
+    f(np.array([0.03, 0, 0]), np.array([0.07, 0, 0]), False)  # 6 cm from p(t - 1) = 0.01, 4 cm from p(t): far
+    assert not f.flag
+    f(np.array([-0.01, 0, 0]), np.array([0.07, 0, 0]), False)  # 4 cm from p(t - 1) = 0.03, 8 cm from p(t): near
+    assert f.flag and f.P == pytest.approx([-0.04, 0, 0])
+
+
+def test_episode_seed_string_and_control_radius():
+    e = hf.make_episode("libero_goal", 4, 2, "close")
+    seed = int.from_bytes(hashlib.sha256(b"c1e3/libero_goal/4/2/close").digest()[:4], "little")
+    assert e.seed == seed == 2813226981
+    rs = [hf.make_episode("libero_spatial", 0, i, "control").r for i in range(50)]
+    assert all(0.08 <= r < 0.20 for r in rs) and min(rs) < 0.10 and max(rs) > 0.18
