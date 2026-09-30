@@ -152,6 +152,7 @@ class Agent:
         assert method != "GJ" or d == 0, "GJ needs d = 0"
         self.method, self.sched = method, Schedule(s, d)
         self.t_ramp, self.k_p = t_ramp, k_p
+        self.eps, self.ppc_v_min = EPS, PPC_V_MIN  # C1-E3 sets them per row (noisy eyes)
         self.p_hist, self.c_hist = {}, {}  # object position and cumulative extra (m) by step
         self.c = np.zeros(3)
         self.p_pre = None  # set by the runner when the perturbation fires (Gpost anchor)
@@ -204,7 +205,7 @@ class Agent:
 
     def _g(self, t, a):
         u = self.unknown_shift(t)
-        if np.linalg.norm(u) <= EPS:
+        if np.linalg.norm(u) <= self.eps:
             return a
         self.g_on = True
         e = self.k_p * (u - (self.c - self.c_hist[self.sched.t_obs]))
@@ -231,7 +232,7 @@ class Agent:
         if t - 1 not in self.p_hist:
             return
         v = self.p_hist[t] - self.p_hist[t - 1]
-        if np.linalg.norm(v) <= PPC_V_MIN:
+        if np.linalg.norm(v) <= self.ppc_v_min:
             if self.method == "PPC9":
                 self.ppc_off = {}  # else a K_exec-long tail would survive a jump
             return
