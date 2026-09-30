@@ -10,7 +10,7 @@
 #   ./scripts/gpu_c1e3.sh base    only if env_check.txt is not SAME: stock lerobot-eval s = 10 -> baseline.json
 #   ./scripts/gpu_c1e3.sh pilot   spec §7: P1-P6 (inits 44-47) in two lanes, the offline choices -> pilot_choice.txt
 #   on the Mac: journal the printed line "C1-E3 pilot: K=.. ... pad=.." in the spec, commit, push; here: git pull
-#   ./scripts/gpu_c1e3.sh grid    spec §6: 31150 episodes in two lanes into results/c1-e3/grid.jsonl and grid_b.jsonl,
+#   ./scripts/gpu_c1e3.sh grid    spec §6: 32190 episodes in two lanes into results/c1-e3/grid.jsonl and grid_b.jsonl,
 #                                 joined into grid_all.jsonl. Refuses unless the spec at HEAD and pilot_choice.txt
 #                                 carry the same pilot line, HEAD is pushed, the pod has no local edits, a baseline
 #                                 applies and the runner code is the pilot's (results/c1-e3/CODE); one grid at a time
@@ -284,8 +284,8 @@ case "$STAGE" in
     $P scripts/c1e3_pilot.py choose "$PAD" $O/pilot.jsonl $O/pilot_b.jsonl 2>&1 | tee $O/pilot_choice.txt
     [ "${PIPESTATUS[0]}" = 0 ] || exit 1
     r=$(cat $LOG/pilot.rates $LOG/pilot_b.rates 2>/dev/null | awk '{ s += $1; n++ } END { if (n) printf "%.2f", s / n }')
-    echo "Rough grid forecast: ${r:-?} s/episode per lane (pilot: 4 envs a lane, grid: 10) x 31150 / 2 lanes =" \
-      "$(awk -v r="${r:-0}" 'BEGIN { printf "%.1f", r * 31150 / 2 / 3600 }') h. Spec §11 fuse: > 16 h." \
+    echo "Rough grid forecast: ${r:-?} s/episode per lane (pilot: 4 envs a lane, grid: 10) x 32190 / 2 lanes =" \
+      "$(awk -v r="${r:-0}" 'BEGIN { printf "%.1f", r * 32190 / 2 / 3600 }') h. Spec §11 fuse: > 16 h." \
       | tee -a $O/pilot_choice.txt
     ;;
   grid)
@@ -313,7 +313,7 @@ case "$STAGE" in
     CO=(--t-ramp 5 --k-p 1.0 --tau-k "$(v tau_k)" --K "$(v K)" --rc "$(v rc)" --dir "$(v dir)" --beta "$(v beta)"
       --eps-noise "$(v eps_noise)" --vmin-noise "$(v vmin_noise)" --pad-brain "$(v pad)" --n-envs 10)
     echo "[$(date +%T)] grid with ${CO[*]}; baseline $BASE; cut: ${CUT:-none}" | tee -a $O/forecast.txt
-    { plan A; plan B; } | awk -F'\t' '{ s += $2 } END { print "planned episodes: " s " of 31150" }' | tee -a $O/forecast.txt
+    { plan A; plan B; } | awk -F'\t' '{ s += $2 } END { print "planned episodes: " s " of 32190" }' | tee -a $O/forecast.txt
     # run_plan <log name> <out> <plan lines>: in the lane's own shell, not a pipeline, so the lane's TERM (Ctrl-C) reaches
     # wd's trap, which kills the runner's process group
     run_plan() {
@@ -375,7 +375,7 @@ case "$STAGE" in
     wait $pa; wait $pb
     trap - INT TERM HUP
     cat $O/grid.jsonl $O/grid_b.jsonl > $O/grid_all.jsonl
-    echo "[$(date +%T)] grid_all.jsonl: $(wc -l < $O/grid_all.jsonl) of 31150 records (the summary checks each)"
+    echo "[$(date +%T)] grid_all.jsonl: $(wc -l < $O/grid_all.jsonl) of 32190 records (the summary checks each)"
     for f in $LOG/grid*.log; do echo "  $f: $(grep -c FAILED "$f") FAILED lines (first-pass failures included)"; done
     echo "On the Mac: python scripts/c1e3_summary.py $O/grid_all.jsonl --baseline $BASE"
     ;;
