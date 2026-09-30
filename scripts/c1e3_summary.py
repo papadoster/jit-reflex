@@ -105,8 +105,12 @@ def early_prs(idx):
     """Q1b's pairs (journal 16): (GR, G) at alpha 0, step, A + B, inits 0-39, in the §8 early-chunk subset: the first
     plan observed after the shift arrives by t_fire + T_ramp. Chosen by the schedule and G's t_fire, as the §9 report
     (journal 17): pair noise or a pre-shift push can move G-R's t_fire; those pairs stay and are counted apart."""
-    return prs(idx, "step", 0.0, AB, "GR", "G", I40,
-               keep=lambda r: bool(hf.early(r["t_fire"], *orx.CELLS[r["cell"]], r["conf"]["t_ramp"])))
+    return prs(idx, "step", 0.0, AB, "GR", "G", I40, keep=early_rec)
+
+
+def early_rec(r):
+    """The record is in the §8 early-chunk subset (its own t_fire, cell and t_ramp)."""
+    return bool(hf.early(r["t_fire"], *orx.CELLS[r["cell"]], r["conf"]["t_ramp"]))
 
 
 def did(pf, pb):
@@ -183,10 +187,11 @@ def rule(name, idx):
     d = (did(prs(idx, "step", 1.0, "F", "GRT", "T0"), prs(idx, "step", 1.0, "B", "GRT", "T0")) if name == "Q3c"
          else e2.diff_pp(pairs(idx)))
     res = {"test": test, **(e2.rnd(d) or {}), "pass": d is not None and bool(ok(d))}
-    if name == "Q1b":  # journal 17: pairs whose G-R t_fire differs from G's (report only)
-        res["t_fire_mismatch"] = sum(x[k]["t_fire"] != y[k]["t_fire"] for c in AB
-                                     for x, y in [(idx.get(("step", c, "GR", 0.0), {}), idx.get(("step", c, "G", 0.0), {}))]
-                                     for k in x.keys() & y.keys() if k[2] in I40)
+    if name == "Q1b":  # journal 17, report only: G-R's t_fire differs inside Q1b; G and G-R on two sides of the cut
+        pairs = [(x[k], y[k]) for c in AB for x, y in [(idx.get(("step", c, "GR", 0.0), {}), idx.get(("step", c, "G", 0.0), {}))]
+                 for k in x.keys() & y.keys() if k[2] in I40]
+        res["t_fire_mismatch"] = sum(early_rec(g) and gr["t_fire"] != g["t_fire"] for gr, g in pairs)
+        res["early_differs"] = sum(early_rec(g) != early_rec(gr) for gr, g in pairs)
     return res
 
 
@@ -585,11 +590,15 @@ def selftest():
     note = "journal 2026-10-01: см. [ §8 ]"
     res = summarize(drop90, base, note)
     assert res["read_gate"]["override"] == note and all(v.startswith("ОТСТУПЛЕНИЕ") for v in res["verdicts"].values())
-    j = next(j for j, r in enumerate(good) if KEY(r)[:4] == ("step", "B", "GR", 0.0) and r["t_fire"] is not None)
+    j = next(j for j, r in enumerate(good) if KEY(r)[:4] == ("step", "B", "GR", 0.0) and r["t_fire"] is not None
+             and early_rec(r) and early_rec(dict(r, t_fire=r["t_fire"] + 1)))  # in Q1b, stays early when moved
     # journal 17: a G-R record whose t_fire differs from G's stays in Q1b (chosen by G's t_fire) and is counted
     moved = good[:j] + good[j + 1:] + [dict(good[j], t_fire=good[j]["t_fire"] + 1)]
     q1b = summarize(moved, base)["rules"]["Q1b"]
-    assert q1b["t_fire_mismatch"] == 1 and q1b["pairs"] == summarize(good, base)["rules"]["Q1b"]["pairs"], q1b
+    assert q1b["t_fire_mismatch"] == 1 and q1b["early_differs"] == 0, q1b
+    assert q1b["pairs"] == summarize(good, base)["rules"]["Q1b"]["pairs"], q1b
+    late = good[:j] + good[j + 1:] + [dict(good[j], t_fire=None)]  # G-R never fired: outside the cut, G still in it
+    assert summarize(late, base)["rules"]["Q1b"]["early_differs"] == 1
     # integrity stops
     for raw, msg in ((good + [dict(good[0], success=not good[0]["success"])], "different success"),
                      (good[1:] + [dict(good[0], conf={"K": 10})], "mix settings")):
