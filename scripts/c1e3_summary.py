@@ -215,7 +215,7 @@ def summarize(raw, baseline, override=None):
     # rules and report on the 26 tasks; LIBERO-10 (row 24) only in its own report entry
     rs26, have = [r for r in rs if r["suite"] in SUITES], {KEY(r) for r in rs}
     idx, idx10 = index(rs26), index([r for r in rs if r["suite"] == "libero_10"])
-    q3a_pass = rule("Q3a", idx)["pass"]
+    q3a_pass, q3a_det = q3a(rs)  # the pod's own gate, so the rows held here are the rows the pod held
     rows = {n: e for n, e in EXPECTED.items() if q3a_pass or n not in HELD}
     need = set().union(*rows.values())
     missing = {n: len(e - have) for n, e in rows.items() if e - have}
@@ -235,6 +235,8 @@ def summarize(raw, baseline, override=None):
         gate["override"] = override  # a deviation recorded in the spec journal before reading
 
     rules = {n: rule(n, idx) for n in RULES}
+    if rules["Q3a"]["pass"] and not q3a_pass:  # passes on what ran, but row 10 is > 1% incomplete: the pod held
+        rules["Q3a"] |= {"pass": False, "note": f"строка 10 неполная (> 1%): не хватает {q3a_det['row10_missing']}"}
     if not rules["Q3a"]["pass"]:  # spec §8: the seeing brain is broken, Q3b and Q3c are not read
         for n in ("Q3b_gate", "Q3b", "Q3c"):
             rules[n] = {"test": RULES[n][0], "pass": None, "note": "не читается: Q3a не прошло"}
@@ -254,8 +256,10 @@ def summarize(raw, baseline, override=None):
 EPISODE = [(k, itemgetter(k)) for k in ("success", "grasp_ok", "steps_to_success", "calls_sched", "calls_trig",
                                         "path_m", "jerk", "grasp_miss_m", "grasp_miss_along_m")] + \
           [("no_close_command", lambda r: r["t_close"] is None)]
+# journal item 3: an engagement counts only strictly before the first close (observe can set t_e at the close step)
+ENGAGED = lambda r: r["t_engage"] is not None and (r["t_close"] is None or r["t_engage"] < r["t_close"])  # noqa: E731
 SHARES = [("no_fire", lambda r: None if r["kind"] == "control" else r["t_fire"] is None),
-          ("engaged_before_close", lambda r: r["t_engage"] is not None if r["method"] in hf.HAgent.FAMILY else None),
+          ("engaged_before_close", lambda r: ENGAGED(r) if r["method"] in hf.HAgent.FAMILY else None),
           ("pushed_before_fire", itemgetter("pushed_before_fire")),
           ("unstable_of_fired", lambda r: r["unstable"] if r["kind"] != "control" and r["t_fire"] is not None else None),
           ("contact_at_shift", itemgetter("contact_at_shift")),
@@ -321,7 +325,7 @@ def report(rs, idx, idx10, conf):
     out["filter"] = {
         "false_engagement_control": e2.nest([r for r in rs if r["kind"] == "control"],
                                             [("cell", ("A", "C", "F")), ("arm", ctrl_arms)],
-                                            lambda x: e2.agg(x, lambda r: r["t_engage"] is not None)),
+                                            lambda x: e2.agg(x, ENGAGED)),
         "surrogate_vs_contact_steps": {"precision": round(b_ / s_, 3) if s_ else None,
                                        "recall": round(b_ / c_, 3) if c_ else None, "steps": [int(s_), int(c_), int(b_)]},
         "close_shift": {"GR-none C": d(prs(idx, "close", 0.0, "C", "GR", "none")),
@@ -357,7 +361,7 @@ def kappa_report(rs, conf):
     the oracle G-R arms; shares of the dead zone, the fallback and the clips at 0 and 1."""
     K, tau, pts = str(conf.get("K", 20)), conf.get("tau_k", 0.01), []
     for r in rs:
-        if r["arm"] not in ("GR", "GRT", "GRret"):
+        if r["arm"] not in ("GR", "GRT", "GRret") or r["kind"] == "control":  # control has no shift: its plans see pushes
             continue
         for k in r.get("kappa_log") or []:
             if k["nd"] < 1e-9:
@@ -499,8 +503,15 @@ def selftest():
     assert rl["Q1"]["pairs"] == 1560 and rl["Q3a"]["pairs"] == 520 and rl["Q6a"]["pairs"] == 2340, rl
     assert rl["Q3c"]["pairs"] == 1040 and rl["Q3c"]["clusters"] == 26 and rl["Q6b"]["pairs"] == 780, rl["Q3c"]
     assert abs(rl["Q3c"]["diff_pp"] - (did_direct(good, "F") - did_direct(good, "B"))) < 1e-3  # rnd: 3 decimals
+    pf = prs(index(good), "step", 1.0, "F", "GRT", "T0")  # one task draw for F and B: identical sets give exactly 0
+    z = did(pf, pf)
+    assert pf and z["lo2.5"] == z["hi97.5"] == 0, z
     rep = res["report"]
     assert rep["kappa"]["shares"][0.0]["fb"][0] == 0.2 and rep["libero_10"]["success"]["GR"][1] == 70, rep
+    assert rep["kappa"]["shares"][0.0]["fb"][1] == sum(r["arm"] == "GR" and r["alpha"] == 0.0 and r["kind"] != "control"
+                                                       and r["suite"] in SUITES for r in good), rep["kappa"]["shares"]
+    assert not ENGAGED({"t_engage": 40, "t_close": 40}) and ENGAGED({"t_engage": 39, "t_close": 40}) \
+        and ENGAGED({"t_engage": 5, "t_close": None}) and not ENGAGED({"t_engage": None, "t_close": 40})
     assert rep["return"]["GR_release_along_vs_C"]["slope"] == 1.0 and rep["pair_noise"]["pairs"] > 0, rep["return"]
     assert set(rep["delay_law_alpha1"]) == {"B d=0", "D d=10", "F d=20"}
     assert json.loads(e2.dump(res)) == json.loads(json.dumps(res))
@@ -514,6 +525,15 @@ def selftest():
     ok, det = q3a(grid(pg | {("step", 1.0, "T0"): 0.3}))
     assert not ok and det["row10_missing"] == 0, det
     assert q3a(good)[0] and not q3a([r for r in good if r["arm"] != "T0"])[0]
+    # row 10 > 1% missing, Q3a passing on the rest: the pod's check fails, so the summary holds the same rows
+    raw = [r for r in grid(pg, drop=held) if not (r["alpha"] == 1.0 and r["arm"] == "T0" and r["init"] == 0)]
+    ok, det = q3a(raw)
+    assert not ok and det["Q3a"]["pass"] and det["row10_missing"] == 26, det
+    res = summarize(raw, base)
+    assert res["read_gate"]["pass"] and res["read_gate"]["held_alpha_rows"] == list(HELD), res["read_gate"]
+    assert res["read_gate"]["missing"] == 26 and res["rules"]["Q3a"]["pass"] is False, res["rules"]["Q3a"]
+    assert all(res["rules"][n]["pass"] is None for n in ("Q3b_gate", "Q3b", "Q3c")), res["rules"]
+    assert all(v["pass"] for n, v in res["rules"].items() if n[:2] != "Q3"), res["rules"]
     # gate Q3b fails: Q3b not read, verdict НЕТ; the others stay
     res = summarize(grid(pg | {("step", 1.0, "Gkeep"): 0.6}), base)
     assert res["rules"]["Q3b"]["pass"] is None and res["verdicts"]["ДЛЯ ЗРЯЧЕГО МОЗГА ТОЖЕ"] == "НЕТ", res["rules"]
