@@ -155,19 +155,23 @@ class PushFilter:
         return p - self.P
 
 
+def ramp_step(base, rem, cap):
+    """One step of G's command form (alpha_topup, the return): send rem (m), at most cap, on top of the clipped plan
+    action base, clipped to +-1. Returns the new action xyz and what is still to send."""
+    n = np.linalg.norm(rem)
+    new = np.clip(base + (rem if n <= cap else rem * cap / n) / G_POS, -1, 1)
+    return new, rem - G_POS * (new - base)
+
+
 def alpha_topup(chunk, add, start, t_ramp):
     """G's command law inside a chunk (spec §4 SmolVLA-alpha): add the displacement `add` (m) from index start, at most
     |add| / t_ramp per step, each action clipped to +-1, up to the chunk's first close command."""
     ch, rem = np.array(chunk, float), np.array(add, float)
     cap, end = np.linalg.norm(rem) / t_ramp, close_index(chunk)
     for j in range(start, len(ch) if end is None else end):
-        n = np.linalg.norm(rem)
-        if n < 1e-12:
+        if np.linalg.norm(rem) < 1e-12:
             break
-        base = np.clip(ch[j, :3], -1, 1)
-        new = np.clip(base + (rem if n <= cap else rem * cap / n) / G_POS, -1, 1)
-        rem = rem - G_POS * (new - base)
-        ch[j, :3] = new
+        ch[j, :3], rem = ramp_step(np.clip(ch[j, :3], -1, 1), rem, cap)
     return ch
 
 
@@ -182,11 +186,12 @@ class SeeingBrain:
         self.S, self.raw, self.s_at = np.zeros(3), {}, {}  # raw chunks and S at each call, by t_obs
 
     def chunk(self, t, raw, pert, p_true, start, grasp_started):
-        """The chunk the brain answers to a call observed at t; start: its first executed index (0 or d)."""
+        """The chunk the brain answers to a call observed at t; start: its first executed index (0 or d). Always a
+        copy: an in-place edit of the executed chunk must not reach the raw chunk that S is counted against."""
         self.raw[t], self.s_at[t] = np.asarray(raw, float), self.S.copy()
         if (self.alpha == 0 or pert.ep.kind == "control" or pert.t_fire is None or t < pert.t_fire + 1
                 or grasp_started):
-            return self.raw[t]
+            return self.raw[t].copy()
         return alpha_topup(raw, self.alpha * (np.asarray(p_true, float) - pert.p_pre - self.S), start, self.t_ramp)
 
     def executed(self, t, t_obs, a, pert):
@@ -205,7 +210,8 @@ class HAgent(orx.Agent):
     for earlier plans kappa = 1 (G's U). G: kappa = 1; Gkeep: kappa = 0 (U = p(t) - p_R); GR: kappa_hat from the
     plans' grasp points. The T variants re-query when the raw shift since the executing plan's observation exceeds
     T_THR. GRret: GR, and after the lift it sends back the reflex's accumulated extra (_return).
-    p is what the reflex sees: the oracle or a Tracker, minus pushes when a PushFilter is on."""
+    p is what the reflex sees: the oracle or a Tracker, minus pushes when a PushFilter is on. t_e and R are recorded
+    for every method (the runner logs t_engage for all arms); only the kappa family acts on them."""
 
     FAMILY = {"G": 1.0, "GT": 1.0, "Gkeep": 0.0, "GkeepT": 0.0, "GR": None, "GRT": None, "GRret": None}
     METHODS = ("none", "T0", "PPC", *FAMILY)
@@ -218,7 +224,7 @@ class HAgent(orx.Agent):
         self.x_hist = {}
         self.t_e = self.ref = self.p_ref = None
         self.kappa, self.delta_n, self.kappa_log = 1.0, np.zeros(3), []
-        self.z_close = self.t_lift = self.ret_left = None  # GRret
+        self.z_close = self.t_lift = self.ret_left = self.ret_cap = None  # GRret
         self.released = False
 
     def observe(self, t, eef, obj, contact=False):
@@ -253,8 +259,7 @@ class HAgent(orx.Agent):
                                "k": round(self.kappa, 4)})
 
     def unknown_shift(self, t):
-        u = self.p_hist[t] - self.p_hist[self.sched.t_obs]
-        return u if self.kappa == 1.0 else (1 - self.kappa) * self.delta_n + u
+        return (1 - self.kappa) * self.delta_n + (self.p_hist[t] - self.p_hist[self.sched.t_obs])
 
     def trigger(self, t):
         if self.method in ("GT", "GkeepT", "GRT"):
@@ -286,19 +291,18 @@ class HAgent(orx.Agent):
             if self.p_hist[t][2] - self.z_close < LIFT:
                 return a
             self.t_lift, self.ret_left, self.ret_cap = t, -self.c.copy(), np.linalg.norm(self.c) / self.t_ramp
-        n = np.linalg.norm(self.ret_left)
-        if n < 1e-12:
+        if np.linalg.norm(self.ret_left) < 1e-12:
             return a
-        base = np.clip(a[:3], -1, 1)
-        new = np.clip(base + (self.ret_left if n <= self.ret_cap else self.ret_left * self.ret_cap / n) / G_POS, -1, 1)
-        self.ret_left = self.ret_left - G_POS * (new - base)
-        a[:3] = new
+        a[:3], self.ret_left = ramp_step(np.clip(a[:3], -1, 1), self.ret_left, self.ret_cap)
         return a
 
 
 def parse_arm(label):
-    """A grid arm label -> (method, filter, noise): "GR+surr" -> ("GR", "surr", ""), "PPC@real" -> ("PPC", "", "real")."""
+    """A grid arm label -> (method, filter, noise): "GR+surr" -> ("GR", "surr", ""), "PPC@real" -> ("PPC", "", "real").
+    GRret is oracle only (spec rows 27, 28): a push filter freezes the seen object while it is carried, so the lift
+    never fires, and noise crosses LIFT on a still object."""
     base, _, noise = label.partition("@")
     method, _, filt = base.partition("+")
     assert method in HAgent.METHODS and filt in ("", "surr", "contact") and (not noise or noise in NOISE), label
+    assert method != "GRret" or not (filt or noise), f"{label}: the return runs on the oracle only"
     return method, filt, noise
