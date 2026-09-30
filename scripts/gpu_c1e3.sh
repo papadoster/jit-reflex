@@ -243,6 +243,7 @@ case "$STAGE" in
     $P scripts/c1e3_pilot.py pad $O/pad1.jsonl $O/pad0.jsonl "$(rate $LOG/pad1.log | cut -d' ' -f1)" \
       "$(rate $LOG/pad0.log | cut -d' ' -f1)" | tee $O/pad_choice.txt
     [ "${PIPESTATUS[0]}" = 0 ] || exit 1
+    rm -rf eval_output/c1e3_images  # the smoke's images only tested the path; the pilot archive holds P1's alone
     ;;
   base)  # as C1-E2's base, s = 10 only (the read gate's number)
     mkdir -p $O/base

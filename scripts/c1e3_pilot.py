@@ -237,7 +237,7 @@ def choose(pad, files):
     if ppc[vmin] > FALSE_MAX:
         print(f"fallback: no PPC speed threshold has <= {FALSE_MAX:.0%} false triggers in P6; the fewest false, ties "
               f"the larger: v_min={vmin} ({ppc[vmin]:.3f})")
-    print(f"C1-E3 pilot: K={k} tau_k={tau[k]:.4f} rc={rc} dir={d} beta={beta} eps_noise={eps} vmin_noise={vmin} pad={pad}")
+    print(f"C1-E3 pilot: K={k} tau_k={tau[k]:.6f} rc={rc} dir={d} beta={beta} eps_noise={eps} vmin_noise={vmin} pad={pad}")
 
 
 def selftest():
