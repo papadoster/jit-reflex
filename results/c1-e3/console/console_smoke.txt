@@ -1,0 +1,551 @@
+Using CPython 3.12.3 interpreter at: /usr/local/bin/python
+Creating virtual environment at: venv
+Activate with: source venv/bin/activate
+Using Python 3.12.3 environment at: venv
+Resolved 81 packages in 6.83s
+Downloading torchvision (7.0MiB)
+Downloading torch (792.1MiB)
+Downloading hf-xet (4.3MiB)
+Downloading nvidia-nvshmem-cu12 (132.7MiB)
+Downloading sympy (6.0MiB)
+Downloading pillow (6.6MiB)
+Downloading nvidia-cudnn-cu12 (674.0MiB)
+Downloading tokenizers (3.1MiB)
+Downloading setuptools (1.0MiB)
+Downloading pyopengl (3.0MiB)
+Downloading nvidia-cufft-cu12 (190.9MiB)
+Downloading nvidia-nccl-cu12 (283.0MiB)
+Downloading opencv-python-headless (57.6MiB)
+Downloading nvidia-cuda-cupti-cu12 (8.5MiB)
+Downloading nvidia-curand-cu12 (53.7MiB)
+Downloading triton (179.5MiB)
+Downloading nvidia-cusolver-cu12 (150.9MiB)
+Downloading nvidia-cusparse-cu12 (206.5MiB)
+Downloading nvidia-nvjitlink-cu12 (18.8MiB)
+Downloading cmake (28.3MiB)
+Downloading transformers (9.8MiB)
+Downloading networkx (2.0MiB)
+Downloading nvidia-cuda-nvrtc-cu12 (22.6MiB)
+Downloading mujoco (6.4MiB)
+Downloading nvidia-cufile-cu12 (1.1MiB)
+Downloading cuda-bindings (7.3MiB)
+Downloading lerobot (1.6MiB)
+Downloading nvidia-cublas-cu12 (374.9MiB)
+Downloading nvidia-cusparselt-cu12 (273.9MiB)
+Downloading pygments (1.2MiB)
+Downloading numpy (15.8MiB)
+   Building docopt==0.6.2
+ Downloading nvidia-cufile-cu12
+ Downloading torchvision
+      Built docopt==0.6.2
+ Downloading pygments
+ Downloading setuptools
+ Downloading lerobot
+ Downloading networkx
+ Downloading tokenizers
+ Downloading hf-xet
+ Downloading mujoco
+ Downloading pillow
+ Downloading cuda-bindings
+ Downloading sympy
+ Downloading nvidia-cuda-cupti-cu12
+ Downloading numpy
+ Downloading nvidia-nvjitlink-cu12
+ Downloading nvidia-cuda-nvrtc-cu12
+ Downloading transformers
+ Downloading pyopengl
+ Downloading nvidia-curand-cu12
+ Downloading opencv-python-headless
+ Downloading nvidia-nvshmem-cu12
+ Downloading nvidia-cusolver-cu12
+ Downloading cmake
+ Downloading nvidia-cufft-cu12
+ Downloading triton
+ Downloading nvidia-cusparse-cu12
+ Downloading nvidia-cusparselt-cu12
+ Downloading nvidia-nccl-cu12
+ Downloading nvidia-cublas-cu12
+ Downloading nvidia-cudnn-cu12
+ Downloading torch
+Prepared 81 packages in 1m 40s
+Installed 81 packages in 11.97s
+ + absl-py==2.5.0
+ + accelerate==1.15.0
+ + annotated-doc==0.0.5
+ + anyio==4.15.1
+ + certifi==2026.7.22
+ + charset-normalizer==3.5.2
+ + click==8.5.0
+ + cloudpickle==3.1.2
+ + cmake==4.1.3
+ + cuda-bindings==12.9.9
+ + cuda-pathfinder==1.8.2
+ + cuda-toolkit==12.6.3
+ + docopt==0.6.2
+ + draccus==0.11.6
+ + einops==0.8.2
+ + etils==1.14.0
+ + farama-notifications==0.0.6
+ + filelock==4.0.7
+ + fsspec==2026.9.0
+ + glfw==2.10.2
+ + gymnasium==1.3.0
+ + h11==0.16.0
+ + hf-xet==1.6.0
+ + httpcore==1.0.9
+ + httpx==0.28.1
+ + huggingface-hub==1.33.0
+ + idna==3.20
+ + jinja2==3.1.6
+ + lerobot==0.6.1
+ + markdown-it-py==4.2.0
+ + markupsafe==3.0.3
+ + mdurl==0.1.2
+ + mergedeep==1.3.4
+ + mpmath==1.3.0
+ + mujoco==3.3.2
+ + mypy-extensions==1.1.0
+ + networkx==3.7
+ + num2words==0.5.14
+ + numpy==2.2.6
+ + nvidia-cublas-cu12==12.6.4.1
+ + nvidia-cuda-cupti-cu12==12.6.80
+ + nvidia-cuda-nvrtc-cu12==12.6.85
+ + nvidia-cuda-runtime-cu12==12.6.77
+ + nvidia-cudnn-cu12==9.10.2.21
+ + nvidia-cufft-cu12==11.3.0.4
+ + nvidia-cufile-cu12==1.11.1.6
+ + nvidia-curand-cu12==10.3.7.77
+ + nvidia-cusolver-cu12==11.7.1.2
+ + nvidia-cusparse-cu12==12.5.4.2
+ + nvidia-cusparselt-cu12==0.7.1
+ + nvidia-nccl-cu12==2.28.9
+ + nvidia-nvjitlink-cu12==12.6.85
+ + nvidia-nvshmem-cu12==3.4.5
+ + nvidia-nvtx-cu12==12.6.77
+ + opencv-python-headless==4.13.0.92
+ + packaging==25.0
+ + pillow==12.3.0
+ + psutil==7.2.2
+ + pygments==2.21.0
+ + pyopengl==3.1.10
+ + pyyaml==6.0.3
+ + regex==2026.9.29
+ + requests==2.34.2
+ + rich==15.0.0
+ + safetensors==0.8.0
+ + setuptools==81.0.0
+ + shellingham==1.5.4
+ + sympy==1.14.0
+ + termcolor==3.3.0
+ + tokenizers==0.22.2
+ + toml==0.10.2
+ + torch==2.11.0+cu126 (from https://download.pytorch.org/whl/cu126/torch-2.11.0%2Bcu126-cp312-cp312-manylinux_2_28_x86_64.whl)
+ + torchvision==0.26.0+cu126 (from https://download.pytorch.org/whl/cu126/torchvision-0.26.0%2Bcu126-cp312-cp312-manylinux_2_28_x86_64.whl)
+ + tqdm==4.70.1
+ + transformers==5.5.4
+ + triton==3.6.0
+ + typer==0.27.2
+ + typing-extensions==4.16.0
+ + typing-inspect==0.9.0
+ + urllib3==2.8.0
+ + zipp==4.1.0
+Using Python 3.12.3 environment at: venv
+Resolved 2 packages in 247ms
+Downloading hf-libero (3.0MiB)
+   Building robomimic==0.2.0
+ Downloading hf-libero
+      Built robomimic==0.2.0
+Prepared 2 packages in 6.85s
+Installed 2 packages in 446ms
+ + hf-libero==0.1.4
+ + robomimic==0.2.0
+Using Python 3.12.3 environment at: venv
+Resolved 130 packages in 11.13s
+Downloading opencv-python (70.4MiB)
+   Building bddl==1.0.1
+   Building antlr4-python3-runtime==4.9.3
+Downloading kiwisolver (1.4MiB)
+Downloading aiohttp (1.7MiB)
+Downloading robosuite (184.5MiB)
+Downloading fonttools (5.1MiB)
+Downloading pyarrow (47.8MiB)
+Downloading matplotlib (9.4MiB)
+Downloading scipy (33.7MiB)
+Downloading pandas (11.8MiB)
+Downloading torchcodec (2.2MiB)
+Downloading numba (3.7MiB)
+Downloading llvmlite (57.1MiB)
+Downloading av (38.1MiB)
+ Downloading kiwisolver
+ Downloading aiohttp
+      Built antlr4-python3-runtime==4.9.3
+ Downloading torchcodec
+      Built bddl==1.0.1
+ Downloading fonttools
+ Downloading numba
+ Downloading matplotlib
+ Downloading av
+ Downloading scipy
+ Downloading llvmlite
+ Downloading pandas
+ Downloading opencv-python
+ Downloading pyarrow
+ Downloading robosuite
+Prepared 54 packages in 22.89s
+Uninstalled 1 package in 71ms
+Installed 54 packages in 1.84s
+ + aiohappyeyeballs==2.7.1
+ + aiohttp==3.14.3
+ + aiosignal==1.4.0
+ + antlr4-python3-runtime==4.9.3
+ + attrs==26.1.0
+ + av==15.1.0
+ + bddl==1.0.1
+ + contourpy==1.4.0
+ + cycler==0.12.1
+ + datasets==4.8.5
+ + dill==0.4.1
+ + easydict==1.13
+ + fastjsonschema==2.22.2
+ + fonttools==4.66.1
+ + frozenlist==1.8.0
+ - fsspec==2026.9.0
+ + fsspec==2026.2.0
+ + future==1.0.0
+ + hydra-core==1.3.7
+ + iniconfig==2.3.0
+ + jsonlines==4.0.0
+ + jsonschema==4.26.0
+ + jsonschema-specifications==2025.9.1
+ + jupyter-core==5.9.1
+ + jupytext==1.19.5
+ + kiwisolver==1.5.1
+ + llvmlite==0.49.0
+ + matplotlib==3.11.2
+ + mdit-py-plugins==0.6.1
+ + multidict==6.9.1
+ + multiprocess==0.70.19
+ + nbformat==5.11.1
+ + numba==0.67.0
+ + omegaconf==2.3.1
+ + opencv-python==5.0.0.93
+ + pandas==2.3.3
+ + platformdirs==4.12.2
+ + pluggy==1.6.0
+ + propcache==0.5.4
+ + pyarrow==25.0.1
+ + pyparsing==3.3.3
+ + pytest==9.1.1
+ + python-dateutil==2.9.0.post0
+ + pytz==2026.4
+ + referencing==0.37.0
+ + robosuite==1.4.0
+ + rpds-py==2026.6.3
+ + scipy==1.18.1
+ + six==1.17.0
+ + thop==0.1.1.post2209072238
+ + torchcodec==0.11.1
+ + traitlets==5.16.1
+ + tzdata==2026.4
+ + xxhash==4.0.1
+ + yarl==1.25.1
+Do you want to specify a custom path for the dataset folder? (Y/N): Initializing the default config file...
+The following information is stored in the config file: /root/.libero/config.yaml
+benchmark_root: /workspace/jit-reflex/venv/lib/python3.12/site-packages/libero/libero
+bddl_files: /workspace/jit-reflex/venv/lib/python3.12/site-packages/libero/libero/./bddl_files
+init_states: /workspace/jit-reflex/venv/lib/python3.12/site-packages/libero/libero/./init_files
+datasets: /workspace/jit-reflex/venv/lib/python3.12/site-packages/libero/libero/../datasets
+assets: /workspace/jit-reflex/venv/lib/python3.12/site-packages/libero/libero/./assets
+Local assets not found. Downloading from HuggingFace Hub...
+Downloading LIBERO assets from Hugging Face...
+/workspace/jit-reflex/venv/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py:206: UserWarning: The `local_dir_use_symlinks` argument is deprecated and ignored in `snapshot_download`. Downloading to a local directory does not use symlinks anymore.
+  warnings.warn(
+Fetching 586 files:   0%|          | 0/586 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 586 files:   0%|          | 1/586 [00:00<02:39,  3.68it/s]Fetching 586 files:   0%|          | 2/586 [00:00<01:50,  5.30it/s]Fetching 586 files:   1%|▏         | 8/586 [00:00<00:28, 20.11it/s]Fetching 586 files:   2%|▏         | 11/586 [00:00<00:31, 18.44it/s]Fetching 586 files:   2%|▏         | 14/586 [00:00<00:37, 15.20it/s]Fetching 586 files:   3%|▎         | 16/586 [00:01<00:46, 12.26it/s]Fetching 586 files:   3%|▎         | 18/586 [00:01<00:53, 10.54it/s]Fetching 586 files:   4%|▎         | 21/586 [00:01<00:43, 12.91it/s]Fetching 586 files:   4%|▍         | 23/586 [00:01<00:43, 12.83it/s]Fetching 586 files:   4%|▍         | 25/586 [00:01<00:39, 14.13it/s]Fetching 586 files:   5%|▍         | 27/586 [00:02<00:36, 15.35it/s]Fetching 586 files:   5%|▌         | 30/586 [00:02<00:33, 16.84it/s]Fetching 586 files:   6%|▌         | 33/586 [00:02<00:28, 19.14it/s]Fetching 586 files:   6%|▌         | 36/586 [00:02<00:27, 19.79it/s]Fetching 586 files:   7%|▋         | 40/586 [00:02<00:23, 23.00it/s]Fetching 586 files:   8%|▊         | 44/586 [00:02<00:21, 25.58it/s]Fetching 586 files:   8%|▊         | 48/586 [00:02<00:19, 27.45it/s]Fetching 586 files:   9%|▉         | 52/586 [00:02<00:18, 28.42it/s]Fetching 586 files:   9%|▉         | 55/586 [00:03<00:18, 28.63it/s]Fetching 586 files:  10%|█         | 60/586 [00:03<00:17, 30.03it/s]Fetching 586 files:  11%|█         | 64/586 [00:03<00:17, 30.17it/s]Fetching 586 files:  12%|█▏        | 68/586 [00:03<00:18, 28.64it/s]Fetching 586 files:  12%|█▏        | 71/586 [00:03<00:18, 28.27it/s]Fetching 586 files:  13%|█▎        | 74/586 [00:03<00:19, 26.05it/s]Fetching 586 files:  13%|█▎        | 77/586 [00:03<00:19, 25.58it/s]Fetching 586 files:  14%|█▎        | 80/586 [00:04<00:21, 23.21it/s]Fetching 586 files:  14%|█▍        | 83/586 [00:04<00:25, 19.36it/s]Fetching 586 files:  15%|█▍        | 87/586 [00:04<00:21, 23.02it/s]Fetching 586 files:  15%|█▌        | 90/586 [00:04<00:25, 19.65it/s]Fetching 586 files:  16%|█▌        | 94/586 [00:04<00:21, 22.52it/s]Fetching 586 files:  17%|█▋        | 97/586 [00:04<00:22, 22.06it/s]Fetching 586 files:  17%|█▋        | 100/586 [00:05<00:27, 17.40it/s]Fetching 586 files:  17%|█▋        | 102/586 [00:05<00:30, 16.01it/s]Fetching 586 files:  18%|█▊        | 104/586 [00:05<00:29, 16.43it/s]Fetching 586 files:  18%|█▊        | 106/586 [00:05<00:31, 15.21it/s]Fetching 586 files:  19%|█▉        | 110/586 [00:05<00:23, 20.36it/s]Fetching 586 files:  19%|█▉        | 113/586 [00:05<00:27, 17.09it/s]Fetching 586 files:  20%|█▉        | 115/586 [00:06<00:30, 15.30it/s]Fetching 586 files:  20%|██        | 118/586 [00:06<00:33, 13.85it/s]Fetching 586 files:  21%|██        | 121/586 [00:06<00:29, 15.74it/s]Fetching 586 files:  21%|██        | 124/586 [00:06<00:25, 17.84it/s]Fetching 586 files:  22%|██▏       | 127/586 [00:06<00:25, 18.19it/s]Fetching 586 files:  22%|██▏       | 131/586 [00:06<00:20, 22.40it/s]Fetching 586 files:  23%|██▎       | 134/586 [00:07<00:23, 19.56it/s]Fetching 586 files:  24%|██▎       | 138/586 [00:07<00:24, 18.44it/s]Fetching 586 files:  24%|██▍       | 143/586 [00:07<00:18, 23.80it/s]Fetching 586 files:  25%|██▍       | 146/586 [00:07<00:19, 22.28it/s]Fetching 586 files:  26%|██▌       | 150/586 [00:07<00:23, 18.44it/s]Fetching 586 files:  27%|██▋       | 156/586 [00:08<00:21, 19.89it/s]Fetching 586 files:  27%|██▋       | 160/586 [00:08<00:18, 22.71it/s]Fetching 586 files:  28%|██▊       | 163/586 [00:08<00:23, 17.66it/s]Fetching 586 files:  28%|██▊       | 166/586 [00:08<00:26, 15.70it/s]Fetching 586 files:  29%|██▊       | 168/586 [00:08<00:27, 15.18it/s]Fetching 586 files:  29%|██▉       | 171/586 [00:09<00:28, 14.36it/s]Fetching 586 files:  30%|██▉       | 173/586 [00:09<00:30, 13.56it/s]Fetching 586 files:  30%|██▉       | 175/586 [00:09<00:29, 13.92it/s]Fetching 586 files:  30%|███       | 177/586 [00:09<00:34, 12.02it/s]Fetching 586 files:  31%|███       | 180/586 [00:09<00:27, 14.83it/s]Fetching 586 files:  31%|███       | 183/586 [00:09<00:24, 16.21it/s]Fetching 586 files:  32%|███▏      | 185/586 [00:10<00:30, 13.24it/s]Fetching 586 files:  32%|███▏      | 187/586 [00:10<00:29, 13.54it/s]Fetching 586 files:  32%|███▏      | 189/586 [00:10<00:37, 10.70it/s]Fetching 586 files:  33%|███▎      | 191/586 [00:10<00:34, 11.45it/s]Fetching 586 files:  33%|███▎      | 194/586 [00:10<00:27, 14.49it/s]Fetching 586 files:  33%|███▎      | 196/586 [00:11<00:28, 13.62it/s]Fetching 586 files:  34%|███▍      | 199/586 [00:11<00:24, 15.76it/s]Fetching 586 files:  34%|███▍      | 201/586 [00:11<00:26, 14.39it/s]Fetching 586 files:  35%|███▍      | 203/586 [00:11<00:31, 12.13it/s]Fetching 586 files:  35%|███▌      | 206/586 [00:11<00:29, 12.79it/s]Fetching 586 files:  36%|███▌      | 209/586 [00:11<00:24, 15.55it/s]Fetching 586 files:  36%|███▌      | 211/586 [00:12<00:24, 15.15it/s]Fetching 586 files:  37%|███▋      | 214/586 [00:12<00:20, 17.81it/s]Fetching 586 files:  37%|███▋      | 216/586 [00:12<00:22, 16.63it/s]Fetching 586 files:  38%|███▊      | 220/586 [00:12<00:16, 21.59it/s]Fetching 586 files:  38%|███▊      | 223/586 [00:12<00:17, 20.95it/s]Fetching 586 files:  39%|███▊      | 226/586 [00:12<00:15, 22.77it/s]Fetching 586 files:  39%|███▉      | 229/586 [00:12<00:17, 20.39it/s]Fetching 586 files:  40%|███▉      | 232/586 [00:12<00:16, 21.51it/s]Fetching 586 files:  40%|████      | 235/586 [00:13<00:22, 15.61it/s]Fetching 586 files:  40%|████      | 237/586 [00:13<00:25, 13.94it/s]Fetching 586 files:  41%|████      | 240/586 [00:13<00:23, 14.69it/s]Fetching 586 files:  41%|████▏     | 242/586 [00:13<00:23, 14.62it/s]Fetching 586 files:  42%|████▏     | 245/586 [00:13<00:19, 17.12it/s]Fetching 586 files:  42%|████▏     | 247/586 [00:14<00:20, 16.40it/s]Fetching 586 files:  43%|████▎     | 250/586 [00:14<00:18, 18.66it/s]Fetching 586 files:  43%|████▎     | 252/586 [00:14<00:19, 17.41it/s]Fetching 586 files:  43%|████▎     | 254/586 [00:14<00:18, 17.56it/s]Fetching 586 files:  44%|████▍     | 257/586 [00:14<00:21, 15.19it/s]Fetching 586 files:  44%|████▍     | 260/586 [00:14<00:21, 15.12it/s]Fetching 586 files:  45%|████▍     | 263/586 [00:15<00:19, 16.53it/s]Fetching 586 files:  45%|████▌     | 265/586 [00:15<00:19, 16.32it/s]Fetching 586 files:  46%|████▌     | 268/586 [00:15<00:17, 18.28it/s]Fetching 586 files:  46%|████▌     | 270/586 [00:15<00:19, 16.62it/s]Fetching 586 files:  47%|████▋     | 273/586 [00:15<00:16, 19.49it/s]Fetching 586 files:  47%|████▋     | 276/586 [00:15<00:19, 16.04it/s]Fetching 586 files:  47%|████▋     | 278/586 [00:15<00:20, 14.77it/s]Fetching 586 files:  48%|████▊     | 280/586 [00:16<00:20, 15.05it/s]Fetching 586 files:  48%|████▊     | 282/586 [00:16<00:23, 12.90it/s]Fetching 586 files:  48%|████▊     | 284/586 [00:16<00:21, 13.87it/s]Fetching 586 files:  49%|████▉     | 286/586 [00:16<00:19, 15.13it/s]Fetching 586 files:  49%|████▉     | 288/586 [00:16<00:18, 16.01it/s]Fetching 586 files:  49%|████▉     | 290/586 [00:16<00:19, 15.19it/s]Fetching 586 files:  50%|████▉     | 292/586 [00:16<00:22, 12.88it/s]Fetching 586 files:  50%|█████     | 295/586 [00:17<00:19, 14.97it/s]Fetching 586 files:  51%|█████     | 297/586 [00:17<00:23, 12.08it/s]Fetching 586 files:  51%|█████     | 299/586 [00:17<00:23, 12.24it/s]Fetching 586 files:  52%|█████▏    | 302/586 [00:17<00:21, 13.14it/s]Fetching 586 files:  52%|█████▏    | 304/586 [00:17<00:22, 12.67it/s]Fetching 586 files:  52%|█████▏    | 307/586 [00:18<00:21, 12.74it/s]Fetching 586 files:  53%|█████▎    | 311/586 [00:18<00:19, 13.77it/s]Fetching 586 files:  54%|█████▎    | 314/586 [00:18<00:21, 12.50it/s]Fetching 586 files:  54%|█████▍    | 318/586 [00:18<00:18, 14.38it/s]Fetching 586 files:  55%|█████▍    | 322/586 [00:19<00:16, 16.21it/s]Fetching 586 files:  55%|█████▌    | 324/586 [00:19<00:16, 16.12it/s]Fetching 586 files:  56%|█████▌    | 326/586 [00:19<00:17, 15.27it/s]Fetching 586 files:  56%|█████▌    | 328/586 [00:19<00:16, 15.25it/s]Fetching 586 files:  56%|█████▋    | 330/586 [00:19<00:16, 15.30it/s]Fetching 586 files:  57%|█████▋    | 332/586 [00:19<00:16, 15.30it/s]Fetching 586 files:  57%|█████▋    | 334/586 [00:19<00:17, 14.30it/s]Fetching 586 files:  57%|█████▋    | 336/586 [00:20<00:16, 15.04it/s]Fetching 586 files:  58%|█████▊    | 338/586 [00:20<00:18, 13.77it/s]Fetching 586 files:  58%|█████▊    | 341/586 [00:20<00:15, 15.36it/s]Fetching 586 files:  59%|█████▊    | 343/586 [00:20<00:17, 14.03it/s]Fetching 586 files:  59%|█████▉    | 345/586 [00:20<00:18, 12.95it/s]Fetching 586 files:  59%|█████▉    | 348/586 [00:20<00:18, 12.93it/s]Fetching 586 files:  60%|█████▉    | 350/586 [00:21<00:18, 12.75it/s]Fetching 586 files:  60%|██████    | 352/586 [00:21<00:18, 12.39it/s]Fetching 586 files:  61%|██████    | 355/586 [00:21<00:17, 12.84it/s]Fetching 586 files:  61%|██████    | 358/586 [00:21<00:14, 15.42it/s]Fetching 586 files:  61%|██████▏   | 360/586 [00:21<00:14, 16.02it/s]Fetching 586 files:  62%|██████▏   | 362/586 [00:21<00:15, 14.87it/s]Fetching 586 files:  62%|██████▏   | 366/586 [00:22<00:14, 15.18it/s]Fetching 586 files:  63%|██████▎   | 370/586 [00:22<00:11, 19.18it/s]Fetching 586 files:  64%|██████▎   | 373/586 [00:22<00:12, 16.91it/s]Fetching 586 files:  64%|██████▍   | 375/586 [00:22<00:12, 16.96it/s]Fetching 586 files:  64%|██████▍   | 377/586 [00:22<00:13, 15.84it/s]Fetching 586 files:  65%|██████▍   | 380/586 [00:22<00:11, 18.40it/s]Fetching 586 files:  65%|██████▌   | 382/586 [00:23<00:11, 17.07it/s]Fetching 586 files:  66%|██████▌   | 384/586 [00:23<00:14, 13.98it/s]Fetching 586 files:  66%|██████▌   | 386/586 [00:23<00:14, 14.03it/s]Fetching 586 files:  66%|██████▌   | 388/586 [00:23<00:17, 11.48it/s]Fetching 586 files:  67%|██████▋   | 391/586 [00:23<00:15, 12.26it/s]Fetching 586 files:  68%|██████▊   | 396/586 [00:24<00:13, 14.30it/s]Fetching 586 files:  68%|██████▊   | 400/586 [00:24<00:10, 17.83it/s]Fetching 586 files:  69%|██████▉   | 403/586 [00:24<00:11, 16.56it/s]Fetching 586 files:  69%|██████▉   | 405/586 [00:24<00:11, 15.82it/s]Fetching 586 files:  69%|██████▉   | 407/586 [00:24<00:11, 15.26it/s]Fetching 586 files:  70%|██████▉   | 409/586 [00:24<00:11, 15.54it/s]Fetching 586 files:  70%|███████   | 411/586 [00:25<00:13, 12.72it/s]Fetching 586 files:  70%|███████   | 413/586 [00:25<00:15, 11.12it/s]Fetching 586 files:  71%|███████   | 415/586 [00:25<00:23,  7.37it/s]Fetching 586 files:  71%|███████   | 417/586 [00:26<00:19,  8.46it/s]Fetching 586 files:  72%|███████▏  | 419/586 [00:26<00:18,  9.06it/s]Fetching 586 files:  72%|███████▏  | 421/586 [00:26<00:17,  9.51it/s]Fetching 586 files:  72%|███████▏  | 423/586 [00:27<00:26,  6.19it/s]Fetching 586 files:  73%|███████▎  | 426/586 [00:27<00:21,  7.51it/s]Fetching 586 files:  73%|███████▎  | 428/586 [00:27<00:19,  8.06it/s]Fetching 586 files:  73%|███████▎  | 430/586 [00:27<00:18,  8.34it/s]Fetching 586 files:  74%|███████▎  | 431/586 [00:27<00:19,  8.15it/s]Fetching 586 files:  74%|███████▍  | 433/586 [00:28<00:17,  8.89it/s]Fetching 586 files:  74%|███████▍  | 434/586 [00:28<00:22,  6.90it/s]Fetching 586 files:  74%|███████▍  | 436/586 [00:28<00:21,  7.07it/s]Fetching 586 files:  75%|███████▍  | 438/586 [00:28<00:18,  7.79it/s]Fetching 586 files:  75%|███████▌  | 440/586 [00:29<00:18,  8.04it/s]Fetching 586 files:  75%|███████▌  | 442/586 [00:29<00:20,  7.03it/s]Fetching 586 files:  76%|███████▌  | 444/586 [00:29<00:19,  7.12it/s]Fetching 586 files:  76%|███████▌  | 446/586 [00:29<00:16,  8.55it/s]Fetching 586 files:  76%|███████▋  | 448/586 [00:29<00:13,  9.92it/s]Fetching 586 files:  77%|███████▋  | 450/586 [00:30<00:11, 11.66it/s]Fetching 586 files:  77%|███████▋  | 452/586 [00:30<00:10, 12.57it/s]Fetching 586 files:  78%|███████▊  | 455/586 [00:30<00:08, 15.56it/s]Fetching 586 files:  78%|███████▊  | 457/586 [00:30<00:08, 15.44it/s]Fetching 586 files:  78%|███████▊  | 459/586 [00:30<00:08, 15.83it/s]Fetching 586 files:  79%|███████▊  | 461/586 [00:30<00:08, 14.79it/s]Fetching 586 files:  79%|███████▉  | 464/586 [00:30<00:07, 16.89it/s]Fetching 586 files:  80%|███████▉  | 466/586 [00:30<00:07, 16.64it/s]Fetching 586 files:  80%|███████▉  | 468/586 [00:31<00:07, 15.58it/s]Fetching 586 files:  80%|████████  | 470/586 [00:31<00:07, 16.49it/s]Fetching 586 files:  81%|████████  | 472/586 [00:31<00:08, 13.51it/s]Fetching 586 files:  81%|████████  | 474/586 [00:31<00:09, 11.24it/s]Fetching 586 files:  81%|████████  | 476/586 [00:31<00:11,  9.64it/s]Fetching 586 files:  82%|████████▏ | 480/586 [00:32<00:07, 14.33it/s]Fetching 586 files:  82%|████████▏ | 482/586 [00:32<00:07, 14.43it/s]Fetching 586 files:  83%|████████▎ | 486/586 [00:32<00:06, 16.54it/s]Fetching 586 files:  83%|████████▎ | 489/586 [00:32<00:05, 18.66it/s]Fetching 586 files:  84%|████████▍ | 492/586 [00:32<00:05, 15.88it/s]Fetching 586 files:  84%|████████▍ | 494/586 [00:32<00:05, 15.95it/s]Fetching 586 files:  85%|████████▍ | 496/586 [00:33<00:06, 14.67it/s]Fetching 586 files:  85%|████████▍ | 498/586 [00:33<00:05, 14.84it/s]Fetching 586 files:  85%|████████▌ | 500/586 [00:33<00:06, 13.05it/s]Fetching 586 files:  86%|████████▌ | 503/586 [00:33<00:05, 16.17it/s]Fetching 586 files:  86%|████████▌ | 505/586 [00:33<00:06, 13.01it/s]Fetching 586 files:  87%|████████▋ | 508/586 [00:33<00:04, 15.61it/s]Fetching 586 files:  87%|████████▋ | 510/586 [00:33<00:04, 15.27it/s]Fetching 586 files:  87%|████████▋ | 512/586 [00:34<00:05, 13.33it/s]Fetching 586 files:  88%|████████▊ | 514/586 [00:34<00:05, 12.62it/s]Fetching 586 files:  88%|████████▊ | 516/586 [00:34<00:06, 11.15it/s]Fetching 586 files:  88%|████████▊ | 518/586 [00:34<00:05, 12.77it/s]Fetching 586 files:  89%|████████▉ | 521/586 [00:34<00:04, 15.40it/s]Fetching 586 files:  90%|████████▉ | 525/586 [00:34<00:03, 19.96it/s]Fetching 586 files:  90%|█████████ | 528/586 [00:35<00:03, 18.36it/s]Fetching 586 files:  91%|█████████ | 532/586 [00:35<00:03, 17.19it/s]Fetching 586 files:  91%|█████████▏| 536/586 [00:35<00:02, 16.69it/s]Fetching 586 files:  92%|█████████▏| 540/586 [00:35<00:02, 17.49it/s]Fetching 586 files:  93%|█████████▎| 543/586 [00:35<00:02, 18.73it/s]Fetching 586 files:  94%|█████████▎| 548/586 [00:36<00:01, 21.90it/s]Fetching 586 files:  94%|█████████▍| 551/586 [00:36<00:01, 23.32it/s]Fetching 586 files:  95%|█████████▍| 554/586 [00:36<00:01, 22.13it/s]Fetching 586 files:  95%|█████████▌| 557/586 [00:36<00:01, 23.42it/s]Fetching 586 files:  96%|█████████▌| 560/586 [00:36<00:01, 19.93it/s]Fetching 586 files:  96%|█████████▌| 563/586 [00:36<00:01, 21.75it/s]Fetching 586 files:  97%|█████████▋| 566/586 [00:36<00:00, 21.14it/s]Fetching 586 files:  97%|█████████▋| 569/586 [00:37<00:00, 23.13it/s]Fetching 586 files:  98%|█████████▊| 572/586 [00:37<00:00, 22.12it/s]Fetching 586 files:  98%|█████████▊| 575/586 [00:37<00:00, 23.73it/s]Fetching 586 files:  99%|█████████▊| 578/586 [00:37<00:00, 20.26it/s]Fetching 586 files:  99%|█████████▉| 581/586 [00:37<00:00, 18.01it/s]Fetching 586 files: 100%|█████████▉| 585/586 [00:38<00:00, 12.93it/s]Fetching 586 files: 100%|██████████| 586/586 [00:38<00:00, 15.29it/s]
+Assets downloaded successfully to /root/.cache/libero/assets
+LIBERO assets: /root/.cache/libero/assets
+torch 2.11.0+cu126 CUDA 12.6 NVIDIA GeForce RTX 4090
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/__init__.py", line 62, in <module>
+    from mujoco.gl_context import *
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/gl_context.py", line 41, in <module>
+    from mujoco.egl import GLContext as _GLContext
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/__init__.py", line 31, in <module>
+    from mujoco.egl import egl_ext as EGL
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/egl_ext.py", line 27, in <module>
+    from OpenGL import EGL
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/OpenGL/EGL/__init__.py", line 2, in <module>
+    from OpenGL.raw.EGL._types import *
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/OpenGL/raw/EGL/_types.py", line 87, in <module>
+    raw_eglQueryString = _p.PLATFORM.EGL.eglQueryString
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'eglQueryString'
+offscreen rendering failed: installing the GL libraries and retrying
+W: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
+debconf: delaying package configuration, since apt-utils is not installed
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 49062 files and directories currently installed.)
+Preparing to unpack .../00-libglib2.0-data_2.80.0-6ubuntu3.9_all.deb ...
+Unpacking libglib2.0-data (2.80.0-6ubuntu3.9) over (2.80.0-6ubuntu3.4) ...
+Preparing to unpack .../01-libglib2.0-bin_2.80.0-6ubuntu3.9_amd64.deb ...
+Unpacking libglib2.0-bin (2.80.0-6ubuntu3.9) over (2.80.0-6ubuntu3.4) ...
+Preparing to unpack .../02-gir1.2-glib-2.0_2.80.0-6ubuntu3.9_amd64.deb ...
+Unpacking gir1.2-glib-2.0:amd64 (2.80.0-6ubuntu3.9) over (2.80.0-6ubuntu3.4) ...
+Preparing to unpack .../03-libglib2.0-0t64_2.80.0-6ubuntu3.9_amd64.deb ...
+Unpacking libglib2.0-0t64:amd64 (2.80.0-6ubuntu3.9) over (2.80.0-6ubuntu3.4) ...
+Preparing to unpack .../04-libdrm-common_2.4.125-1ubuntu0.1~24.04.2_all.deb ...
+Unpacking libdrm-common (2.4.125-1ubuntu0.1~24.04.2) over (2.4.122-1~ubuntu0.24.04.1) ...
+Preparing to unpack .../05-libdrm2_2.4.125-1ubuntu0.1~24.04.2_amd64.deb ...
+Unpacking libdrm2:amd64 (2.4.125-1ubuntu0.1~24.04.2) over (2.4.122-1~ubuntu0.24.04.1) ...
+Preparing to unpack .../06-libdrm-amdgpu1_2.4.125-1ubuntu0.1~24.04.2_amd64.deb ...
+Unpacking libdrm-amdgpu1:amd64 (2.4.125-1ubuntu0.1~24.04.2) over (2.4.122-1~ubuntu0.24.04.1) ...
+Preparing to unpack .../07-libdrm-intel1_2.4.125-1ubuntu0.1~24.04.2_amd64.deb ...
+Unpacking libdrm-intel1:amd64 (2.4.125-1ubuntu0.1~24.04.2) over (2.4.122-1~ubuntu0.24.04.1) ...
+Preparing to unpack .../08-libgl1-mesa-dri_25.2.8-0ubuntu0.24.04.3_amd64.deb ...
+Unpacking libgl1-mesa-dri:amd64 (25.2.8-0ubuntu0.24.04.3) over (25.0.7-0ubuntu0.24.04.2) ...
+Preparing to unpack .../09-libglx-mesa0_25.2.8-0ubuntu0.24.04.3_amd64.deb ...
+Unpacking libglx-mesa0:amd64 (25.2.8-0ubuntu0.24.04.3) over (25.0.7-0ubuntu0.24.04.2) ...
+Preparing to unpack .../10-libgbm1_25.2.8-0ubuntu0.24.04.3_amd64.deb ...
+Unpacking libgbm1:amd64 (25.2.8-0ubuntu0.24.04.3) over (25.0.7-0ubuntu0.24.04.2) ...
+Preparing to unpack .../11-mesa-libgallium_25.2.8-0ubuntu0.24.04.3_amd64.deb ...
+Unpacking mesa-libgallium:amd64 (25.2.8-0ubuntu0.24.04.3) over (25.0.7-0ubuntu0.24.04.2) ...
+Selecting previously unselected package libegl-mesa0:amd64.
+Preparing to unpack .../12-libegl-mesa0_25.2.8-0ubuntu0.24.04.3_amd64.deb ...
+Unpacking libegl-mesa0:amd64 (25.2.8-0ubuntu0.24.04.3) ...
+Selecting previously unselected package libegl1:amd64.
+Preparing to unpack .../13-libegl1_1.7.0-1build1_amd64.deb ...
+Unpacking libegl1:amd64 (1.7.0-1build1) ...
+Selecting previously unselected package libopengl0:amd64.
+Preparing to unpack .../14-libopengl0_1.7.0-1build1_amd64.deb ...
+Unpacking libopengl0:amd64 (1.7.0-1build1) ...
+Setting up libopengl0:amd64 (1.7.0-1build1) ...
+Setting up libglib2.0-0t64:amd64 (2.80.0-6ubuntu3.9) ...
+Setting up libglib2.0-data (2.80.0-6ubuntu3.9) ...
+Setting up gir1.2-glib-2.0:amd64 (2.80.0-6ubuntu3.9) ...
+Setting up libdrm-common (2.4.125-1ubuntu0.1~24.04.2) ...
+Setting up libglib2.0-bin (2.80.0-6ubuntu3.9) ...
+Setting up libdrm2:amd64 (2.4.125-1ubuntu0.1~24.04.2) ...
+Setting up libdrm-amdgpu1:amd64 (2.4.125-1ubuntu0.1~24.04.2) ...
+Setting up libdrm-intel1:amd64 (2.4.125-1ubuntu0.1~24.04.2) ...
+Setting up mesa-libgallium:amd64 (25.2.8-0ubuntu0.24.04.3) ...
+Setting up libgbm1:amd64 (25.2.8-0ubuntu0.24.04.3) ...
+Setting up libgl1-mesa-dri:amd64 (25.2.8-0ubuntu0.24.04.3) ...
+Setting up libegl-mesa0:amd64 (25.2.8-0ubuntu0.24.04.3) ...
+Setting up libegl1:amd64 (1.7.0-1build1) ...
+Setting up libglx-mesa0:amd64 (25.2.8-0ubuntu0.24.04.3) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.6) ...
+GL renderer: unknown (AttributeError("'NoneType' object has no attribute 'decode'"))
+name, driver_version, memory.total [MiB]
+NVIDIA GeForce RTX 4090, 580.159.04, 24564 MiB
+[10:17:27] smoke: --cells A --methods none,T0,G,GT,Gkeep,GkeepT,GR,GRT,GRret,PPC --inits 48-49 --n-envs 10 --save-images 2
+/workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/__init__.py:30: SyntaxWarning: invalid escape sequence '\ '
+  __logo__ = """
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+20 episodes to run
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=4385) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  self.pid = os.fork()
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+10/20 episodes, 8.82 s/episode, eta 0.02 h
+20/20 episodes, 6.35 s/episode, eta 0.00 h
+[10:21:37] smoke: --cells C --kinds control,close --methods none,GR+surr,GR+contact,GR@real,PPC@real,GR@s0.5 --inits 48 --n-envs 6 --trace
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+12 episodes to run
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=6170) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  self.pid = os.fork()
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+6/12 episodes, 4.82 s/episode, eta 0.01 h
+12/12 episodes, 4.15 s/episode, eta 0.00 h
+[10:23:43] smoke: --cells F --alpha 1 --methods none,T0,GRT --inits 48-49 --n-envs 6
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+6 episodes to run
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=7175) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  self.pid = os.fork()
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+6/6 episodes, 4.94 s/episode, eta 0.00 h
+[10:25:28] smoke: --tasks libero_10:0 --cells A --methods none,GR --inits 48 --n-envs 2
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2 episodes to run
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=8051) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  self.pid = os.fork()
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+2/2 episodes, 29.99 s/episode, eta 0.00 h
+[10:27:43] smoke: 40 of 40 records (20 + 12 + 6 + 2), 0 FAILED
+C1-E3 env: SAME as C1-E2's grid pod (GPU model, model snapshot, python, torch|torchvision|numpy|mujoco|robosuite|hf-libero|lerobot|transformers|gymnasium|robomimic|bddl)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+16 episodes to run
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=9231) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  self.pid = os.fork()
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+3/16 episodes, 10.43 s/episode, eta 0.04 h
+6/16 episodes, 9.23 s/episode, eta 0.03 h
+8/16 episodes, 9.94 s/episode, eta 0.02 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+11/16 episodes, 9.60 s/episode, eta 0.01 h
+14/16 episodes, 8.89 s/episode, eta 0.00 h
+16/16 episodes, 8.52 s/episode, eta 0.00 h
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+16 episodes to run
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=10715) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  self.pid = os.fork()
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+3/16 episodes, 13.08 s/episode, eta 0.05 h
+6/16 episodes, 11.82 s/episode, eta 0.03 h
+8/16 episodes, 12.86 s/episode, eta 0.03 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+11/16 episodes, 12.71 s/episode, eta 0.02 h
+14/16 episodes, 12.16 s/episode, eta 0.01 h
+16/16 episodes, 11.62 s/episode, eta 0.00 h
+padded: 8/8 pairs bitwise equal, unpadded: 2/7; 11.62 vs 8.52 s/episode (+36%)
+C1-E3 padding: pad=0
+[10:35:38] packed c1e3_results.tgz (79K)

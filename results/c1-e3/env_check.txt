@@ -1,0 +1,16 @@
+C1-E3 env: SAME as C1-E2's grid pod (GPU model, model snapshot, python, torch|torchvision|numpy|mujoco|robosuite|hf-libero|lerobot|transformers|gymnasium|robomimic|bddl)
+for the record only, the whole package freeze (< C1-E2, > here):
+15c15
+< charset-normalizer==3.5.1
+---
+> charset-normalizer==3.5.2
+33,34c33,34
+< filelock==4.0.6
+< fonttools==4.66.0
+---
+> filelock==4.0.7
+> fonttools==4.66.1
+95c95
+< platformdirs==4.12.1
+---
+> platformdirs==4.12.2

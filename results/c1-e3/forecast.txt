@@ -1,0 +1,4 @@
+[11:51:20] grid with --t-ramp 5 --k-p 1.0 --tau-k 0.037044 --K 20 --rc 0.03 --dir 1 --beta 0.2 --eps-noise 0.02 --vmin-noise 0.01 --pad-brain 0 --n-envs 10; baseline results/c1-e2/baseline.json; cut: none
+planned episodes: 32190 of 32190
+[12:44:23] lane B forecast: 2.98 s/episode x 16120 episodes = 13.3 h
+[15:09:58] lane A forecast: 2.85 s/episode x 16070 episodes = 12.7 h

@@ -1,0 +1,2 @@
+padded: 8/8 pairs bitwise equal, unpadded: 2/7; 11.62 vs 8.52 s/episode (+36%)
+C1-E3 padding: pad=0

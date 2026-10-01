@@ -1,0 +1,28 @@
+1. tau_kappa (P95 over 95 plans in P3): K=10: 3.70 cm, K=20: 3.70 cm, K=30: 3.70 cm
+2. K: 8 fallback plans in P1-P2; mean |kappa_hat - kappa_model|: K=10: 0.687, K=20: 0.675, K=30: 0.660 -> K=20
+3. r_c=0.03 dir=0: caught 1.000 (of 7), passed 0.728 (of 103), score 0.864
+3. r_c=0.03 dir=1: caught 0.857 (of 7), passed 0.893 (of 103), score 0.875
+3. r_c=0.05 dir=0: caught 1.000 (of 7), passed 0.350 (of 103), score 0.675
+3. r_c=0.05 dir=1: caught 0.857 (of 7), passed 0.709 (of 103), score 0.783
+3. r_c=0.08 dir=0: caught 1.000 (of 7), passed 0.000 (of 103), score 0.500
+3. r_c=0.08 dir=1: caught 0.857 (of 7), passed 0.534 (of 103), score 0.696
+   contact oracle (report): caught 0.857, passed 0.971 -> r_c=0.03 dir=1
+4. beta=1.0 eps'=5 mm: false 1.000, median delay 1.0
+4. beta=1.0 eps'=10 mm: false 1.000, median delay 1.0
+4. beta=1.0 eps'=15 mm: false 1.000, median delay 1.0
+4. beta=1.0 eps'=20 mm: false 1.000, median delay 1.0
+4. beta=0.5 eps'=5 mm: false 1.000, median delay 1.0
+4. beta=0.5 eps'=10 mm: false 1.000, median delay 1.0
+4. beta=0.5 eps'=15 mm: false 1.000, median delay 3.5
+4. beta=0.5 eps'=20 mm: false 0.769, median delay 4.0
+4. beta=0.3 eps'=5 mm: false 1.000, median delay 1.0
+4. beta=0.3 eps'=10 mm: false 0.990, median delay 3.0
+4. beta=0.3 eps'=15 mm: false 0.615, median delay 5.0
+4. beta=0.3 eps'=20 mm: false 0.202, median delay 6.0
+4. beta=0.2 eps'=5 mm: false 1.000, median delay 1.0
+4. beta=0.2 eps'=10 mm: false 0.865, median delay 4.0
+4. beta=0.2 eps'=15 mm: false 0.192, median delay 6.0
+4. beta=0.2 eps'=20 mm: false 0.000, median delay 9.5
+   PPC: v_min=1 mm/step false 1.000, v_min=2 mm/step false 1.000, v_min=5 mm/step false 1.000, v_min=10 mm/step false 0.000 -> beta=0.2 eps'=0.02 v_min=0.01
+C1-E3 pilot: K=20 tau_k=0.037044 rc=0.03 dir=1 beta=0.2 eps_noise=0.02 vmin_noise=0.01 pad=0
+Rough grid forecast: 6.92 s/episode per lane (pilot: 4 envs a lane, grid: 10) x 32190 / 2 lanes = 30.9 h. Spec §11 fuse: > 16 h.
