@@ -176,11 +176,11 @@ def wmax(stat, lo, hi):
     return np.where((t >= lo[:, None]) & (t <= hi[:, None]), stat, -np.inf).max(1)
 
 
-def follow(fol, meas, deliv, est, ref, tob, P, tf, ta, kh, sig):
-    """Applied-correction error over steps tf+1..tf+LAG_N, xy, m: (lag, trigger part, following part) per episode.
+def follow(fol, meas, deliv, est, ref, tob, P, tf, ta, kh, sig, n=LAG_N):
+    """Applied-correction error over steps tf+1..tf+n, xy, m: (lag, trigger part, following part) per episode.
     Before the alarm the correction is 0; after it, estimate - reference at the alarm's plan observation."""
     N, rows = len(tf), np.arange(len(tf))[:, None]
-    st = tf[:, None] + 1 + np.arange(LAG_N)
+    st = tf[:, None] + 1 + np.arange(n)
     on = (ta[:, None] >= 0) & (st >= ta[:, None])
     pos_a = W + tob[np.maximum(ta, 0)]
     D = P[rows, st] - P[np.arange(N), tf][:, None]
@@ -190,7 +190,7 @@ def follow(fol, meas, deliv, est, ref, tob, P, tf, ta, kh, sig):
         x, base = last_mean(meas, deliv, int(fol[3:]))[rows, W + st], ref[np.arange(N), pos_a]
     else:  # Kalman with a jump model: restart at k_hat from the reference with a wide prior
         base, R = ref[np.arange(N), pos_a], sig ** 2
-        x, xk, Pk = np.zeros((N, LAG_N, 3)), base.copy(), np.full(N, P0)
+        x, xk, Pk = np.zeros((N, n, 3)), base.copy(), np.full(N, P0)
         k0 = np.where(ta >= 0, kh, 10 ** 9)
         for t in range(int(k0.min()) if (ta >= 0).any() else 0, int(st.max()) + 1):
             act = t >= k0
@@ -198,7 +198,7 @@ def follow(fol, meas, deliv, est, ref, tob, P, tf, ta, kh, sig):
             K = np.where(act & deliv[:, W + t], Pk / (Pk + R), 0.0)
             xk, Pk = xk + K[:, None] * (meas[:, W + t] - xk), (1 - K) * Pk
             rel = t - tf - 1
-            sel = (rel >= 0) & (rel < LAG_N)
+            sel = (rel >= 0) & (rel < n)
             x[sel, rel[sel]] = xk[sel]
     C = np.where(on[..., None], x - base[:, None], 0.0)
     e = np.linalg.norm((D - C)[..., :2], axis=2)
