@@ -24,7 +24,7 @@
 #                                 grid stops, spec §8), phase "q0" with the Q0 gate (fails or cannot run: the delay-axis
 #                                 ids are held and results/c1-e4/pod/q0_held is written; later grid runs keep holding
 #                                 them, spec §8; Q0_HOLD=run runs them, report only).
-# One stage at a time on a pod (flock on venv/pod.lock). Trial and grid run with HF_HUB_OFFLINE=1.
+# One stage at a time on a pod (flock on .git/c1e4-pod.lock). Trial and grid run with HF_HUB_OFFLINE=1.
 # Spec §12 fuse: the forecast goes to forecast.txt after each brain's first line; above 32 h the owner cuts report rows,
 # in this order: 12 16 11 15 10 9 14 13 17. Rule rows are never cut. To cut: Ctrl-C, then CUT="12 16" ./scripts/gpu_c1e4.sh
 # grid (resume skips finished episodes). Cut rows fail the summary's completeness gate, which then needs an
@@ -215,8 +215,8 @@ case "${1:-}" in
 esac
 # one stage at a time: a second instance would run the same episodes into the same files (the lock is outside results)
 if command -v flock >/dev/null; then
-  mkdir -p venv && exec 9>venv/pod.lock
-  flock -n 9 || { echo "!!! a stage already runs on this pod (it holds venv/pod.lock): tmux attach -t c1e4"; exit 1; }
+  exec 9>.git/c1e4-pod.lock  # in .git: setup's "uv venv --clear" would delete a lock under venv/
+  flock -n 9 || { echo "!!! a stage already runs on this pod (it holds .git/c1e4-pod.lock): tmux attach -t c1e4"; exit 1; }
 else
   echo "!!! no flock here: nothing stops a second instance"
 fi
@@ -290,14 +290,17 @@ case "$STAGE" in
         | tee $O/env_check.txt
     fi
     { echo "for the record only, the whole package freeze (< C1-E2, > here):"
-      diff <(env_key results/c1-e2/pod_env_grid.txt freeze) <(env_key $O/pod_env_check.txt freeze); } >> $O/env_check.txt
+      diff <(env_key results/c1-e2/pod_env_grid.txt freeze) <(env_key $O/pod_env_check.txt freeze) || true; } \
+      >> $O/env_check.txt  # a differing freeze is for the record only, not a smoke failure
     ;;
   base)  # spec §7 item 4: stock lerobot-eval, s = 10, the 26 tasks x 10
     mkdir -p $O/base
     brains=(pi05); grep -q '^C1-E4 env: SAME' $O/env_check.txt 2>/dev/null || brains+=(smolvla)
     for b in "${brains[@]}"; do
       if [ $b = pi05 ]; then pol=(--policy.path=$SNAP --policy.compile_model=false); bs=5
-      else pol=(--policy.path=HuggingFaceVLA/smolvla_libero); bs=10; fi
+      else pol=(--policy.path=$($P -c "import sys; sys.path.insert(0, 'src'); import gauto
+from huggingface_hub import snapshot_download as d; r, v = gauto.BRAINS['smolvla']; print(d(r, revision=v))" | tail -1))
+        bs=10; fi  # the pinned SmolVLA snapshot
       for suite in libero_spatial libero_object libero_goal; do
         d=${b}_$suite
         [ -f $O/base/$d/eval_info.json ] && continue
