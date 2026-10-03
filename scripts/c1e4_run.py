@@ -64,6 +64,7 @@ METHODS = {gauto.parse_arm(a)[0] for a in ARMS}
 assert args.precision == "fp32" or args.brain == "pi05", "bf16-row is pi0.5's fallback only (spec §4.1)"
 assert args.kbar is not None or not METHODS & {"Gauto", "GautoT"}, "G-auto needs --kbar"
 assert not args.shadow_pseudo or args.kinds == "control", "--shadow-pseudo runs on control episodes"
+assert set(args.cells.split(",")) <= set(gauto.CELLS), args.cells
 CONF = {"brain": args.brain, "revision": REV, "precision": args.precision, "t_ramp": args.t_ramp, "k_p": args.k_p,
         "tau_k": args.tau_k, "kbar": args.kbar, "kappa0": KAPPA0, "shadow_pseudo": args.shadow_pseudo}
 dev = torch.device(args.device)
@@ -174,6 +175,9 @@ def cat(xs):
     return {k: cat([x[k] for x in xs]) for k in xs[0]} if isinstance(xs[0], dict) else np.concatenate(xs)
 
 
+TIMER = {"s": 0.0, "calls": 0, "rows": 0}  # brain time of the current batch (spec §10: pi0.5's call time)
+
+
 def brain(obs, desc, noises):
     """Raw-unit chunks (B, H, 7) for B observations with their task descriptions, each with its own noise. bf16-row:
     one row per call, so a chunk never depends on the batch (spec §4.1)."""
@@ -181,9 +185,14 @@ def brain(obs, desc, noises):
         return np.concatenate([brain(rows(obs, [j]), [desc[j]], [noises[j]]) for j in range(len(desc))])
     b = preprocess_observation(obs)
     b["task"] = list(desc)
+    tb = time.time()
     with torch.no_grad():
         ch = policy.predict_action_chunk(pre(env_pre(b)), noise=torch.cat(noises).to(dev))
-    return post(ch).float().cpu().numpy()
+    out = post(ch).float().cpu().numpy()
+    TIMER["s"] += time.time() - tb
+    TIMER["calls"] += 1
+    TIMER["rows"] += len(desc)
+    return out
 
 
 def make_agent(arm, cell, ep):
@@ -203,6 +212,7 @@ repeat_done = False
 def run_batch(vec, eps):
     """Run up to n_envs episodes (same task, same cell and kind) to the end; one record per real episode."""
     global repeat_done
+    TIMER.update(s=0.0, calls=0, rows=0)
     n = args.n_envs
     pad = eps + [eps[-1]] * (n - len(eps))  # padding envs are run and ignored
     vec.set_attr("init_state_id", [e["ep"].init for e in pad])
@@ -241,14 +251,12 @@ def run_batch(vec, eps):
                 installed(i, t)
         due = [i for i in range(n) if live[i] and cache[i] is not None and shadow[i] is None
                and (t == perts[i].t_fire + 1 if args.shadow_pseudo else agents[i].t_e == t)]
-        if due:  # two calls with one noise: the cached pre-shift observation and the current one; both plans dropped
-            z = [torch.randn(1, orx.H, cfg.max_action_dim, generator=torch.Generator().manual_seed(pad[i]["ep"].seed + 1))
-                 for i in due]
-            two = brain(cat([cache[i] for i in due] + [rows(obs, [i]) for i in due]), [desc[i] for i in due] * 2, z + z)
-            for j, i in enumerate(due):
-                ag, tf = agents[i], perts[i].t_fire
-                shadow[i] = gauto.shadow_sample((tf, ag.x_hist[tf], two[j]), (t, ag.x_hist[t], two[len(due) + j]),
-                                                ag.p_hist[tf], ag.p_hist[t])
+        for i in due:  # two calls with one noise: the cached pre-shift observation and the current one; plans dropped
+            z = torch.randn(1, orx.H, cfg.max_action_dim, generator=torch.Generator().manual_seed(pad[i]["ep"].seed + 1))
+            two = brain(cat([cache[i], rows(obs, [i])]), [desc[i]] * 2, [z, z])
+            ag, tf = agents[i], perts[i].t_fire
+            shadow[i] = gauto.shadow_sample((tf, ag.x_hist[tf], two[0]), (t, ag.x_hist[t], two[1]),
+                                            ag.p_hist[tf], ag.p_hist[t])
         want = [i for i in range(n) if live[i] and agents[i].sched.wants_call(t, agents[i].trigger(t))]
         if want:
             nz = [torch.randn(1, orx.H, cfg.max_action_dim, generator=gens[i]) for i in want]
@@ -318,7 +326,7 @@ def run_batch(vec, eps):
     return out
 
 
-path = snapshot_download(REPO, revision=REV)  # pi0.5's pinned revision (spec §4.1); the cache serves it offline
+path = snapshot_download(REPO, revision=REV)  # the brain's pinned revision (spec §4.1); the cache serves it offline
 cfg = PreTrainedConfig.from_pretrained(path)
 cfg.pretrained_path, cfg.device, cfg.compile_model = path, args.device, False  # pi0.5 v044: true + max-autotune
 if hasattr(cfg, "load_vlm_weights"):  # SmolVLA only
@@ -330,6 +338,8 @@ env_cfg = LiberoCfg(task="libero_spatial", task_ids=[0])
 policy = make_policy(cfg=cfg, env_cfg=env_cfg).eval().requires_grad_(False)
 if args.precision == "fp32":  # spec §4.1: in bf16 a chunk depends on the batch it was computed in (C1-E2 spec journal)
     policy = policy.float()
+    if dev.type == "cuda":  # the freed bf16 copy, else nvidia-smi (the smoke's memory rule) and EGL see it as used
+        torch.cuda.empty_cache()
 pre, post = make_pre_post_processors(cfg, path, preprocessor_overrides={"device_processor": {"device": args.device}})
 env_pre, _ = env_cfg.get_env_processors()  # the LIBERO env postprocessor is the identity
 
@@ -377,7 +387,8 @@ for st, tk in tasks:
             n_done += len(recs)
             rate = (time.time() - t0) / n_done
             # the pod's precision rule reads full batches only (scripts/gpu_c1e4.sh smoke)
-            print(f"batch {st}:{tk} {key[0]},{key[1]} real={len(recs)}/{args.n_envs} {time.time() - tb:.1f} s", flush=True)
+            print(f"batch {st}:{tk} {key[0]},{key[1]} real={len(recs)}/{args.n_envs} {time.time() - tb:.1f} s "
+                  f"brain {TIMER['s']:.1f} s {TIMER['calls']} calls {TIMER['rows']} rows", flush=True)
             print(f"{n_done}/{len(episodes)} episodes, {rate:.2f} s/episode, eta {rate * (len(episodes) - n_done) / 3600:.2f} h",
                   flush=True)
     vec.close()

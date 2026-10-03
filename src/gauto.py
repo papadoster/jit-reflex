@@ -13,9 +13,9 @@ import objreflex as orx
 
 # spec §4.2: cell -> (s = call period, d = answer delay), steps; s + d <= H (§4.3)
 CELLS = {"A": (10, 0), "A10": (10, 10), "A20": (10, 20), "A40": (10, 40), "C": (50, 0)}
-# spec §4.1: brain -> (Hugging Face repo, pinned revision or None)
+# spec §4.1: brain -> (Hugging Face repo, pinned revision); SmolVLA: the snapshot of the C1-E2 / C1-E3 pods
 BRAINS = {"pi05": ("lerobot/pi05_libero_finetuned_v044", "8e174154ef5f6c60a8da12ae99c303d8963138c1"),
-          "smolvla": ("HuggingFaceVLA/smolvla_libero", None)}
+          "smolvla": ("HuggingFaceVLA/smolvla_libero", "6721902bc4d61e50a3bfdb11dfb4cb626f05d102")}
 KAPPA0 = {"pi05": 0.355, "smolvla": 0.038}  # spec §5.2: C1-E4a's median headroom, frozen before data (G-kappa0)
 K = 20  # spec §5.2-5.3: the fallback horizon of G-R's kappa_hat and of the shadow sample
 ND_MIN = 1e-3  # spec §5.3: s_N := 0 when |Delta_N| < 1 mm
@@ -177,7 +177,8 @@ class GAgent(hf.HAgent):
     at its engagement. The T variants re-query when the raw shift since the executing plan's observation exceeds T_THR."""
 
     LAW = ("Gk0", "Gk0T", "Gauto", "GautoT")
-    FAMILY = {"G": 1.0, "GT": 1.0, "Gkeep": 0.0, "GR": None, **dict.fromkeys(LAW, 1.0), "Gcal": 1.0}  # LAW: set below
+    # LAW: 1.0 placeholder, on_new_chunk sets Z1's kappa
+    FAMILY = {"G": 1.0, "GT": 1.0, "Gkeep": 0.0, "GR": None, **dict.fromkeys(LAW, 1.0), "Gcal": 1.0}
     METHODS = ("none", "T0", "PPC", *FAMILY)
 
     def __init__(self, method, s, d, kbar=None, **kw):

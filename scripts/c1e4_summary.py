@@ -6,7 +6,7 @@ lines of scripts/c1e4_run.py (spec docs/superpowers/specs/2026-10-03-c1-e4-desig
     python scripts/c1e4_summary.py --precision FP32_S FP32_ENVS BF16_S BF16_FITS BITWISE   the §4.1 rule (smoke)
     python scripts/c1e4_summary.py --trial P1 P2 P3 --choice precision_choice.txt         the §7 choices and journal line
     python scripts/c1e4_summary.py --forecast PI_S S_S                 hours and dollars, RTX 4090 vs a 48 GB card
-    python scripts/c1e4_summary.py results/c1-e4/pod/grid_all.jsonl --baseline results/c1-e2/baseline.json
+    python scripts/c1e4_summary.py results/c1-e4/pod/grid_all.jsonl --baseline results/c1-e2/baseline.json [--q0-held]
     python scripts/c1e4_summary.py --selftest
 If the read gate fails only the gate is returned, unless the owner's deviation, journaled in the spec before reading, is
 passed with --override-gate. Bootstrap and rule helpers are C1-E2's and C1-E3's; tau_kappa is C1-E3's pilot choice.
@@ -148,7 +148,7 @@ def rule(name, idx, dc=DELAY):
     test, pairs, ok = RULES[name]
     d = (s3.did(prs(idx, P, "step", dc, "G", "none", I20), prs(idx, P, "step", ("A",), "G", "none", I30))
          if name == "Q1" else e2.diff_pp(pairs(idx, dc)))
-    return {"test": test, **(e2.rnd(d) or {}), "pass": d is not None and bool(ok(d))}
+    return {"test": test, **(e2.rnd(d) or {}), "pass": None if d is None else bool(ok(d))}  # no pairs: not read
 
 
 def q2a(rs):
@@ -167,7 +167,7 @@ def gate_row(raw, gid, pred):
     miss = len(EXPECTED[gid] - have)
     rs = list({KEY(r): r for r in raw if KEY(r) in EXPECTED[gid]}.values())
     ok, det = pred(index(rs))
-    return ok and miss <= 0.01 * len(EXPECTED[gid]) + TOL, det | {f"id{gid}_missing": miss}
+    return bool(ok) and miss <= 0.01 * len(EXPECTED[gid]) + TOL, det | {f"id{gid}_missing": miss}
 
 
 def control(raw):
@@ -190,6 +190,8 @@ def plan(cut=(), hold=False):
     delay-axis ids the Q0 gate holds."""
     if bad := [r for r in cut if r not in CUT_ORDER]:
         raise SystemExit(f"cut {bad}: not report rows (spec §12: rule rows are never cut; report rows {CUT_ORDER})")
+    if set(cut) != set(CUT_ORDER[:len(set(cut))]):
+        raise SystemExit(f"cut {list(cut)}: report rows are cut in the order {' '.join(CUT_ORDER)} only (spec §12)")
     out = []
     for ph, lanes in PHASES:
         for ln, ids in lanes.items():
@@ -221,15 +223,22 @@ def kbar30(recs):
     return float(np.median(xs[:N_CAL])), min(len(xs), N_CAL), xs
 
 
-def trial_rows(p1, p2, p3):
+def trial_rows(p1, p2, p3, prec):
+    """The rows P1-P3, one record per episode (the first); P1 and P2 in the smoke's precision prec."""
     want = {"P1": (p1, P, "control", "none"), "P2": (p2, P, "step", "Gcal"), "P3": (p3, S, "step", "Gcal")}
     out = {}
     for k, (rs, brain, kind, arm) in want.items():
-        rs = [r for r in rs if (r["brain"], r["kind"], r["cell"], r["arm"]) == (brain, kind, "A", arm)]
-        if len({(r["suite"], r["task"], r["init"]) for r in rs}) != N_TRIAL:
-            raise SystemExit(f"!!! trial row {k}: {len(rs)} records, expected {N_TRIAL} distinct episodes. The owner "
+        one = {}
+        for r in rs:
+            if (r["brain"], r["kind"], r["cell"], r["arm"]) == (brain, kind, "A", arm):
+                one.setdefault((r["suite"], r["task"], r["init"]), r)
+        if len(one) != N_TRIAL:
+            raise SystemExit(f"!!! trial row {k}: {len(one)} distinct episodes, expected {N_TRIAL}. The owner "
                              "decides, e.g. rerun the trial: it resumes and retries failed batches")
-        out[k] = rs
+        if brain == P and (bad := {r["conf"]["precision"] for r in one.values()} - {prec}):
+            raise SystemExit(f"!!! trial row {k}: records in precision {sorted(bad)}, the smoke chose {prec} "
+                             "(precision_choice.txt). The owner decides")
+        out[k] = list(one.values())
     return out
 
 
@@ -239,7 +248,7 @@ def trial(p1, p2, p3, choice):
     m = re.search(r"C1-E4 precision: precision=(fp32|bf16-row) envs=(\d+)", choice)
     if not m:
         raise SystemExit("!!! no precision choice: run the smoke first")
-    rows = trial_rows(p1, p2, p3)
+    rows = trial_rows(p1, p2, p3, m[1])
     tau, n_tau = pilot.tau_kappa(rows["P1"])
     kb = {b: kbar30(rows[k]) for b, k in ((P, "P2"), (S, "P3"))}
     jit = []  # spec §7 item 5: the shadow pair's jitter without a shift, along the episode's pseudo direction
@@ -251,8 +260,9 @@ def trial(p1, p2, p3, choice):
     j = np.array(jit) if jit else np.zeros((0, 2))
     q = lambda v: {k: round(float(np.percentile(v, p)), 5) for k, p in  # noqa: E731
                    (("median", 50), ("p75", 75), ("p90", 90), ("p95", 95), ("max", 100))} if len(v) else None
+    n = str(N_CAL) if kb[P][1] == kb[S][1] == N_CAL else f"{kb[P][1]}/{kb[S][1]}"  # spec §7.2: fewer is recorded
     line = (f"C1-E4 trial: precision={m[1]} tau_k={tau[gauto.K]:.6f} kbar_pi05={kb[P][0]:.4f} "
-            f"kbar_smolvla={kb[S][0]:.4f} N={N_CAL} envs={m[2]} pad=0")
+            f"kbar_smolvla={kb[S][0]:.4f} N={n} envs={m[2]} pad=0")
     rep = {"tau_k_plans": n_tau, "tau_by_K": tau,
            "kbar": {b: {"kbar_30": v[0], "samples_used": v[1], "samples": len(v[2]), "kbar_all": float(np.median(v[2])),
                         "kappa0": gauto.KAPPA0[b]} for b, v in kb.items()},
@@ -263,6 +273,8 @@ def trial(p1, p2, p3, choice):
 def forecast(pi_s, s_s, cut=(), hold=False):
     """spec §4.1, §12: the grid in hours and dollars on an RTX 4090 (pi0.5 one lane, SmolVLA two) and on a 48 GB card
     (pi0.5 two lanes, CARD48 guesses); rates in seconds per episode per lane from the trial."""
+    if min(pi_s, s_s) <= 0:
+        raise SystemExit("!!! no tempo: no forecast")
     n = defaultdict(int)
     for _, ln, _, k, _ in plan(cut, hold):
         n[LANE_BRAIN[ln]] += k
@@ -272,10 +284,12 @@ def forecast(pi_s, s_s, cut=(), hold=False):
            "48GB": [round(h["48GB"] * x * y, 1) for x, y in zip(PRICE_4090, CARD48["price"])]}
     cheaper = np.mean(usd["48GB"]) < np.mean(usd["4090"])
     return {"episodes": dict(n), "hours": {k: round(v, 1) for k, v in h.items()}, "usd": usd,
-            "card48_cheaper": bool(cheaper), "fuse_32h": h["4090"] > 32}
+            "card48_cheaper": bool(cheaper), "fuse_32h": h["4090"] > 32,
+            "note": "SmolVLA per-lane tempo from one lane alone; the grid fuse re-forecasts from real lane rates"}
 
 
-def summarize(raw, baseline, override=None):
+def summarize(raw, baseline, override=None, q0_held=False):
+    """q0_held: the pod held the delay-axis ids at its Q0 gate (results/c1-e4/pod/q0_held): later runs report only."""
     succ = defaultdict(set)
     for r in raw:
         succ[KEY(r)].add(r["success"])
@@ -290,14 +304,16 @@ def summarize(raw, baseline, override=None):
     idx, have = index(rs), {KEY(r) for r in rs}
     c_ok, c_det = control(rs)
     q0_ok, q0_det = q0(rs)  # the pod's own gate, so the ids held here are the ids the pod held
-    ids = {g: e for g, e in EXPECTED.items() if q0_ok or g not in HELD}
+    hold = q0_held or not q0_ok
+    ids = {g: e for g, e in EXPECTED.items() if not hold or g not in HELD}
     need = set().union(*ids.values())
     missing = {g: len(e - have) for g, e in ids.items() if e - have}
     s_rate, s_n = rate(idx, S, "control", "A", "none")
     base, n_miss = baseline.get("s10"), sum(missing.values())
     gate = {"records": len(raw), "ignored_outside_grid": sum(KEY(r) not in want for r in raw),
             "expected": len(need), "missing": n_miss, "missing_by_id": missing,
-            "held_delay_ids": [] if q0_ok else list(HELD), "complete": n_miss <= 0.01 * len(need) + TOL,
+            "held_delay_ids": list(HELD) if hold else [], "q0_held": q0_held,
+            "complete": n_miss <= 0.01 * len(need) + TOL,
             "control_pi": c_det | {"pass": c_ok}, "control_smolvla_A_none": s_rate, "control_smolvla_n": s_n,
             "baseline_s10": base,
             "baseline_ok": s_rate is not None and base is not None and abs(s_rate - base) <= 0.15 + TOL}
@@ -314,12 +330,15 @@ def summarize(raw, baseline, override=None):
     rules["Q1"]["control_A40_none"] = a40
     if rules["Q0"]["pass"] and not q0_ok:  # passes on what ran, but id 1 is > 1% incomplete: the pod held
         rules["Q0"] |= {"pass": False, "note": f"строка 1 неполная (> 1%): не хватает {q0_det['id1_missing']}"}
-    if not rules["Q0"]["pass"]:  # spec §8: the delay axis is not read; Q3a / Q3b on A go to the report
+    if not rules["Q0"]["pass"] or q0_held:  # spec §8: the delay axis is not read; Q3a / Q3b on A go to the report
+        note = ("не читалось: Q0 не прошло" if not rules["Q0"]["pass"] else "не читалось: на поде строки оси задержки "
+                "придержаны заслонкой Q0 (q0_held); поздний прогон этих строк — только отчёт")
         for n in ("Q1", "Q3a", "Q3b"):
-            rules[n] = {"test": RULES[n][0], "pass": None, "note": "не читалось: Q0 не прошло"}
+            rules[n] = {"test": RULES[n][0], "pass": None, "note": note}
         for n in ("Q3a", "Q3b"):  # their numbers on cell A alone, report only
             rules[n]["report_A"] = e2.rnd(e2.diff_pp(RULES[n][1](idx, ())))
-    verdicts = {v: "ДА" if all(rules[n]["pass"] for n in need_rules) else "НЕТ" for v, need_rules in VERDICTS.items()}
+    ps = {v: [rules[n]["pass"] for n in need_rules] for v, need_rules in VERDICTS.items()}
+    verdicts = {v: "НЕТ" if False in p else "НЕ ЧИТАЛОСЬ" if None in p else "ДА" for v, p in ps.items()}
     if "override" in gate:
         verdicts = {v: "ОТСТУПЛЕНИЕ (проверка перед чтением не пройдена, см. read_gate.override): " + x
                     for v, x in verdicts.items()}
@@ -330,6 +349,7 @@ def summarize(raw, baseline, override=None):
 # §10 goes into the memo)
 
 def report(rs, idx):
+    mean = lambda v: round(float(np.mean(v)), 4) if v else None  # noqa: E731  (never NaN: summary.json stays JSON)
     out = {"success": {}, "eyes": {}, "delay_law": {}, "fresh_before_close": {}}
     for key in sorted(idx):
         g = list(idx[key].values())
@@ -338,13 +358,17 @@ def report(rs, idx):
             "calls": [round(float(np.mean([r[k] for r in g])), 2) for k in ("calls_sched", "calls_trig", "calls_shadow")],
             "engaged_before_close": round(float(np.mean([r["t_engage"] is not None and (r["t_close"] is None
                                                          or r["t_engage"] < r["t_close"]) for r in g])), 4)}
-        if key[3].startswith("G@"):  # noisy eyes: false (before the shift), missed, delay
-            ft = [(r["t_alarm"] if key[3] == "G@glr" else r["t_engage"], r["t_fire"], r["t_close"]) for r in g]
-            on = [a - f for a, f, c in ft if a is not None and f is not None and a > f and (c is None or a < c)]
-            out["eyes"]["/".join(key)] = {
-                "false": round(float(np.mean([a is not None and (f is None or a <= f) for a, f, _ in ft])), 4),
-                "missed": round(float(np.mean([a is None for a, _, _ in ft])), 4),
-                "delay_median": float(np.median(on)) if on else None}
+        if key[3].startswith("G@"):  # noisy eyes; a = the alarm (G@glr) or the engagement (G@ema), c = the close
+            ac = [(r["t_alarm"] if key[3] == "G@glr" else r["t_engage"], r["t_fire"], r["t_close"]) for r in g]
+            if key[1] == "control":  # no shift: any alarm before the close is false
+                fl, ms, on = [a is not None and (c is None or a < c) for a, _, c in ac], None, None
+            else:  # fired shifts: false at or before the shift, missed without an alarm before the close
+                ac = [x for x in ac if x[1] is not None]
+                fl = [a is not None and a <= f for a, f, _ in ac]
+                ms = [a is None or (c is not None and a >= c) for a, _, c in ac]
+                on = [a - f for a, f, c in ac if a is not None and f < a and (c is None or a < c)]
+            out["eyes"]["/".join(key)] = {"false": mean(fl), "missed": mean(ms),
+                                          "delay_median": float(np.median(on)) if on else None}
     bins = (("<=10", 0, 10), ("11-20", 11, 20), ("21-40", 21, 40), (">40", 41, 10 ** 9), ("no_close", None, None))
     for b in (P, S):
         for c in gauto.CELLS:
@@ -352,9 +376,9 @@ def report(rs, idx):
             if not (x.keys() & y.keys()):
                 continue
             cell = {}  # spec §10: G - none by tau = t_close - t_fire of "none" in the same episode and cell
+            tau = {k: None if y[k]["t_close"] is None else y[k]["t_close"] - y[k]["t_fire"]
+                   for k in x.keys() & y.keys() if y[k]["t_fire"] is not None}
             for name, lo, hi in bins:
-                tau = {k: None if y[k]["t_close"] is None else y[k]["t_close"] - y[k]["t_fire"]
-                       for k in x.keys() & y.keys() if y[k]["t_fire"] is not None}
                 p = [(k[:2], x[k]["success"], y[k]["success"]) for k in sorted(tau)
                      if (tau[k] is None if lo is None else tau[k] is not None and lo <= tau[k] <= hi)]
                 cell[name] = e2.rnd(e2.diff_pp(p))
@@ -365,7 +389,7 @@ def report(rs, idx):
                     continue
                 arr = [ta for to, ta in r["plans_in"] if to >= r["t_fire"] + 1]
                 fresh.append(bool(arr) and (r["t_close"] is None or arr[0] < r["t_close"]))
-            out["fresh_before_close"][f"{b}/{c}"] = round(float(np.mean(fresh)), 4) if fresh else None
+            out["fresh_before_close"][f"{b}/{c}"] = mean(fresh)
     return out
 
 
@@ -377,15 +401,22 @@ def selftest():
     assert (n_pi, n_s, rule_pi) == (17074, 7972, 12568), (n_pi, n_s, rule_pi)  # spec §6: 17 074 / 7 973 / 12 567
     assert sum(k for *_, k, _ in plan()) == n_pi + n_s
     assert {g for _, _, g, _, _ in plan(hold=True)} == set(GRID) - set(HELD)
-    assert {g for _, _, g, _, _ in plan(cut=("12", "14"))} == set(GRID) - {"12", "12d", "14a", "14b"}
-    try:
-        plan(cut=("7",))
-        raise AssertionError("a rule row was cut")
-    except SystemExit:
-        pass
+    assert {g for _, _, g, _, _ in plan(cut=("12", "16"))} == set(GRID) - {"12", "12d", "16a", "16b"}
+    for bad in (("7",), ("16",)):  # a rule row; not the start of the cut order
+        try:
+            plan(cut=bad)
+            raise AssertionError(f"cut {bad} accepted")
+        except SystemExit:
+            pass
     assert plan()[0][:3] == ("control", "p", "6") and plan()[1][:3] == ("q0", "p", "1")
     assert precision(10.0, 6, 7.6, 1, 1) == ("bf16-row", 10) and precision(10.0, 6, 7.8, 1, 1) == ("fp32", 6)
     assert precision(10.0, 5, 5.0, 1, 0) == ("fp32", 5) and precision(10.0, 6, 5.0, 0, 1) == ("fp32", 6)
+    for n, t in (("Q0", 4), ("Q1", 5), ("Q2c", 3), ("Q2d", 5), ("Q3a", 4)):  # thresholds: equality passes
+        ok = RULES[n][2]
+        assert ok({"diff_pp": t, "lo2.5": 1e-6}) and not ok({"diff_pp": t - 1e-6, "lo2.5": 1}), n
+        assert not ok({"diff_pp": 99, "lo2.5": 0}), n
+    for n, t in (("Q2b", -2), ("Q2e", -3), ("Q2f", -3), ("Q3b", -2)):
+        assert RULES[n][2]({"lo5_one_sided": t}) and not RULES[n][2]({"lo5_one_sided": t - 1e-6}), n
 
     conf = {P: {"kbar": 0.33}, S: {"kbar": 0.05}}
     succ_p = {"none": 0.70, "T0": 0.80, "G": 0.85, "Gkeep": 0.78, "Gk0": 0.86, "Gauto": 0.86, "GT": 0.70, "GautoT": 0.82,
@@ -429,25 +460,56 @@ def selftest():
     # Q2a off by more than 0.10
     rawk = [x | {"conf": {"kbar": 0.50}} if x["brain"] == P else x for x in raw]
     assert not summarize(rawk, base)["rules"]["Q2a"]["pass"]
-    # an incomplete grid fails the gate
+    # an incomplete grid fails the gate; so does a SmolVLA control off the baseline by more than 15 pp
     assert not summarize(raw[: len(raw) // 2], base)["read_gate"]["complete"]
+    g5 = summarize(raw, {"s10": 0.5})["read_gate"]
+    assert not g5["baseline_ok"] and not g5["pass"]
+    # sticky Q0 hold: the pod held the delay ids, Q0 passes on the data, Q1 / Q3a / Q3b are still not read
+    oh = summarize(raw, base, q0_held=True)
+    assert oh["rules"]["Q0"]["pass"] and oh["read_gate"]["held_delay_ids"] == list(HELD)
+    assert all(oh["rules"][n]["pass"] is None and "q0_held" in oh["rules"][n]["note"] for n in ("Q1", "Q3a", "Q3b"))
+    assert oh["verdicts"]["ОСЬ ЗАДЕРЖКИ НА НАСТОЯЩЕЙ VLA"] == "НЕ ЧИТАЛОСЬ", oh["verdicts"]
+    assert oh["rules"]["Q3a"]["report_A"]["pairs"] == 520
+    # a deterministic grid: every rule passes on its own pairs, with the pair counts of spec §8
+    win = {"T0", "Gauto", "GautoT", "G@glr"}
+    raw1 = grid(lambda k: float(k[1] == "control" or k[3] in win or (k[3] == "G" and k[2] in DELAY)))
+    out1 = summarize(raw1, {"s10": 0.796}, override="selftest")  # SmolVLA control 100%: off C1-E2's 79.6% by > 15 pp
+    assert all(v["pass"] for v in out1["rules"].values()), out1["rules"]
+    assert all(v.startswith("ОТСТУПЛЕНИЕ") and v.endswith(": ДА") for v in out1["verdicts"].values()), out1["verdicts"]
+    assert {n: out1["rules"][n]["pairs"] for n in RULES} == {"Q0": 1040, "Q1": 1820, "Q2b": 780, "Q2c": 780, "Q2d": 694,
+                                                            "Q2e": 780, "Q2f": 780, "Q3a": 1560, "Q3b": 780}
+    # eyes: on control any alarm before the close is false; on a shift an alarm at or after the close is missed
+    x = rec((P, "control", "A", "G@glr", *orx.TASKS[0], 0), 1.0) | {"t_alarm": 50, "t_close": 60}
+    y = rec((P, "step", "A", "G@glr", *orx.TASKS[0], 0), 1.0) | {"t_alarm": 40}
+    eyes = report([x, y], index([x, y]))["eyes"]
+    assert eyes["pi05/control/A/G@glr"] == {"false": 1.0, "missed": None, "delay_median": None}, eyes
+    assert eyes["pi05/step/A/G@glr"] == {"false": 0.0, "missed": 1.0, "delay_median": None}, eyes
 
     # trial: kbar_30 in round-robin order, tau_kappa, the journal line
     def cal(b, smp):
         return [{"brain": b, "kind": "step", "cell": "A", "arm": "Gcal", "suite": s, "task": t, "init": i,
-                 "shadow": {"sample": smp(i, ti)}} for i in range(40, 44) for ti, (s, t) in enumerate(orx.TASKS)]
+                 "conf": {"precision": "fp32"}, "shadow": {"sample": smp(i, ti)}}
+                for i in range(40, 44) for ti, (s, t) in enumerate(orx.TASKS)]
     p2 = cal(P, lambda i, ti: 0.3 if i == 40 else 0.9)  # the first 26 (init 40) give 0.3, the next 4 give 0.9
     p3 = cal(S, lambda i, ti: None if ti % 2 else 0.04)
     walk = lambda n: [[0, 0, 0, -1]] * n + [[0, 0, 0, 1]] * (orx.H - n)  # noqa: E731  (still arm, closes at n)
     p1 = [{"brain": P, "kind": "control", "cell": "A", "arm": "none", "suite": s, "task": t, "init": i, "t_fire": 12,
-           "t_close": 60, "angle": 0.0, "shadow": {"diff": [0.01, 0.0, 0.0]},
+           "t_close": 60, "angle": 0.0, "shadow": {"diff": [0.01, 0.0, 0.0]}, "conf": {"precision": "fp32"},
            "trace": {"plans": [[10, [0, 0, 0], walk(20)], [20, [0.001 * ti, 0, 0], walk(10)]]}}
           for i in range(44, 48) for ti, (s, t) in enumerate(orx.TASKS)]
-    line, rep = trial(p1, p2, p3, "C1-E4 precision: precision=fp32 envs=6 (...)")
+    ch = "C1-E4 precision: precision=fp32 envs=6 (...)"
+    line, rep = trial(p1, p2 + [p2[0] | {"shadow": {"sample": 0.9}}], p3, ch)  # a duplicate: the first one counts
     assert rep["kbar"][P]["kbar_30"] == 0.3 and rep["kbar"][P]["samples_used"] == 30
     assert rep["kbar"][S]["samples"] == 52 and rep["kbar"][S]["kbar_30"] == 0.04
     assert line.startswith("C1-E4 trial: precision=fp32 tau_k=") and line.endswith("N=30 envs=6 pad=0"), line
-    assert rep["shadow_pairs"] == 104 and rep["shadow_jitter_m"]["median"] == 0.01
+    assert rep["shadow_pairs"] == 104 and rep["shadow_jitter_m"]["median"] == 0.01 and rep["kbar"][P]["samples"] == 104
+    p3_20 = cal(S, lambda i, ti: 0.04 if i == 40 and ti < 20 else None)  # 20 samples: recorded in the line
+    assert trial(p1, p2, p3_20, ch)[0].endswith("N=30/20 envs=6 pad=0")
+    try:
+        trial(p1, p2, p3, ch.replace("fp32", "bf16-row"))
+        raise AssertionError("trial records in another precision than the smoke's were accepted")
+    except SystemExit:
+        pass
     fc = forecast(7.0, 1.7)
     assert fc["episodes"] == {P: 17074, S: 7972} and fc["hours"]["4090"] > fc["hours"]["48GB"]
     print("selftest ok")
@@ -458,8 +520,12 @@ if __name__ == "__main__":
     ap.add_argument("grid", nargs="?", help="JSON lines of scripts/c1e4_run.py, all brains")
     ap.add_argument("--baseline", help='JSON {"s10": rate}: C1-E2\'s, or this pod\'s stock SmolVLA lerobot-eval')
     ap.add_argument("--override-gate", help="the spec journal entry that records the owner's deviation")
-    ap.add_argument("--control", nargs="+", metavar="JSONL", help="pi0.5 records: exit 0 if the control check passes, else 3")
-    ap.add_argument("--q0", nargs="+", metavar="JSONL", help="pi0.5 records: exit 0 if Q0 passes, else 3")
+    gate = ap.add_mutually_exclusive_group()
+    gate.add_argument("--control", nargs="+", metavar="JSONL",
+                      help="pi0.5 records: exit 0 if the control check passes, else 3")
+    gate.add_argument("--q0", nargs="+", metavar="JSONL", help="pi0.5 records: exit 0 if Q0 passes, else 3")
+    ap.add_argument("--q0-held", action="store_true",
+                    help="the pod held the delay-axis ids (results/c1-e4/pod/q0_held): Q1, Q3a, Q3b are not read")
     ap.add_argument("--plan", action="store_true", help='the pod\'s runner lines: "phase<TAB>lane<TAB>id<TAB>n<TAB>args"')
     ap.add_argument("--cut", default="", help='with --plan / --forecast: report rows cut by the §12 fuse, e.g. "12 16"')
     ap.add_argument("--hold", action="store_true", help="with --plan / --forecast: without the ids the Q0 gate holds")
@@ -496,6 +562,6 @@ if __name__ == "__main__":
         if not (a.grid and a.baseline):
             ap.error("grid and --baseline are required")
         src = Path(a.grid)
-        text = e2.dump(summarize(e2.load(src), json.loads(Path(a.baseline).read_text()), a.override_gate))
+        text = e2.dump(summarize(e2.load(src), json.loads(Path(a.baseline).read_text()), a.override_gate, a.q0_held))
         (src.parent / "summary.json").write_text(text + "\n")
         print(text)

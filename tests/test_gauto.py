@@ -1,4 +1,5 @@
 import importlib
+import itertools
 import sys
 from pathlib import Path
 
@@ -79,10 +80,9 @@ def test_conveyor_hold():
 def test_glr_kalman_matches_c1e3d():
     det = importlib.import_module("c1e3_detectors")
     T, tf, sig, lag, q = 90, 33, *gauto.NOISE
-    tob = det.tobs("A", T)
-    alarms = 0
-    for seed in range(40):
-        for mag in (0.0, 0.015, 0.04):
+    for cell in "ACF":  # C, F (25, 20): plans older than GLR_W steps, the window cap t - GLR_W + 1 binds
+        tob = det.tobs(cell, T)
+        for seed, mag in itertools.product(range(40), (0.0, 0.015, 0.04)):
             P = np.zeros((1, T, 3))
             P[0, tf + 1:] = mag * np.array([0.6, 0.8, 0.0])
             z, u = det.noise([seed], T, 3)
@@ -95,8 +95,8 @@ def test_glr_kalman_matches_c1e3d():
                 tr.t_obs = None if tob[t] < 0 else int(tob[t])
                 out.append(tr(P[0, t]))
             assert np.array_equal(np.array(tr.meas), meas[0]) and tr.deliv == list(deliv[0])  # hf.Tracker's frames
-            assert tr.t_alarm == (None if a < 0 else a), (seed, mag)
-            alarms += a >= 0
+            assert tr.t_alarm == (None if a < 0 else a), (cell, seed, mag)
+            assert mag < 0.04 or tf < a, (cell, seed, a)  # every 4 cm shift is found, after it happened
             if a >= 0:
                 assert tr.k_hat == kh[0, a]
             ta = det.first(stat, gauto.GLRKalman.GLR_H, np.ones(1, int), np.array([tf + det.LAG_N]))
@@ -105,7 +105,6 @@ def test_glr_kalman_matches_c1e3d():
             st_ = tf + 1 + np.arange(det.LAG_N)
             C = np.array(out)[st_] - tr.base0  # the applied correction: 0 before the alarm
             assert abs(np.linalg.norm((P[0, st_] - P[0, tf] - C)[:, :2], axis=1).mean() - lag_m) < 1e-12
-    assert alarms >= 40  # the 4 cm shifts are found
 
 
 def test_glr_kalman_still_object_outputs_constant():
@@ -170,6 +169,12 @@ def test_law_z1_t_plan_holds_one_minus_kbar():
     assert ag.kappa_log[1]["t"] == 22 and ag.kappa_log[1]["s"] == pytest.approx(0.7, abs=1e-3)
 
 
+def test_t_variant_triggers_on_the_raw_shift():
+    ag = gauto.GAgent("GautoT", 10, 0, kbar=0.04)
+    _run(ag, [0.06, 0.0, 0.0])  # on |U| the held (1 - kbar) Delta = 5.76 cm > T_THR would re-trigger
+    assert ag.sched.n_trig == 1
+
+
 def test_gk0_is_gauto_with_its_number_and_gcal_is_g():
     a = _run(gauto.GAgent("Gk0", 10, 0, kbar=0.355, t_ramp=20), [0.03, 0.0, 0.0])
     b = _run(gauto.GAgent("Gauto", 10, 0, kbar=0.355, t_ramp=20), [0.03, 0.0, 0.0])
@@ -183,10 +188,26 @@ def test_gk0_is_gauto_with_its_number_and_gcal_is_g():
 
 
 def test_reference_is_the_plan_in_flight():
-    ag = gauto.GAgent("Gauto", 10, 40, kbar=0.3)  # A40: no orx.Schedule assertion
+    ag = gauto.GAgent("Gauto", 10, 40, kbar=0.3, t_ramp=20)  # A40: no orx.Schedule assertion
     _run(ag, [0.03, 0.0, 0.0], T=70)
     assert ag.ref[0] == 10 and ag.p_ref == pytest.approx(P0)  # observed at 10, still in flight at t_e = 12
     assert ag.kappa_log[0]["t"] == 20 and ag.kappa_log[0]["d"] == pytest.approx([0.03, 0.0, 0.0])
+    # S at the plan's observation (20): 8 steps x 1.5 mm = 12 mm of 30; at its arrival (60) it would be 1.0
+    assert ag.kappa_log[0]["s"] == pytest.approx(0.4, abs=1e-3)
+
+
+def test_glr_eyes_get_the_executing_plans_observation():
+    det = importlib.import_module("c1e3_detectors")
+
+    class Spy(gauto.GLRKalman):
+        def __call__(self, p):
+            self.seen.append(self.t_obs)
+            return super().__call__(p)
+
+    spy = Spy(7, *gauto.NOISE)
+    spy.seen = []
+    _run(gauto.GAgent("G", 25, 20, tracker=spy), [0.03, 0.0, 0.0], T=80)
+    assert spy.seen == [None if x < 0 else int(x) for x in det.tobs("F", 80)]  # cell F = (25, 20)
 
 
 def test_shadow_sample():
