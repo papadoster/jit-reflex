@@ -272,4 +272,14 @@ def headroom(ch_before, ch_after, delta):
     (on the clipped plans, i.e. what the arm executes)."""
     d = np.clip(ch_after, -1, 1) - np.clip(ch_before, -1, 1)
     delta = np.asarray(delta, float)
-    return {h: float(G_POS * d[:h, :3].sum(0) @ delta / (delta @ delta)) for h in (10, 25, 50)}
+    out = {h: float(G_POS * d[:h, :3].sum(0) @ delta / (delta @ delta)) for h in (10, 25, 50)}
+    # C1-E4a: where each plan grasps, i.e. its displacement up to its own first close command (> 0 closes; the whole
+    # chunk if none). After the grasp both plans carry the object to the same unmoved placement, so a fixed h dilutes
+    # a fast policy; a common cut would cancel a shift toward the gripper for a perfect follower
+    def grasp_point(ch):
+        closed = ch[:, 6] > 0
+        k = int(np.argmax(closed)) if closed.any() else len(ch)
+        return np.clip(ch, -1, 1)[:k, :3].sum(0), k
+    (p0, out["k_close_before"]), (p1, out["k_close"]) = grasp_point(ch_before), grasp_point(ch_after)
+    out["close"] = float(G_POS * (p1 - p0) @ delta / (delta @ delta))
+    return out

@@ -73,7 +73,9 @@ if Path(args.out).exists():
         done.add((r["suite"], r["task"], r["init"], r["kind"], r["cell"], r["method"]))
 
 cfg = PreTrainedConfig.from_pretrained(args.policy)
-cfg.pretrained_path, cfg.device, cfg.load_vlm_weights = args.policy, args.device, False
+cfg.pretrained_path, cfg.device, cfg.compile_model = args.policy, args.device, False  # pi0.5 v044: true + max-autotune
+if hasattr(cfg, "load_vlm_weights"):  # SmolVLA only
+    cfg.load_vlm_weights = False
 assert cfg.chunk_size == orx.H, cfg.chunk_size
 env_cfg = LiberoCfg(task="libero_spatial", task_ids=[0])
 # spec §4: fp32. make_policy keeps the checkpoint's bf16 body, and in bf16 a chunk depends on the batch it was
@@ -280,7 +282,7 @@ def run_batch(vec, eps):
     out = []
     for i, e in enumerate(eps):
         ag, pt, ep = agents[i], perts[i], e["ep"]
-        rec = {"suite": ep.suite, "task": ep.task, "init": ep.init, "kind": ep.kind, "cell": e["cell"], "method": e["method"],
+        rec = {"policy": args.policy, "suite": ep.suite, "task": ep.task, "init": ep.init, "kind": ep.kind, "cell": e["cell"], "method": e["method"],
                "seed": ep.seed, "mag_class": ep.mag_class, "mag": ep.mag, "angle": ep.angle, "r": ep.r,
                "t_ramp": args.t_ramp, "k_p": args.k_p,
                "success": bool(succ[i]), "steps_to_success": steps_ok[i], "steps": len(acts[i]),

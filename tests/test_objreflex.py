@@ -442,6 +442,19 @@ def test_headroom_ratio():
     ch1[:, 1] = 0.3  # sideways to the shift: projected out
     r = orx.headroom(ch0, ch1, np.array([0.11, 0, 0]))
     assert r[10] == pytest.approx(0.5) and r[25] == pytest.approx(1.0) and r[50] == pytest.approx(1.0)
+    assert r["k_close"] == 50 and r["close"] == pytest.approx(r[50])  # never closes: the whole chunk
+    ch1[15:, 6] = 1.0  # closes at step 15: the position reached by then, 15 * 0.5 * 11 mm of the 11 cm
+    r = orx.headroom(ch0, ch1, np.array([0.11, 0, 0]))
+    assert r["k_close"] == 15 and r["close"] == pytest.approx(0.75) and r[50] == pytest.approx(1.0)
+    # a perfect follower of a shift toward the gripper: the fresh plan stops 3.3 cm short and closes 6 steps earlier
+    before, after = np.zeros((50, 7)), np.zeros((50, 7))
+    before[:20, 0], before[20:, 6] = 0.5, 1.0
+    after[:14, 0], after[14:, 6] = 0.5, 1.0
+    r = orx.headroom(before, after, np.array([-0.033, 0, 0]))
+    assert (r["k_close_before"], r["k_close"]) == (20, 14) and r["close"] == pytest.approx(1.0)
+    after[:, 6] = 1.0  # the fresh plan closes at once, where it is
+    r = orx.headroom(before, after, np.array([-0.033, 0, 0]))
+    assert r["k_close"] == 0 and r["close"] == pytest.approx(0.11 / 0.033)  # grasps 11 cm short of the old grasp
     ch1 = np.zeros((50, 7))
     ch1[:10, 0] = 1.5  # clipped to 1: 10 * 1 * 11 mm = 11 cm
     assert orx.headroom(ch0, ch1, np.array([0.11, 0, 0]))[10] == pytest.approx(1.0)
