@@ -411,6 +411,7 @@ from huggingface_hub import snapshot_download as d; r, v = gauto.BRAINS['smolvla
     [ $q = 0 ] || { echo "!!! the pi control check did not pass (exit $q): the grid stops; Q0 is not computed;" \
       "the owner decides after the analysis (spec §8)" | tee -a $O/gates.txt; exit 1; }
     run_phase q0 "$PLAN"
+    fcast "row 1 (shift episodes; before the Q0 gate, no hold)"
     echo "=== $(date -u) Q0 gate" >> $O/gates.txt
     summ --q0 $(out p) 2>&1 | tee -a $O/gates.txt; q=${PIPESTATUS[0]}
     case $q in  # the summary exits 3 if Q0 does not pass; any other error is the gate not running

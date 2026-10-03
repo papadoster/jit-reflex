@@ -326,6 +326,15 @@ def run_batch(vec, eps):
     return out
 
 
+classes = {int(c) for c in args.classes.split(",")}
+episodes = [{"ep": ep, "cell": c, "arm": m}
+            for st, tk in tasks for k in args.kinds.split(",") for c in args.cells.split(",") for m in ARMS
+            for i in span(args.inits)
+            if (ep := hf.make_episode(st, tk, i, k, prefix="c1e4")).kind == "control" or ep.mag_class in classes
+            if (st, tk, i, k, c, m) not in done]
+print(f"{len(episodes)} episodes to run", flush=True)
+if not episodes:  # a resumed line with nothing left: no model load
+    raise SystemExit
 path = snapshot_download(REPO, revision=REV)  # the brain's pinned revision (spec §4.1); the cache serves it offline
 cfg = PreTrainedConfig.from_pretrained(path)
 cfg.pretrained_path, cfg.device, cfg.compile_model = path, args.device, False  # pi0.5 v044: true + max-autotune
@@ -343,13 +352,6 @@ if args.precision == "fp32":  # spec §4.1: in bf16 a chunk depends on the batch
 pre, post = make_pre_post_processors(cfg, path, preprocessor_overrides={"device_processor": {"device": args.device}})
 env_pre, _ = env_cfg.get_env_processors()  # the LIBERO env postprocessor is the identity
 
-classes = {int(c) for c in args.classes.split(",")}
-episodes = [{"ep": ep, "cell": c, "arm": m}
-            for st, tk in tasks for k in args.kinds.split(",") for c in args.cells.split(",") for m in ARMS
-            for i in span(args.inits)
-            if (ep := hf.make_episode(st, tk, i, k, prefix="c1e4")).kind == "control" or ep.mag_class in classes
-            if (st, tk, i, k, c, m) not in done]
-print(f"{len(episodes)} episodes to run", flush=True)
 t0, n_done = time.time(), 0
 n_try = n_fail = 0  # batches over the whole invocation: abort on a systematic failure, never on one bad task
 failed_tasks = set()
