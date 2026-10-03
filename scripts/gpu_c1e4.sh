@@ -45,6 +45,8 @@ PI_SHA=877b3ec1130548b69af7f8aeef3ec9d3fc7738040f0b9beb490857ec970997ae
 PEAK_MAX=23552  # MiB: spec §4.1, 23 GB
 mkdir -p $LOG
 export MUJOCO_GL=${MUJOCO_GL:-egl} PYOPENGL_PLATFORM=${PYOPENGL_PLATFORM:-egl} PYTHONUNBUFFERED=1 PATH="$HOME/.local/bin:$PATH"
+# spec journal "trial": fp32 at 6 envs runs 23.4 of 24 GB; expandable segments cut fragmentation (-0.5 GB, actions bitwise)
+export PYTORCH_CUDA_ALLOC_CONF=${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}
 if [ -d /workspace ]; then
   export HF_HOME=/workspace/.cache/huggingface UV_CACHE_DIR=/workspace/.cache/uv \
     UV_PYTHON_INSTALL_DIR=/workspace/.cache/uv-python
