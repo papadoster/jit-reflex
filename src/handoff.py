@@ -26,12 +26,12 @@ SIGMA_SWEEP = ("s0.5", "s1", "s2")
 LIFT = 0.03  # lifted: >= 3 cm above the object's height at the close command (spec §5, G-R + return)
 
 
-def make_episode(suite, task, init, kind):
+def make_episode(suite, task, init, kind, prefix="c1e3"):
     """spec §4: everything from the episode seed, identical for all methods and cells. kind: step; close (the shift
     fires within r ~ U[3, 8] cm of the object's box, journal item 14); control (no shift: the pseudo-shift moment and
-    its direction are only recorded)."""
+    its direction are only recorded). prefix: the seed's experiment tag (C1-E4: "c1e4", its spec §4.4)."""
     assert kind in R_RANGE, kind
-    seed = int.from_bytes(hashlib.sha256(f"c1e3/{suite}/{task}/{init}/{kind}".encode()).digest()[:4], "little")
+    seed = int.from_bytes(hashlib.sha256(f"{prefix}/{suite}/{task}/{init}/{kind}".encode()).digest()[:4], "little")
     rng = np.random.default_rng(seed)
     r, angle = float(rng.uniform(*R_RANGE[kind])), float(rng.uniform(0.0, 2 * math.pi))
     if kind == "control":
