@@ -371,7 +371,7 @@ from huggingface_hub import snapshot_download as d; r, v = gauto.BRAINS['smolvla
     out() { case $1 in p) echo $O/grid_pi05.jsonl ;; a) echo $O/grid_smolvla.jsonl ;; b) echo $O/grid_smolvla_b.jsonl ;; esac; }
     echo "[$(date +%T)] grid with ${CO[*]}; lanes: p $(lane_args p), a/b $(lane_args a); baseline $BASE; cut: ${CUT:-none}" \
       | tee -a $O/forecast.txt
-    run_lane() {  # run_lane <lane> <plan lines of that lane>: in the lane's own shell, so Ctrl-C reaches wd's trap
+    run_lane() {  # run_lane <lane> <plan lines of that lane>: in the foreground, so Ctrl-C reaches wd's trap
       local ph ln id n args
       while IFS=$'\t' read -r ph ln id n args; do
         [ -n "$id" ] || continue
@@ -380,16 +380,15 @@ from huggingface_hub import snapshot_download as d; r, v = gauto.BRAINS['smolvla
         run2 grid_$ln $args $(lane_args $ln) "${CO[@]}" --out "$(out $ln)" </dev/null
       done <<< "$2"
     }
-    run_phase() {  # run_phase <phase> <plan>: the phase's lanes in parallel
-      local ln pids=() lines
-      trap 'kill -TERM ${pids[*]:-} 2>/dev/null; wait; exit 130' INT TERM HUP  # before the fork: no lane escapes
+    # spec journal 2026-10-04: the phase's lanes one after another. Two SmolVLA lanes at once (20 envs resetting their
+    # EGL contexts together) killed env workers; one lane never failed (smoke, trial, row 8)
+    run_phase() {  # run_phase <phase> <plan>
+      local ln lines
       for ln in p a b; do
         lines=$(awk -F'\t' -v ph="$1" -v ln=$ln '$1 == ph && $2 == ln' <<< "$2")
         [ -n "$lines" ] || continue
-        run_lane $ln "$lines" & pids+=($!)
+        run_lane $ln "$lines"
       done
-      wait "${pids[@]}"
-      trap - INT TERM HUP
     }
     fcast() {  # fcast <why>: the §12 fuse from the latest pass-1 rates of lanes p and a (else the smoke's tempo)
       local pr sr t
