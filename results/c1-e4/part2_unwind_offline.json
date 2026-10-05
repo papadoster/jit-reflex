@@ -1,0 +1,418 @@
+{
+ "meta": {
+  "script": "scripts/c1e4u_offline.py",
+  "traces": "results/c1-e4/mac_traces_a40.jsonl",
+  "python": "3.12.13",
+  "numpy": "2.2.6",
+  "cell": "A40",
+  "s_d": [
+   10,
+   40
+  ],
+  "tau_close": 13,
+  "tau_close_source": "results/c1-e4/part2_offline.json:close_obj.tau_close",
+  "settle_steps": 5,
+  "criterion": "angle(E, err) < 45 deg and |err|/|E| in [0.5, 2.0] in all three episodes -> pilot",
+  "E": "C(t_c) - C(t_obs of the plan executing at t_rel), xy; C rebuilt by replaying G on the trace",
+  "err": "object xy at t_rel + 5 minus the control's final object xy (same triple); the controls succeed with the gripper still closed, so that is the object set on the target",
+  "touchdown": "report only: first step after the carry peak within 1 cm of the height at t_rel; no rule reads it"
+ },
+ "episodes": [
+  {
+   "suite": "libero_spatial",
+   "task": 0,
+   "init": 7,
+   "mag_m": 0.0359,
+   "grasp_miss_m": 0.0389,
+   "steps": 280,
+   "success": false,
+   "t_fire": 30,
+   "t_engage": 31,
+   "t_c": 40,
+   "t_open_first": 90,
+   "t_rel": 90,
+   "carry_steps": 50,
+   "N_rel": 50,
+   "law_acts": false,
+   "C_tc": [
+    -0.0358,
+    -0.0027
+   ],
+   "C_N_rel": [
+    -0.0358,
+    -0.0027
+   ],
+   "E": [
+    0.0,
+    0.0
+   ],
+   "E_norm": 0.0,
+   "err_t_rel": [
+    -0.0551,
+    0.0164
+   ],
+   "err": [
+    -0.0511,
+    0.0174
+   ],
+   "err_norm": 0.054,
+   "angle_deg": null,
+   "ratio": null,
+   "holds": false,
+   "vs_C_tc": {
+    "angle_deg": 23.0,
+    "ratio": 1.503
+   },
+   "z_rel_t_rel": 0.0101,
+   "contact_t_rel": true,
+   "closed_t_c_to_t_rel": true,
+   "lifted_in_carry": true,
+   "z_peak_rel": 0.0919,
+   "carry_plans": [
+    [
+     0,
+     0,
+     true
+    ],
+    [
+     10,
+     50,
+     true
+    ],
+    [
+     20,
+     60,
+     true
+    ],
+    [
+     30,
+     70,
+     true
+    ],
+    [
+     40,
+     80,
+     false
+    ],
+    [
+     50,
+     90,
+     false
+    ]
+   ],
+   "touchdown": {
+    "t_down": 79,
+    "N_down": 30,
+    "stale": true,
+    "E": [
+     -0.0358,
+     -0.0027
+    ],
+    "angle_deg": 23.0,
+    "ratio": 1.503
+   },
+   "after_release": {
+    "grip": [
+     [
+      90,
+      "open"
+     ],
+     [
+      140,
+      "close"
+     ],
+     [
+      199,
+      "open"
+     ],
+     [
+      270,
+      "close"
+     ]
+    ],
+    "err_end": [
+     -0.0485,
+     0.0314
+    ],
+    "z_rel_end": 0.0144,
+    "relifted": false,
+    "moved_after_settle_m": 0.0143
+   },
+   "control_steps_to_success": 79,
+   "control_final_xy": [
+    0.0708,
+    0.1986
+   ]
+  },
+  {
+   "suite": "libero_spatial",
+   "task": 2,
+   "init": 1,
+   "mag_m": 0.0587,
+   "grasp_miss_m": 0.0387,
+   "steps": 280,
+   "success": false,
+   "t_fire": 24,
+   "t_engage": 25,
+   "t_c": 37,
+   "t_open_first": 104,
+   "t_rel": 104,
+   "carry_steps": 67,
+   "N_rel": 60,
+   "law_acts": false,
+   "C_tc": [
+    0.0117,
+    -0.0584
+   ],
+   "C_N_rel": [
+    0.0117,
+    -0.0584
+   ],
+   "E": [
+    0.0,
+    0.0
+   ],
+   "E_norm": 0.0,
+   "err_t_rel": [
+    0.0561,
+    -0.0072
+   ],
+   "err": [
+    0.053,
+    -0.0063
+   ],
+   "err_norm": 0.0534,
+   "angle_deg": null,
+   "ratio": null,
+   "holds": false,
+   "vs_C_tc": {
+    "angle_deg": 71.9,
+    "ratio": 0.897
+   },
+   "z_rel_t_rel": 0.0099,
+   "contact_t_rel": true,
+   "closed_t_c_to_t_rel": true,
+   "lifted_in_carry": true,
+   "z_peak_rel": 0.1457,
+   "carry_plans": [
+    [
+     0,
+     0,
+     true
+    ],
+    [
+     10,
+     50,
+     true
+    ],
+    [
+     20,
+     60,
+     true
+    ],
+    [
+     30,
+     70,
+     true
+    ],
+    [
+     40,
+     80,
+     false
+    ],
+    [
+     50,
+     90,
+     false
+    ],
+    [
+     60,
+     100,
+     false
+    ]
+   ],
+   "touchdown": {
+    "t_down": 94,
+    "N_down": 50,
+    "stale": false,
+    "E": [
+     0.0,
+     0.0
+    ],
+    "angle_deg": null,
+    "ratio": null
+   },
+   "after_release": {
+    "grip": [
+     [
+      104,
+      "open"
+     ],
+     [
+      278,
+      "close"
+     ]
+    ],
+    "err_end": [
+     0.0492,
+     -0.0053
+    ],
+    "z_rel_end": 0.0157,
+    "relifted": false,
+    "moved_after_settle_m": 0.004
+   },
+   "control_steps_to_success": 95,
+   "control_final_xy": [
+    0.0701,
+    0.178
+   ]
+  },
+  {
+   "suite": "libero_goal",
+   "task": 6,
+   "init": 4,
+   "mag_m": 0.0521,
+   "grasp_miss_m": 0.0089,
+   "steps": 300,
+   "success": false,
+   "t_fire": 29,
+   "t_engage": 30,
+   "t_c": 38,
+   "t_open_first": 83,
+   "t_rel": 83,
+   "carry_steps": 45,
+   "N_rel": 40,
+   "law_acts": false,
+   "C_tc": [
+    0.0048,
+    0.0518
+   ],
+   "C_N_rel": [
+    0.0048,
+    0.0518
+   ],
+   "E": [
+    0.0,
+    0.0
+   ],
+   "E_norm": 0.0,
+   "err_t_rel": [
+    -0.002,
+    0.0633
+   ],
+   "err": [
+    -0.0023,
+    0.0613
+   ],
+   "err_norm": 0.0614,
+   "angle_deg": null,
+   "ratio": null,
+   "holds": false,
+   "vs_C_tc": {
+    "angle_deg": 7.5,
+    "ratio": 1.18
+   },
+   "z_rel_t_rel": 0.0345,
+   "contact_t_rel": true,
+   "closed_t_c_to_t_rel": true,
+   "lifted_in_carry": true,
+   "z_peak_rel": 0.1477,
+   "carry_plans": [
+    [
+     0,
+     0,
+     true
+    ],
+    [
+     10,
+     50,
+     true
+    ],
+    [
+     20,
+     60,
+     true
+    ],
+    [
+     30,
+     70,
+     true
+    ],
+    [
+     40,
+     80,
+     false
+    ]
+   ],
+   "touchdown": {
+    "t_down": 78,
+    "N_down": 30,
+    "stale": true,
+    "E": [
+     0.0048,
+     0.0518
+    ],
+    "angle_deg": 7.5,
+    "ratio": 1.18
+   },
+   "after_release": {
+    "grip": [
+     [
+      83,
+      "open"
+     ],
+     [
+      130,
+      "close"
+     ],
+     [
+      149,
+      "open"
+     ],
+     [
+      150,
+      "close"
+     ],
+     [
+      210,
+      "open"
+     ],
+     [
+      250,
+      "close"
+     ],
+     [
+      267,
+      "open"
+     ],
+     [
+      270,
+      "close"
+     ],
+     [
+      279,
+      "open"
+     ],
+     [
+      297,
+      "close"
+     ]
+    ],
+    "err_end": [
+     -0.0061,
+     0.0724
+    ],
+    "z_rel_end": 0.0,
+    "relifted": false,
+    "moved_after_settle_m": 0.0117
+   },
+   "control_steps_to_success": 78,
+   "control_final_xy": [
+    -0.0635,
+    0.012
+   ]
+  }
+ ],
+ "n_law_acts": 0,
+ "verdict": "no pilot"
+}
