@@ -145,12 +145,26 @@ def test_z1_for_a_plan_inside_the_tracking_window(monkeypatch):
     assert acts[32, :3].any()  # the old reset: U(32) = 4 mm, no action before 33
 
 
-def test_tracking_until_the_fingers_close():
+def test_tracking_until_the_fingers_close(monkeypatch):
+    # the lead off: with it, a constant speed and the shrinking horizon hold the virtual object still in the window
+    monkeypatch.setattr(lead, "lead_gate", lambda *a: False)
     g = _run(gauto.GAgent("Gauto", 10, 0, kbar=0.2), move(0.002), T=45, close_at=30)
     ld = _run(lead.LeadAgent(10, 0, kbar=0.2, tau_lead=8, tau_close=6), move(0.002), T=45, close_at=30)
     assert not g[31:].any(axis=0)[:3].any()  # G-auto stops at the first close (the plan moves nothing)
-    assert np.abs(ld[31:36, :3]).sum(axis=1).min() > 0  # the lead keeps tracking tau_close steps
+    assert np.abs(ld[32:36, :3]).sum(axis=1).min() > 0  # tracking goes on tau_close steps (at 31: 2 mm < G's dead band)
     assert not ld[36:, :3].any() and (ld[30:, 6] > 0).all()
+
+
+def test_lead_shrinks_in_the_tracking_window():
+    # at the close command the fingers finish tau_close steps later: the lead's horizon is the time left, tau_lead - j
+    # at close + j, down to tau_lead - tau_close (the arm's lag); a constant tau_lead put the arm v tau_close ahead of
+    # the object when the fingers closed
+    v, tau, tc = 0.002, 15, 6
+    ag = lead.LeadAgent(10, 0, kbar=0.2, tau_lead=tau, tau_close=tc)
+    _run(ag, move(v), T=45, close_at=30)
+    off = {t: np.linalg.norm(ag.p_hist[t] - ag.seen_hist[t]) for t in range(30, 45)}
+    for t, h in ((30, tau), (31, tau - 1), (35, tau - 5), (36, tau - tc), (44, tau - tc)):
+        assert off[t] == pytest.approx(v * h, rel=0.05), (t, off[t] / v)
 
 
 def test_move_episode_classes_and_stop():

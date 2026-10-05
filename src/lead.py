@@ -124,11 +124,14 @@ class LeadAgent(gauto.GAgent):
             e["post_close"] = True
 
     def lead(self, t):
-        """The lead at the latest observed step t (the filter holds only its current state)."""
+        """The lead at the latest observed step t (the filter holds only its current state). Its horizon is tau_lead
+        until the close command, then the time left until the fingers close: tau_lead - (t - t_close), down to
+        tau_lead - tau_close (the arm's lag)."""
         seen = [self.seen_hist[k] for k in range(max(0, t - self.gate_m), t + 1)]
         if not lead_gate(self.kf, seen, self.gate_m):
             return np.zeros(3)
-        add = np.append(self.kf.v[:2] * self.tau_lead, 0.0)
+        h = self.tau_lead - (0 if self.t_close is None else min(t - self.t_close, self.tau_close))
+        add = np.append(self.kf.v[:2] * h, 0.0)
         n = float(np.linalg.norm(add))
         return add if n <= LEAD_MAX else add * LEAD_MAX / n
 
