@@ -5,11 +5,18 @@ noisy CV-Kalman eyes' (q_acc, gate window m) by the rule fixed in the plan befor
     fit x(t) ~ x0 + v_act (t - tau_arm) to the EEF of the observation (t = observation after t actions). The window
     ends where the commanded path passes the 4 cm/s run's 24 cm: 6 and 8 cm/s reach the arm's limit (x ~ 0.15 m)
     before step 120, so their window is 40-80 / 40-60 (the 40-120 fit is kept beside it).
-(b) Same env, arm still: gripper -1 up to step 10, +1 from it; tau_close = close actions until the fingers stop
-    (|d width| < 0.1 mm per step three steps in a row; width = |q0| + |q1| of robot0_gripper_qpos).
+(b) Same env, arm still: gripper -1 up to step 10, +1 from it; tau_close_free = close actions until the fingers stop
+    (|d width| < 0.1 mm per step three steps in a row; width = |q0| + |q1| of robot0_gripper_qpos). Report only: the
+    count is dominated by the creep tail near full closure.
+(b2) With the object: scripted top-down grasps (oracle positions, raw delta-EEF clipped to +-1 via G_POS) on the bench
+    tasks libero_spatial 0, libero_object 0, libero_goal 1 (goal 0 opens a drawer: no free object), Mac inits 48-49;
+    open, 8 cm above the grasp point, down to it, 3 still steps, close from t0 with the arm still (same stop rule) until
+    the stop is confirmed, then a 10-step +3 cm test lift. Held: width at the stop > 5 mm and the object rose >= 1.5 cm.
+    tau_close = median over the held grasps (>= 4 of 6, rule fixed in the follow-up spec before the data).
 (c) numpy only: lead.CVKalman at gauto.NOISE, grid q_acc x m; uniform motion 2 / 4 / 6 cm/s from step 12 and a step
     of (4.5, 2) cm at step 12, seeds 0..N-1, 100 steps; selection rule of the plan (task 5).
-tau_lead (oracle) = 1 + tau_arm(4 cm/s) + tau_close; tau_lead (noisy) = that + the estimate's lag at the chosen pair.
+tau_lead (oracle) = 1 + tau_arm(4 cm/s) + tau_close (b2); tau_lead (noisy) = that + the estimate's lag at the chosen
+    pair.
     MUJOCO_GL=cgl HF_HUB_OFFLINE=1 nice -n 10 ~/Desktop/M2R-c1-env/bin/python scripts/c1e4b_offline.py
 """
 
@@ -43,6 +50,16 @@ RULE = ("among pairs with false-open share on the step <= 1%: max open share at 
 REF = {"q_acc": 1e-8, "m": 20, "open": {"2": 0.18, "4": 0.59, "6": 0.79}, "false_open": 0.002,
        "source": "plan, cvsim.py 2026-10-05: 20 motion seeds, 40 step seeds"}
 ENV = {"suite": "libero_spatial", "task": 0, "init": 0, "reset_seed": 0, "render": 64}
+GRASP_INITS = (48, 49)  # Mac debug inits, never read for rules
+# grasp point = object + EEF-object offset at the first close command, median over part 1's successful pi0.5 control
+# episodes (results/c1-e4/pod/trial_p1.jsonl, inits 44-47): the bowls are taken by the rim (the 77 mm open gripper
+# cannot span a bowl at its centre), the can near its centre
+GRASP_AT = {("libero_spatial", 0): (0.0137, -0.0446, 0.0560), ("libero_object", 0): (-0.0100, -0.0073, 0.0054),
+            ("libero_goal", 1): (-0.0171, 0.0327, 0.0252)}
+ABOVE, TOL, CAP, GAIN, HOLD = 0.08, 0.002, 80, 0.5, 3  # m, m, steps per move, P gain on err / G_POS, still steps
+CLOSE_OBJ_STEPS, LIFT, LIFT_STEPS = 100, 0.03, 10  # close-step cap (a bowl slides on: long creep after contact)
+HELD_W, HELD_LIFT = 0.005, 0.5  # held: width at the stop > 5 mm and the object rose >= HELD_LIFT * LIFT
+CLOSE_RULE = "median with object (free closing: creep tail; report only)"
 
 
 def cms(v):
@@ -111,10 +128,23 @@ def select(rows):
 
 
 # --- (a), (b) LiberoEnv ---------------------------------------------------------------------------------------------
-def make_env():
+def make_env(suite=ENV["suite"], task=ENV["task"]):
     from lerobot.envs.libero import LiberoEnv, _get_suite
-    return LiberoEnv(task_suite=_get_suite(ENV["suite"]), task_id=ENV["task"], task_suite_name=ENV["suite"],
+    return LiberoEnv(task_suite=_get_suite(suite), task_id=task, task_suite_name=suite,
                      obs_type="pixels_agent_pos", observation_width=ENV["render"], observation_height=ENV["render"])
+
+
+def width(obs):
+    return float(np.abs(obs["robot_state"]["gripper"]["qpos"]).sum())
+
+
+def stop(w):
+    """w[j] = width after j close actions -> (first moving action index k0, tau = close actions until the fingers stop:
+    |d width| < 0.1 mm per step three steps in a row, from k0 on)."""
+    moving = np.abs(np.diff(w)) >= STILL
+    assert moving.any(), "the fingers never moved"
+    k0 = int(np.argmax(moving))
+    return k0, next(i for i in range(k0, len(moving) - N_STILL + 1) if not moving[i: i + N_STILL].any())
 
 
 def rollout(env, actions):
@@ -155,22 +185,60 @@ def close_time(env):
     acts = [np.r_[np.zeros(6), -1.0 if t < CLOSE_AT else 1.0] for t in range(CLOSE_STEPS)]
     st = rollout(env, acts)
     w = np.array([np.abs(g).sum() for _, g in st])
-    d = np.abs(np.diff(w[CLOSE_AT:]))  # d[i]: the change made by close action i + 1
-    moving = d >= STILL
-    assert moving.any(), "the fingers never moved"
-    k0 = int(np.argmax(moving))
-    tau = next(i for i in range(k0, len(d) - N_STILL + 1) if not moving[i: i + N_STILL].any())
+    k0, tau = stop(w[CLOSE_AT:])
     frac = (w[CLOSE_AT] - w[CLOSE_AT:]) / (w[CLOSE_AT] - w[-1])  # share of the closing done after j close actions
-    return {"tau_close": tau, "width_open_mm": float(1e3 * w[CLOSE_AT]), "width_closed_mm": float(1e3 * w[-1]),
+    return {"tau_close_free": tau, "width_open_mm": float(1e3 * w[CLOSE_AT]), "width_closed_mm": float(1e3 * w[-1]),
             "width_at_tau_close_mm": float(1e3 * w[CLOSE_AT + tau]), "eef_z": float(st[CLOSE_AT][0][2]),
             "first_moving_action": k0 + 1, "actions_to_90pct": int(np.argmax(frac >= 0.9)),
-            "actions_to_95pct": int(np.argmax(frac >= 0.95)), "note_pct": "report only, no rule reads them"}
+            "actions_to_95pct": int(np.argmax(frac >= 0.95)),
+            "note": "report only: free closing ends in a creep tail just under the 0.1 mm/step threshold; tau_close "
+                    "is measured with the object (close_obj)"}
+
+
+def grasp(env, suite, task, init):
+    """Scripted top-down grasp on a fresh reset (init, seed 0); positions from the sim as the runner's ShiftEnv reads
+    them (target = the first object of interest with a free joint, EEF site)."""
+    env.init_state_id = init
+    obs, _ = env.reset(seed=ENV["reset_seed"])
+    e = env._env.env
+    name = next(n for n in e.obj_of_interest if n in e.objects_dict)
+    obj = lambda: np.array(e.sim.data.body_xpos[e.obj_body_id[name]])  # noqa: E731
+    eef = lambda: np.array(e.sim.data.site_xpos[e.robots[0].eef_site_id])  # noqa: E731
+    act = lambda xyz, g: env.step(np.r_[np.clip(xyz, -1, 1), 0.0, 0.0, 0.0, g])[0]  # noqa: E731
+    p0 = obj()
+    goal = p0 + GRASP_AT[(suite, task)]
+    moves = []
+    for target in (goal + [0.0, 0.0, ABOVE], goal):  # open gripper; above the grasp point, then straight down
+        n = 0
+        while n < CAP and np.linalg.norm(target - eef()) >= TOL:
+            act(GAIN * (target - eef()) / orx.G_POS, -1.0)
+            n += 1
+        moves.append(n)
+    err = 1e3 * np.linalg.norm(goal - eef())
+    for _ in range(HOLD):
+        obs = act(np.zeros(3), -1.0)
+    p_t0 = obj()
+    w = [width(obs)]  # w[j]: width after j close actions, the arm still
+    while len(w) <= CLOSE_OBJ_STEPS and not (len(w) > N_STILL + 1
+                                            and (np.abs(np.diff(w[-N_STILL - 1:])) < STILL).all()):
+        w.append(width(act(np.zeros(3), 1.0)))  # until the stop is confirmed: a long squeeze lets the rim slip out
+    k0, tau = stop(np.array(w))
+    z_eef, z_obj, p_closed = eef()[2], obj()[2], obj()
+    for _ in range(LIFT_STEPS):
+        act([0.0, 0.0, LIFT / LIFT_STEPS / orx.G_POS], 1.0)
+    lift, lift_eef = obj()[2] - z_obj, eef()[2] - z_eef
+    return {"suite": suite, "task": task, "init": init, "object": name, "tau_close_obj": tau,
+            "width_at_stop_mm": 1e3 * w[tau], "held": bool(w[tau] > HELD_W and lift >= HELD_LIFT * LIFT),
+            "lift_obj_mm": 1e3 * lift, "lift_eef_mm": 1e3 * lift_eef, "first_moving_action": k0 + 1,
+            "width_open_mm": 1e3 * w[0], "grasp_point_err_mm": err, "move_steps": moves,
+            "obj_moved_before_close_mm": 1e3 * np.linalg.norm(p_t0 - p0),
+            "obj_moved_while_closing_mm": 1e3 * np.linalg.norm(p_closed - p_t0)}
 
 
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--seeds", type=int, default=40, help="seeds 0..N-1 for the motion and for the step")
-    p.add_argument("--no-env", action="store_true", help="skip (a), (b) and tau_lead (check of (c) only)")
+    p.add_argument("--no-env", action="store_true", help="skip (a), (b), (b2) and tau_lead (check of (c) only)")
     p.add_argument("--out", default="results/c1-e4/part2_offline.json", help="relative to the repo root")
     args = p.parse_args()
     seeds = list(range(args.seeds))
@@ -199,20 +267,45 @@ def main():
         arm = {cms(v): arm_lag(env, v) for v in ARM_SPEEDS}
         close = close_time(env)
         env.close()
-        a4 = arm["4"]
-        assert 0.5 <= a4["v_act_over_v"] <= 1.5 and math.isfinite(a4["tau_arm"]) and a4["tau_arm"] >= 0, a4
-        t_arm, lag = round(a4["tau_arm"]), round(pick["lag_steps"]["4"])
-        t_or = 1 + t_arm + close["tau_close"]
-        out["arm"] = arm
-        out["close"] = close
-        out["tau_lead"] = {"oracle": t_or, "noisy": t_or + lag, "parts": {"G_step": 1, "tau_arm_4cms": t_arm,
-                           "tau_close": close["tau_close"], "estimate_lag_4cms": lag},
-                           "note": "each part rounded to a step, then summed"}
-        out["meta"]["env_seconds"] = round(time.time() - tb, 1)
+        tg = time.time()
+        grasps = []
+        for st, tk in GRASP_AT:
+            env = make_env(st, tk)
+            grasps += [grasp(env, st, tk, i) for i in GRASP_INITS]
+            env.close()
+        t_grasp = time.time() - tg
         for v, r in arm.items():
             print(f"arm {v} cm/s: tau_arm {r['tau_arm']:.2f}  v_act/v {r['v_act_over_v']:.3f}  "
                   f"resid {r['fit_max_resid_mm']:.2f} mm  fit {r['fit_steps']}  x {r['x0']:.3f}->{r['x_end']:.3f}")
-        print(f"tau_close {close['tau_close']} (90% {close['actions_to_90pct']}, 95% {close['actions_to_95pct']})  tau_lead oracle {t_or}  noisy {t_or + lag}")
+        print(f"tau_close_free {close['tau_close_free']} (90% {close['actions_to_90pct']}, "
+              f"95% {close['actions_to_95pct']}), report only")
+        for g in grasps:
+            print(f"{g['suite']}:{g['task']} init {g['init']} {g['object']}: tau_close_obj {g['tau_close_obj']}  "
+                  f"width {g['width_at_stop_mm']:.1f} mm  held {g['held']}  lift {g['lift_obj_mm']:.1f} / eef "
+                  f"{g['lift_eef_mm']:.1f} mm  err {g['grasp_point_err_mm']:.1f} mm  "
+                  f"moved {g['obj_moved_before_close_mm']:.1f} / {g['obj_moved_while_closing_mm']:.1f} mm")
+        held = [g["tau_close_obj"] for g in grasps if g["held"]]
+        assert len(held) >= 4, f"only {len(held)} of {len(grasps)} grasps held: report and stop"
+        med = float(np.median(held))
+        t_close = math.floor(med + 0.5)  # half up
+        assert 1 <= t_close <= 16, t_close
+        a4 = arm["4"]
+        assert 0.5 <= a4["v_act_over_v"] <= 1.5 and math.isfinite(a4["tau_arm"]) and a4["tau_arm"] >= 0, a4
+        t_arm, lag = round(a4["tau_arm"]), round(pick["lag_steps"]["4"])
+        t_or = 1 + t_arm + t_close
+        out["arm"] = arm
+        out["close"] = close
+        out["close_obj"] = {"grasps": grasps, "n_held": len(held), "tau_close_median": med, "tau_close": t_close,
+                            "tau_close_rule": CLOSE_RULE, "grasp_at": {f"{s}:{t}": v for (s, t), v in GRASP_AT.items()},
+                            "held_rule": f"width at the stop > {1e3 * HELD_W:g} mm and the object rose >= "
+                                         f"{1e3 * HELD_LIFT * LIFT:g} mm on the {LIFT_STEPS}-step +{1e2 * LIFT:g} cm "
+                                         "lift that starts once the stop is confirmed",
+                            "inits": list(GRASP_INITS), "seconds": round(t_grasp, 1)}
+        out["tau_lead"] = {"oracle": t_or, "noisy": t_or + lag, "parts": {"G_step": 1, "tau_arm_4cms": t_arm,
+                           "tau_close": t_close, "estimate_lag_4cms": lag}, "tau_close_rule": CLOSE_RULE,
+                           "note": "each part rounded to a step (tau_close half up), then summed"}
+        out["meta"]["env_seconds"] = round(time.time() - tb, 1)
+        print(f"tau_close {t_close} (median {med:g} over {len(held)} held)  tau_lead oracle {t_or}  noisy {t_or + lag}")
     out = json.loads(json.dumps(out), parse_float=lambda s: float(f"{float(s):.4g}"))  # 4 significant digits
     (ROOT / args.out).write_text(json.dumps(out, indent=1) + "\n")
     print("wrote", args.out)

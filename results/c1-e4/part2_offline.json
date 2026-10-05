@@ -24,7 +24,7 @@
   "G_POS": 0.011,
   "hz": 20,
   "mujoco": "3.3.2",
-  "env_seconds": 28.7
+  "env_seconds": 49.1
  },
  "cv": {
   "grid": [
@@ -397,7 +397,7 @@
     "false_open": 0.0015
    }
   },
-  "seconds": 1.6
+  "seconds": 2.0
  },
  "arm": {
   "1": {
@@ -477,7 +477,7 @@
   }
  },
  "close": {
-  "tau_close": 16,
+  "tau_close_free": 16,
   "width_open_mm": 78.47,
   "width_closed_mm": 0.9996,
   "width_at_tau_close_mm": 2.195,
@@ -485,17 +485,169 @@
   "first_moving_action": 1,
   "actions_to_90pct": 10,
   "actions_to_95pct": 12,
-  "note_pct": "report only, no rule reads them"
+  "note": "report only: free closing ends in a creep tail just under the 0.1 mm/step threshold; tau_close is measured with the object (close_obj)"
+ },
+ "close_obj": {
+  "grasps": [
+   {
+    "suite": "libero_spatial",
+    "task": 0,
+    "init": 48,
+    "object": "akita_black_bowl_1",
+    "tau_close_obj": 13,
+    "width_at_stop_mm": 5.78,
+    "held": true,
+    "lift_obj_mm": 33.3,
+    "lift_eef_mm": 33.75,
+    "first_moving_action": 1,
+    "width_open_mm": 79.62,
+    "grasp_point_err_mm": 1.628,
+    "move_steps": [
+     26,
+     11
+    ],
+    "obj_moved_before_close_mm": 0.0002786,
+    "obj_moved_while_closing_mm": 6.17
+   },
+   {
+    "suite": "libero_spatial",
+    "task": 0,
+    "init": 49,
+    "object": "akita_black_bowl_1",
+    "tau_close_obj": 13,
+    "width_at_stop_mm": 5.838,
+    "held": true,
+    "lift_obj_mm": 33.34,
+    "lift_eef_mm": 33.72,
+    "first_moving_action": 1,
+    "width_open_mm": 79.62,
+    "grasp_point_err_mm": 1.765,
+    "move_steps": [
+     26,
+     11
+    ],
+    "obj_moved_before_close_mm": 0.0002786,
+    "obj_moved_while_closing_mm": 6.061
+   },
+   {
+    "suite": "libero_object",
+    "task": 0,
+    "init": 48,
+    "object": "alphabet_soup_1",
+    "tau_close_obj": 4,
+    "width_at_stop_mm": 62.59,
+    "held": true,
+    "lift_obj_mm": 32.88,
+    "lift_eef_mm": 32.9,
+    "first_moving_action": 1,
+    "width_open_mm": 79.62,
+    "grasp_point_err_mm": 0.6655,
+    "move_steps": [
+     29,
+     8
+    ],
+    "obj_moved_before_close_mm": 0.722,
+    "obj_moved_while_closing_mm": 1.109
+   },
+   {
+    "suite": "libero_object",
+    "task": 0,
+    "init": 49,
+    "object": "alphabet_soup_1",
+    "tau_close_obj": 4,
+    "width_at_stop_mm": 62.55,
+    "held": true,
+    "lift_obj_mm": 32.87,
+    "lift_eef_mm": 32.89,
+    "first_moving_action": 1,
+    "width_open_mm": 79.6,
+    "grasp_point_err_mm": 0.54,
+    "move_steps": [
+     28,
+     8
+    ],
+    "obj_moved_before_close_mm": 0.7121,
+    "obj_moved_while_closing_mm": 1.181
+   },
+   {
+    "suite": "libero_goal",
+    "task": 1,
+    "init": 48,
+    "object": "akita_black_bowl_1",
+    "tau_close_obj": 43,
+    "width_at_stop_mm": 8.069,
+    "held": true,
+    "lift_obj_mm": 21.73,
+    "lift_eef_mm": 33.56,
+    "first_moving_action": 1,
+    "width_open_mm": 79.5,
+    "grasp_point_err_mm": 1.51,
+    "move_steps": [
+     19,
+     11
+    ],
+    "obj_moved_before_close_mm": 0.02098,
+    "obj_moved_while_closing_mm": 10.93
+   },
+   {
+    "suite": "libero_goal",
+    "task": 1,
+    "init": 49,
+    "object": "akita_black_bowl_1",
+    "tau_close_obj": 43,
+    "width_at_stop_mm": 8.109,
+    "held": true,
+    "lift_obj_mm": 30.77,
+    "lift_eef_mm": 33.52,
+    "first_moving_action": 1,
+    "width_open_mm": 79.45,
+    "grasp_point_err_mm": 1.617,
+    "move_steps": [
+     17,
+     11
+    ],
+    "obj_moved_before_close_mm": 0.01964,
+    "obj_moved_while_closing_mm": 10.53
+   }
+  ],
+  "n_held": 6,
+  "tau_close_median": 13.0,
+  "tau_close": 13,
+  "tau_close_rule": "median with object (free closing: creep tail; report only)",
+  "grasp_at": {
+   "libero_spatial:0": [
+    0.0137,
+    -0.0446,
+    0.056
+   ],
+   "libero_object:0": [
+    -0.01,
+    -0.0073,
+    0.0054
+   ],
+   "libero_goal:1": [
+    -0.0171,
+    0.0327,
+    0.0252
+   ]
+  },
+  "held_rule": "width at the stop > 5 mm and the object rose >= 15 mm on the 10-step +3 cm lift that starts once the stop is confirmed",
+  "inits": [
+   48,
+   49
+  ],
+  "seconds": 21.8
  },
  "tau_lead": {
-  "oracle": 18,
-  "noisy": 21,
+  "oracle": 15,
+  "noisy": 18,
   "parts": {
    "G_step": 1,
    "tau_arm_4cms": 1,
-   "tau_close": 16,
+   "tau_close": 13,
    "estimate_lag_4cms": 3
   },
-  "note": "each part rounded to a step, then summed"
+  "tau_close_rule": "median with object (free closing: creep tail; report only)",
+  "note": "each part rounded to a step (tau_close half up), then summed"
  }
 }
