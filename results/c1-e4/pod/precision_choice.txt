@@ -1,0 +1,1 @@
+C1-E4 precision: precision=fp32 envs=6 (fp32 5.728 s/episode at 6 envs; bf16-row 5.827 s/episode at 10 envs, fits 1, bitwise 1; rule: bf16-row if >= 1.3x faster, bitwise and fits)

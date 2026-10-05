@@ -1,0 +1,43 @@
+{
+ "tau_k_plans": 108,
+ "tau_by_K": {
+  "10": 0.039517362505136426,
+  "20": 0.039517362505136426,
+  "30": 0.039517362505136426
+ },
+ "kbar": {
+  "pi05": {
+   "kbar_30": 0.1565515,
+   "samples_used": 30,
+   "samples": 101,
+   "kbar_all": 0.327195,
+   "kappa0": 0.355
+  },
+  "smolvla": {
+   "kbar_30": 0.031515,
+   "samples_used": 30,
+   "samples": 97,
+   "kbar_all": 0.012117,
+   "kappa0": 0.038
+  }
+ },
+ "shadow_jitter_m": {
+  "median": 0.00139,
+  "p75": 0.00286,
+  "p90": 0.00447,
+  "p95": 0.00593,
+  "max": 0.01044
+ },
+ "shadow_jitter_share": {
+  "median": 0.04113,
+  "p75": 0.09848,
+  "p90": 0.21142,
+  "p95": 0.28881,
+  "max": 0.3683
+ },
+ "shadow_pairs": 101
+}
+C1-E4 trial: precision=fp32 tau_k=0.039517 kbar_pi05=0.1566 kbar_smolvla=0.0315 N=30 envs=6 pad=0
+forecast (smoke tempo: pi0.5 fp32 5.728 s/episode one lane, SmolVLA 4.010 s/episode per lane, two lanes):
+{"episodes": {"pi05": 17074, "smolvla": 7972}, "hours": {"4090": 31.6, "48GB": 18.0}, "usd": {"4090": [19.0, 22.1], "48GB": [14.1, 18.9]}, "card48_cheaper": true, "fuse_32h": false, "note": "SmolVLA per-lane tempo from one lane alone; the grid fuse re-forecasts from real lane rates"}
+if card48_cheaper is true: tell the owner before the grid (spec §4.1); fuse_32h: report rows to cut (§12)

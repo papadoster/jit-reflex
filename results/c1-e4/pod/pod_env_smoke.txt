@@ -1,0 +1,162 @@
+=== Sat Oct  3 20:13:42 UTC 2026 smoke, HEAD 80260b95e604121d802435bc6939f0a2d641eca0, MUJOCO_GL=egl, vCPUs 96
+code (src, c1e4_run.py): f93a7bbaf023081e292a00809c42af7f8140f3af 10bdf857a7ef1b3dae4662f9ee5c5bd37ade3135
+HuggingFaceVLA/smolvla_libero snapshots: 6721902bc4d61e50a3bfdb11dfb4cb626f05d102
+pi0.5 revision 8e174154ef5f6c60a8da12ae99c303d8963138c1, weights SHA-256 checked: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+Sat Oct  3 20:13:42 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.159.04             Driver Version: 580.159.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 4090        On  |   00000000:02:00.0 Off |                  Off |
+| 31%   40C    P8             23W /  450W |       1MiB /  24564MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+torch 2.11.0+cu126 CUDA 12.6
+Using Python 3.12.3 environment at: venv
+absl-py==2.5.0
+accelerate==1.15.0
+aiohappyeyeballs==2.7.1
+aiohttp==3.14.3
+aiosignal==1.4.0
+annotated-doc==0.0.5
+antlr4-python3-runtime==4.9.3
+anyio==4.15.1
+attrs==26.1.0
+av==15.1.0
+bddl==1.0.1
+certifi==2026.7.22
+charset-normalizer==3.5.2
+click==8.5.0
+cloudpickle==3.1.2
+cmake==4.1.3
+contourpy==1.4.0
+cuda-bindings==12.9.9
+cuda-pathfinder==1.8.3
+cuda-toolkit==12.6.3
+cycler==0.12.1
+datasets==4.8.5
+dill==0.4.1
+docopt==0.6.2
+draccus==0.11.6
+easydict==1.13
+einops==0.8.2
+etils==1.14.0
+farama-notifications==0.0.6
+fastjsonschema==2.22.2
+filelock==4.0.9
+fonttools==4.66.1
+frozenlist==1.8.0
+fsspec==2026.2.0
+future==1.0.0
+glfw==2.10.2
+gymnasium==1.3.0
+h11==0.16.0
+hf-libero==0.1.4
+hf-xet==1.6.0
+httpcore==1.0.9
+httpx==0.28.1
+huggingface-hub==1.33.0
+hydra-core==1.3.7
+idna==3.20
+iniconfig==2.3.0
+jinja2==3.1.6
+jsonlines==4.0.0
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+jupyter-core==5.9.1
+jupytext==1.19.5
+kiwisolver==1.5.1
+lerobot==0.6.1
+llvmlite==0.50.0
+markdown-it-py==4.2.0
+markupsafe==3.0.4
+matplotlib==3.11.2
+mdit-py-plugins==0.6.1
+mdurl==0.1.2
+mergedeep==1.3.4
+mpmath==1.3.0
+mujoco==3.3.2
+multidict==6.9.1
+multiprocess==0.70.19
+mypy-extensions==1.1.0
+nbformat==5.11.1
+networkx==3.7
+num2words==0.5.14
+numba==0.68.0
+numpy==2.2.6
+nvidia-cublas-cu12==12.6.4.1
+nvidia-cuda-cupti-cu12==12.6.80
+nvidia-cuda-nvrtc-cu12==12.6.85
+nvidia-cuda-runtime-cu12==12.6.77
+nvidia-cudnn-cu12==9.10.2.21
+nvidia-cufft-cu12==11.3.0.4
+nvidia-cufile-cu12==1.11.1.6
+nvidia-curand-cu12==10.3.7.77
+nvidia-cusolver-cu12==11.7.1.2
+nvidia-cusparse-cu12==12.5.4.2
+nvidia-cusparselt-cu12==0.7.1
+nvidia-nccl-cu12==2.28.9
+nvidia-nvjitlink-cu12==12.6.85
+nvidia-nvshmem-cu12==3.4.5
+nvidia-nvtx-cu12==12.6.77
+omegaconf==2.3.1
+opencv-python==5.0.0.93
+opencv-python-headless==4.13.0.92
+packaging==25.0
+pandas==2.3.3
+pillow==12.3.0
+platformdirs==4.12.2
+pluggy==1.6.0
+propcache==0.5.4
+psutil==7.2.2
+pyarrow==25.0.1
+pygments==2.21.0
+pyopengl==3.1.10
+pyparsing==3.3.3
+pytest==9.1.1
+python-dateutil==2.9.0.post0
+pytz==2026.4
+pyyaml==6.0.3
+referencing==0.37.0
+regex==2026.9.29
+requests==2.34.2
+rich==15.0.0
+robomimic==0.2.0
+robosuite==1.4.0
+rpds-py==2026.6.3
+safetensors==0.8.0
+scipy==1.18.1
+setuptools==81.0.0
+shellingham==1.5.4
+six==1.17.0
+sympy==1.14.0
+termcolor==3.3.0
+thop==0.1.1.post2209072238
+tokenizers==0.22.2
+toml==0.10.2
+torch @ https://download.pytorch.org/whl/cu126/torch-2.11.0%2Bcu126-cp312-cp312-manylinux_2_28_x86_64.whl
+torchcodec==0.11.1
+torchvision @ https://download.pytorch.org/whl/cu126/torchvision-0.26.0%2Bcu126-cp312-cp312-manylinux_2_28_x86_64.whl
+tqdm==4.70.1
+traitlets==5.16.1
+transformers==5.5.4
+triton==3.6.0
+typer==0.27.2
+typing-extensions==4.16.0
+typing-inspect==0.9.0
+tzdata==2026.5
+urllib3==2.8.0
+xxhash==4.0.1
+yarl==1.25.1
+zipp==4.1.1

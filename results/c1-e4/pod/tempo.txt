@@ -1,0 +1,3 @@
+pi0.5 fp32, 6 envs: GPU peak 23369 MiB (max 23552)
+pi0.5 bf16-row, 10 envs: GPU peak 17334 MiB; C1-E4 repeat: rows=10 max_abs=0.000e+00 bitwise=1
+tempo (s/episode, full batches): pi_fp32=5.728 pi_bf16=5.827 smolvla=4.010

@@ -1,0 +1,10 @@
+=== Sat Oct  3 22:24:36 UTC 2026 pi control check
+{"control_A_none": 0.9769230769230769, "n": 260, "min": 0.9, "id6_missing": 0}
+=== Sun Oct  4 00:13:21 UTC 2026 Q0 gate
+{"Q0": {"test": "pi05, step, C, 0-39: (T0 - none) >= +4 and lo2.5 > 0", "diff_pp": 14.712, "lo2.5": 9.231, "lo5_one_sided": 10.091, "hi97.5": 20.288, "pairs": 1040, "clusters": 26, "pass": true}, "id1_missing": 0}
+Q0 passed: the delay-axis ids run
+=== Sun Oct  4 18:17:51 UTC 2026 pi control check
+{"control_A_none": 0.9769230769230769, "n": 260, "min": 0.9, "id6_missing": 0}
+=== Sun Oct  4 18:18:05 UTC 2026 Q0 gate
+{"Q0": {"test": "pi05, step, C, 0-39: (T0 - none) >= +4 and lo2.5 > 0", "diff_pp": 14.712, "lo2.5": 9.231, "lo5_one_sided": 10.091, "hi97.5": 20.288, "pairs": 1040, "clusters": 26, "pass": true}, "id1_missing": 0}
+Q0 passed: the delay-axis ids run
