@@ -187,7 +187,8 @@ class GAgent(hf.HAgent):
         assert (method == "GautoU") == (tau_close is not None), f"{method}: tau_close {tau_close}"
         super().__init__(method, s, 0, **kw)  # orx.Schedule would assert max(s, d) + d <= H; the conveyor replaces it
         self.sched, self.kbar, self.tau_close = Conveyor(s, d), kbar, tau_close
-        self.t_c, self.unwind_done, self.unwind_plan, self.unwind_cap = None, False, None, None  # GautoU
+        # GautoU: the close step, the runner's log (acting steps, plans acted under, the open that ended the window)
+        self.t_c, self.unwind_cap, self.unwind_steps, self.unwind_plans, self.unwind_stop = None, None, 0, [], None
 
     def observe(self, t, eef, obj, contact=False):
         if isinstance(self.tracker, GLRKalman):
@@ -215,26 +216,36 @@ class GAgent(hf.HAgent):
         return self._unwind(t, a)
 
     def _unwind(self, t, a):
-        """part-2 spec §unwind: from t_c + tau_close (the fingers closed) to the first open command after the close,
-        while the executing plan N was observed before t_c, G's command form drives E_N = C(t) - C(t_obs_N) -> 0: at
-        most cap_N = |E_N| / T_ramp a step (|E_N| at the first unwind step under N), clip +-1, C counts what was sent.
-        Stops for good at the first plan observed at or after t_c, or at the first open command. E_N comes from self.c:
-        observe wrote c_hist[t] before act."""
-        t_obs = self.sched.t_obs
-        if self.unwind_done or a[6] <= 0 or t_obs >= self.t_c:
-            self.unwind_done = True
+        """part-2 spec §unwind: the object is put down at the release, so the reflex acts only when the executing plan N,
+        observed before t_c, commands the release (first open row from t on) before the next arrival on the known
+        schedule; it then drives E_N = C(t) - C(t_obs_N), the extra N does not know, to 0 in G's command form, at most
+        |E_N| / min(T_ramp, t_rel - t) a step (fixed at its first acting step under N), clip +-1, C counts what was sent.
+        Window: t_c + tau_close up to the first open command in it, then off for good; elsewhere GautoU is Gauto. A stop
+        at the first fresh plan left the unwind in flight unknown to later plans (review C1)."""
+        sc = self.sched
+        if self.unwind_stop is not None or t < self.t_c + self.tau_close:
             return a
-        if t < self.t_c + self.tau_close:
+        if a[6] <= 0:
+            self.unwind_stop = t
             return a
-        err = self.c - self.c_hist[t_obs]
-        if self.unwind_plan != t_obs:
-            self.unwind_plan, self.unwind_cap = t_obs, np.linalg.norm(err) / self.t_ramp
-        if np.linalg.norm(err) < 1e-12:
+        if sc.t_obs >= self.t_c:
             return a
+        k = t - sc.t_obs
+        rel = np.flatnonzero(np.asarray(sc.chunk, float)[k:, 6] <= 0)  # the executing chunk only: in-flight ones unseen
+        t_rel = sc.t_obs + k + int(rel[0]) if len(rel) else np.inf
+        # no trigger after the close (grasp_started), so the next arrival is queue[0]'s, else the next scheduled call's
+        t_next = sc.queue[0][1] if sc.queue else sc.next_call + sc.d
+        err = self.c - self.c_hist[sc.t_obs]  # observe wrote c_hist[t] before act: E from self.c
+        if t_rel >= t_next or np.linalg.norm(err) < 1e-12:
+            return a
+        if not self.unwind_plans or self.unwind_plans[-1] != sc.t_obs:
+            self.unwind_plans.append(sc.t_obs)
+            self.unwind_cap = np.linalg.norm(err) / max(1, min(self.t_ramp, t_rel - t))
         base = np.clip(a[:3], -1, 1)
         new, _ = hf.ramp_step(base, -err, self.unwind_cap)
         self.c = self.c + orx.G_POS * (new - base)
         a[:3] = new
+        self.unwind_steps += 1
         return a
 
     def trigger(self, t):

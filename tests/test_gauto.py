@@ -142,16 +142,19 @@ def _run(agent, delta, shift_at=12, T=40):
     return np.array(acts)
 
 
-def _run_close(agent, delta, close_at, shift_at=12, T=60):
-    """_run with a gripper that closes for absolute steps >= close_at (row k of a call observed at t is step t + k)."""
+def _run_close(agent, delta, close_at, shift_at=12, T=60, open_at=None, edit=None):
+    """_run with a gripper that closes for absolute steps >= close_at (row k of a call observed at t is step t + k) and
+    opens again from open_at; edit(steps, chunk) changes each chunk in place (steps: its rows' absolute steps)."""
     eef, acts = np.zeros(3), []
     for t in range(T):
         agent.observe(t, eef, P0 + (np.asarray(delta) if t >= shift_at else 0.0))
         if agent.sched.arrive(t):
             agent.on_new_chunk()
         if agent.sched.wants_call(t, agent.trigger(t)):
-            ch = np.zeros((orx.H, 7))
-            ch[:, 6] = np.where(t + np.arange(orx.H) >= close_at, 1.0, -1.0)
+            ch, st = np.zeros((orx.H, 7)), t + np.arange(orx.H)
+            ch[:, 6] = np.where((st >= close_at) & (st < (np.inf if open_at is None else open_at)), 1.0, -1.0)
+            if edit:
+                edit(st, ch)
             agent.sched.issue(t, ch)
             if agent.sched.arrive(t):
                 agent.on_new_chunk()
@@ -252,33 +255,98 @@ def test_parse_arm():
 
 # ------------------------------------------------------------------ part 2: the carry unwind GautoU, PPC on noisy eyes
 
-def test_unwind_withdraws_what_the_stale_plan_does_not_know():
-    """A20: shift at 12, the reflex carries 3 cm by 17, the close at 25 comes from the plan observed at 0. Plans 0 and
-    10 (C(t_obs) = 0) get the 3 cm withdrawn from 29 = 25 + tau_close; plan 20 (arrives at 40) saw the reflex's work,
-    so it gets it back; plan 30 (observed after the close, arrives at 50) stops the unwinding."""
-    ag = gauto.GAgent("GautoU", 10, 20, kbar=0.2, tau_close=4)
-    acts = _run_close(ag, [0.03, 0.0, 0.0], close_at=25)
-    assert ag.c_hist[25] == pytest.approx([0.03, 0.0, 0.0], abs=1e-9)
-    assert not acts[25:29, :3].any()  # nothing while the fingers close
-    assert ag.c_hist[39] == pytest.approx([0.0, 0.0, 0.0], abs=1e-9)
-    assert ag.c_hist[49] == pytest.approx([0.03, 0.0, 0.0], abs=1e-9)
-    assert not acts[50:, :3].any() and ag.c == pytest.approx(ag.c_hist[50])
-    assert np.abs(acts[29:39, 0]).max() <= 0.03 / 5 / orx.G_POS + 1e-9  # cap |E_N| / T_ramp
+DX = [0.03, 0.0, 0.0]
+
+
+def _unwinder(s=10, d=20):
+    return gauto.GAgent("GautoU", s, d, kbar=0.2, tau_close=4)
+
+
+def _pair(s, d, **kw):
+    """Gauto's and GautoU's actions on the same episode, and the GautoU agent."""
+    ag = _unwinder(s, d)
+    return _run_close(gauto.GAgent("Gauto", s, d, kbar=0.2), DX, **kw), _run_close(ag, DX, **kw), ag
+
+
+def _flicker(at):
+    def edit(st, ch):
+        ch[st == at, 6] = -1.0
+    return edit
+
+
+def test_unwind_before_a_stale_release():
+    """A20: the reflex carries the 3 cm shift at 12 by 17; close at 25 (plan 0), open at 38, window from 29. Plan 0
+    (25-29) has its release at 38, but plan 10 arrives at 30: nothing. Plan 10 (observed at 10, C = 0, executes 30-39,
+    next arrival 40) releases at 38 < 40: cap 30 mm / min(T_ramp 5, 38 - 30) = 6 mm a step, C 30 -> 0 over 30-34."""
+    ag = _unwinder()
+    acts = _run_close(ag, DX, close_at=25, open_at=38)
+    assert ag.c_hist[25] == pytest.approx(DX, abs=1e-9) and not acts[25:30, :3].any()
+    assert [ag.c_hist[t][0] for t in range(30, 36)] == pytest.approx([0.03, 0.024, 0.018, 0.012, 0.006, 0.0], abs=1e-9)
+    assert acts[30:35, 0] == pytest.approx([-0.006 / orx.G_POS] * 5) and not acts[30:35, 1:3].any()
+    assert ag.c_hist[35] == pytest.approx([0.0, 0.0, 0.0], abs=1e-9) and not acts[35:, :3].any()
+    assert ag.unwind_plans == [10] and ag.unwind_stop == 38 and ag.unwind_steps == 5
+
+
+def test_no_unwind_when_a_knowing_plan_releases():
+    """Open at 45, executed by plan 20 (observed at 20, after the reflex's work that ended at 17: E = 0). Plans 0 and
+    10 release only after their next arrivals (30, 40): GautoU is Gauto."""
+    a, b, ag = _pair(10, 20, close_at=25, open_at=45)
+    assert np.array_equal(a, b) and ag.unwind_steps == 0 and ag.unwind_plans == [] and ag.unwind_stop == 45
+
+
+def test_unwind_tight_release():
+    """Open at 32: under plan 10 the release is 2 steps after 30, cap 30 mm / 2 = 15 mm > G_POS = 11 mm. From base 0,
+    -15 mm / G_POS clips to -1, so each of 30 and 31 sends -G_POS: C 30 -> 19 -> 8 mm at the release."""
+    ag = _unwinder()
+    acts = _run_close(ag, DX, close_at=25, open_at=32)
+    assert ag.unwind_cap == pytest.approx(0.015) and list(acts[30:32, 0]) == [-1.0, -1.0]
+    assert [ag.c_hist[t][0] for t in (30, 31, 32)] == pytest.approx([0.03, 0.019, 0.008], abs=1e-12)
+    assert ag.unwind_stop == 32 and ag.unwind_steps == 2
 
 
 def test_unwind_idle_without_delay():
-    """A: the plan executing at the close (observed at 20) already saw the reflex's 3 cm, so nothing to withdraw."""
-    a = _run_close(gauto.GAgent("Gauto", 10, 0, kbar=0.2), [0.03, 0.0, 0.0], close_at=25)
-    b = _run_close(gauto.GAgent("GautoU", 10, 0, kbar=0.2, tau_close=4), [0.03, 0.0, 0.0], close_at=25)
-    assert np.array_equal(a, b)
+    """A (d = 0), open at 38. Shift at 12: plans 20 and 30 executing in the window saw the reflex's 3 cm. Shift at 22:
+    plan 20 misses the 24 mm G sent at 22-25 and its rows release at 38, but plan 30 arrives at 30 (the next scheduled
+    call; at d = 0 nothing is ever in flight at act time), so plan 20 does not release: nothing. Both equal Gauto."""
+    for shift_at in (12, 22):
+        a, b, ag = _pair(10, 0, close_at=25, open_at=38, shift_at=shift_at)
+        assert np.array_equal(a, b) and ag.unwind_steps == 0 and ag.unwind_stop == 38
+    assert ag.c_hist[29][0] - ag.c_hist[20][0] == pytest.approx(0.024)  # the late shift: E under plan 20 at 29
 
 
-def test_unwind_stops_at_the_first_open():
-    ag = gauto.GAgent("GautoU", 10, 20, kbar=0.2, tau_close=4)
-    acts = _run_close(ag, [0.03, 0.0, 0.0], close_at=25, T=31)
-    assert acts[29:31, 0].min() < 0  # unwinding started
-    ag.act(31, np.array([0, 0, 0, 0, 0, 0, -1.0]))  # an open command
-    assert not ag.act(32, np.zeros(7))[:3].any()
+def test_open_flicker_before_the_window_is_ignored():
+    """A20, close at 25, open at 38, window from 29. An open row at 30 is inside the window: a real release (plan 10),
+    the window ends there with nothing done (plan 0 at 29: release at 30, not before the arrival at 30). An open row
+    at 27 < 29 is delay flicker: ignored, and plan 10 still unwinds before its release at 38."""
+    a, b, ag = _pair(10, 20, close_at=25, open_at=38, edit=_flicker(30))
+    assert ag.unwind_stop == 30 and ag.unwind_steps == 0 and np.array_equal(a, b)
+    ag = _unwinder()
+    acts = _run_close(ag, DX, close_at=25, open_at=38, edit=_flicker(27))
+    assert acts[27, 6] == -1.0 and ag.unwind_stop == 38 and ag.unwind_plans == [10]
+    assert ag.c_hist[35] == pytest.approx([0.0, 0.0, 0.0], abs=1e-9)
+
+
+def test_unwind_counts_only_what_was_sent():
+    """A saturating plan under the unwind (as test_unwind_before_a_stale_release, cap 6 mm). At 30 the plan sends
+    x = -1, the unwind's own direction: nothing more goes out, C stays 30 mm. At 31 it sends 1.5, clipped to 1: the
+    unwind sends -6 mm from the clipped base (x = 1 - 6/11). Then 6 mm a step over 32-35: C = 0 at 36, before 38."""
+    def edit(st, ch):
+        ch[st == 30, 0], ch[st == 31, 0] = -1.0, 1.5
+
+    ag = _unwinder()
+    acts = _run_close(ag, DX, close_at=25, open_at=38, edit=edit)
+    assert acts[30, 0] == -1.0 and acts[31, 0] == pytest.approx(1 - 0.006 / orx.G_POS)
+    assert [ag.c_hist[t][0] for t in (31, 32, 36)] == pytest.approx([0.03, 0.024, 0.0], abs=1e-9)
+    assert ag.unwind_steps == 6 and ag.unwind_stop == 38
+
+
+def test_unwind_plan_observed_at_the_close_is_fresh():
+    """Shift at 28, close at 30 (plan 10's row 20): G still carries at the close step, C 12 -> 18 mm at 30, so plan 30
+    (observed at t_c = 30, executes 50-59) misses G's 6 mm of step 30 and releases at 55 < 60. t_obs == t_c counts as
+    fresh: no unwind. Plans 10 and 20 release only after their next arrivals (40, 50)."""
+    a, b, ag = _pair(10, 20, close_at=30, open_at=55, shift_at=28)
+    assert ag.t_c == 30 and ag.c[0] - ag.c_hist[30][0] == pytest.approx(0.006)
+    assert np.array_equal(a, b) and ag.unwind_steps == 0 and ag.unwind_stop == 55
 
 
 def test_parse_arm_noisy_ppc():
