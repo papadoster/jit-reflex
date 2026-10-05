@@ -24,7 +24,7 @@
   "G_POS": 0.011,
   "hz": 20,
   "mujoco": "3.3.2",
-  "env_seconds": 49.1
+  "env_seconds": 39.8
  },
  "cv": {
   "grid": [
@@ -397,7 +397,41 @@
     "false_open": 0.0015
    }
   },
-  "seconds": 2.0
+  "bands": {
+   "eps_cv": 0.02286,
+   "ppc_v_min_cv": 0.007031,
+   "rule": "eps_cv = P95 over 200 still-object seeds of max_t max_{1<=k<=30} |p_hat(t) - p_hat(t-k)| (30 = s + d of A20, the noisy cell: <= 5% of the episodes with a false engagement); ppc_v_min_cv = P95 over the seeds of max_t |p_hat(t) - p_hat(t-1)|; gauto.NOISE, the chosen q_acc, 300 steps after the warm-up; the runner sets them on every @cv arm (eps, ppc_v_min), as C1-E3 set them per row",
+   "q_acc": 1e-08,
+   "seeds": 200,
+   "still_window_max": {
+    "median": 0.01884,
+    "max": 0.02557
+   },
+   "still_step_max": {
+    "median": 0.005825,
+    "max": 0.009459
+   },
+   "false_engage_share_at_eps": 0.05,
+   "engage_delay_a20": {
+    "2": {
+     "median_steps": 27.0,
+     "never": 0,
+     "false_before_t0": 0
+    },
+    "4": {
+     "median_steps": 18.0,
+     "never": 0,
+     "false_before_t0": 0
+    },
+    "6": {
+     "median_steps": 15.0,
+     "never": 0,
+     "false_before_t0": 0
+    }
+   },
+   "delay_rule": "info only: steps from the motion start t0 = 5 + seed % 11 (the t_fire range) to the engagement |p_hat(t) - p_hat(t_obs)| > eps_cv, t_obs the plan executing at observe time on the A20 conveyor (call 0 at once, call c >= 10 from c + 20 on); median over the seeds without a false engagement before t0, null when no engagement in 300 steps"
+  },
+  "seconds": 4.1
  },
  "arm": {
   "1": {
@@ -636,7 +670,7 @@
    48,
    49
   ],
-  "seconds": 21.8
+  "seconds": 15.2
  },
  "tau_lead": {
   "oracle": 15,
