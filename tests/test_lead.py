@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 import pytest
 
@@ -29,6 +31,11 @@ def _run(agent, path, T=60, close_at=None):
     return np.array(acts)
 
 
+def _eef(acts):
+    """_run's toy arm at each observation t (x(0) = 0): the actions before t."""
+    return np.vstack([np.zeros(3), np.cumsum(orx.G_POS * np.clip(acts[:, :3], -1, 1), 0)])[:-1]
+
+
 def step(t):
     return P0 + (np.array([0.045, 0.02, 0.0]) if t >= 12 else 0.0)
 
@@ -48,7 +55,8 @@ def test_lead_term_on_constant_speed_and_cap():
     ag = lead.LeadAgent(10, 0, kbar=0.2, tau_lead=8, tau_close=6)
     _run(ag, move(v), T=40)
     assert ag.lead(39) == pytest.approx([v * 8, 0.0, 0.0], rel=0.05, abs=1e-6)
-    assert np.allclose(ag.unknown_shift(39) - gauto.GAgent.unknown_shift(ag, 39), ag.lead(39))
+    # the lead acts through a virtual object: G-auto sees p_seen + lead; the gate and the velocity read the true p_seen
+    assert np.allclose(ag.p_hist[39] - ag.seen_hist[39], ag.lead(39)) and np.allclose(ag.seen_hist[39], move(v)(39))
     fast = lead.LeadAgent(10, 0, kbar=0.2, tau_lead=8, tau_close=6)
     _run(fast, move(0.01), T=40)  # 20 cm/s x 8 steps = 8 cm > LEAD_MAX
     assert np.linalg.norm(fast.lead(39)) == pytest.approx(lead.LEAD_MAX)
@@ -75,10 +83,25 @@ def test_noisy_eyes_share_the_stream_and_feed_the_lead():
             e(move(0.002)(t))
     st = [e.rng.bit_generator.state for e in eyes]
     assert st[0] == st[1] == st[2]  # the same draws in the same order: branches with one seed share the noise
-    ag = lead.LeadAgent(10, 0, kbar=0.2, tau_lead=8, tau_close=6, tracker=lead.CVKalman(7, 0.01, 3, 0.1, 1e-8),
-                        gate_m=16)
+    kf = lead.CVKalman(7, 0.01, 3, 0.1, 1e-8)
+    ag = lead.LeadAgent(10, 0, kbar=0.2, tau_lead=8, tau_close=6, tracker=kf, gate_m=16)
     _run(ag, move(0.003), T=20)
-    assert ag.kf is ag.tracker  # the shared eyes give both the seen position and the velocity
+    # the shared eyes give both the seen position and the velocity, one filter step per env step (the parent's tracker
+    # is off: it would see the virtual object)
+    twin = lead.CVKalman(7, 0.01, 3, 0.1, 1e-8)
+    assert ag.kf is kf and len(kf.true) == 20 and ag.tracker is None
+    assert all(np.array_equal(twin(move(0.003)(t)), ag.seen_hist[t]) for t in range(20))
+
+
+def test_lead_does_not_run_away_on_a_brain_that_does_not_react():
+    # Task 6 Mac check: with the lead added to U and E restarting at every plan, a barely reacting brain got the full
+    # lead again under each new plan (C 22.5 cm along the motion against the object's 9.9 cm)
+    v, tau = 0.002, 15
+    L = v * tau
+    acts = _run(lead.LeadAgent(10, 0, kbar=0.038, tau_lead=tau, tau_close=13), move(v), T=60)  # zero chunks
+    off = _eef(acts)[:, 0] - np.array([move(v)(t)[0] - P0[0] for t in range(60)])  # arm ahead of the object along v
+    assert (off[40:] >= 0.5 * L).all() and (off[40:] <= 1.5 * L).all(), off[40:]
+    assert abs(off[59] - off[40]) < 0.25 * L  # no growth from plan to plan
 
 
 def test_cv_eyes_follow_the_lagged_position():
@@ -132,29 +155,60 @@ def test_tracking_until_the_fingers_close():
 
 def test_move_episode_classes_and_stop():
     eps = [lead.make_move_episode("libero_spatial", 0, i) for i in range(3)]
-    assert sorted(e.speed for e in eps) == list(lead.SPEEDS) and all(0.15 <= e.r <= 0.25 for e in eps)
+    assert sorted(e.speed for e in eps) == list(lead.SPEEDS)
+    assert {lead.make_move_episode("libero_spatial", 0, i).t_fire for i in range(200)} == set(range(5, 16))
     assert all(e.kind == "move" for e in eps) and eps[0].seed == lead.make_move_episode("libero_spatial", 0, 0).seed
     ep = eps[0]
     pt = lead.MovePerturbation(ep, tau_close=6)
-    eef, obj = np.array([0.0, 0.0, 1.0]), np.array([0.0, 0.1, 1.0])
-    dqs = [pt.dq(t, eef, obj, close_cmd=t >= 20) for t in range(40)]
-    moving = [d for d in dqs if d is not None]
-    assert pt.t_fire == 0 and len(moving) == 26  # steps 0..25: tau_close steps after the first close at 20
-    assert np.linalg.norm(moving[0]) == pytest.approx(ep.speed / lead.HZ) and moving[0][2] == 0.0
-    far = lead.MovePerturbation(ep, tau_close=6)
-    assert far.dq(0, eef, np.array([0.0, 0.3, 1.0]), close_cmd=False) is None and far.t_fire is None
-    assert pt.stop == "tau" and far.stop is None
+    obj = np.array([0.0, 0.1, 1.0])
+    dqs = [pt.dq(t, obj, close_cmd=t >= 20) for t in range(40)]
+    # the motion starts by time, at the episode's t_fire, and moves to tau_close steps after the first close at 20
+    assert pt.t_fire == ep.t_fire and [t for t, d in enumerate(dqs) if d is not None] == list(range(ep.t_fire, 26))
+    assert np.linalg.norm(dqs[ep.t_fire]) == pytest.approx(ep.speed / lead.HZ) and dqs[ep.t_fire][2] == 0.0
+    early = lead.MovePerturbation(ep, tau_close=6)  # the brain closes before t_fire: the motion never fires
+    assert all(early.dq(t, obj, close_cmd=t >= ep.t_fire - 1) is None for t in range(40))
+    assert pt.stop == "tau" and early.t_fire is None and early.stop is None
+
+
+def test_move_follows_its_commanded_track():
+    # Task 6 Mac check: a constant step with the qvel set ran 6% fast; the shift to the track corrects the drift
+    for i in range(3):
+        ep = lead.make_move_episode("libero_spatial", 0, i)
+        pt, obj, step = lead.MovePerturbation(ep, tau_close=6), np.array([0.0, 0.1, 1.0]), ep.speed / lead.HZ
+        u = np.array([math.cos(ep.direction), math.sin(ep.direction), 0.0])
+        err = []
+        for t in range(50):  # under the path cap at 6 cm/s (50 steps)
+            d = pt.dq(t, obj, close_cmd=False)
+            if d is not None:
+                obj = obj + 0.94 * d  # an env that applies only 94% of each shift
+                err.append(np.linalg.norm(obj - (pt.p_pre + step * (t - pt.t_fire + 1) * u)))
+        assert len(err) == 50 - ep.t_fire
+        assert max(err) < 0.065 * step  # bounded at 0.06 / 0.94 of a step, never accumulating
+        assert ep.speed > 0.02 or max(err) < 1e-4  # 2 cm/s: within 0.1 mm
+
+
+def test_held_is_contact_once_the_fingers_closed_and_stopped():
+    w = [0.08, 0.08, 0.079, 0.07, 0.06, 0.06]  # first close command at 1: the fingers move from 2 and stop at 5
+    assert not lead.held(True, w[:2], 1)  # the close step: the fingers have not moved yet
+    assert not lead.held(True, w[:5], 1)  # still closing
+    assert lead.held(True, w, 1) and not lead.held(False, w, 1) and not lead.held(True, w, None)
+    # Task 6 Mac check: a touch with the fingers still open (52 or 31 mm) stopped the motion
+    assert not lead.held(True, [0.08] * 6, 1)
+    # the brain's gripper flickers (close, open, close): fingers that reopened and paused have not stopped closing
+    # (the fix re-check, SmolVLA libero_object:0 init 48: 0.7 mm closed, reopened, paused at 79 mm)
+    assert not lead.held(True, [0.08, 0.08, 0.0793, 0.0786, 0.0796, 0.07975, 0.07983], 1)
+    assert lead.held(True, [0.08, 0.08, 0.0793, 0.0796, 0.0790, 0.0790], 1)  # closing again, then stopped
 
 
 def test_move_stops_when_held_or_at_the_path_cap():
     ep = lead.make_move_episode("libero_spatial", 0, 0)
-    eef, obj = np.array([0.0, 0.0, 1.0]), np.array([0.0, 0.1, 1.0])
+    obj = np.array([0.0, 0.1, 1.0])
     pt = lead.MovePerturbation(ep, tau_close=6)
-    # contact before the close is ignored; from the close on it stops the motion for good (steps 0..21 move)
-    dqs = [pt.dq(t, eef, obj, close_cmd=t >= 20, held=t in (5, 22)) for t in range(40)]
-    assert pt.stop == "held" and [d is not None for d in dqs] == [t < 22 for t in range(40)]
+    # held before the close is ignored; from the close on it stops the motion for good (steps t_fire..21 move)
+    dqs = [pt.dq(t, obj, close_cmd=t >= 20, held=t in (ep.t_fire + 1, 22)) for t in range(40)]
+    assert pt.stop == "held" and [d is not None for d in dqs] == [ep.t_fire <= t < 22 for t in range(40)]
     capped = lead.MovePerturbation(ep, tau_close=6)
-    moved = sum(capped.dq(t, eef, obj, close_cmd=False) is not None for t in range(400))
+    moved = sum(capped.dq(t, obj, close_cmd=False) is not None for t in range(400))
     assert capped.stop == "path" and moved == round(lead.MAX_PATH / (ep.speed / lead.HZ))
     assert capped.path == pytest.approx(lead.MAX_PATH)
 

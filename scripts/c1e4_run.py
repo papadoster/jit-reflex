@@ -75,15 +75,18 @@ assert set(args.cells.split(",")) <= set(gauto.CELLS), args.cells
 CONF = {"brain": args.brain, "revision": REV, "precision": args.precision, "t_ramp": args.t_ramp, "k_p": args.k_p,
         "tau_k": args.tau_k, "kbar": args.kbar, "kappa0": KAPPA0, "shadow_pseudo": args.shadow_pseudo}
 # part 2 block B (Task 5's offline numbers): tau_close of the fingers with the object; Glead's tau_lead and gate window,
-# oracle and noisy eyes; the CV eyes' q_acc. In CONF only when used, so part-1 records and resumes stay as they were
+# oracle and noisy eyes; the CV eyes' q_acc and their dead bands (eps, ppc_v_min of every @cv arm). In CONF only when
+# used, so part-1 records and resumes stay as they were
 OFF = json.loads((Path(__file__).resolve().parents[1] / "results/c1-e4/part2_offline.json").read_text())
 TAU_CLOSE = OFF["close_obj"]["tau_close"]
 LEAD = {"": [OFF["tau_lead"]["oracle"], OFF["cv"]["oracle"]["m"]],
         "cv": [OFF["tau_lead"]["noisy"], OFF["cv"]["chosen"]["m"]]}  # eyes -> [tau_lead, gate window m]
 Q_CV = OFF["cv"]["chosen"]["q_acc"]
+EPS_CV, PPC_V_MIN_CV = OFF["cv"]["bands"]["eps_cv"], OFF["cv"]["bands"]["ppc_v_min_cv"]
 assert OFF["cv"]["oracle"]["q_acc"] == lead.CVKalman.oracle.__defaults__[0], "LeadAgent builds its oracle eyes itself"
 if "move" in args.kinds.split(",") or any(m in ("Glead", "GautoU") or z == "cv" for m, z in map(gauto.parse_arm, ARMS)):
-    CONF["part2"] = {"tau_close": TAU_CLOSE, "tau_lead_gate_m": LEAD, "q_acc_cv": Q_CV}
+    CONF["part2"] = {"tau_close": TAU_CLOSE, "tau_lead_gate_m": LEAD, "q_acc_cv": Q_CV,
+                     "cv_bands": [EPS_CV, PPC_V_MIN_CV]}
 dev = torch.device(args.device)
 torch.backends.cuda.matmul.allow_tf32 = False  # literal fp32 on CUDA (spec §4.1)
 torch.backends.cudnn.allow_tf32 = False
@@ -237,7 +240,7 @@ def make_agent(arm, cell, ep):
     elif noise == "ema":
         kw |= {"tracker": hf.Tracker(ep.seed, *gauto.NOISE, gauto.EMA_BETA), "eps": gauto.EMA_EPS}
     elif noise == "cv":  # one stream per episode seed: Gauto@cv, Glead@cv and PPC@cv see the same frames
-        kw["tracker"] = lead.CVKalman(ep.seed, *gauto.NOISE, Q_CV)
+        kw |= {"tracker": lead.CVKalman(ep.seed, *gauto.NOISE, Q_CV), "eps": EPS_CV, "ppc_v_min": PPC_V_MIN_CV}
     kbar = (KAPPA0 if method in ("Gk0", "Gk0T") else args.kbar if method in ("Gauto", "GautoT", "GautoU", "Glead")
             else None)
     if method == "Glead":
@@ -332,8 +335,8 @@ def run_batch(vec, eps):
                     gates[i].append(bool(ag.lead(t).any()))
                 if move:  # this step's close command: the motion window t_c .. t_c + tau - 1 is the tracking window
                     pt = perts[i]
-                    d = pt.dq(t, eef[i], obj[i], a[i, 6] > 0, held=bool(con[i]))
-                    dqs[i] = None if d is None else np.concatenate([d, d * lead.HZ])  # shift, velocity (m/s)
+                    d = pt.dq(t, obj[i], a[i, 6] > 0, held=lead.held(bool(con[i]), widths[i], pt.t_close))
+                    dqs[i] = None if d is None else np.concatenate([d, pt.step * lead.HZ])  # to the track; velocity m/s
                     if shadow_on[i] and pt.t_fire == t:
                         cache[i] = rows(obs, [i])
         if any(dq is not None for dq in dqs):  # ShiftEnv clears it after applying
@@ -352,7 +355,7 @@ def run_batch(vec, eps):
         rec = {"brain": args.brain, "policy": REPO, "suite": ep.suite, "task": ep.task, "init": ep.init, "kind": ep.kind,
                "cell": e["cell"], "arm": e["arm"], "method": method, "noise": noise, "conf": CONF, "seed": ep.seed,
                "mag_class": getattr(ep, "mag_class", None), "mag": getattr(ep, "mag", None),
-               "angle": getattr(ep, "angle", None), "r": ep.r,
+               "angle": getattr(ep, "angle", None), "r": getattr(ep, "r", None),
                "success": bool(succ[i]), "steps_to_success": steps_ok[i], "steps": len(acts[i]),
                "calls_sched": ag.sched.n_sched, "calls_trig": ag.sched.n_trig, "calls_shadow": 2 * (shadow[i] is not None),
                "t_fire": pt.t_fire, "g_on": ag.g_on, "t_engage": ag.t_e, "bad_qacc": int(bad[i]),
@@ -380,7 +383,8 @@ def run_batch(vec, eps):
         rec["contact_at_shift"] = (bool(c[pt.t_fire: pt.t_fire + 2].any())
                                    if pt.t_fire is not None and ep.kind != "control" else None)
         if move:  # the motion's own stop, or "end": still moving when the episode ended
-            rec |= {"speed": ep.speed, "direction": ep.direction, "move_path_m": round(pt.path, 6),
+            rec |= {"speed": ep.speed, "direction": ep.direction, "t_fire_plan": ep.t_fire,
+                    "move_path_m": round(pt.path, 6),
                     "move_stop_reason": pt.stop or ("never_fired" if pt.t_fire is None else "end")}
         if move or leads[i]:  # gate open: share of the steps before the first close, and of the tracking window
             g, tl = np.asarray(gates[i], bool), getattr(ag, "t_close", None)
@@ -392,7 +396,8 @@ def run_batch(vec, eps):
             rec["trace"] = {"p": np.round(o, 5).tolist(), "eef": np.round(x, 5).tolist(), "c": c.astype(int).tolist(),
                             "tobs": tobs[i], "plans": plans[i]}
             if move:
-                rec["trace"] |= {"w": np.round(widths[i], 5).tolist(), "gate": [int(g) for g in gates[i]]}
+                rec["trace"] |= {"w": np.round(widths[i], 5).tolist(), "gate": [int(g) for g in gates[i]],
+                                 "C": np.round([ag.c_hist[j] for j in range(len(o))], 5).tolist()}  # extra at observe
         out.append(rec)
     return out
 
