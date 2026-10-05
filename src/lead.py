@@ -161,17 +161,20 @@ def make_move_episode(suite, task, init):
 
 class MovePerturbation:
     """Fires at the first step with no close command yet and |EEF - object| < r; from then on the object is moved by
-    speed / HZ along the direction every step (before that step's physics), up to tau_close steps from the first close
-    command on (that step included) and while the path stays within MAX_PATH."""
+    speed / HZ along the direction every step (before that step's physics) until it stops for good at the earliest of:
+    tau_close steps from the first close command on (that step included), "tau"; the first step from that close on with
+    robot-object contact (the fingers hold it; moving a held object would fight the grasp), "held"; the path reaching
+    MAX_PATH, "path". .stop: that reason, None while moving or never fired."""
 
     def __init__(self, ep, tau_close):
         self.ep, self.tau_close = ep, tau_close
-        self.t_fire = self.p_pre = self.t_close = None
+        self.t_fire = self.p_pre = self.t_close = self.stop = None
         self.path = 0.0
         self.step = ep.speed / HZ * np.array([math.cos(ep.direction), math.sin(ep.direction), 0.0])
 
-    def dq(self, t, eef, obj, close_cmd):
-        """Shift (m) to apply before this step's physics, or None."""
+    def dq(self, t, eef, obj, close_cmd, held=False):
+        """Shift (m) to apply before this step's physics, or None. held: robot-object contact seen at this step
+        (counted from the first close command on)."""
         if close_cmd and self.t_close is None:
             self.t_close = t
         if self.t_fire is None:
@@ -179,7 +182,14 @@ class MovePerturbation:
                 return None
             self.t_fire, self.p_pre = t, np.array(obj, dtype=float)
         n = self.ep.speed / HZ
-        if (self.t_close is not None and t >= self.t_close + self.tau_close) or self.path + n > MAX_PATH + 1e-9:
+        if self.stop is None:
+            if self.t_close is not None and t >= self.t_close + self.tau_close:
+                self.stop = "tau"
+            elif held and self.t_close is not None:
+                self.stop = "held"
+            elif self.path + n > MAX_PATH + 1e-9:
+                self.stop = "path"
+        if self.stop is not None:
             return None
         self.path += n
         return self.step.copy()

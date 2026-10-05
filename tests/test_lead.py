@@ -143,6 +143,20 @@ def test_move_episode_classes_and_stop():
     assert np.linalg.norm(moving[0]) == pytest.approx(ep.speed / lead.HZ) and moving[0][2] == 0.0
     far = lead.MovePerturbation(ep, tau_close=6)
     assert far.dq(0, eef, np.array([0.0, 0.3, 1.0]), close_cmd=False) is None and far.t_fire is None
+    assert pt.stop == "tau" and far.stop is None
+
+
+def test_move_stops_when_held_or_at_the_path_cap():
+    ep = lead.make_move_episode("libero_spatial", 0, 0)
+    eef, obj = np.array([0.0, 0.0, 1.0]), np.array([0.0, 0.1, 1.0])
+    pt = lead.MovePerturbation(ep, tau_close=6)
+    # contact before the close is ignored; from the close on it stops the motion for good (steps 0..21 move)
+    dqs = [pt.dq(t, eef, obj, close_cmd=t >= 20, held=t in (5, 22)) for t in range(40)]
+    assert pt.stop == "held" and [d is not None for d in dqs] == [t < 22 for t in range(40)]
+    capped = lead.MovePerturbation(ep, tau_close=6)
+    moved = sum(capped.dq(t, eef, obj, close_cmd=False) is not None for t in range(400))
+    assert capped.stop == "path" and moved == round(lead.MAX_PATH / (ep.speed / lead.HZ))
+    assert capped.path == pytest.approx(lead.MAX_PATH)
 
 
 def test_parse_arm_accepts_the_lead_and_cv_eyes():

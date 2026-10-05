@@ -1,9 +1,12 @@
 """C1-E4 runner: LIBERO + a frozen VLA (pi0.5 or SmolVLA) with the reflexes of src/gauto.py on the call conveyor (spec
-docs/superpowers/specs/2026-10-03-c1-e4-design.md). Part 1 only (our bench); LIBERO-MAX is part 2.
+docs/superpowers/specs/2026-10-03-c1-e4-design.md). Part 1 (our bench) and part 2's block B on it: kind move (the object
+moves at a constant speed, src/lead.py), arms Glead / *@cv / GautoU with their numbers from
+results/c1-e4/part2_offline.json, and the bench calibration pairs (--pairs-file, scripts/c1e4b_calib_pairs.py).
 
 Runs in the separate PyTorch/LeRobot env. One JSON line per episode. --methods takes arm labels (gauto.parse_arm):
-none, T0, PPC, G, GT, Gkeep, GR, Gk0, Gk0T, Gauto, GautoT, Gcal (G + the shadow paired call at the engagement), and
-G@glr / G@ema (noisy eyes). Example (Mac, debug only, never read):
+none, T0, PPC, G, GT, Gkeep, GR, Gk0, Gk0T, Gauto, GautoT, GautoU, Glead, Gcal (G + the shadow paired call at the
+engagement), and G@glr / PPC@glr / G@ema / Gauto@cv / Glead@cv / PPC@cv (noisy eyes). Example (Mac, debug only,
+never read):
     MUJOCO_GL=cgl ~/Desktop/M2R-c1-env/bin/python scripts/c1e4_run.py --brain smolvla --tasks libero_spatial:0 \
         --cells A,A40 --methods none,Gauto,Gcal --kbar 0.04 --inits 48-49 --n-envs 2 --vector sync --device mps --out x.jsonl
 Pod: MUJOCO_GL=egl ... --vector async --device cuda (scripts/gpu_c1e4.sh)
@@ -27,6 +30,8 @@ from huggingface_hub import snapshot_download
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import gauto  # noqa: E402
 import handoff as hf  # noqa: E402
+import lead  # noqa: E402
+import maxwrap  # noqa: E402
 import objreflex as orx  # noqa: E402
 from lerobot.configs.policies import PreTrainedConfig  # noqa: E402
 from lerobot.envs.configs import LiberoEnv as LiberoCfg  # noqa: E402
@@ -41,8 +46,10 @@ p.add_argument("--precision", choices=["fp32", "bf16-row"], default="fp32",
 p.add_argument("--tasks", default="all", help="all (the 26 of orx.TASKS) or suite:task[,suite:task]")
 p.add_argument("--cells", default="A", help="of gauto.CELLS")
 p.add_argument("--methods", default="none", help="arm labels, e.g. none,G,Gauto,G@glr")
-p.add_argument("--kinds", default="step", help="step, control")
+p.add_argument("--kinds", default="step", help="step, control, move")
 p.add_argument("--inits", default="0-9")
+p.add_argument("--pairs-file", help="JSON list of {suite, task, init}, or c1e4b_calib_pairs.py's frozen file (its "
+               "calib list, SHA-256 checked); replaces --tasks and --inits")
 p.add_argument("--classes", default="0,1,2", help="shift classes kept (step); class 5-6 cm only: 2")
 p.add_argument("--t-ramp", type=int, default=5)
 p.add_argument("--k-p", type=float, default=1.0)
@@ -62,11 +69,21 @@ KAPPA0 = gauto.KAPPA0[args.brain]
 ARMS = args.methods.split(",")
 METHODS = {gauto.parse_arm(a)[0] for a in ARMS}
 assert args.precision == "fp32" or args.brain == "pi05", "bf16-row is pi0.5's fallback only (spec §4.1)"
-assert args.kbar is not None or not METHODS & {"Gauto", "GautoT"}, "G-auto needs --kbar"
+assert args.kbar is not None or not METHODS & {"Gauto", "GautoT", "GautoU", "Glead"}, "G-auto needs --kbar"
 assert not args.shadow_pseudo or args.kinds == "control", "--shadow-pseudo runs on control episodes"
 assert set(args.cells.split(",")) <= set(gauto.CELLS), args.cells
 CONF = {"brain": args.brain, "revision": REV, "precision": args.precision, "t_ramp": args.t_ramp, "k_p": args.k_p,
         "tau_k": args.tau_k, "kbar": args.kbar, "kappa0": KAPPA0, "shadow_pseudo": args.shadow_pseudo}
+# part 2 block B (Task 5's offline numbers): tau_close of the fingers with the object; Glead's tau_lead and gate window,
+# oracle and noisy eyes; the CV eyes' q_acc. In CONF only when used, so part-1 records and resumes stay as they were
+OFF = json.loads((Path(__file__).resolve().parents[1] / "results/c1-e4/part2_offline.json").read_text())
+TAU_CLOSE = OFF["close_obj"]["tau_close"]
+LEAD = {"": [OFF["tau_lead"]["oracle"], OFF["cv"]["oracle"]["m"]],
+        "cv": [OFF["tau_lead"]["noisy"], OFF["cv"]["chosen"]["m"]]}  # eyes -> [tau_lead, gate window m]
+Q_CV = OFF["cv"]["chosen"]["q_acc"]
+assert OFF["cv"]["oracle"]["q_acc"] == lead.CVKalman.oracle.__defaults__[0], "LeadAgent builds its oracle eyes itself"
+if "move" in args.kinds.split(",") or any(m in ("Glead", "GautoU") or z == "cv" for m, z in map(gauto.parse_arm, ARMS)):
+    CONF["part2"] = {"tau_close": TAU_CLOSE, "tau_lead_gate_m": LEAD, "q_acc_cv": Q_CV}
 dev = torch.device(args.device)
 torch.backends.cuda.matmul.allow_tf32 = False  # literal fp32 on CUDA (spec §4.1)
 torch.backends.cudnn.allow_tf32 = False
@@ -78,6 +95,17 @@ def span(txt):
 
 
 tasks = orx.TASKS if args.tasks == "all" else [(t.split(":")[0], int(t.split(":")[1])) for t in args.tasks.split(",")]
+pairs = json.loads(Path(args.pairs_file).read_text()) if args.pairs_file else None
+if isinstance(pairs, dict):  # the frozen calibration file
+    pairs = maxwrap.load_split(args.pairs_file)["calib"]
+if pairs is not None:
+    tasks = list(dict.fromkeys((q["suite"], q["task"]) for q in pairs))
+
+
+def inits_of(st, tk):
+    return span(args.inits) if pairs is None else [q["init"] for q in pairs if (q["suite"], q["task"]) == (st, tk)]
+
+
 done = set()  # resume: skip episodes already written
 if Path(args.out).exists():
     text = Path(args.out).read_text()
@@ -98,8 +126,10 @@ if Path(args.out).exists():
 class ShiftEnv(LiberoEnv):
     """LiberoEnv plus a pending shift of the target object applied before the next physics step, and oracle data in
     info: object of interest and EEF positions, robot-object contact (as scripts/c1e3_run.py, without the box and the
-    placement target). The target is the first object of interest with a free joint. The MjSim is re-read on every call
-    and the contact masks on every reset: a hard reset rebuilds the sim."""
+    placement target), finger width (|q0| + |q1| of robot0_gripper_qpos, m). The pending shift zeroes the object's
+    velocity; a 6-vector (shift, velocity m/s; kind move) sets its linear velocity, so contacts see a moving object.
+    The target is the first object of interest with a free joint. The MjSim is re-read on every call and the contact
+    masks on every reset: a hard reset rebuilds the sim."""
 
     pending_dq = None
 
@@ -135,6 +165,7 @@ class ShiftEnv(LiberoEnv):
         c = d._data.contact
         g1, g2 = np.asarray(c.geom1, int), np.asarray(c.geom2, int)
         info["contact"] = bool(((self._robot[g1] & self._obj[g2]) | (self._robot[g2] & self._obj[g1])).any())
+        info["gripper"] = float(np.abs(d.qpos[e.robots[0]._ref_gripper_joint_pos_indexes]).sum())
         return info
 
     def reset(self, seed=None, **kw):
@@ -146,8 +177,11 @@ class ShiftEnv(LiberoEnv):
         if self.pending_dq is not None:
             e = self._env.env
             _, qa, va = self._target()
-            e.sim.data.qpos[qa: qa + 3] += self.pending_dq
+            dq = np.asarray(self.pending_dq, float)
+            e.sim.data.qpos[qa: qa + 3] += dq[:3]
             e.sim.data.qvel[va: va + 6] = 0.0
+            if len(dq) == 6:
+                e.sim.data.qvel[va: va + 3] = dq[3:]
             e.sim.forward()
             self.pending_dq = None
         obs, r, _, trunc, info = super().step(action)
@@ -202,8 +236,15 @@ def make_agent(arm, cell, ep):
         kw["tracker"] = gauto.GLRKalman(ep.seed, *gauto.NOISE)
     elif noise == "ema":
         kw |= {"tracker": hf.Tracker(ep.seed, *gauto.NOISE, gauto.EMA_BETA), "eps": gauto.EMA_EPS}
-    kbar = KAPPA0 if method in ("Gk0", "Gk0T") else args.kbar if method in ("Gauto", "GautoT") else None
-    return gauto.GAgent(method, *gauto.CELLS[cell], kbar=kbar, **kw)
+    elif noise == "cv":  # one stream per episode seed: Gauto@cv, Glead@cv and PPC@cv see the same frames
+        kw["tracker"] = lead.CVKalman(ep.seed, *gauto.NOISE, Q_CV)
+    kbar = (KAPPA0 if method in ("Gk0", "Gk0T") else args.kbar if method in ("Gauto", "GautoT", "GautoU", "Glead")
+            else None)
+    if method == "Glead":
+        tau_lead, gate_m = LEAD[noise]
+        return lead.LeadAgent(*gauto.CELLS[cell], kbar, tau_lead, TAU_CLOSE, gate_m=gate_m, **kw)
+    tau_close = TAU_CLOSE if method == "GautoU" else None
+    return gauto.GAgent(method, *gauto.CELLS[cell], kbar=kbar, tau_close=tau_close, **kw)
 
 
 repeat_done = False
@@ -220,7 +261,9 @@ def run_batch(vec, eps):
     obs, info = vec.reset(seed=[0] * n)
     desc = vec.call("task_description")
     agents = [make_agent(e["arm"], e["cell"], e["ep"]) for e in pad]
-    perts = [hf.Perturbation(e["ep"]) for e in pad]
+    move = pad[0]["ep"].kind == "move"
+    perts = [lead.MovePerturbation(e["ep"], TAU_CLOSE) if move else hf.Perturbation(e["ep"]) for e in pad]
+    leads = [isinstance(ag, lead.LeadAgent) for ag in agents]
     gens = [torch.Generator().manual_seed(e["ep"].seed) for e in pad]
     # spec §5.3, §7: the shadow pair at G-auto's calibration engagement, or at a control episode's pseudo-shift (P1)
     shadow_on = [args.shadow_pseudo or agents[i].method == "Gcal" for i in range(n)]
@@ -228,7 +271,7 @@ def run_batch(vec, eps):
     live, succ = np.ones(n, bool), np.zeros(n, bool)
     live[len(eps):] = False  # padding envs only step no-ops: no brain calls
     steps_ok, bad = [None] * n, info["bad_qacc"].copy()
-    xs, acts, objs, cons, tobs, plans, got = ([[] for _ in range(n)] for _ in range(7))
+    xs, acts, objs, cons, tobs, plans, got, widths, gates = ([[] for _ in range(n)] for _ in range(9))
     cache, shadow = [None] * n, [None] * n  # the observation rows at t_fire; the shadow pair's log entry
 
     def installed(i, t):
@@ -242,9 +285,10 @@ def run_batch(vec, eps):
             if not live[i]:
                 continue
             ag, pt = agents[i], perts[i]
-            dqs[i] = pt.dq(t, eef[i], obj[i], ag.grasp_started)
-            if shadow_on[i] and pt.t_fire == t:
-                cache[i] = rows(obs, [i])  # pre-shift: the shift moves the object before this step's physics
+            if not move:  # kind move: after act, below
+                dqs[i] = pt.dq(t, eef[i], obj[i], ag.grasp_started)
+                if shadow_on[i] and pt.t_fire == t:
+                    cache[i] = rows(obs, [i])  # pre-shift: the shift moves the object before this step's physics
             tobs[i].append(-1 if ag.sched.t_obs is None else ag.sched.t_obs)
             ag.observe(t, eef[i], obj[i], bool(con[i]))
             if ag.sched.arrive(t):
@@ -282,6 +326,16 @@ def run_batch(vec, eps):
                 acts[i].append(a[i])
                 objs[i].append(obj[i])
                 cons[i].append(bool(con[i]))
+                widths[i].append(float(info["gripper"][i]))
+                ag = agents[i]
+                if leads[i] and (ag.t_close is None or t < ag.t_close + ag.tau_close):  # gate: to the window's end
+                    gates[i].append(bool(ag.lead(t).any()))
+                if move:  # this step's close command: the motion window t_c .. t_c + tau - 1 is the tracking window
+                    pt = perts[i]
+                    d = pt.dq(t, eef[i], obj[i], a[i, 6] > 0, held=bool(con[i]))
+                    dqs[i] = None if d is None else np.concatenate([d, d * lead.HZ])  # shift, velocity (m/s)
+                    if shadow_on[i] and pt.t_fire == t:
+                        cache[i] = rows(obs, [i])
         if any(dq is not None for dq in dqs):  # ShiftEnv clears it after applying
             vec.set_attr("pending_dq", dqs)
         obs, _, _, _, info = vec.step(a)
@@ -297,7 +351,8 @@ def run_batch(vec, eps):
         method, noise = gauto.parse_arm(e["arm"])
         rec = {"brain": args.brain, "policy": REPO, "suite": ep.suite, "task": ep.task, "init": ep.init, "kind": ep.kind,
                "cell": e["cell"], "arm": e["arm"], "method": method, "noise": noise, "conf": CONF, "seed": ep.seed,
-               "mag_class": ep.mag_class, "mag": ep.mag, "angle": ep.angle, "r": ep.r,
+               "mag_class": getattr(ep, "mag_class", None), "mag": getattr(ep, "mag", None),
+               "angle": getattr(ep, "angle", None), "r": ep.r,
                "success": bool(succ[i]), "steps_to_success": steps_ok[i], "steps": len(acts[i]),
                "calls_sched": ag.sched.n_sched, "calls_trig": ag.sched.n_trig, "calls_shadow": 2 * (shadow[i] is not None),
                "t_fire": pt.t_fire, "g_on": ag.g_on, "t_engage": ag.t_e, "bad_qacc": int(bad[i]),
@@ -307,30 +362,52 @@ def run_batch(vec, eps):
         rec |= orx.episode_metrics(xs[i], acts[i], objs[i])
         x, o, c, tc = np.asarray(xs[i]), np.asarray(objs[i]), np.asarray(cons[i]), rec["t_close"]
         # signed grasp miss along the shift (as C1-E2/E3): > 0 when the gripper closed beyond the object
-        rec["grasp_miss_along_m"] = (float((x[tc] - o[tc])[:2] @ ep.delta[:2]) / ep.mag
-                                     if pt.t_fire is not None and ep.mag > 0 and tc is not None else None)
+        if move:  # along the motion; the commanded track at step j: p_pre + step * (moves applied before j)
+            u, n_mv = pt.step[:2] / np.linalg.norm(pt.step[:2]), round(pt.path * lead.HZ / ep.speed)
+            rec["grasp_miss_along_m"] = (float((x[tc] - o[tc])[:2] @ u)
+                                         if pt.t_fire is not None and tc is not None else None)
+        else:
+            rec["grasp_miss_along_m"] = (float((x[tc] - o[tc])[:2] @ ep.delta[:2]) / ep.mag
+                                         if pt.t_fire is not None and ep.mag > 0 and tc is not None else None)
         # pushes before the shift, up to its last pre-shift observation; with no shift, up to the first close command
         end = pt.t_fire if pt.t_fire is not None and ep.kind != "control" else tc
         w = o if end is None else o[: end + 1]
         rec["pushed_before_fire"] = bool(len(w) > 1 and np.linalg.norm(w - w[0], axis=1).max() > orx.EPS)
         # unstable shift: the object moved another > 1 cm, seen 20 steps after the shift or at the first close command
         k = None if pt.t_fire is None else min(pt.t_fire + 21, len(o) if tc is None else tc)
-        rec["unstable"] = bool(ep.kind != "control" and k is not None and pt.t_fire < k < len(o)
-                               and np.linalg.norm(o[k] - (pt.p_pre + ep.delta)) > 0.01)
+        rec["unstable"] = bool(ep.kind != "control" and k is not None and pt.t_fire < k < len(o) and np.linalg.norm(
+            o[k] - pt.p_pre - (pt.step * min(k - pt.t_fire, n_mv) if move else ep.delta)) > 0.01)
         rec["contact_at_shift"] = (bool(c[pt.t_fire: pt.t_fire + 2].any())
                                    if pt.t_fire is not None and ep.kind != "control" else None)
+        if move:  # the motion's own stop, or "end": still moving when the episode ended
+            rec |= {"speed": ep.speed, "direction": ep.direction, "move_path_m": round(pt.path, 6),
+                    "move_stop_reason": pt.stop or ("never_fired" if pt.t_fire is None else "end")}
+        if move or leads[i]:  # gate open: share of the steps before the first close, and of the tracking window
+            g, tl = np.asarray(gates[i], bool), getattr(ag, "t_close", None)
+            rec["lead_on_share"] = round(float(g[:tl].mean()), 4) if leads[i] and len(g[:tl]) else None
+            rec["lead_on_window"] = round(float(g[tl:].mean()), 4) if leads[i] and tl is not None else None
+        if method == "GautoU":
+            rec |= {"unwind_steps": ag.unwind_steps, "unwind_plans": ag.unwind_plans, "unwind_stop": ag.unwind_stop}
         if args.trace:
             rec["trace"] = {"p": np.round(o, 5).tolist(), "eef": np.round(x, 5).tolist(), "c": c.astype(int).tolist(),
                             "tobs": tobs[i], "plans": plans[i]}
+            if move:
+                rec["trace"] |= {"w": np.round(widths[i], 5).tolist(), "gate": [int(g) for g in gates[i]]}
         out.append(rec)
     return out
 
 
 classes = {int(c) for c in args.classes.split(",")}
+
+
+def make_ep(st, tk, i, k):
+    return lead.make_move_episode(st, tk, i) if k == "move" else hf.make_episode(st, tk, i, k, prefix="c1e4")
+
+
 episodes = [{"ep": ep, "cell": c, "arm": m}
             for st, tk in tasks for k in args.kinds.split(",") for c in args.cells.split(",") for m in ARMS
-            for i in span(args.inits)
-            if (ep := hf.make_episode(st, tk, i, k, prefix="c1e4")).kind == "control" or ep.mag_class in classes
+            for i in inits_of(st, tk)
+            if (ep := make_ep(st, tk, i, k)).kind in ("control", "move") or ep.mag_class in classes
             if (st, tk, i, k, c, m) not in done]
 print(f"{len(episodes)} episodes to run", flush=True)
 if not episodes:  # a resumed line with nothing left: no model load
