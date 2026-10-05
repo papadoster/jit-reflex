@@ -1,9 +1,12 @@
+import json
+
 import numpy as np
 import pytest
 
 import maxwrap as mw
 
-NAMES = {"libero_goal": [f"open_the_drawer_{k}" for k in range(7)] + ["open_the_drawer_1_and_close_it"]}
+NAMES = {"libero_goal": [f"open_the_drawer_{k}" for k in range(7)] + ["open_the_drawer_1_and_close_it",
+                                                                     "put_the_bowl_on_the_plate", "turn_on_the_stove"]}
 
 
 def case(i, task, ctype="target_relocation", name=None, variant=None):
@@ -27,6 +30,8 @@ def test_base_task_longest_prefix_and_pro_variant():
     assert mw.base_task(c, NAMES) == ("libero_goal", "open_the_drawer_5")
     with pytest.raises(KeyError):
         mw.base_task(case(3, 0, name="close_the_door"), NAMES)
+    with pytest.raises(AssertionError):  # a LIBERO-plus overlay's variant list, not LIBERO's 10 names per suite
+        mw.base_task(case(0, 3), {"libero_goal": NAMES["libero_goal"] + ["open_the_drawer_3_v2"]})
 
 
 def test_case_order_round_robin_and_deterministic():
@@ -39,6 +44,11 @@ def test_case_order_round_robin_and_deterministic():
     assert [c["case_id"] for c in mw.case_order(cs, NAMES, seed=8)] != [c["case_id"] for c in a]
 
 
+def test_case_order_golden():  # pins the stream (numpy 2.2.6); the runner reads the frozen split, not this
+    assert [c["case_id"] for c in mw.case_order(toy(), NAMES, seed="c1e4m")][:10] == [
+        "c0059", "c0024", "c0114", "c0013", "c0065", "c0138", "c0087", "c0045", "c0023", "c0101"]
+
+
 def test_split_cases_and_extension():
     cs = toy()
     cal, ev = mw.split_cases(cs, NAMES, seed=7, n_cal=30)
@@ -47,6 +57,22 @@ def test_split_cases_and_extension():
     cal2, ev2 = mw.split_cases(cs, NAMES, seed=7, n_cal=30, extra=5)
     assert [c["case_id"] for c in cal2[:30]] == [c["case_id"] for c in cal] and len(cal2) == 35
     assert [c["case_id"] for c in ev2] == [c["case_id"] for c in ev[5:]]
+
+
+def test_freeze_split_round_trip_and_tamper(tmp_path):
+    cs = toy()
+    d = mw.freeze_split(cs, NAMES, seed=7, n_cal=30, extra=2, n_conn=10)
+    cal, ev = mw.split_cases(cs, NAMES, seed=7, n_cal=30, extra=2)
+    assert d["calib"] == [c["case_id"] for c in cal] and d["eval"] == [c["case_id"] for c in ev]
+    assert sorted(d["calib"] + d["eval"]) == sorted(c["case_id"] for c in cs)
+    assert d["connect"] == [c["case_id"] for c in mw.connection_sample(cs, 10, 7)]
+    assert (d["seed"], d["n_cal"], d["extra"], d["numpy"]) == (7, 30, 2, np.__version__)
+    p = tmp_path / "split.json"
+    p.write_text(json.dumps(d))
+    assert mw.load_split(p) == d
+    p.write_text(json.dumps({**d, "eval": d["eval"][::-1]}))
+    with pytest.raises(ValueError):
+        mw.load_split(p)
 
 
 def test_n_extra_rule():
@@ -67,10 +93,15 @@ def test_connection_sample_balanced_over_events():
 @pytest.mark.parametrize("q,e", [(5, 1), (5, 5), (5, 7), (10, 23), (8, 16)])
 def test_schedule_check(q, e):
     plans = [(t, t) for t in range(0, 200, q)]  # (t_obs, arrival) of the native schedule at d = 0
-    ok, last, first = mw.schedule_check(e, q, plans)
+    ok, last, first = mw.schedule_check(e, q, plans, steps=200)
     assert ok and last == q * ((e - 1) // q) and first == q * -(-e // q)
-    assert not mw.schedule_check(e, q, [p for p in plans if p[0] != last])[0]
-    assert not mw.schedule_check(e, q, [p for p in plans if p[0] != first])[0]
+    assert not mw.schedule_check(e, q, [p for p in plans if p[0] != last], steps=200)[0]
+    # the episode runs past the first post-event plan's step: missing it fails
+    assert not mw.schedule_check(e, q, [p for p in plans if p[0] != first], steps=200)[0]
+    # the episode ended at or before that step: no post-event plan passes
+    assert mw.schedule_check(e, q, [p for p in plans if p[0] < first], steps=first)[0]
+    late = [(t, t + (t == last)) for t, _ in plans]  # at d = 0 every plan arrives at its observation step
+    assert not mw.schedule_check(e, q, late, steps=200)[0]
 
 
 def test_chunk_replay_serves_recorded_chunks_until_event():
@@ -80,6 +111,8 @@ def test_chunk_replay_serves_recorded_chunks_until_event():
     assert np.array_equal(rp.chunk(5), np.ones((50, 7)))
     with pytest.raises(KeyError):
         rp.chunk(3)
+    with pytest.raises(AssertionError):  # from the event on the brain plans
+        rp.chunk(7)
 
 
 def test_kbar_line_band():
@@ -90,3 +123,5 @@ def test_kbar_line_band():
     assert n == 70 and k == pytest.approx(float(np.median(good)))
     assert lo < k < hi and hi - lo < 0.4
     assert mw.kbar_line(xs, n_boot=2000, seed=0) == (k, lo, hi, n)
+    with pytest.raises(AssertionError):  # no valid sample: no NaN line
+        mw.kbar_line([None, None])

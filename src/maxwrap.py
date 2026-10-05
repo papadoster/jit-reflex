@@ -4,7 +4,9 @@ the calibration line (pure numpy; no LIBERO / LIBERO-MAX import, the runner pass
 
 Spec: docs/superpowers/specs/2026-10-05-c1-e4-part2-design.md."""
 
-from pathlib import PurePosixPath
+import hashlib
+import json
+from pathlib import Path, PurePosixPath
 
 import numpy as np
 
@@ -17,6 +19,8 @@ def base_task(case, names):
     """(suite, original LIBERO task): the longest of LIBERO's task names in the suite that prefixes the case's task
     name (LIBERO-PRO: the init-states file's stem). LIBERO-plus's task_index numbers variants, not tasks."""
     suite = case["task_suite_name"]
+    assert len(names[suite]) == 10, (f"{suite}: {len(names[suite])} names; pass standard LIBERO's 40 task names "
+                                     "(hf-libero), not a LIBERO-plus overlay's variant list")
     v = case.get("substrate_variant")
     name = PurePosixPath(v["init_states_file"]).name.split(".")[0] if v else case["task_name"]
     hits = [n for n in names[suite] if name.startswith(n)]
@@ -51,9 +55,35 @@ def split_cases(cases, names, seed=SEED, n_cal=N_CAL_CASES, extra=0):
     return order[:n_cal + extra], order[n_cal + extra:]
 
 
+def _sha(d):
+    body = json.dumps({k: v for k, v in d.items() if k != "sha256"}, sort_keys=True)
+    return hashlib.sha256(body.encode()).hexdigest()
+
+
+def freeze_split(cases, names, seed=SEED, n_cal=N_CAL_CASES, extra=0, n_conn=300, all_cases=None):
+    """The split as case_ids, frozen on the Mac: NumPy does not promise the same Generator stream across versions (the
+    pod runs in another venv) and under the LIBERO-plus overlay get_task_names() gives variant names, so the runner
+    reads this (load_split) and does not recompute it. all_cases: the whole manifest, for the connection sample."""
+    cal, ev = split_cases(cases, names, seed, n_cal, extra)
+    d = {"seed": seed, "n_cal": n_cal, "extra": extra, "calib": [c["case_id"] for c in cal],
+         "eval": [c["case_id"] for c in ev],
+         "connect": [c["case_id"] for c in connection_sample(cases if all_cases is None else all_cases, n_conn, seed)],
+         "numpy": np.__version__}
+    return {**d, "sha256": _sha(d)}
+
+
+def load_split(path):
+    """freeze_split's dict from its JSON file; ValueError if its SHA-256 does not match."""
+    d = json.loads(Path(path).read_text())
+    if d.get("sha256") != _sha(d):
+        raise ValueError(f"{path}: SHA-256 mismatch")
+    return d
+
+
 def n_extra(samples, more=(), n_min=N_MIN):
     """How many further cases (in order; their samples in `more`, None = no valid sample) bring the valid samples of
-    the calibration cases up to n_min. 0 when there are enough already."""
+    the calibration cases up to n_min. 0 when there are enough already. The runner passes the maximum over brains to
+    split_cases(extra=...) / freeze_split(extra=...), so the added cases drop out of evaluation for every brain."""
     have = sum(x is not None for x in samples)
     for k, x in enumerate(more):
         if have >= n_min:
@@ -75,20 +105,31 @@ def connection_sample(cases, n, seed=SEED):
     return [by[t][j] for t, k in zip(types, share) for j in sorted(rng.choice(len(by[t]), size=k, replace=False))]
 
 
-def schedule_check(e, q, plans_in):
-    """Check (g): with the native schedule (s = Q, d = 0) the last plan observed before the event step e is at
-    Q floor((e - 1) / Q) and the first one at or after e at Q ceil(e / Q), as LIBERO-MAX's Dynamic (their action queue
-    is not cleared at the event). plans_in: (t_obs, arrival) per installed plan; an episode that ends before
-    Q ceil(e / Q) has no first. (ok, last t_obs before e, first t_obs at or after e)."""
+def schedule_check(e, q, plans_in, steps, d=0):
+    """Check (g), defined at the native schedule (s = Q, d = 0; not used for d > 0): the last plan observed before the
+    event step e is at Q floor((e - 1) / Q) and the first one at or after e at Q ceil(e / Q), as LIBERO-MAX's Dynamic
+    (their action queue is not cleared at the event); at d = 0 every plan arrives at its observation step.
+    Time: t is LIBERO-MAX's post-warm-up policy step (total_env_steps - warmup_steps); e is their
+    cosmos_query_boundary_step, the first policy step whose observation is already post-event (the event is applied
+    inside the previous step() call, after physics). On our own bench e = t_fire + 1 (handoff.Perturbation: the
+    observation at t_fire is pre-shift).
+    plans_in: (t_obs, arrival) per installed plan; steps: the episode's policy steps actually run. The first plan is
+    required when steps > Q ceil(e / Q); None only when the episode ended before that step.
+    (ok, last t_obs before e, first t_obs at or after e)."""
     before = [t for t, _ in plans_in if t < e]
     after = [t for t, _ in plans_in if t >= e]
     last, first = (max(before) if before else None), (min(after) if after else None)
-    return last == q * ((e - 1) // q) and first in (None, q * -(-e // q)), last, first
+    q_first = q * -(-e // q)
+    on_time = d != 0 or all(a == t for t, a in plans_in)
+    return (last == q * ((e - 1) // q) and (first == q_first or first is None and steps <= q_first)
+            and on_time), last, first
 
 
 class ChunkReplay:
     """Dynamic's prefix: until the event the runner gives the agent Base's recorded chunk of each call instead of calling
-    the brain, so the agent's state at the event is Base's (the observations are bitwise the same up to it)."""
+    the brain, so the agent's state at the event is Base's (the observations are bitwise the same up to it).
+    t, event_step: as in schedule_check (LIBERO-MAX's post-warm-up policy step; event_step = their
+    cosmos_query_boundary_step, the first step with a post-event observation; on our bench t_fire + 1)."""
 
     def __init__(self, recorded, event_step):
         self.recorded, self.event_step = recorded, event_step
@@ -97,6 +138,7 @@ class ChunkReplay:
         return t < self.event_step
 
     def chunk(self, t):
+        assert self.replaying(t), f"step {t} >= event step {self.event_step}: the brain plans from the event on"
         return self.recorded[t]
 
 
@@ -104,6 +146,7 @@ def kbar_line(samples, n_boot=2000, seed=0):
     """(kbar, band 5%, band 95%, N): the median of the valid samples (None dropped) and the percentile bootstrap band
     of that median (resampling the N samples with replacement)."""
     x = np.asarray([s for s in samples if s is not None], float)
+    assert len(x) > 0, "no valid sample"
     rng = np.random.default_rng(seed)
     meds = np.median(x[rng.integers(len(x), size=(n_boot, len(x)))], axis=1)
     return float(np.median(x)), float(np.percentile(meds, 5)), float(np.percentile(meds, 95)), len(x)
