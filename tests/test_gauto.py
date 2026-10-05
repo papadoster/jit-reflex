@@ -142,6 +142,25 @@ def _run(agent, delta, shift_at=12, T=40):
     return np.array(acts)
 
 
+def _run_close(agent, delta, close_at, shift_at=12, T=60):
+    """_run with a gripper that closes for absolute steps >= close_at (row k of a call observed at t is step t + k)."""
+    eef, acts = np.zeros(3), []
+    for t in range(T):
+        agent.observe(t, eef, P0 + (np.asarray(delta) if t >= shift_at else 0.0))
+        if agent.sched.arrive(t):
+            agent.on_new_chunk()
+        if agent.sched.wants_call(t, agent.trigger(t)):
+            ch = np.zeros((orx.H, 7))
+            ch[:, 6] = np.where(t + np.arange(orx.H) >= close_at, 1.0, -1.0)
+            agent.sched.issue(t, ch)
+            if agent.sched.arrive(t):
+                agent.on_new_chunk()
+        a = agent.act(t, agent.sched.action(t))
+        eef = eef + orx.G_POS * np.clip(a[:3], -1, 1)
+        acts.append(a)
+    return np.array(acts)
+
+
 def test_share():
     d = np.array([0.03, 0.0, 0.0])
     assert gauto.share(0.5 * d, d) == pytest.approx(0.5)
@@ -229,3 +248,41 @@ def test_parse_arm():
     for bad in ("Gauto@glr", "GRT", "G@real", "nope"):
         with pytest.raises(AssertionError):
             gauto.parse_arm(bad)
+
+
+# ------------------------------------------------------------------ part 2: the carry unwind GautoU, PPC on noisy eyes
+
+def test_unwind_withdraws_what_the_stale_plan_does_not_know():
+    """A20: shift at 12, the reflex carries 3 cm by 17, the close at 25 comes from the plan observed at 0. Plans 0 and
+    10 (C(t_obs) = 0) get the 3 cm withdrawn from 29 = 25 + tau_close; plan 20 (arrives at 40) saw the reflex's work,
+    so it gets it back; plan 30 (observed after the close, arrives at 50) stops the unwinding."""
+    ag = gauto.GAgent("GautoU", 10, 20, kbar=0.2, tau_close=4)
+    acts = _run_close(ag, [0.03, 0.0, 0.0], close_at=25)
+    assert ag.c_hist[25] == pytest.approx([0.03, 0.0, 0.0], abs=1e-9)
+    assert not acts[25:29, :3].any()  # nothing while the fingers close
+    assert ag.c_hist[39] == pytest.approx([0.0, 0.0, 0.0], abs=1e-9)
+    assert ag.c_hist[49] == pytest.approx([0.03, 0.0, 0.0], abs=1e-9)
+    assert not acts[50:, :3].any() and ag.c == pytest.approx(ag.c_hist[50])
+    assert np.abs(acts[29:39, 0]).max() <= 0.03 / 5 / orx.G_POS + 1e-9  # cap |E_N| / T_ramp
+
+
+def test_unwind_idle_without_delay():
+    """A: the plan executing at the close (observed at 20) already saw the reflex's 3 cm, so nothing to withdraw."""
+    a = _run_close(gauto.GAgent("Gauto", 10, 0, kbar=0.2), [0.03, 0.0, 0.0], close_at=25)
+    b = _run_close(gauto.GAgent("GautoU", 10, 0, kbar=0.2, tau_close=4), [0.03, 0.0, 0.0], close_at=25)
+    assert np.array_equal(a, b)
+
+
+def test_unwind_stops_at_the_first_open():
+    ag = gauto.GAgent("GautoU", 10, 20, kbar=0.2, tau_close=4)
+    acts = _run_close(ag, [0.03, 0.0, 0.0], close_at=25, T=31)
+    assert acts[29:31, 0].min() < 0  # unwinding started
+    ag.act(31, np.array([0, 0, 0, 0, 0, 0, -1.0]))  # an open command
+    assert not ag.act(32, np.zeros(7))[:3].any()
+
+
+def test_parse_arm_noisy_ppc():
+    assert gauto.parse_arm("PPC@glr") == ("PPC", "glr") and gauto.parse_arm("G@glr") == ("G", "glr")
+    assert gauto.parse_arm("GautoU") == ("GautoU", "")
+    with pytest.raises(AssertionError):
+        gauto.parse_arm("PPC@ema")

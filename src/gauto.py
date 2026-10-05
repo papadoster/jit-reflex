@@ -174,17 +174,20 @@ class GAgent(hf.HAgent):
     arm logs s_N = share(S_N, Delta_N), S_N = C(t_obs_N) - C(t_e) the extra displacement the reflex commanded since
     the engagement. Gk0, Gauto and their T variants: kappa_N = s_N + kbar (1 - s_N), kbar given (G-kappa0: C1-E4a's
     kappa0; G-auto: kbar_30 frozen in the trial). Gcal acts as G (kappa = 1); the runner makes the shadow paired call
-    at its engagement. The T variants re-query when the raw shift since the executing plan's observation exceeds T_THR."""
+    at its engagement. The T variants re-query when the raw shift since the executing plan's observation exceeds T_THR.
+    GautoU: Gauto plus the carry unwind after the close (part-2 spec §unwind, _unwind)."""
 
-    LAW = ("Gk0", "Gk0T", "Gauto", "GautoT")
+    LAW = ("Gk0", "Gk0T", "Gauto", "GautoT", "GautoU")
     # LAW: 1.0 placeholder, on_new_chunk sets Z1's kappa
     FAMILY = {"G": 1.0, "GT": 1.0, "Gkeep": 0.0, "GR": None, **dict.fromkeys(LAW, 1.0), "Gcal": 1.0}
     METHODS = ("none", "T0", "PPC", *FAMILY)
 
-    def __init__(self, method, s, d, kbar=None, **kw):
+    def __init__(self, method, s, d, kbar=None, tau_close=None, **kw):
         assert (method in self.LAW) == (kbar is not None), f"{method}: kbar {kbar}"
+        assert (method == "GautoU") == (tau_close is not None), f"{method}: tau_close {tau_close}"
         super().__init__(method, s, 0, **kw)  # orx.Schedule would assert max(s, d) + d <= H; the conveyor replaces it
-        self.sched, self.kbar = Conveyor(s, d), kbar
+        self.sched, self.kbar, self.tau_close = Conveyor(s, d), kbar, tau_close
+        self.t_c, self.unwind_done, self.unwind_plan, self.unwind_cap = None, False, None, None  # GautoU
 
     def observe(self, t, eef, obj, contact=False):
         if isinstance(self.tracker, GLRKalman):
@@ -202,6 +205,38 @@ class GAgent(hf.HAgent):
             self.kappa = s_n + self.kbar * (1 - s_n)
         self.kappa_log[-1] |= {"s": round(s_n, 4), "S": np.round(S, 6).tolist(), "k": round(self.kappa, 4)}
 
+    def act(self, t, a):
+        a = super().act(t, a)
+        if self.method != "GautoU" or not self.grasp_started:
+            return a
+        if self.t_c is None:  # the close step: G's law already ran on it (HAgent.act)
+            self.t_c = t
+            return a
+        return self._unwind(t, a)
+
+    def _unwind(self, t, a):
+        """part-2 spec §unwind: from t_c + tau_close (the fingers closed) to the first open command after the close,
+        while the executing plan N was observed before t_c, G's command form drives E_N = C(t) - C(t_obs_N) -> 0: at
+        most cap_N = |E_N| / T_ramp a step (|E_N| at the first unwind step under N), clip +-1, C counts what was sent.
+        Stops for good at the first plan observed at or after t_c, or at the first open command. E_N comes from self.c:
+        observe wrote c_hist[t] before act."""
+        t_obs = self.sched.t_obs
+        if self.unwind_done or a[6] <= 0 or t_obs >= self.t_c:
+            self.unwind_done = True
+            return a
+        if t < self.t_c + self.tau_close:
+            return a
+        err = self.c - self.c_hist[t_obs]
+        if self.unwind_plan != t_obs:
+            self.unwind_plan, self.unwind_cap = t_obs, np.linalg.norm(err) / self.t_ramp
+        if np.linalg.norm(err) < 1e-12:
+            return a
+        base = np.clip(a[:3], -1, 1)
+        new, _ = hf.ramp_step(base, -err, self.unwind_cap)
+        self.c = self.c + orx.G_POS * (new - base)
+        a[:3] = new
+        return a
+
     def trigger(self, t):
         if self.method in ("Gk0T", "GautoT"):
             return (not self.grasp_started and self.sched.chunk is not None
@@ -211,10 +246,12 @@ class GAgent(hf.HAgent):
 
 def parse_arm(label):
     """A grid arm label -> (method, noise): "G@glr" -> ("G", "glr"), "Gauto" -> ("Gauto", ""). Noise: glr (default noisy
-    eyes, GLRKalman) or ema (the old pipeline, hf.Tracker with EMA_BETA and EMA_EPS), on G only (spec §5.2); cv
-    (lead.CVKalman, part 2 block B) on G, Gauto, PPC and Glead (lead.LeadAgent, built by the runner, not by GAgent)."""
+    eyes, GLRKalman) on G and PPC (part 2: PPC on the same frames as G@glr); ema (the old pipeline, hf.Tracker with
+    EMA_BETA and EMA_EPS) on G only (spec §5.2); cv (lead.CVKalman, part 2 block B) on G, Gauto, PPC and Glead
+    (lead.LeadAgent, built by the runner, not by GAgent)."""
     method, _, noise = label.partition("@")
     assert method in (*GAgent.METHODS, "Glead") and noise in ("", "glr", "ema", "cv"), label
-    assert noise in ("", "cv") or method == "G", f"{label}: glr and ema eyes run on G only"
+    assert noise != "glr" or method in ("G", "PPC"), f"{label}: glr eyes run on G and PPC"
+    assert noise != "ema" or method == "G", f"{label}: ema eyes run on G only"
     assert noise != "cv" or method in ("G", "Gauto", "PPC", "Glead"), f"{label}: cv eyes run on G, Gauto, PPC, Glead"
     return method, noise
