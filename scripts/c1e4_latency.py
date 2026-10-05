@@ -8,6 +8,9 @@ call conveyor fed a moving object for STEPS steps (observe + act per step, numpy
 median, P10, P90 in ms and in 20 Hz steps.
     MUJOCO_GL=cgl ~/Desktop/M2R-c1-env/bin/python scripts/c1e4_latency.py --brain pi05 --device mps
     Pod: MUJOCO_GL=egl ... --device cuda --precision fp32 | bf16
+OFT / OFT+ (pod, openvla-oft's venv): --brain oft | oftplus --precision bf16 goes through scripts/c1e4m_brains.py on a
+raw LIBERO observation (256 px, as LIBERO-MAX renders for OFT) and times the whole brain call (its image preprocessing
+included).
 """
 
 import argparse
@@ -21,16 +24,13 @@ import torch
 from huggingface_hub import snapshot_download
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import c1e4m_brains as cb  # noqa: E402
 import gauto  # noqa: E402
 import objreflex as orx  # noqa: E402
-from lerobot.configs.policies import PreTrainedConfig  # noqa: E402
-from lerobot.envs.configs import LiberoEnv as LiberoCfg  # noqa: E402
-from lerobot.envs.libero import LiberoEnv, _get_suite  # noqa: E402
-from lerobot.envs.utils import preprocess_observation  # noqa: E402
-from lerobot.policies.factory import make_policy, make_pre_post_processors  # noqa: E402
 
 p = argparse.ArgumentParser()
-p.add_argument("--brain", choices=sorted(gauto.BRAINS), required=True)
+p.add_argument("--brain", choices=cb.NAMES, required=True)
 p.add_argument("--precision", choices=["fp32", "bf16"], default="fp32")
 p.add_argument("--device", default="cuda")
 p.add_argument("--warm", type=int, default=3)
@@ -41,40 +41,57 @@ dev = torch.device(args.device)
 torch.backends.cuda.matmul.allow_tf32 = False
 torch.backends.cudnn.allow_tf32 = False
 
-repo, rev = gauto.BRAINS[args.brain]
-path = snapshot_download(repo, revision=rev)
-cfg = PreTrainedConfig.from_pretrained(path)
-cfg.pretrained_path, cfg.device, cfg.compile_model = path, args.device, False
-if hasattr(cfg, "load_vlm_weights"):
-    cfg.load_vlm_weights = False
-if args.precision == "bf16":
-    cfg.dtype = "bfloat16"
-env_cfg = LiberoCfg(task="libero_spatial", task_ids=[0])
-policy = make_policy(cfg=cfg, env_cfg=env_cfg).eval().requires_grad_(False)
-if args.precision == "fp32":
-    policy = policy.float()
-pre, post = make_pre_post_processors(cfg, path, preprocessor_overrides={"device_processor": {"device": args.device}})
-env_pre, _ = env_cfg.get_env_processors()
+if args.brain in cb.OFT:  # openvla-oft's venv on the pod (no LeRobot): the brain module on a raw LIBERO observation
+    assert args.precision == "bf16", "openvla-oft runs in bf16"
+    brain = cb.make_brain(args.brain, args.device, args.precision)
+    raw, raw_env, desc = cb.raw_libero_obs()  # libero_spatial task 0, init 0, 256 px as LIBERO-MAX renders for OFT
 
-env = LiberoEnv(task_suite=_get_suite("libero_spatial"), task_id=0, task_suite_name="libero_spatial",
-                obs_type="pixels_agent_pos", observation_width=360, observation_height=360)
-env.init_state_id = 0
-obs, _ = env.reset(seed=0)
-desc = env.task_description
-batched = lambda x: {k: batched(v) for k, v in x.items()} if isinstance(x, dict) else np.asarray(x)[None]  # noqa: E731
-batch = batched(obs)
-gen = torch.Generator().manual_seed(0)
+    def call():  # the whole brain call: OFT's image preprocessing is part of its answer time
+        tb = time.perf_counter()
+        brain([raw], [raw_env], [desc], [0], ["libero_spatial"])
+        return time.perf_counter() - tb
+else:
+    from lerobot.configs.policies import PreTrainedConfig
+    from lerobot.envs.configs import LiberoEnv as LiberoCfg
+    from lerobot.envs.libero import LiberoEnv, _get_suite
+    from lerobot.envs.utils import preprocess_observation
+    from lerobot.policies.factory import make_policy, make_pre_post_processors
 
+    repo, rev = gauto.BRAINS[args.brain]
+    path = snapshot_download(repo, revision=rev)
+    cfg = PreTrainedConfig.from_pretrained(path)
+    cfg.pretrained_path, cfg.device, cfg.compile_model = path, args.device, False
+    if hasattr(cfg, "load_vlm_weights"):
+        cfg.load_vlm_weights = False
+    if args.precision == "bf16":
+        cfg.dtype = "bfloat16"
+    env_cfg = LiberoCfg(task="libero_spatial", task_ids=[0])
+    policy = make_policy(cfg=cfg, env_cfg=env_cfg).eval().requires_grad_(False)
+    if args.precision == "fp32":
+        policy = policy.float()
+    pre, post = make_pre_post_processors(cfg, path,
+                                         preprocessor_overrides={"device_processor": {"device": args.device}})
+    env_pre, _ = env_cfg.get_env_processors()
 
-def call():
-    b = preprocess_observation(batch)
-    b["task"] = [desc]
-    z = torch.randn(1, orx.H, cfg.max_action_dim, generator=gen).to(dev)
-    tb = time.perf_counter()
-    with torch.no_grad():
-        ch = policy.predict_action_chunk(pre(env_pre(b)), noise=z)
-    post(ch).float().cpu().numpy()
-    return time.perf_counter() - tb
+    env = LiberoEnv(task_suite=_get_suite("libero_spatial"), task_id=0, task_suite_name="libero_spatial",
+                    obs_type="pixels_agent_pos", observation_width=360, observation_height=360)
+    env.init_state_id = 0
+    obs, _ = env.reset(seed=0)
+    desc = env.task_description
+    batched = lambda x: ({k: batched(v) for k, v in x.items()}  # noqa: E731
+                         if isinstance(x, dict) else np.asarray(x)[None])
+    batch = batched(obs)
+    gen = torch.Generator().manual_seed(0)
+
+    def call():
+        b = preprocess_observation(batch)
+        b["task"] = [desc]
+        z = torch.randn(1, orx.H, cfg.max_action_dim, generator=gen).to(dev)
+        tb = time.perf_counter()
+        with torch.no_grad():
+            ch = policy.predict_action_chunk(pre(env_pre(b)), noise=z)
+        post(ch).float().cpu().numpy()
+        return time.perf_counter() - tb
 
 
 for _ in range(args.warm):
