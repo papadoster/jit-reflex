@@ -211,8 +211,10 @@ class GAgent(hf.HAgent):
 
 def parse_arm(label):
     """A grid arm label -> (method, noise): "G@glr" -> ("G", "glr"), "Gauto" -> ("Gauto", ""). Noise: glr (default noisy
-    eyes, GLRKalman) or ema (the old pipeline, hf.Tracker with EMA_BETA and EMA_EPS), on G only (spec §5.2)."""
+    eyes, GLRKalman) or ema (the old pipeline, hf.Tracker with EMA_BETA and EMA_EPS), on G only (spec §5.2); cv
+    (lead.CVKalman, part 2 block B) on G, Gauto, PPC and Glead (lead.LeadAgent, built by the runner, not by GAgent)."""
     method, _, noise = label.partition("@")
-    assert method in GAgent.METHODS and noise in ("", "glr", "ema"), label
-    assert not noise or method == "G", f"{label}: noisy eyes run on G only"
+    assert method in (*GAgent.METHODS, "Glead") and noise in ("", "glr", "ema", "cv"), label
+    assert noise in ("", "cv") or method == "G", f"{label}: glr and ema eyes run on G only"
+    assert noise != "cv" or method in ("G", "Gauto", "PPC", "Glead"), f"{label}: cv eyes run on G, Gauto, PPC, Glead"
     return method, noise
