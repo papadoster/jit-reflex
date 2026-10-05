@@ -9,8 +9,10 @@ per process. Per case:
   (trigger_observation).
 - Dynamic: their "intervention" arm, once per --arms label (gauto.parse_arm). Until the event every call is answered
   with Base's recorded chunk of that step (maxwrap.ChunkReplay; the same (s, d) schedule as Base all episode), from the
-  event on the brain is called live. prefix_ok: the executed actions equal Base's bitwise up to the event, at the same
-  event step, with no call Base did not make (else the pair is invalid; the episode still runs to its end).
+  event on the brain is called live. A pre-event call Base did not make (the agent's own trigger) does not raise, as
+  LIBERO-MAX's replay would: it goes live and is flagged (replay_miss = its step). prefix_ok: the executed actions
+  equal Base's bitwise up to the event, at the same event step, with no replay miss. Spec §6 drops the pairs with
+  prefix_ok false or a replay miss; the episode still runs to its end.
 - Agent per step as scripts/c1e4_run.py: observe(t, eef, object) -> arrive -> Gcal's shadow pair -> wants_call /
   issue (brain or replay) -> arrive -> act -> step. eef = raw robot0_eef_pos; object = backend.entity_position of the
   trigger entity (the moved object). The event flag is not passed to the agent.
@@ -19,7 +21,9 @@ per process. Per case:
 - Time t: their policy step (total_env_steps - warmup_steps); e: their cosmos_query_boundary_step (Base: the would-be
   one), the first policy step whose observation is post-event. Brain noise seed: policy_seed + t (their runners);
   the shadow pair's: policy_seed + t_e.
-One JSON line per episode; a case's lines are written together, Base last (resume: a case with a Base line is done).
+One JSON line per episode (strict JSON, no NaN); a case's lines are written together, Base last (resume: a case with a
+Base line is done). The run ends with "done N of M cases, failed K: <ids>" and exits 1 when a group failed (a rerun
+with the same --out retries it).
 
 Run (env set by the caller, workers inherit it). Source LIBERO-plus (PRO: LIBERO-PRO/libero, libero-pro-config):
     export MUJOCO_GL=cgl HF_HUB_OFFLINE=1 TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
@@ -39,6 +43,7 @@ import math
 import multiprocessing as mp
 import os
 import re
+import subprocess
 import sys
 import time
 import traceback
@@ -60,15 +65,24 @@ MAX_STEPS = {"libero_spatial": 220, "libero_object": 280, "libero_goal": 300, "l
 Q = {"pi05": 10, "smolvla": 10, "oft": 8, "oftplus": 8}  # native call period (pi0.5: ours, as part 1)
 DUMMY = [0, 0, 0, 0, 0, 0, -1]  # lerobot.envs.libero.get_libero_dummy_action(), their warm-up action
 T_RAMP, K_P, TAU_K = 5, 1.0, 0.01  # scripts/c1e4_run.py's defaults
+STRICT = json.JSONEncoder(allow_nan=False)  # not json.dumps: openvla-oft's import patches it to pass numpy silently
+
+
+def lines(recs):
+    """Records as strict JSON lines: NaN, infinity, a numpy int / bool / float32 raise (np.float64 is a float)."""
+    return "".join(STRICT.encode(r) + "\n" for r in recs)
 
 
 def shim():
-    """Before LIBERO is imported: LIBERO-plus / PRO import old gym for type hints only; LIBERO-plus's fog uses np.float_
-    (gone in NumPy 2; LIBERO-MAX's runners set it too); Wand (ImageMagick) serves LIBERO-plus's motion blur only. Where
-    Wand is missing (the Mac) the stub of the Task 1 scratch scene stands in, and motion-blur cases are skipped.
-    True when Wand is real."""
-    import gymnasium
-    sys.modules.setdefault("gym", gymnasium)
+    """Before LIBERO is imported: LIBERO-plus / PRO import old gym for type hints only (gym = gymnasium when gymnasium
+    imports, else an installed gym stays); LIBERO-plus's fog uses np.float_ (gone in NumPy 2; LIBERO-MAX's runners set
+    it too); Wand (ImageMagick) serves LIBERO-plus's motion blur only. Where Wand is missing (the Mac) the stub of the
+    Task 1 scratch scene stands in, and motion-blur cases are skipped. True when Wand is real."""
+    try:
+        import gymnasium
+        sys.modules.setdefault("gym", gymnasium)
+    except ImportError:
+        pass
     if not hasattr(np, "float_"):
         np.float_ = np.float64
     try:
@@ -98,6 +112,14 @@ def source_of(case):
     return "pro" if case.get("substrate_variant") else "plus"
 
 
+def same_task(case, task):
+    """The task load_case_task loaded is the case's: LIBERO-plus, the registry's task name (task_index numbers the
+    overlay's variants, so another source's registry gives another task); LIBERO-PRO, the BDDL file (load_case_task
+    copies the task name from the case, and one name repeats over PRO's categories)."""
+    v = case.get("substrate_variant")
+    return f"{task.problem_folder}/{task.bddl_file}" == v["bddl_file"] if v else task.name == case["task_name"]
+
+
 def noise_level(case):
     """LIBERO-plus sensor-noise level (task name ..._noise_N; 1-10 motion blur, needs Wand), else 0."""
     m = re.search(r"_noise_(\d+)$", case.get("task_name") or "")
@@ -123,6 +145,33 @@ def make_agent(arm, conf, seed):
     kbar = (gauto.KAPPA0[conf["brain"]] if method in ("Gk0", "Gk0T")
             else conf["kbar"] if method in ("Gauto", "GautoT") else None)
     return gauto.GAgent(method, conf["s"], conf["d"], kbar=kbar, **kw)
+
+
+def validate(arms, conf, cases):
+    """main()'s checks before the brain loads: every arm builds its agent, s + d fits the brain's chunk (the conveyor
+    reads a chunk up to s + d - 1 steps after its observation), and Dynamic arms run on target relocation only (the eyes
+    watch the trigger entity, the moved object; connect runs Base only)."""
+    h = cb.OFTBrain.H if conf["brain"] in cb.OFT else orx.H  # OFT 8; LeRobotBrain asserts chunk_size == orx.H (50)
+    assert conf["s"] + conf["d"] <= h, f"s + d = {conf['s'] + conf['d']} > {conf['brain']}'s chunk H = {h}"
+    for a in arms:
+        make_agent(a, conf, 0)
+    bad = [c["case_id"] for c in cases if c["scenario"]["change_type"] != "target_relocation"]
+    assert not (arms and bad), f"Dynamic arms {arms} on {len(bad)} cases without target relocation, e.g. {bad[:3]}"
+
+
+def set_ids(split, name):
+    """The case ids of --set: eval300 = the first 300 of eval (M1 + M2 of pi0.5, M4, D), evalrest = the rest of eval
+    (M1)."""
+    return split["eval"][:300] if name == "eval300" else split["eval"][300:] if name == "evalrest" else split[name]
+
+
+def git_head(path):
+    """The commit of the git checkout holding path (the LIBERO-MAX package this process imports), else "unknown"."""
+    try:
+        r = subprocess.run(["git", "-C", str(path), "rev-parse", "HEAD"], capture_output=True, text=True)
+    except OSError:
+        return "unknown"
+    return r.stdout.strip() if r.returncode == 0 else "unknown"
 
 
 def _reseed(v):  # LIBERO-MAX's reseed (np.random, torch)
@@ -157,6 +206,8 @@ class LocalEnv:
         from libero_max.substrate import load_case_task
         self.close()
         task, inits = load_case_task(case, benchmark, self.suites)
+        assert same_task(case, task), (f"{case['case_id']}: loaded task {task.name} ({task.problem_folder}/"
+                                       f"{task.bddl_file}): another scene source's env (LIBERO_* env vars)?")
         seed = int(case["policy_seed"])
 
         def factory():
@@ -303,7 +354,8 @@ class Episode:
 
     def replayed(self):
         """Base's chunk for a call before the event; None for a live call. A pre-event call Base did not make (the
-        agent's own trigger) breaks the pair: it is noted and made live."""
+        agent's own trigger) does not raise: it goes live and is flagged (replay_miss, its first step), and spec §6
+        drops the pair."""
         if self.replay is None or not self.replay.replaying(self.t):
             return None
         if self.t not in self.replay.recorded:
@@ -346,7 +398,12 @@ class Episode:
             "kappa_log": ag.kappa_log, "c_extra": np.round(ag.c, 6).tolist(),
             "act_hash": hashlib.sha256(np.asarray(self.acts).tobytes()).hexdigest()[:16],
             "prefix_ok": None, "replay_miss": self.miss, "g_check": None}
-        rec |= orx.episode_metrics(self.xs, self.acts, self.objs)  # grasp_ok: lifted >= 3 cm while closed
+        rec |= orx.episode_metrics(self.xs, self.acts, self.objs)
+        # grasp_ok after the event (spec §6): lifted >= 3 cm above its height at step e while closed, from e on (Base:
+        # the would-be e; no event: step 0)
+        k = self.e or 0
+        rec["grasp_ok"] = (k < len(self.acts)
+                           and orx.episode_metrics(self.xs[k:], self.acts[k:], self.objs[k:])["grasp_ok"])
         if self.kind == "dynamic":
             b = self.base
             n = len(self.acts) if self.e is None else self.e  # actions of steps 0 .. e - 1
@@ -442,8 +499,12 @@ def run_cases(cases, arms, conf, envs, brain, wand=True, video_cases=(), video_d
     for ep in dyn + bases:
         out.setdefault(ep.case["case_id"], []).append(ep.record())
         if ep.frames is not None:
-            write_video(Path(video_dir) / f"{ep.case['case_id']}__{conf['brain']}__{ep.kind}_{ep.arm}__s{conf['s']}"
-                                          f"d{conf['d']}.mp4", ep.frames)
+            path = (Path(video_dir) / f"{ep.case['case_id']}__{conf['brain']}__{ep.kind}_{ep.arm}__s{conf['s']}"
+                                      f"d{conf['d']}.mp4")
+            try:
+                write_video(path, ep.frames)
+            except Exception as exc:  # a video is for viewing only: the records stay
+                print(f"video {path} not written: {exc!r}", flush=True)
     return [r for c in cases for r in out[c["case_id"]]]
 
 
@@ -496,7 +557,7 @@ def main():
     p.add_argument("--precision", choices=["fp32", "bf16"], help="default fp32 (LeRobot), bf16 (OFT)")
     p.add_argument("--source", choices=["plus", "pro"], help="the scene source of this process (env vars)")
     p.add_argument("--split", default=str(REPO / "results/c1-e4/part2/split.json"))
-    p.add_argument("--set", choices=["calib", "eval", "eval300", "connect"])
+    p.add_argument("--set", choices=["calib", "eval", "eval300", "evalrest", "connect"])
     p.add_argument("--cases", help="comma-separated case ids, a subset of the set (debugging)")
     p.add_argument("--arms", default="none,G,Gauto,PPC", help="Dynamic arms (gauto.parse_arm); '' = Base only")
     p.add_argument("--s", type=int, help="call period, default the brain's native Q")
@@ -508,6 +569,8 @@ def main():
     p.add_argument("--vector", choices=["async", "sync"], default="async")
     p.add_argument("--device", default="cuda")
     p.add_argument("--out", help="JSON lines")
+    p.add_argument("--repeat-check", action="store_true",
+                   help="repeat the first brain call (same inputs and seeds) and print whether it matches bitwise")
     args = p.parse_args()
     wand = shim()
     if args.freeze_split:
@@ -520,7 +583,7 @@ def main():
     assert not video or (args.video_dir and REPO not in Path(args.video_dir).resolve().parents
                          and Path(args.video_dir).resolve() != REPO), "videos need --video-dir outside the repository"
     split = maxwrap.load_split(args.split)
-    ids = split["eval"][:300] if args.set == "eval300" else split[args.set]
+    ids = set_ids(split, args.set)
     rev = (gauto.BRAINS.get(args.brain) or cb.OFT[args.brain])[1]
     precision = args.precision or ("bf16" if args.brain in cb.OFT else "fp32")
     conf = {"brain": args.brain, "revision": rev, "precision": precision, "s": args.s or Q[args.brain], "d": args.d,
@@ -533,37 +596,49 @@ def main():
         keep = set(args.cases.split(","))
         assert keep <= set(ids), f"not in --set {args.set}: {sorted(keep - set(ids))}"
         cases = [c for c in cases if c["case_id"] in keep]
+    validate(arms, conf, cases)
+    import libero_max
+    prov = {"lmax_commit": git_head(Path(libero_max.__file__).parent), "source": args.source, "n_envs": args.n_envs,
+            "vector": args.vector}  # not in conf: conf is the resume key, these may change between resumed runs
     done = load_done(args.out, conf)
     todo = [c for c in cases if c["case_id"] not in done]
     print(f"{len(todo)} of {len(cases)} {args.source} cases of {args.set} to run, {1 + len(arms)} episodes each; "
           f"split {split['sha256'][:12]}, Wand {'real' if wand else 'stub'}", flush=True)
     if not todo:
+        print("done 0 of 0 cases, failed 0:", flush=True)
         return
     if video:
         Path(args.video_dir).mkdir(parents=True, exist_ok=True)
     timer = {"s": 0.0, "calls": 0, "rows": 0}
     model = cb.make_brain(args.brain, args.device, precision)
+    repeat = args.repeat_check
 
     def brain(*a):
+        nonlocal repeat
         tb = time.time()
         out = model(*a)
         timer["s"] += time.time() - tb
         timer["calls"] += 1
         timer["rows"] += len(a[3])
+        if repeat:  # spec §4.1 (scripts/c1e4_run.py --repeat-check): the same call again must give the same chunk
+            repeat, again = False, model(*a)
+            print(f"C1-E4m repeat: rows={len(a[3])} max_abs={np.abs(again - out).max():.3e} "
+                  f"bitwise={int(np.array_equal(again, out))}", flush=True)
         return out
 
     def make_envs():
         return [(Remote if args.vector == "async" else LocalEnv)(cb.RES[args.brain]) for _ in range(args.n_envs)]
 
-    envs, t0, n_done, n_try, n_fail = make_envs(), time.time(), 0, 0, 0
+    envs, t0, n_done, n_try, n_fail, failed = make_envs(), time.time(), 0, 0, 0, []
     try:
         for g in range(0, len(todo), args.n_envs):
             group, tb, n_try = todo[g: g + args.n_envs], time.time(), n_try + 1
             timer.update(s=0.0, calls=0, rows=0)
             try:
                 recs = run_cases(group, arms, conf, envs, brain, wand, video, args.video_dir)
+                text = lines(r | {"run": prov} for r in recs)
             except Exception as exc:  # a fallen group is skipped here; a rerun with resume retries it
-                n_fail += 1
+                n_fail, failed = n_fail + 1, failed + [c["case_id"] for c in group]
                 print(f"FAILED {[c['case_id'] for c in group]}: {exc!r}", flush=True)
                 traceback.print_exc()
                 for env in envs:
@@ -573,12 +648,11 @@ def main():
                         pass
                 if n_fail >= 5 and n_fail > 0.2 * n_try:
                     print(f"ABORT: systematic failure, {n_fail} of {n_try} groups failed", flush=True)
-                    sys.exit(1)
+                    break
                 envs = make_envs()
                 continue
-            strict = json.JSONEncoder()  # not json.dumps: openvla-oft's import patches it to pass numpy silently
             with open(args.out, "a") as f:
-                f.write("".join(strict.encode(r) + "\n" for r in recs))
+                f.write(text)
             n_done += len(group)
             rate = (time.time() - t0) / n_done
             print(f"group {g // args.n_envs}: {len(group)} cases {len(recs)} episodes {time.time() - tb:.1f} s, brain "
@@ -587,6 +661,9 @@ def main():
     finally:
         for env in envs:
             env.close()
+    print(f"done {n_done} of {len(todo)} cases, failed {len(failed)}: {','.join(failed)}".rstrip(), flush=True)
+    if failed:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
