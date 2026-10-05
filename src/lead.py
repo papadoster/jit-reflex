@@ -58,7 +58,7 @@ class CVKalman:
 
     def __call__(self, p):
         p = np.array(p, float)
-        if self.x is None:
+        if self.x is None:  # prior: centred on the true position with variance R, velocity 0
             self.x, self.P = np.stack([p, np.zeros(3)], axis=1), np.diag([self.R, 1e-6])
             for i in range(self.WARM):
                 self._step(p, may_drop=i > 0)
@@ -69,7 +69,9 @@ class CVKalman:
 
 def lead_gate(kf, seen, m=GATE_M):
     """lambda: the speed is above V_MIN, the velocity confident (sd <= GATE_SD |v|) and the motion uniform: over the last
-    m seen positions both halves moved by ~ v m / 2. A step moves only one half, so the gate stays shut."""
+    m seen positions both halves moved by ~ v m / 2. A step moves only one half, so the gate stays shut. m even: an odd
+    m's second half spans m - m // 2 steps against v (m // 2) and shuts the gate on uniform motion."""
+    assert m % 2 == 0, m
     v = kf.v[:2]
     sp = float(np.linalg.norm(v))
     if sp < V_MIN or len(seen) <= m or kf.sd > GATE_SD * sp:
@@ -83,19 +85,35 @@ def lead_gate(kf, seen, m=GATE_M):
 class LeadAgent(gauto.GAgent):
     """G-auto (law Z1) with the lead: U_lead(t) = U(t) + lambda(t) clip(v_xy(t) tau_lead, LEAD_MAX), z of the lead 0,
     lambda = lead_gate on the same eyes, and tracking until the fingers close: G's law runs tau_close steps from the
-    first close command on (that step included), the gripper untouched. The velocity comes from the CV-Kalman eyes when
-    they are the tracker (one filter step per env step), else from an oracle CVKalman on the seen positions."""
+    first close command on (that step included), the gripper untouched; a plan arriving in that window gets Z1's kappa
+    (HAgent resets kappa to 1 after the close), its kappa_log entry tagged post_close. The velocity comes from the
+    CV-Kalman eyes when they are the tracker (one filter step per env step), else from an oracle CVKalman on the seen
+    positions."""
 
     def __init__(self, s, d, kbar, tau_lead, tau_close, tracker=None, gate_m=GATE_M, **kw):
+        assert gate_m >= 2 and gate_m % 2 == 0, gate_m
         super().__init__("Gauto", s, d, kbar=kbar, tracker=tracker, **kw)
         self.tau_lead, self.tau_close, self.gate_m = tau_lead, tau_close, gate_m
         self.kf = tracker if isinstance(tracker, CVKalman) else CVKalman.oracle()
         self.t_close = None
 
     def observe(self, t, eef, obj, contact=False):
+        self.t_now = t
         super().observe(t, eef, obj, contact)
         if self.kf is not self.tracker:
             self.kf(self.p_hist[t])
+
+    def on_new_chunk(self):
+        if self.t_close is None or self.t_now >= self.t_close + self.tau_close:
+            return super().on_new_chunk()
+        n = len(self.kappa_log)
+        self.grasp_started = False  # only HAgent.on_new_chunk reads it here; t_e is set by observe alone
+        try:
+            super().on_new_chunk()
+        finally:
+            self.grasp_started = True
+        for e in self.kappa_log[n:]:
+            e["post_close"] = True
 
     def lead(self, t):
         """The lead at the latest observed step t (the filter holds only its current state)."""

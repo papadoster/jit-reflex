@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 import gauto
+import handoff as hf
 import lead
 import objreflex as orx
 
@@ -68,12 +69,57 @@ def test_gate_closed_on_still_and_step_open_on_motion():
 
 
 def test_noisy_eyes_share_the_stream_and_feed_the_lead():
-    a, b = lead.CVKalman(7, 0.01, 3, 0.1, 1e-8), lead.CVKalman(7, 0.01, 3, 0.1, 1e-8)
-    assert np.array_equal(a(P0), b(P0 + 0.0))
+    eyes = (lead.CVKalman(7, 0.01, 3, 0.1, 1e-8), hf.Tracker(7, 0.01, 3, 0.1), gauto.GLRKalman(7, 0.01, 3, 0.1))
+    for t in range(50):
+        for e in eyes:
+            e(move(0.002)(t))
+    st = [e.rng.bit_generator.state for e in eyes]
+    assert st[0] == st[1] == st[2]  # the same draws in the same order: branches with one seed share the noise
     ag = lead.LeadAgent(10, 0, kbar=0.2, tau_lead=8, tau_close=6, tracker=lead.CVKalman(7, 0.01, 3, 0.1, 1e-8),
                         gate_m=16)
     _run(ag, move(0.003), T=20)
     assert ag.kf is ag.tracker  # the shared eyes give both the seen position and the velocity
+
+
+def test_cv_eyes_follow_the_lagged_position():
+    kf, v = lead.CVKalman(0, 0.0, 3, 0.0, 1e-8), 0.001
+    for t in range(60):
+        est = kf(move(v)(t))
+    # on uniform motion the CV filter has no steady-state error, so it sits on the lagged frame p(t - 3), 3v behind p(t)
+    assert np.allclose(est, move(v)(59 - 3), atol=1e-6) and np.allclose(kf.v, [v, 0.0, 0.0], atol=1e-7)
+
+
+def test_even_gate_window():
+    kf, seen = lead.CVKalman.oracle(), []
+    for t in range(40):
+        seen.append(move(0.001)(t))
+        kf(seen[-1])
+    with pytest.raises(AssertionError):
+        lead.lead_gate(kf, seen, 7)
+    with pytest.raises(AssertionError):
+        lead.LeadAgent(10, 0, kbar=0.2, tau_lead=8, tau_close=6, gate_m=7)
+
+
+def test_lead_is_gauto_on_a_step_with_a_close():
+    a = _run(gauto.GAgent("Gauto", 10, 0, kbar=0.2), step, close_at=30)
+    b = _run(lead.LeadAgent(10, 0, kbar=0.2, tau_lead=8, tau_close=6), step, close_at=30)
+    assert np.array_equal(a[:30], b[:30]) and np.array_equal(a[36:], b[36:])
+    assert np.array_equal(a, b)  # the reflex has carried the whole step by the close: Z1's U is 0 in the window
+
+
+def test_z1_for_a_plan_inside_the_tracking_window(monkeypatch):
+    monkeypatch.setattr(lead, "lead_gate", lambda *a: False)  # no lead: U is Z1's target alone
+    ag = lead.LeadAgent(10, 0, kbar=0.2, tau_lead=8, tau_close=6)
+    _run(ag, move(0.002), T=40, close_at=25)  # window 25..30, the plan observed at 30 arrives inside it
+    assert ag.t_close == 25 and ag.t_e == 15 and [e["t"] for e in ag.kappa_log] == [20, 30]
+    assert "post_close" not in ag.kappa_log[0] and ag.kappa_log[-1]["post_close"] is True
+    # Z1 at 30: kappa 0.93 < 1 and U(30) = (1 - kappa) Delta_30 = 2.6 mm (the old reset: kappa 1, U 0); the reflex had
+    # carried most of the shift, so U(30) is inside G's dead band and the action at 30 stays 0
+    u = ag.unknown_shift(30)
+    assert ag.kappa_log[-1]["k"] < 1 and np.allclose(u, (1 - ag.kappa) * ag.delta_n) and 0 < np.linalg.norm(u) < orx.EPS
+    late = lead.LeadAgent(10, 0, kbar=0.2, tau_lead=8, tau_close=6)
+    acts = _run(late, move(0.002), T=40, close_at=29)  # window 29..34: U(32) = 2.6 + 4 mm leaves the dead band
+    assert acts[32, :3].any()  # the old reset: U(32) = 4 mm, no action before 33
 
 
 def test_tracking_until_the_fingers_close():
