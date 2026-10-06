@@ -356,7 +356,8 @@ def calib(raw, split, pairs, pod):
 
 def smoke(raw, pod):
     """The pod smoke's validity on calibration debug cases (never read), per brain of the pod (each must be there):
-    invalid Dynamic episodes (prefix_ok false or a replay miss) <= 2% per arm (spec §9's pair rule), check (g) ok for
+    invalid Dynamic episodes (prefix_ok false or a replay miss) <= max(1, 2%) per arm (spec §9's pair rule; one in a
+    smoke's 20 is a warning to look at before connect, two fail), check (g) ok for
     every Dynamic "none" at d = 0 with an event, no skipped episode, and the share of Base episodes without an event
     (report). (pass, detail)."""
     out, ok = {}, True
@@ -372,7 +373,8 @@ def smoke(raw, pod):
                   "base": len(base),
                   "no_event_share": round(float(np.mean([r["e"] is None for r in base])), 4) if base else None,
                   "skipped": sum(1 for r in raw if r.get("brain") == b and r.get("skipped_reason"))}
-        ok &= (bool(dyn) and all(k <= 0.02 * n + TOL for k, n in inv.values()) and len(g) == len(ev) and all(g)
+        out[b]["warn_arms"] = [a for a, (k, n) in inv.items() if 0 < k <= max(1, 0.02 * n)]
+        ok &= (bool(dyn) and all(k <= max(1, 0.02 * n) + TOL for k, n in inv.values()) and len(g) == len(ev) and all(g)
                and not out[b]["skipped"])
     return ok, out
 
@@ -840,6 +842,10 @@ def selftest():
         assert not smoke([x | {"g_check": g} if x["case_id"] == "c9" and x["arm"] == "none" and x["kind"] == "dynamic"
                           else x for x in sm], "A")[0]
     assert not smoke(sm, "B")[0] and not smoke([], "A")[0]
+    s20 = [x for x in sm if int(x["case_id"][1:]) < 20]  # the pod's 20 cases per arm: 1 invalid warns, 2 fail
+    ok, det = smoke(s20, "A")
+    assert ok and det[P]["warn_arms"] == ["G", "none"], det
+    assert not smoke([x | {"prefix_ok": False} if x["case_id"] == "c1" and x["arm"] == "G" else x for x in s20], "A")[0]
     print("selftest ok")
 
 
