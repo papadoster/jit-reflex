@@ -555,9 +555,10 @@ def report(rs, mi, bi, clu, split):
     cv = json.loads(OFFLINE.read_text())["cv"]["bands"]
     v = [round(1000 * s / lead.HZ, 2) for s in lead.SPEEDS]
     out["ppc_cv_offline"] = {"ppc_v_min_cv_mm_per_step": round(1000 * cv["ppc_v_min_cv"], 2), "speeds_mm_per_step": v,
-                             "ppc_cv_sees_motion": 1000 * cv["ppc_v_min_cv"] <= max(v),
-                             "note": "PPC@cv is not in the grid: its band is above every speed class, so it equals "
-                                     "none by construction (spec §7, §11)"}
+                             "band_at_or_below_max_speed": 1000 * cv["ppc_v_min_cv"] <= max(v),
+                             "note": "PPC@cv is not in the grid: under our noise model and an equal false-engagement "
+                                     "budget (<= 5%) its band is above the object's speed, so it equals none by "
+                                     "construction; not 'PPC cannot see motion at all' (spec §7, §11)"}
     return out
 
 

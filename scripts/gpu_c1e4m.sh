@@ -32,7 +32,7 @@
 #                 4. on the Mac: refreeze the split with extra = the maximum of both pods' (maxwrap.freeze_split),
 #                    journal it with the line, push; 5. here: git pull; 6. grid (its lines use the refrozen split)
 #   on the Mac: journal the pod's calib line in the spec, commit, push; here: git pull. Money: the owner adds both pods'
-#               post-smoke forecasts when journaling; above ~$27 the owner is told before the grid (spec §13). This
+#               post-smoke forecasts when journaling; above $30 the owner is asked before the grid (spec §13). This
 #               script only prints its own forecast at the end of smoke and after each grid line
 #   grid        spec §6, §7, §13: the pod's grid lines by priority (A: M1 pi0.5 with M2 -> M1 pi0.5 rest -> B oracle ->
 #               B noisy -> D; B: M1 OFT+ -> M4 SmolVLA -> B oracle -> B noisy -> M4 OFT), one runner process on the GPU
