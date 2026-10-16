@@ -129,6 +129,10 @@ fail() { echo "!!! $*"; exit 1; }
 refuse() { echo "!!! $*"; dry && echo "    (DRY: going on)" || exit 1; }
 
 setup() {
+  # a host whose CUDA does not start fails in seconds, not after the installs (part 2's first two pods, driver
+  # 580.126.09: /dev/nvidia-uvm gives EIO, cuInit 999, nvidia-smi fine)
+  dry || python3 -c "import ctypes; r = ctypes.CDLL('libcuda.so.1').cuInit(0); assert r == 0, f'cuInit {r}'" \
+    || fail "CUDA does not start on this host (driver $(nvidia-smi --query-gpu=driver_version --format=csv,noheader)): a new pod"
   # LIBERO-plus's motion blur (19 sensor-noise cases) needs ImageMagick's MagickWand (Wand); spec §3
   if dry || ! dpkg -s libmagickwand-dev >/dev/null 2>&1; then
     dry || [ "$(id -u)" = 0 ] || fail "not root: run  apt-get update && apt-get install -y libmagickwand-dev  first"
