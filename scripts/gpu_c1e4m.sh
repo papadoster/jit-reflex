@@ -111,6 +111,9 @@ NUM='-?[0-9]+\.[0-9]+ \[-?[0-9]+\.[0-9]+, -?[0-9]+\.[0-9]+\] N=[0-9]+'
 line_re() { echo "C1-E4 part 2 calib $1: kbar_[a-z0-9]+=$NUM( · (bench: )?kbar_[a-z0-9]+=$NUM)+"; }
 mkdir -p $LOG
 export MUJOCO_GL=${MUJOCO_GL:-egl} PYOPENGL_PLATFORM=${PYOPENGL_PLATFORM:-egl} PYTHONUNBUFFERED=1 PATH="$HOME/.local/bin:$PATH"
+# a container can show the host's CPUs (nproc 256) under a cgroup quota of ~30: per-process BLAS / torch pools of nproc
+# threads in every env worker would oversubscribe it. The same on both pods, so pairs never mix settings
+export OMP_NUM_THREADS=${OMP_NUM_THREADS:-2} OPENBLAS_NUM_THREADS=${OPENBLAS_NUM_THREADS:-2} MKL_NUM_THREADS=${MKL_NUM_THREADS:-2}
 export PYTORCH_CUDA_ALLOC_CONF=${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}  # part 1's journal "trial"
 export OPENVLA_OFT_ROOT=$DEPS/openvla-oft C1E4_OFT_CKPT=${C1E4_OFT_CKPT:-/workspace/oft-ckpt} \
   TF_FORCE_GPU_ALLOW_GROWTH=true  # openvla-oft imports TensorFlow (image resize): it must not take the GPU's memory
