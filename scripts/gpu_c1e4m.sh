@@ -39,7 +39,8 @@
 #               at a time, the forecast after each line, then grid_all_$POD.jsonl. Refuses unless the spec at HEAD
 #               journals this pod's calib line (equal to calib.txt) and the other pod's (a refreeze moves both pods'
 #               evaluation cases), the split has calib's extra, HEAD is pushed, the tree is clean, connect passed and
-#               the runner code is connect's ($O/CODE). The reading: on the Mac with both pods' grid_all files
+#               the runner code is connect's ($O/CODE). ONLY=<id regex>: only those lines (bench lines alone need no
+#               line of the other pod). The reading: on the Mac with both pods' grid_all files
 # One stage at a time on a pod (flock). Each runner line has its own --out (block, brain, set, source, d), runs twice
 # (pass 2 resumes and retries failed groups, scripts/gpu_c1e3.sh's watchdog STALL, default 1200 s) and a stage fails if a
 # runner still exits non-zero after pass 2. Every exit appends the environment to $O/pod_env_<stage>.txt, refreshes
@@ -642,8 +643,15 @@ json.dump(more[:$K], open('$O/bench_more.json', 'w'))" || exit 1  # a list: the 
     ($W/calib.txt)"
     # a refreeze (spec §5: N < 45 on either pod) moves both pods' evaluation cases: no grid before both lines
     other=$([ $POD = A ] && echo B || echo A)
-    grep -qE "$(line_re $other)" <<< "$spec" || refuse "the spec at HEAD has no calibration line of pod $other yet:
+    # ONLY (an id regex, owner 2026-10-17): only those plan lines. Bench lines alone (runner c1e4: tasks x inits, the
+    # pod's own bench kbar) never use the split, so they need no line of the other pod
+    if [ -n "${ONLY:-}" ] && ! summ --plan --pod $POD --kbar-line "$m" | awk -F'\t' -v re="^($ONLY)\$" '$5 ~ re' \
+      | cut -f2 | grep -qx c1e4m; then
+      echo "ONLY=$ONLY: bench lines only (no split): no calibration line of pod $other needed"
+    else
+      grep -qE "$(line_re $other)" <<< "$spec" || refuse "the spec at HEAD has no calibration line of pod $other yet:
     its calib may still refreeze the split (spec §5); journal it on the Mac, push, pull"
+    fi
     ex=$(grep -oE "^C1-E4 part 2 extra $POD: m=[0-9]+" $W/calib.txt 2>/dev/null | grep -oE '[0-9]+$')
     [ -z "$ex" ] || [ "$($SP -c "import json; print(json.load(open('$SPLIT'))['extra'])")" -ge "$ex" ] \
       || refuse "calib used $ex further cases (calib.txt) but the split at HEAD has a smaller extra: refreeze on the
@@ -654,6 +662,8 @@ json.dump(more[:$K], open('$O/bench_more.json', 'w'))" || exit 1  # a list: the 
     [ ! -f $W/connect_fail ] || refuse "connect failed ($W/connect_fail): no grid"
     check_code require
     PLAN=$(summ --plan --pod $POD --kbar-line "$m") || exit 1
+    [ -z "${ONLY:-}" ] || PLAN=$(awk -F'\t' -v re="^($ONLY)\$" '$5 ~ re' <<< "$PLAN")
+    [ -n "$PLAN" ] || fail "ONLY=${ONLY:-} matches no line of the plan"
     echo "[$(date +%T)] grid, pod $POD; $m" | tee -a $W/forecast.txt
     run_phase grid "$PLAN"; rc=$?
     oft_numpy
