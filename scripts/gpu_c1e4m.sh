@@ -195,6 +195,12 @@ d('Sylvest/LIBERO-plus', 'assets.zip', repo_type='dataset', revision='$ASSETS_RE
     x rm -f $DEPS/dl/assets.zip
     wr $DEPS/plus-assets-ok $ASSETS_SHA
   fi
+  # the zip keeps its authors' path (inspire/hdd/.../LIBERO-plus-0/assets): that assets dir goes to $PL/assets
+  if ! dry && [ ! -d $PL/assets ]; then
+    a=$(find $PL/inspire -type d -path '*/LIBERO-plus-0/assets' 2>/dev/null | head -1)
+    [ -n "$a" ] && mv "$a" $PL/assets && rm -rf $PL/inspire
+  fi
+  dry || [ -f $PL/assets/scenes/libero_floor_base_style.xml ] || fail "LIBERO-plus assets are not at $PL/assets"
   # standard LIBERO (hf-libero) for the bench, the self-tests and the latency: assets and ~/.libero (the pod's venvs)
   for py in $PYS; do
     x sh -c "echo N | $py -c \"import os, libero.libero as L; a = L.get_assets_path()
