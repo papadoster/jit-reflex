@@ -203,11 +203,15 @@ assert os.path.isdir(a), f'no LIBERO assets at {a}'; print('LIBERO assets:', a)\
   done
   x $P -c "import torch; assert torch.cuda.is_available(), 'CUDA is not visible to torch'
 print('torch', torch.__version__, 'CUDA', torch.version.cuda, torch.cuda.get_device_name(0))" || exit 1
+  # the context is kept (c): an unreferenced one can be freed at once, and GL_RENDERER then comes back empty although
+  # MuJoCo renders on the GPU (pod A, 2026-10-17); the EGL vendor of that context is checked too
   local probe='import os, mujoco
-mujoco.GLContext(64, 64).make_current()
-from OpenGL import GL; r = GL.glGetString(GL.GL_RENDERER).decode()
-print("GL renderer:", r)
-assert not any(s in r.lower() for s in ("llvmpipe", "softpipe", "swrast")), "EGL renders on the CPU"'
+from mujoco.egl import egl_ext as EGL
+c = mujoco.GLContext(64, 64); c.make_current()
+v = EGL.eglQueryString(EGL.eglGetCurrentDisplay(), EGL.EGL_VENDOR).decode()
+from OpenGL import GL; r = (GL.glGetString(GL.GL_RENDERER) or b"?").decode()
+print("EGL vendor:", v, "GL renderer:", r)
+assert v == "NVIDIA" and not any(s in r.lower() for s in ("llvmpipe", "softpipe", "swrast")), "EGL renders on the CPU"'
   if ! dry && ! $P -c "$probe" </dev/null; then  # as scripts/gpu_c1e4.sh
     apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq libegl1 libgl1 libopengl0 libglib2.0-0 \
       </dev/null
