@@ -278,3 +278,27 @@ def test_sync_envs_keep_their_own_np_random():
     alone, (x, y) = frames([run.LocalEnv(128)])[0], frames([run.LocalEnv(128), run.LocalEnv(128)])
     assert all(np.array_equal(p, q) and np.array_equal(p, r) for p, q, r in zip(alone, x, y))
     assert not np.array_equal(alone[1], alone[2])  # the fog redraws per step: the test can fail
+
+
+def test_fog_map_at_our_render_size(monkeypatch):
+    """LIBERO-plus's fog adds a 256-px plasma map; at 360 px it must be that same map, resized (not a crash)."""
+    from types import ModuleType
+    ew = ModuleType("libero.libero.envs.env_wrapper")
+    ew.plasma_fractal = lambda mapsize=256, wibbledecay=3: np.random.uniform(0, 1, (mapsize, mapsize))
+    for name, mod in {"libero": ModuleType("libero"), "libero.libero": ModuleType("libero.libero"),
+                      "libero.libero.envs": ModuleType("libero.libero.envs"),
+                      "libero.libero.envs.env_wrapper": ew}.items():
+        monkeypatch.setitem(sys.modules, name, mod)
+    sys.modules["libero.libero.envs"].env_wrapper = ew
+    orig = ew.plasma_fractal
+    run.fog_at(256)
+    assert ew.plasma_fractal is orig
+    run.fog_at(360)
+    run.fog_at(360)  # once only
+    np.random.seed(0)
+    m = ew.plasma_fractal(wibbledecay=2.0)
+    np.random.seed(0)
+    m256 = orig()
+    assert m.shape == (360, 360) and 0 <= m.min() and m.max() <= 1
+    assert abs(m.mean() - m256.mean()) < 0.01  # the same draws, stretched
+    assert ew.plasma_fractal(wibbledecay=2.0).shape == (360, 360)

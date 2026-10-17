@@ -182,6 +182,22 @@ def _reseed(v):  # LIBERO-MAX's reseed (np.random, torch)
         torch.cuda.manual_seed_all(v)
 
 
+def fog_at(res):
+    """LIBERO-plus's fog adds a 256-px plasma map, its own render size; at 360 px (pi0.5 and SmolVLA, part 1's) the sum
+    does not broadcast. The same map (the same np.random draws), resized to res: its fog at our render size."""
+    from libero.libero.envs import env_wrapper as ew
+    orig = getattr(ew, "plasma_fractal", None)
+    if res == 256 or orig is None or getattr(orig, "c1e4m", False):
+        return
+    from PIL import Image
+
+    def plasma(mapsize=256, wibbledecay=3):
+        m = orig(mapsize, wibbledecay).astype(np.float32)
+        return np.asarray(Image.fromarray(m, mode="F").resize((res, res), Image.BILINEAR), dtype=np.float64)
+
+    plasma.c1e4m = True
+    ew.plasma_fractal = plasma
+
 class LocalEnv:
     """One LIBERO-MAX episode per start(), built fresh as their reference shard does (one env per paired arm), and
     stepped to the end. np.random's global state is kept per env (LIBERO-plus's motion blur, fog and glass blur draw
@@ -200,6 +216,7 @@ class LocalEnv:
     def start(self, case, arm, s):
         from libero.libero import benchmark, get_libero_path
         from libero.libero.envs import OffScreenRenderEnv
+        fog_at(self.res)
         from libero_max.cosmos_integration import CosmosInterventionEnv
         from libero_max.env_factory import create_libero_env_with_retry
         from libero_max.pro_runtime import wrap_case_env
