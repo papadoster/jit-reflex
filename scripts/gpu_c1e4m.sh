@@ -43,7 +43,7 @@
 #               the runner code is connect's ($O/CODE). ONLY=<id regex>: only those lines (bench lines alone need no
 #               line of the other pod). The reading: on the Mac with both pods' grid_all files
 # One stage at a time on a pod (flock). Each runner line has its own --out (block, brain, set, source, d), runs twice
-# (pass 2 resumes and retries failed groups, scripts/gpu_c1e3.sh's watchdog STALL, default 1200 s) and a stage fails if a
+# (pass 2 resumes and retries failed groups, scripts/gpu_c1e3.sh's watchdog STALL, default 7200 s) and a stage fails if a
 # runner still exits non-zero after pass 2. Every exit appends the environment to $O/pod_env_<stage>.txt, refreshes
 # $O/MANIFEST.sha256 and packs $O into c1e4m_results_$POD.tgz.
 # DRY=1 [DRY_PY=python-with-numpy] [KBAR_LINE="C1-E4 part 2 calib A: ..."] [SHORT="m/pi05"]: print every command instead
@@ -76,7 +76,7 @@ VO=$DEPS/venv-oft
 PO=$VO/bin/python
 PYS=$P; [ $POD = B ] && PYS="$P $PO"  # the pod's venvs
 VID=${VID:-/workspace/c1e4m_videos}  # outside the repository
-STALL=${STALL:-1200}
+STALL=${STALL:-7200}  # an M1/M2 pi0.5 group (6 cases x 8 episodes) runs 15-30 min without output
 K=${K:-20}  # calib_more: the next K evaluation cases (bench: spare pairs) in order, spec §5
 PEAK_MAX=23552  # MiB: part 1's 23 GB
 PI_REPO=lerobot/pi05_libero_finetuned_v044
