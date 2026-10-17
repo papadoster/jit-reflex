@@ -57,16 +57,20 @@ B_ARMS, NOISY, D_ARMS = ("none", "Gauto", "Glead", "PPC"), ("Gauto@cv", "Glead@c
 RATE, N_MIN, CONNECT_PP = 0.34, maxwrap.N_MIN, 10  # $/h RTX 4090 (spec §13); calibration N >= 45; connect +-10 pp
 NUM = r"-?\d+\.\d+ \[-?\d+\.\d+, -?\d+\.\d+\] N=\d+"
 KB0 = {(r, b): 0.0 for r in "mb" for b in CAL}  # a placeholder kbar: the plan's episodes do not depend on it
+# spec journal 2026-10-17: SmolVLA's connect Base 6.3 % against Table 2's 26.1 +- 10 (pi0.5 on the same cases as theirs):
+# no LIBERO-MAX line after connect (no M0, no M4 S; its connect stays in the report), its bench block B stays (owner)
+DROPPED = {S}
 
 
-def mine(pod):
-    """The pod's LIBERO-MAX brains in the calibration line's order (both pods' without a pod)."""
-    return [b for b in CAL if pod is None or b in POD[pod]]
+def mine(pod, dropped=False):
+    """The pod's LIBERO-MAX brains in the calibration line's order (both pods' without a pod); those whose connect
+    failed (DROPPED) only with dropped."""
+    return [b for b in CAL if (pod is None or b in POD[pod]) and (dropped or b not in DROPPED)]
 
 
 def tkeys(pod):
     """The pod's tempo keys: seconds per episode per runner and brain (scripts/gpu_c1e4m.sh smoke)."""
-    return [f"lmax_{b}" for b in mine(pod)] + [f"bench_{BENCH[pod]}"]
+    return [f"lmax_{b}" for b in mine(pod, True)] + [f"bench_{BENCH[pod]}"]
 
 
 def line_re(pod):
@@ -111,10 +115,10 @@ def lines(kbar=None, split=None, pod=None, more=(), k=20):
     process with its own --out (id): a LIBERO-MAX block, brain, set, source and d, or a bench block and brain. Dicts:
     phase, runner, brain, source, id, block, arms, keys (the expected episodes, key()), args."""
     split = split or maxwrap.load_split(SPLIT)
-    s0, brains, out = split0(split), mine(pod), []
+    s0, brains, out = split0(split), mine(pod, True), []
 
     def m(phase, block, brain, sset, arms, d=0, tag=None, cases=None):
-        if brain not in brains:
+        if brain not in brains or brain in DROPPED and phase != "connect":
             return
         for src, ids in sources(cases or run.set_ids(split if phase == "grid" else s0, sset)).items():
             args = f"--brain {brain} --source {src} --set {sset} --arms={','.join(arms)} --d {d}"
@@ -273,17 +277,18 @@ def mrule(name, mi, clu):
 def connect(raw, split, pod=None):
     """spec §9: Base "none" success on the connect set per brain against their Table 2 overall Base, within +-10 pp
     (pi0.5, OFT, SmolVLA; equality passes); OFT+ report only. A brain with > 1% of its 300 Base episodes missing does
-    not pass. The pod's brains (both pods' without one). (pass, detail)."""
+    not pass. The pod's brains (both pods' without one); a DROPPED brain is reported, the gate is the others'.
+    (pass, detail)."""
     ids, out = set(split["connect"]), {}
-    for b in mine(pod):
+    for b in mine(pod, True):
         x = {r["case_id"]: r["success"] for r in raw if r.get("case_id") in ids and r["brain"] == b
              and not r["conf"]["arms"] and r["kind"] == "base" and not r.get("skipped_reason")}
         rate, miss = (100 * float(np.mean(list(x.values()))) if x else None), len(ids - x.keys())
         ok = (None if b not in TABLE2 else rate is not None and abs(rate - TABLE2[b]) <= CONNECT_PP + TOL
               and miss <= 0.01 * len(ids) + TOL)
         out[b] = {"n": len(x), "missing": miss, "base_none": None if rate is None else round(rate, 2),
-                  "table2": TABLE2.get(b), "pass": ok}
-    return all(v["pass"] is not False for v in out.values()), out
+                  "table2": TABLE2.get(b), "pass": ok, "dropped": b in DROPPED}
+    return all(v["pass"] is not False for b, v in out.items() if b not in DROPPED), out
 
 
 def connect_table(det):
@@ -293,7 +298,8 @@ def connect_table(det):
         diff = None if v["base_none"] is None or v["table2"] is None else v["base_none"] - v["table2"]
         rows.append(f"{b:8} {v['n']:4} {v['missing']:4} {v['base_none']!s:>11} {v['table2'] or '-'!s:>9} "
                     f"{'-' if diff is None else f'{diff:+.1f}':>6}  "
-                    f"{'report only' if v['pass'] is None else v['pass']}")
+                    f"{'report only' if v['pass'] is None else v['pass']}"
+                    f"{' (dropped: no LIBERO-MAX line after connect)' if v['dropped'] else ''}")
     return "\n".join(rows)
 
 
@@ -594,6 +600,8 @@ def figure(path, fig):
 
 
 def selftest():
+    global DROPPED
+    dropped, DROPPED = DROPPED, set()  # the plan as specified first (every brain); the drop is checked at the end
     split = maxwrap.load_split(SPLIT)
     kla = "C1-E4 part 2 calib A: kbar_pi05=0.300 [0.250, 0.350] N=58 · bench: kbar_pi05=0.350 [0.300, 0.400] N=60"
     klb = ("C1-E4 part 2 calib B: kbar_oftplus=0.100 [0.050, 0.150] N=50 · kbar_oft=0.050 [0.000, 0.100] N=47 · "
@@ -847,6 +855,33 @@ def selftest():
     ok, det = smoke(s20, "A")
     assert ok and det[P]["warn_arms"] == ["G", "none"], det
     assert not smoke([x | {"prefix_ok": False} if x["case_id"] == "c1" and x["arm"] == "G" else x for x in s20], "A")[0]
+    # SmolVLA dropped after its connect (spec journal 2026-10-17): its connect and bench lines stay, M0 and M4 S go, pod
+    # B's line has no LIBERO-MAX kbar of it, the gate is the other brains'
+    DROPPED = dropped
+    assert DROPPED == {S}
+    klb2 = ("C1-E4 part 2 calib B: kbar_oftplus=0.100 [0.050, 0.150] N=50 · kbar_oft=0.050 [0.000, 0.100] N=47 · "
+            "bench: kbar_smolvla=0.030 [0.000, 0.060] N=59")
+    assert parse_line(klb2) == {("m", OP): 0.1, ("m", O): 0.05, ("b", S): 0.03}
+    assert spec_lines(f"`{kla}`, `{klb2}`") == {"A": kla, "B": klb2}
+    for bad in (klb, klb2.replace("kbar_oft=0.050 [0.000, 0.100] N=47 · ", "")):
+        try:
+            parse_line(bad)
+            raise AssertionError(f"accepted {bad!r}")
+        except SystemExit:
+            pass
+    nd = Counter()
+    for ln in lines(parse_line(klb2), pod="B"):
+        nd[ln["block"], ln["brain"]] += len(ln["keys"])
+    assert nd["connect", S] == 300 and nd["Bcal", S] == 60 and nd["Boracle", S] == 2080 and nd["Bnoisy", S] == 520
+    assert not nd["M0", S] and not nd["M4S", S] and nd["M0", O] == 120 and nd["M4oft", O] == 1500, nd
+    assert sum(nd.values()) == 11620 - 120 - 1500
+    assert lines(parse_line(kla), pod="A") == lines(kb, pod="A")  # pod A untouched
+    assert "M4S" not in forecast(t36, "B")["blocks"] and forecast(t36, "A") == fa
+    bad_s = conn(good | {S: 19})  # 6.3 %
+    ok, det = connect(bad_s, split, "B")
+    assert ok and det[S]["pass"] is False and det[S]["dropped"] and not det[O]["dropped"], det
+    assert not connect(conn(good | {S: 19, O: 100}), split, "B")[0]  # OFT's own failure still stops
+    assert "dropped" in connect_table(det)
     print("selftest ok")
 
 

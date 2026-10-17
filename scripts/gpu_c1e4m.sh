@@ -21,7 +21,8 @@
 #               against sync; a bench move smoke -> tempo_smoke.txt and forecast.txt. A failed rerun keeps the last
 #               passed smoke's
 #   connect     spec §9: Base on the 300 connect cases for the pod's brains, then its connection gate. Fails:
-#               $O/connect_fail, the pod stops and the owner is asked
+#               $O/connect_fail, the pod stops and the owner is asked. A brain the owner dropped after its failed
+#               connect (the summary's DROPPED) runs no LIBERO-MAX line after connect; the gate is the others'
 #   calib       spec §5: M0 (Gcal on the 60 calibration cases) and B-cal (bench, 60 pairs) -> the pod's line
 #               "C1-E4 part 2 calib A|B: ..." in calib.txt. N < 45 for a brain (exit 4):
 #                 1. calib exits 4 and names the brains ("short");
@@ -614,6 +615,7 @@ a, s = f('async'), f('sync'); assert a == s and len(a) == 3, (a, s); print('asyn
     x summ --connect $O/connect_*.jsonl --pod $POD | tee -a $W/gates.txt; q=${PIPESTATUS[0]}
     [ $q = 0 ] || { [ $q = 3 ] && x touch $W/connect_fail; fail "connect did not pass (exit $q): pod $POD stops, the
     owner is asked (spec §9, §13)"; }
+    x rm -f $W/connect_fail  # an earlier gate's (a brain since dropped: the summary's DROPPED, spec journal 2026-10-17)
     ;;
   calib | calib_more)
     [ ! -f $W/connect_fail ] || refuse "connect failed ($W/connect_fail): no calibration"
