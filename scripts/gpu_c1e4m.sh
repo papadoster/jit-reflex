@@ -170,15 +170,19 @@ print('HF user:', whoami()['name']); model_info('google/paligemma-3b-pt-224'); p
   # pod B: openvla-oft's venv (python 3.10, torch 2.2.0 as its pyproject) with the transformers fork: plain transformers
   # silently gives wrong chunks (parallel decoding needs the fork's bidirectional attention); plus the scenes
   [ $POD = B ] && clone https://github.com/moojink/openvla-oft.git $DEPS/openvla-oft $OFT_GIT
-  if [ $POD = B ] && { dry || [ ! -f $VO/c1e4m-installed ] || ! $PO -V >/dev/null 2>&1; }; then
+  # tensorflow-metadata >= 1.17 is generated for protobuf 5 (TF 2.15 keeps 4.25); 1.16.1 asks protobuf < 4.21 on python
+  # 3.10, which breaks wandb: both forced (imports checked on the pod, 2026-10-17). Marker 2: venvs built before rebuild
+  if [ $POD = B ] && { dry || [ "$(cat $VO/c1e4m-installed 2>/dev/null)" != 2 ] || ! $PO -V >/dev/null 2>&1; }; then
     x uv venv --clear --python 3.10 $VO || exit 1
     wr $DEPS/oft-overrides.txt "transformers @ git+https://github.com/moojink/transformers-openvla-oft.git@$TF_GIT" \
-      "dlimp @ git+https://github.com/moojink/dlimp_openvla.git@$DLIMP_GIT"
+      "dlimp @ git+https://github.com/moojink/dlimp_openvla.git@$DLIMP_GIT" tensorflow-metadata==1.16.1 protobuf==4.25.9
     x uv pip install --python $PO --override $DEPS/oft-overrides.txt -e $DEPS/openvla-oft robosuite==1.4.0 mujoco==3.3.2 \
       bddl==1.0.1 "hydra-core>=1.2,<1.4" easydict thop cloudpickle opencv-python future gymnasium==1.3.0 \
       scikit-image==0.25.2 imageio==2.38.0 lazy_loader==0.6 Wand==0.6.13 || exit 1  # 0.26: python >= 3.11
     x uv pip install --python $PO --no-deps hf-libero==0.1.4 robomimic==0.2.0 || exit 1
-    x touch $VO/c1e4m-installed
+    x $PO -c "import sys; sys.path.insert(0, '$DEPS/openvla-oft'); import tensorflow_datasets, wandb
+import experiments.robot.openvla_utils" >/dev/null || fail "venv-oft: openvla-oft does not import"
+    wr $VO/c1e4m-installed 2
   fi
   # LIBERO-PRO's data and config through LIBERO-MAX's own setup script (it checks LIBERO-PRO's commit); it calls hf
   x env PATH="$PWD/venv/bin:$PATH" $P $LMAX/scripts/setup_libero_pro_substrate.py --libero-pro-root $DEPS/LIBERO-PRO \
