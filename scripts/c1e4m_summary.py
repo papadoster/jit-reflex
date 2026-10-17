@@ -944,7 +944,7 @@ if __name__ == "__main__":
         print(f"C1-E4 part 2 smoke validity {a.pod}: {'PASS' if ok else 'FAIL'}")
         raise SystemExit(0 if ok else 3)
     elif a.forecast:
-        done = {key(r) for r in load(a.grid)}
+        done = {key(r) for r in load(a.grid) if "kind" in r}  # the pod's other JSON lines (latency.jsonl) are no episodes
         pods = [a.pod] if len(a.forecast) == 1 else "AB"  # two files: pod A's, then pod B's
         fs = [forecast(read_tempo(t, p), p, a.rate, done) for t, p in zip(a.forecast, pods)]
         print(e2.dump(fs[0] if len(fs) == 1 else both(*fs)))
