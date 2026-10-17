@@ -302,3 +302,25 @@ def test_fog_map_at_our_render_size(monkeypatch):
     assert m.shape == (360, 360) and 0 <= m.min() and m.max() <= 1
     assert abs(m.mean() - m256.mean()) < 0.01  # the same draws, stretched
     assert ew.plasma_fractal(wibbledecay=2.0).shape == (360, 360)
+
+
+@pytest.mark.skipif("LIBERO-plus" not in os.environ.get("LIBERO_SOURCE_PACKAGE_ROOT", ""),
+                    reason="needs the LIBERO-plus scene env (see the runner's docstring)")
+def test_fast_glass_is_theirs_bitwise():
+    """LIBERO-plus's glass blur and ours: the same frame, the same np.random state after, every severity."""
+    run.shim()
+    from libero.libero.envs import env_wrapper as ew
+    from PIL import Image
+    run.fast_glass()
+    fast = ew.glass_blur
+    run.fast_glass()  # once only
+    orig = fast.orig  # theirs (an env started in another test may have swapped it already)
+    assert ew.glass_blur is fast and fast.c1e4m and not getattr(orig, "c1e4m", False)
+    img = Image.fromarray(np.random.default_rng(1).integers(0, 256, (64, 64, 3), dtype=np.uint8))
+    for sev in range(1, 11):
+        np.random.seed(sev)
+        a, sa = orig(img, severity=sev), np.random.get_state()
+        np.random.seed(sev)
+        b, sb = fast(img, severity=sev), np.random.get_state()
+        assert a.dtype == b.dtype and np.array_equal(a, b) and all(np.array_equal(u, v) for u, v in zip(sa, sb)), sev
+

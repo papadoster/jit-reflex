@@ -198,6 +198,42 @@ def fog_at(res):
     plasma.c1e4m = True
     ew.plasma_fractal = plasma
 
+
+def fast_glass():
+    """LIBERO-plus's glass blur (sensor noise 41-50) shuffles pixels in a Python loop, ~1 s per frame on the pod, and a
+    group steps at its slowest env. The same function bitwise, ~20x faster: its parameters read from its own code (not
+    copied), the same np.random draws in the same order (one randint per pass: legacy randint draws element by element)
+    and its numpy "swap" x[h, w], x[h', w'] = x[h', w'], x[h, w], which copies x[h', w'] into x[h, w] only (the right side
+    holds views), done on packed RGB integers."""
+    from libero.libero.envs import env_wrapper as ew
+    orig = getattr(ew, "glass_blur", None)
+    if orig is None or getattr(orig, "c1e4m", False):
+        return
+    table = [k for k in orig.__code__.co_consts if isinstance(k, tuple) and len(k) == 10
+             and all(isinstance(t, tuple) and len(t) == 3 for t in k)]
+    assert len(table) == 1, "LIBERO-plus's glass_blur is not the one fast_glass was checked against"
+    gaussian = ew.gaussian
+
+    def glass_blur(x, severity=1):
+        sigma, m, passes = table[0][severity - 1]
+        x = np.uint8(gaussian(np.array(x) / 255., sigma=sigma, channel_axis=-1) * 255)
+        H, W = x.shape[:2]
+        hs, ws = range(H - m, m, -1), range(W - m, m, -1)
+        p = ((x[..., 0].astype(np.int64) << 16) | (x[..., 1].astype(np.int64) << 8) | x[..., 2]).ravel().tolist()
+        for _ in range(passes):
+            d = iter(np.random.randint(-m, m, size=(len(hs) * len(ws), 2)).tolist())
+            for h in hs:
+                for w in ws:
+                    dx, dy = next(d)
+                    p[h * W + w] = p[(h + dy) * W + w + dx]
+        q = np.array(p, dtype=np.int64).reshape(H, W)
+        x = np.stack([q >> 16, (q >> 8) & 255, q & 255], -1).astype(np.uint8)
+        return np.clip(gaussian(x / 255., sigma=sigma, channel_axis=-1), 0, 1) * 255
+
+    glass_blur.c1e4m, glass_blur.orig = True, orig
+    ew.glass_blur = glass_blur
+
+
 class LocalEnv:
     """One LIBERO-MAX episode per start(), built fresh as their reference shard does (one env per paired arm), and
     stepped to the end. np.random's global state is kept per env (LIBERO-plus's motion blur, fog and glass blur draw
@@ -217,6 +253,7 @@ class LocalEnv:
         from libero.libero import benchmark, get_libero_path
         from libero.libero.envs import OffScreenRenderEnv
         fog_at(self.res)
+        fast_glass()
         from libero_max.cosmos_integration import CosmosInterventionEnv
         from libero_max.env_factory import create_libero_env_with_retry
         from libero_max.pro_runtime import wrap_case_env
