@@ -175,11 +175,13 @@ class GAgent(hf.HAgent):
     the engagement. Gk0, Gauto and their T variants: kappa_N = s_N + kbar (1 - s_N), kbar given (G-kappa0: C1-E4a's
     kappa0; G-auto: kbar_30 frozen in the trial). Gcal acts as G (kappa = 1); the runner makes the shadow paired call
     at its engagement. The T variants re-query when the raw shift since the executing plan's observation exceeds T_THR.
-    GautoU: Gauto plus the carry unwind after the close (part-2 spec §unwind, _unwind)."""
+    GautoU: Gauto plus the carry unwind after the close (part-2 spec §unwind, _unwind). VS0.1, VS0.3, VS1.0: a fixed
+    kappa (controls spec §3.2); VS1.0 is G."""
 
     LAW = ("Gk0", "Gk0T", "Gauto", "GautoT", "GautoU")
+    VS = {f"VS{k}": k for k in (0.1, 0.3, 1.0)}  # controls spec §3.2: our reflex with a fixed kappa instead of law Z1
     # LAW: 1.0 placeholder, on_new_chunk sets Z1's kappa
-    FAMILY = {"G": 1.0, "GT": 1.0, "Gkeep": 0.0, "GR": None, **dict.fromkeys(LAW, 1.0), "Gcal": 1.0}
+    FAMILY = {"G": 1.0, "GT": 1.0, "Gkeep": 0.0, "GR": None, **dict.fromkeys(LAW, 1.0), "Gcal": 1.0, **VS}
     METHODS = ("none", "T0", "PPC", "PPCL", *FAMILY)
 
     def __init__(self, method, s, d, kbar=None, tau_close=None, **kw):
@@ -258,11 +260,12 @@ class GAgent(hf.HAgent):
 def parse_arm(label):
     """A grid arm label -> (method, noise): "G@glr" -> ("G", "glr"), "Gauto" -> ("Gauto", ""). Noise: glr (default noisy
     eyes, GLRKalman) on G and PPC (part 2: PPC on the same frames as G@glr); ema (the old pipeline, hf.Tracker with
-    EMA_BETA and EMA_EPS) on G only (spec §5.2); cv (lead.CVKalman, part 2 block B) on G, Gauto, PPC and Glead
-    (lead.LeadAgent, built by the runner, not by GAgent)."""
+    EMA_BETA and EMA_EPS) on G only (spec §5.2); cv (lead.CVKalman, part 2 block B) on G, Gauto, PPC, Glead
+    (lead.LeadAgent, built by the runner, not by GAgent) and VS (controls spec §3.2)."""
     method, _, noise = label.partition("@")
     assert method in (*GAgent.METHODS, "Glead") and noise in ("", "glr", "ema", "cv"), label
     assert noise != "glr" or method in ("G", "PPC"), f"{label}: glr eyes run on G and PPC"
     assert noise != "ema" or method == "G", f"{label}: ema eyes run on G only"
-    assert noise != "cv" or method in ("G", "Gauto", "PPC", "Glead"), f"{label}: cv eyes run on G, Gauto, PPC, Glead"
+    assert noise != "cv" or method in ("G", "Gauto", "PPC", "Glead", *GAgent.VS), \
+        f"{label}: cv eyes run on G, Gauto, PPC, Glead and VS"
     return method, noise

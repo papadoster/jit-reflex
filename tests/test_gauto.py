@@ -375,3 +375,70 @@ def test_gagent_ppcl_dispatches_like_ppc():
             ag.trigger(t)
             outs.append(ag.act(t, ag.sched.action(t)))
         assert np.array_equal(*outs)
+
+
+# ------------------------------------------------------------------ controls: VS(k), the kappa family, kappa fixed
+
+
+def _walk(method, steps=80, s=10, d=0, jump_at=15, jump=(0.0, 0.06, 0.0)):
+    """One GAgent on a jump: the arm walks to the object it saw at each call (a chunk toward the seen object)."""
+    ag = gauto.GAgent(method, s, d)
+    x, p, acts = np.zeros(3), np.array([0.30, 0.0, 0.0]), []
+    for t in range(steps):
+        if t == jump_at:
+            p = p + np.asarray(jump)
+        ag.observe(t, x, p)
+        if ag.sched.arrive(t):
+            ag.on_new_chunk()
+        if ag.sched.wants_call(t, ag.trigger(t)):
+            ch = np.zeros((orx.H, 7))
+            ch[:, :3] = np.clip((p - x) / orx.G_POS / 25, -1, 1)  # a slow plan toward the seen object
+            ch[:, 6] = -1.0
+            ag.sched.issue(t, ch)
+            if ag.sched.arrive(t):
+                ag.on_new_chunk()
+        a = ag.act(t, ag.sched.action(t))
+        acts.append(a)
+        x = x + orx.G_POS * np.clip(a[:3], -1, 1)
+    return np.array(acts), ag
+
+
+def test_vs_labels_and_kappa():
+    assert gauto.GAgent.VS == {"VS0.1": 0.1, "VS0.3": 0.3, "VS1.0": 1.0}
+    for m, k in gauto.GAgent.VS.items():
+        assert gauto.GAgent.FAMILY[m] == k and m in gauto.GAgent.METHODS and m not in gauto.GAgent.LAW
+
+
+def test_vs1_is_g_bitwise():
+    """controls spec §13 item 6: on jumps (the plan's and random ones) with d = 0 and d = 10."""
+    jumps = [(0.0, 0.06, 0.0), *np.random.default_rng(0).uniform(-0.08, 0.08, (4, 3))]
+    for d, jump in itertools.product((0, 10), jumps):
+        a0, g0 = _walk("G", d=d, jump=jump)
+        a1, g1 = _walk("VS1.0", d=d, jump=jump)
+        assert g0.t_e is not None and g0.kappa_log  # the reflex engaged and a plan ran under kappa
+        assert np.array_equal(a0, a1) and np.array_equal(g0.c, g1.c)
+        assert (g0.g_on, g0.t_e, g0.sched.n_trig) == (g1.g_on, g1.t_e, g1.sched.n_trig)
+
+
+def test_vs03_fixed_kappa_after_engagement_and_g_before():
+    """controls spec §13 item 7."""
+    for d in (0, 10):
+        a0, g0 = _walk("G", d=d)
+        a3, g3 = _walk("VS0.3", d=d)
+        te = g3.t_e
+        assert te is not None and g3.kappa_log
+        t1 = g3.kappa_log[0]["t"] + d  # the first post-engagement plan starts acting at its arrival
+        assert np.array_equal(a0[:t1], a3[:t1]) and not np.array_equal(a0[t1:], a3[t1:])  # G up to that plan
+        post = [k for k in g3.kappa_log if k["t"] >= te]
+        assert post and all(k["k"] == 0.3 for k in post)  # Z1 does not act: kappa stays 0.3 whatever s_N is
+        assert len({k["s"] for k in post}) > 1  # s_N moved, so Z1 would have moved kappa
+        t = len(a3) - 1
+        want = 0.7 * g3.delta_n + (g3.p_hist[t] - g3.p_hist[g3.sched.t_obs])
+        assert np.allclose(g3.unknown_shift(t), want)
+
+
+def test_vs_labels_parse_with_cv_eyes():
+    assert gauto.parse_arm("VS0.3@cv") == ("VS0.3", "cv")
+    assert gauto.parse_arm("VS1.0") == ("VS1.0", "")
+    with pytest.raises(AssertionError):
+        gauto.parse_arm("VS0.3@glr")

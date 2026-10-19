@@ -182,6 +182,12 @@ def test_validate_before_the_model():
     assert run.set_ids(split, "evalrest") == split["eval"][300:] and len(run.set_ids(split, "evalrest")) == 640
 
 
+def test_make_agent_builds_vs_without_kbar():
+    conf = {"t_ramp": 5, "k_p": 1.0, "tau_k": 0.01, "brain": "pi05", "kbar": None, "s": 10, "d": 0}
+    for arm in ("VS0.1", "VS0.3", "VS1.0", "PPCL"):
+        assert run.make_agent(arm, conf, 0).method == arm
+
+
 def test_shim_leaves_gym_without_gymnasium(monkeypatch):
     real = object()
     monkeypatch.setitem(sys.modules, "gym", real)
