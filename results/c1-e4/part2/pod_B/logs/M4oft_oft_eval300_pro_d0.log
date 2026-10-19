@@ -1,0 +1,86 @@
+[22:56:48] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PRO/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX /workspace/lmax-deps/venv-oft/bin/python scripts/c1e4m_run.py --device cuda --brain oft --source pro --set eval300 --arms=none,G,Gauto,PPC --d 0 --kbar 0.088 --n-envs 6 --out results/c1-e4/part2/pod_B/M4oft_oft_eval300_pro_d0.jsonl
+113 of 113 pro cases of eval300 to run, 5 episodes each; split 4beda8e750b4, Wand real
+2026-10-18 22:56:51.324255: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:9261] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2026-10-18 22:56:51.324332: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:607] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2026-10-18 22:56:51.326062: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1515] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2026-10-18 22:56:51.334584: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-10-18 22:56:52.761957: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+Using LIBERO constants:
+  NUM_ACTIONS_CHUNK = 8
+  ACTION_DIM = 7
+  PROPRIO_DIM = 8
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds_q99
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+Returning existing local_dir `/workspace/oft-ckpt/openvla-7b-oft-finetuned-libero-spatial-object-goal-10-638918f3d1` as remote repo cannot be accessed in `snapshot_download` (Cannot reach https://huggingface.co/api/models/moojink/openvla-7b-oft-finetuned-libero-spatial-object-goal-10/revision/638918f3d1c2e43a39a8a20772bdb8b91835e4b7: offline mode is enabled. To disable it, please unset the `HF_HUB_OFFLINE` environment variable.).
+10/18 [22:57:11] WARNING  | >> Returning existing      _snapshot_download.py:224
+                          local_dir                                             
+                          `/workspace/oft-ckpt/openvla                          
+                          -7b-oft-finetuned-libero-spa                          
+                          tial-object-goal-10-638918f3                          
+                          d1` as remote repo cannot be                          
+                          accessed in                                           
+                          `snapshot_download` (Cannot                           
+                          reach                                                 
+                          https://huggingface.co/api/m                          
+                          odels/moojink/openvla-7b-oft                          
+                          -finetuned-libero-spatial-ob                          
+                          ject-goal-10/revision/638918                          
+                          f3d1c2e43a39a8a20772bdb8b918                          
+                          35e4b7: offline mode is                               
+                          enabled. To disable it,                               
+                          please unset the                                      
+                          `HF_HUB_OFFLINE` environment                          
+                          variable.).                                           
+Instantiating pretrained VLA policy...
+Created backup of original config at: /workspace/oft-ckpt/openvla-7b-oft-finetuned-libero-spatial-object-goal-10-638918f3d1/config.json.back.20261018_225711
+Updated config.json at: /workspace/oft-ckpt/openvla-7b-oft-finetuned-libero-spatial-object-goal-10-638918f3d1/config.json
+Changes made:
+  - Set AutoConfig to "configuration_prismatic.OpenVLAConfig"
+  - Set AutoModelForVision2Seq to "modeling_prismatic.OpenVLAForActionPrediction"
+WARNING: `modeling_prismatic.py` is not found anywhere in the current directory.
+WARNING: `configuration_prismatic.py` is not found anywhere in the current directory.
+<frozen importlib._bootstrap>:283: DeprecationWarning: the load_module() method is deprecated and slated for removal in Python 3.12; use exec_module() instead
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:01,  2.61it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:00<00:00,  2.82it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:01<00:00,  2.91it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  2.97it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  2.91it/s]
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+group 0: 6 cases 30 episodes 464.0 s, brain 379.9 s 350 calls 1073 rows; 6/113 cases, 77.3 s/case, eta 2.30 h
+group 1: 6 cases 30 episodes 330.0 s, brain 242.9 s 274 calls 842 rows; 12/113 cases, 66.2 s/case, eta 1.86 h
+group 2: 6 cases 30 episodes 262.3 s, brain 201.0 s 204 calls 589 rows; 18/113 cases, 58.7 s/case, eta 1.55 h
+group 3: 6 cases 30 episodes 340.7 s, brain 267.1 s 226 calls 750 rows; 24/113 cases, 58.2 s/case, eta 1.44 h
+group 4: 6 cases 30 episodes 410.2 s, brain 324.0 s 287 calls 912 rows; 30/113 cases, 60.2 s/case, eta 1.39 h
+group 5: 6 cases 30 episodes 460.7 s, brain 376.1 s 439 calls 1080 rows; 36/113 cases, 63.0 s/case, eta 1.35 h
+group 6: 6 cases 30 episodes 412.3 s, brain 329.4 s 216 calls 934 rows; 42/113 cases, 63.8 s/case, eta 1.26 h
+group 7: 6 cases 30 episodes 379.3 s, brain 307.6 s 260 calls 873 rows; 48/113 cases, 63.7 s/case, eta 1.15 h
+group 8: 6 cases 30 episodes 404.6 s, brain 320.0 s 381 calls 912 rows; 54/113 cases, 64.1 s/case, eta 1.05 h
+group 9: 6 cases 30 episodes 457.6 s, brain 367.2 s 417 calls 1049 rows; 60/113 cases, 65.4 s/case, eta 0.96 h
+group 10: 6 cases 30 episodes 335.8 s, brain 260.7 s 259 calls 737 rows; 66/113 cases, 64.5 s/case, eta 0.84 h
+group 11: 6 cases 30 episodes 357.1 s, brain 274.9 s 322 calls 778 rows; 72/113 cases, 64.1 s/case, eta 0.73 h
+group 12: 6 cases 30 episodes 318.1 s, brain 253.2 s 228 calls 714 rows; 78/113 cases, 63.2 s/case, eta 0.61 h
+group 13: 6 cases 30 episodes 353.4 s, brain 259.5 s 264 calls 732 rows; 84/113 cases, 62.9 s/case, eta 0.51 h
+group 14: 6 cases 30 episodes 314.1 s, brain 233.3 s 262 calls 661 rows; 90/113 cases, 62.2 s/case, eta 0.40 h
+group 15: 6 cases 30 episodes 482.6 s, brain 392.2 s 377 calls 1109 rows; 96/113 cases, 63.4 s/case, eta 0.30 h
+group 16: 6 cases 30 episodes 464.1 s, brain 368.0 s 345 calls 1045 rows; 102/113 cases, 64.2 s/case, eta 0.20 h
+group 17: 6 cases 30 episodes 360.0 s, brain 284.5 s 323 calls 808 rows; 108/113 cases, 64.0 s/case, eta 0.09 h
+group 18: 5 cases 25 episodes 434.3 s, brain 338.2 s 379 calls 965 rows; 113/113 cases, 65.0 s/case, eta 0.00 h
+done 113 of 113 cases, failed 0:
+[00:59:58] pass 2 skipped: pass 1 exited cleanly, no failed group

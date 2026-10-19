@@ -1,0 +1,52 @@
+[14:06:13] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PRO/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX venv/bin/python scripts/c1e4m_run.py --device cuda --brain smolvla --source pro --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json --n-envs 8 --out results/c1-e4/part2/pod_B/connect_smolvla_connect_pro_d0.jsonl
+93 of 93 pro cases of connect to run, 1 episodes each; split 4beda8e750b4, Wand real
+Fetching 8 files:   0%|          | 0/8 [00:00<?, ?it/s]Fetching 8 files: 100%|██████████| 8/8 [00:00<00:00, 936.65it/s]
+Loading weights from local directory
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+group 0: 8 cases 8 episodes 78.4 s, brain 50.3 s 52 calls 260 rows; 8/93 cases, 9.8 s/case, eta 0.23 h
+group 1: 8 cases 8 episodes 74.9 s, brain 49.1 s 52 calls 250 rows; 16/93 cases, 9.6 s/case, eta 0.20 h
+group 2: 8 cases 8 episodes 81.0 s, brain 50.6 s 52 calls 260 rows; 24/93 cases, 9.8 s/case, eta 0.19 h
+group 3: 8 cases 8 episodes 56.5 s, brain 39.2 s 30 calls 226 rows; 32/93 cases, 9.1 s/case, eta 0.15 h
+group 4: 8 cases 8 episodes 85.3 s, brain 51.1 s 52 calls 259 rows; 40/93 cases, 9.4 s/case, eta 0.14 h
+group 5: 8 cases 8 episodes 95.8 s, brain 57.1 s 52 calls 312 rows; 48/93 cases, 9.8 s/case, eta 0.12 h
+group 6: 8 cases 8 episodes 73.1 s, brain 47.2 s 52 calls 228 rows; 56/93 cases, 9.7 s/case, eta 0.10 h
+group 7: 8 cases 8 episodes 82.0 s, brain 51.1 s 52 calls 263 rows; 64/93 cases, 9.8 s/case, eta 0.08 h
+group 8: 8 cases 8 episodes 85.8 s, brain 54.9 s 52 calls 287 rows; 72/93 cases, 9.9 s/case, eta 0.06 h
+group 9: 8 cases 8 episodes 82.7 s, brain 55.0 s 52 calls 289 rows; 80/93 cases, 9.9 s/case, eta 0.04 h
+group 10: 8 cases 8 episodes 68.7 s, brain 46.0 s 52 calls 216 rows; 88/93 cases, 9.8 s/case, eta 0.01 h
+group 11: 5 cases 5 episodes 68.3 s, brain 38.5 s 52 calls 169 rows; 93/93 cases, 10.0 s/case, eta 0.00 h
+done 93 of 93 cases, failed 0:
+[14:22:30] pass 2 skipped: pass 1 exited cleanly, no failed group
+[17:17:56] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PRO/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX venv/bin/python scripts/c1e4m_run.py --device cuda --brain smolvla --source pro --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json --n-envs 8 --out results/c1-e4/part2/pod_B/connect_smolvla_connect_pro_d0.jsonl
+0 of 93 pro cases of connect to run, 1 episodes each; split 4beda8e750b4, Wand real
+done 0 of 0 cases, failed 0:
+[17:18:01] pass 2 skipped: pass 1 exited cleanly, no failed group

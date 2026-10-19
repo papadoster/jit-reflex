@@ -1,0 +1,5 @@
+[17:18:28] phase calib, M0_oftplus_calib_plus_d0 (84 episodes): --brain oftplus --source plus --set calib --arms=Gcal --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[17:40:39] phase calib, M0_oftplus_calib_pro_d0 (36 episodes): --brain oftplus --source pro --set calib --arms=Gcal --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[17:49:35] phase calib, M0_oft_calib_plus_d0 (84 episodes): --brain oft --source plus --set calib --arms=Gcal --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[18:16:37] phase calib, M0_oft_calib_pro_d0 (36 episodes): --brain oft --source pro --set calib --arms=Gcal --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[18:24:38] phase calib, Bcal_smolvla (60 episodes): --brain smolvla --kinds step --cells A --methods Gcal --pairs-file results/c1-e4/part2/bench_calib_pairs.json

@@ -1,0 +1,113 @@
+[09:18:08] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PRO/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX /workspace/lmax-deps/venv-oft/bin/python scripts/c1e4m_run.py --device cuda --brain oftplus --source pro --set eval --arms=none,G,Gauto,PPC --d 0 --kbar 0.121 --n-envs 6 --out results/c1-e4/part2/pod_B/M1oftplus_oftplus_eval_pro_d0.jsonl
+282 of 282 pro cases of eval to run, 5 episodes each; split 4beda8e750b4, Wand real
+2026-10-18 09:18:10.615632: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:9261] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2026-10-18 09:18:10.615729: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:607] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2026-10-18 09:18:10.617466: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1515] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2026-10-18 09:18:10.625662: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-10-18 09:18:11.530342: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+Using LIBERO constants:
+  NUM_ACTIONS_CHUNK = 8
+  ACTION_DIM = 7
+  PROPRIO_DIM = 8
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds_q99
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+Returning existing local_dir `/workspace/oft-ckpt/openvla-7b-oft-finetuned-libero-plus-mixdata-a85655ec94` as remote repo cannot be accessed in `snapshot_download` (Cannot reach https://huggingface.co/api/models/Sylvest/openvla-7b-oft-finetuned-libero-plus-mixdata/revision/a85655ec941bae6644c9fbdf62db02b9726d7cf5: offline mode is enabled. To disable it, please unset the `HF_HUB_OFFLINE` environment variable.).
+10/18 [09:18:26] WARNING  | >> Returning existing      _snapshot_download.py:224
+                          local_dir                                             
+                          `/workspace/oft-ckpt/openvla                          
+                          -7b-oft-finetuned-libero-plu                          
+                          s-mixdata-a85655ec94` as                              
+                          remote repo cannot be                                 
+                          accessed in                                           
+                          `snapshot_download` (Cannot                           
+                          reach                                                 
+                          https://huggingface.co/api/m                          
+                          odels/Sylvest/openvla-7b-oft                          
+                          -finetuned-libero-plus-mixda                          
+                          ta/revision/a85655ec941bae66                          
+                          44c9fbdf62db02b9726d7cf5:                             
+                          offline mode is enabled. To                           
+                          disable it, please unset the                          
+                          `HF_HUB_OFFLINE` environment                          
+                          variable.).                                           
+Instantiating pretrained VLA policy...
+Created backup of original config at: /workspace/oft-ckpt/openvla-7b-oft-finetuned-libero-plus-mixdata-a85655ec94/config.json.back.20261018_091826
+Updated config.json at: /workspace/oft-ckpt/openvla-7b-oft-finetuned-libero-plus-mixdata-a85655ec94/config.json
+Changes made:
+  - Set AutoConfig to "configuration_prismatic.OpenVLAConfig"
+  - Set AutoModelForVision2Seq to "modeling_prismatic.OpenVLAForActionPrediction"
+WARNING: `modeling_prismatic.py` is not found anywhere in the current directory.
+WARNING: `configuration_prismatic.py` is not found anywhere in the current directory.
+<frozen importlib._bootstrap>:283: DeprecationWarning: the load_module() method is deprecated and slated for removal in Python 3.12; use exec_module() instead
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:01,  2.43it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:00<00:00,  2.23it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:01<00:00,  2.17it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  2.38it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+group 0: 6 cases 30 episodes 498.8 s, brain 412.8 s 384 calls 1148 rows; 6/282 cases, 83.1 s/case, eta 6.37 h
+group 1: 6 cases 30 episodes 391.9 s, brain 304.3 s 240 calls 846 rows; 12/282 cases, 74.2 s/case, eta 5.57 h
+group 2: 6 cases 30 episodes 281.5 s, brain 219.4 s 208 calls 608 rows; 18/282 cases, 65.1 s/case, eta 4.78 h
+group 3: 6 cases 30 episodes 349.7 s, brain 276.5 s 259 calls 768 rows; 24/282 cases, 63.4 s/case, eta 4.54 h
+group 4: 6 cases 30 episodes 401.1 s, brain 316.8 s 250 calls 871 rows; 30/282 cases, 64.1 s/case, eta 4.49 h
+group 5: 6 cases 30 episodes 461.2 s, brain 376.9 s 391 calls 1040 rows; 36/282 cases, 66.2 s/case, eta 4.53 h
+group 6: 6 cases 30 episodes 386.1 s, brain 305.4 s 188 calls 840 rows; 42/282 cases, 66.0 s/case, eta 4.40 h
+group 7: 6 cases 30 episodes 389.6 s, brain 318.0 s 313 calls 880 rows; 48/282 cases, 65.8 s/case, eta 4.28 h
+group 8: 6 cases 30 episodes 423.2 s, brain 338.9 s 349 calls 940 rows; 54/282 cases, 66.4 s/case, eta 4.20 h
+group 9: 6 cases 30 episodes 428.9 s, brain 345.0 s 338 calls 960 rows; 60/282 cases, 66.9 s/case, eta 4.12 h
+group 10: 6 cases 30 episodes 305.8 s, brain 237.8 s 218 calls 657 rows; 66/282 cases, 65.4 s/case, eta 3.93 h
+group 11: 6 cases 30 episodes 367.1 s, brain 282.5 s 328 calls 785 rows; 72/282 cases, 65.1 s/case, eta 3.80 h
+group 12: 6 cases 30 episodes 318.2 s, brain 252.5 s 259 calls 699 rows; 78/282 cases, 64.1 s/case, eta 3.63 h
+group 13: 6 cases 30 episodes 412.6 s, brain 314.7 s 292 calls 870 rows; 84/282 cases, 64.5 s/case, eta 3.55 h
+group 14: 6 cases 30 episodes 280.6 s, brain 199.6 s 219 calls 551 rows; 90/282 cases, 63.3 s/case, eta 3.38 h
+group 15: 6 cases 30 episodes 418.4 s, brain 334.6 s 363 calls 927 rows; 96/282 cases, 63.7 s/case, eta 3.29 h
+group 16: 6 cases 30 episodes 459.0 s, brain 366.0 s 339 calls 1007 rows; 102/282 cases, 64.4 s/case, eta 3.22 h
+group 17: 6 cases 30 episodes 372.0 s, brain 294.5 s 276 calls 809 rows; 108/282 cases, 64.3 s/case, eta 3.11 h
+group 18: 6 cases 30 episodes 443.5 s, brain 350.8 s 378 calls 1016 rows; 114/282 cases, 64.8 s/case, eta 3.02 h
+group 19: 6 cases 30 episodes 315.0 s, brain 248.8 s 219 calls 695 rows; 120/282 cases, 64.2 s/case, eta 2.89 h
+group 20: 6 cases 30 episodes 291.7 s, brain 206.0 s 179 calls 576 rows; 126/282 cases, 63.5 s/case, eta 2.75 h
+group 21: 6 cases 30 episodes 398.7 s, brain 300.2 s 325 calls 844 rows; 132/282 cases, 63.6 s/case, eta 2.65 h
+group 22: 6 cases 30 episodes 293.9 s, brain 212.0 s 310 calls 693 rows; 138/282 cases, 63.0 s/case, eta 2.52 h
+group 23: 6 cases 30 episodes 330.9 s, brain 251.7 s 282 calls 860 rows; 144/282 cases, 62.6 s/case, eta 2.40 h
+group 24: 6 cases 30 episodes 277.9 s, brain 191.5 s 234 calls 738 rows; 150/282 cases, 62.0 s/case, eta 2.27 h
+group 25: 6 cases 30 episodes 262.1 s, brain 189.7 s 272 calls 796 rows; 156/282 cases, 61.3 s/case, eta 2.14 h
+group 26: 6 cases 30 episodes 189.1 s, brain 117.1 s 180 calls 456 rows; 162/282 cases, 60.2 s/case, eta 2.01 h
+group 27: 6 cases 30 episodes 393.4 s, brain 318.1 s 255 calls 897 rows; 168/282 cases, 60.4 s/case, eta 1.91 h
+group 28: 6 cases 30 episodes 221.3 s, brain 149.0 s 184 calls 411 rows; 174/282 cases, 59.6 s/case, eta 1.79 h
+group 29: 6 cases 30 episodes 483.3 s, brain 374.2 s 363 calls 1035 rows; 180/282 cases, 60.3 s/case, eta 1.71 h
+group 30: 6 cases 30 episodes 316.9 s, brain 235.6 s 222 calls 650 rows; 186/282 cases, 60.0 s/case, eta 1.60 h
+group 31: 6 cases 30 episodes 432.1 s, brain 334.2 s 336 calls 932 rows; 192/282 cases, 60.4 s/case, eta 1.51 h
+group 32: 6 cases 30 episodes 352.7 s, brain 267.4 s 246 calls 738 rows; 198/282 cases, 60.3 s/case, eta 1.41 h
+group 33: 6 cases 30 episodes 404.4 s, brain 319.2 s 316 calls 883 rows; 204/282 cases, 60.5 s/case, eta 1.31 h
+group 34: 6 cases 30 episodes 305.7 s, brain 237.4 s 190 calls 654 rows; 210/282 cases, 60.3 s/case, eta 1.21 h
+group 35: 6 cases 30 episodes 422.8 s, brain 330.5 s 256 calls 908 rows; 216/282 cases, 60.6 s/case, eta 1.11 h
+group 36: 6 cases 30 episodes 352.8 s, brain 278.1 s 248 calls 762 rows; 222/282 cases, 60.5 s/case, eta 1.01 h
+group 37: 6 cases 30 episodes 272.2 s, brain 202.4 s 226 calls 561 rows; 228/282 cases, 60.1 s/case, eta 0.90 h
+group 38: 6 cases 30 episodes 379.3 s, brain 291.8 s 224 calls 803 rows; 234/282 cases, 60.2 s/case, eta 0.80 h
+group 39: 6 cases 30 episodes 255.0 s, brain 179.8 s 199 calls 502 rows; 240/282 cases, 59.7 s/case, eta 0.70 h
+group 40: 6 cases 30 episodes 422.4 s, brain 329.9 s 343 calls 908 rows; 246/282 cases, 60.0 s/case, eta 0.60 h
+group 41: 6 cases 30 episodes 507.2 s, brain 411.6 s 357 calls 1126 rows; 252/282 cases, 60.6 s/case, eta 0.50 h
+group 42: 6 cases 30 episodes 402.5 s, brain 315.1 s 279 calls 862 rows; 258/282 cases, 60.7 s/case, eta 0.40 h
+group 43: 6 cases 30 episodes 405.7 s, brain 304.9 s 357 calls 837 rows; 264/282 cases, 60.9 s/case, eta 0.30 h
+group 44: 6 cases 30 episodes 566.1 s, brain 448.6 s 370 calls 1226 rows; 270/282 cases, 61.6 s/case, eta 0.21 h
+group 45: 6 cases 30 episodes 430.6 s, brain 336.1 s 322 calls 1013 rows; 276/282 cases, 61.9 s/case, eta 0.10 h
+group 46: 6 cases 30 episodes 546.2 s, brain 423.4 s 440 calls 1545 rows; 282/282 cases, 62.5 s/case, eta 0.00 h
+done 282 of 282 cases, failed 0:
+[14:12:26] pass 2 skipped: pass 1 exited cleanly, no failed group

@@ -1,0 +1,48 @@
+{
+ "oftplus": {
+  "dynamic": 100,
+  "invalid_by_arm": {
+   "G": [0, 20],
+   "Gauto": [0, 20],
+   "Gcal": [0, 20],
+   "PPC": [0, 20],
+   "none": [0, 20]
+  },
+  "g_check_ok_of_with_event": [17, 17, 17],
+  "base": 20,
+  "no_event_share": 0.15,
+  "skipped": 0,
+  "warn_arms": []
+ },
+ "oft": {
+  "dynamic": 100,
+  "invalid_by_arm": {
+   "G": [0, 20],
+   "Gauto": [0, 20],
+   "Gcal": [0, 20],
+   "PPC": [0, 20],
+   "none": [0, 20]
+  },
+  "g_check_ok_of_with_event": [18, 18, 18],
+  "base": 20,
+  "no_event_share": 0.1,
+  "skipped": 0,
+  "warn_arms": []
+ },
+ "smolvla": {
+  "dynamic": 100,
+  "invalid_by_arm": {
+   "G": [0, 20],
+   "Gauto": [0, 20],
+   "Gcal": [0, 20],
+   "PPC": [0, 20],
+   "none": [0, 20]
+  },
+  "g_check_ok_of_with_event": [14, 14, 14],
+  "base": 20,
+  "no_event_share": 0.3,
+  "skipped": 0,
+  "warn_arms": []
+ }
+}
+C1-E4 part 2 smoke validity B: PASS

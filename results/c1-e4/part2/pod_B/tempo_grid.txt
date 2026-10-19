@@ -1,0 +1,6 @@
+tempo (s/episode): lmax_oftplus=15.093 lmax_oft=15.917 lmax_smolvla=15.253 bench_smolvla=7.242
+tempo (s/episode): lmax_oftplus=12.497 lmax_oft=15.917 lmax_smolvla=15.253 bench_smolvla=7.242
+tempo (s/episode): lmax_oftplus=12.497 lmax_oft=15.917 lmax_smolvla=15.253 bench_smolvla=6.537
+tempo (s/episode): lmax_oftplus=12.497 lmax_oft=15.917 lmax_smolvla=15.253 bench_smolvla=6.078
+tempo (s/episode): lmax_oftplus=12.497 lmax_oft=15.409 lmax_smolvla=15.253 bench_smolvla=6.078
+tempo (s/episode): lmax_oftplus=12.497 lmax_oft=12.993 lmax_smolvla=15.253 bench_smolvla=6.078

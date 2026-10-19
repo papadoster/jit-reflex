@@ -1,0 +1,12 @@
+[12:18:45] phase connect, connect_smolvla_connect_plus_d0 (207 episodes): --brain smolvla --source plus --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[14:06:13] phase connect, connect_smolvla_connect_pro_d0 (93 episodes): --brain smolvla --source pro --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[14:22:30] phase connect, connect_oft_connect_plus_d0 (207 episodes): --brain oft --source plus --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[15:27:30] phase connect, connect_oft_connect_pro_d0 (93 episodes): --brain oft --source pro --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[15:50:52] phase connect, connect_oftplus_connect_plus_d0 (207 episodes): --brain oftplus --source plus --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[16:54:47] phase connect, connect_oftplus_connect_pro_d0 (93 episodes): --brain oftplus --source pro --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[17:17:51] phase connect, connect_smolvla_connect_plus_d0 (207 episodes): --brain smolvla --source plus --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[17:17:56] phase connect, connect_smolvla_connect_pro_d0 (93 episodes): --brain smolvla --source pro --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[17:18:01] phase connect, connect_oft_connect_plus_d0 (207 episodes): --brain oft --source plus --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[17:18:06] phase connect, connect_oft_connect_pro_d0 (93 episodes): --brain oft --source pro --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[17:18:11] phase connect, connect_oftplus_connect_plus_d0 (207 episodes): --brain oftplus --source plus --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[17:18:16] phase connect, connect_oftplus_connect_pro_d0 (93 episodes): --brain oftplus --source pro --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json

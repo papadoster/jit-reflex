@@ -1,0 +1,69 @@
+[17:40:39] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PRO/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX /workspace/lmax-deps/venv-oft/bin/python scripts/c1e4m_run.py --device cuda --brain oftplus --source pro --set calib --arms=Gcal --d 0 --split results/c1-e4/part2/pod_B/split0.json --n-envs 6 --out results/c1-e4/part2/pod_B/M0_oftplus_calib_pro_d0_4beda8e750b4.jsonl
+18 of 18 pro cases of calib to run, 2 episodes each; split 4beda8e750b4, Wand real
+2026-10-17 17:40:42.407965: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:9261] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2026-10-17 17:40:42.408051: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:607] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2026-10-17 17:40:42.410513: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1515] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2026-10-17 17:40:42.424206: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-10-17 17:40:43.666749: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+Using LIBERO constants:
+  NUM_ACTIONS_CHUNK = 8
+  ACTION_DIM = 7
+  PROPRIO_DIM = 8
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds_q99
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+Returning existing local_dir `/workspace/oft-ckpt/openvla-7b-oft-finetuned-libero-plus-mixdata-a85655ec94` as remote repo cannot be accessed in `snapshot_download` (Cannot reach https://huggingface.co/api/models/Sylvest/openvla-7b-oft-finetuned-libero-plus-mixdata/revision/a85655ec941bae6644c9fbdf62db02b9726d7cf5: offline mode is enabled. To disable it, please unset the `HF_HUB_OFFLINE` environment variable.).
+10/17 [17:41:08] WARNING  | >> Returning existing      _snapshot_download.py:224
+                          local_dir                                             
+                          `/workspace/oft-ckpt/openvla                          
+                          -7b-oft-finetuned-libero-plu                          
+                          s-mixdata-a85655ec94` as                              
+                          remote repo cannot be                                 
+                          accessed in                                           
+                          `snapshot_download` (Cannot                           
+                          reach                                                 
+                          https://huggingface.co/api/m                          
+                          odels/Sylvest/openvla-7b-oft                          
+                          -finetuned-libero-plus-mixda                          
+                          ta/revision/a85655ec941bae66                          
+                          44c9fbdf62db02b9726d7cf5:                             
+                          offline mode is enabled. To                           
+                          disable it, please unset the                          
+                          `HF_HUB_OFFLINE` environment                          
+                          variable.).                                           
+Instantiating pretrained VLA policy...
+Created backup of original config at: /workspace/oft-ckpt/openvla-7b-oft-finetuned-libero-plus-mixdata-a85655ec94/config.json.back.20261017_174108
+Updated config.json at: /workspace/oft-ckpt/openvla-7b-oft-finetuned-libero-plus-mixdata-a85655ec94/config.json
+Changes made:
+  - Set AutoConfig to "configuration_prismatic.OpenVLAConfig"
+  - Set AutoModelForVision2Seq to "modeling_prismatic.OpenVLAForActionPrediction"
+WARNING: `modeling_prismatic.py` is not found anywhere in the current directory.
+WARNING: `configuration_prismatic.py` is not found anywhere in the current directory.
+<frozen importlib._bootstrap>:283: DeprecationWarning: the load_module() method is deprecated and slated for removal in Python 3.12; use exec_module() instead
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.03it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.30it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.35it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.63it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.47it/s]
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+group 0: 6 cases 12 episodes 163.6 s, brain 123.6 s 132 calls 344 rows; 6/18 cases, 27.3 s/case, eta 0.09 h
+group 1: 6 cases 12 episodes 102.8 s, brain 80.7 s 74 calls 225 rows; 12/18 cases, 22.2 s/case, eta 0.04 h
+group 2: 6 cases 12 episodes 166.4 s, brain 132.0 s 129 calls 366 rows; 18/18 cases, 24.0 s/case, eta 0.00 h
+done 18 of 18 cases, failed 0:
+[17:49:35] pass 2 skipped: pass 1 exited cleanly, no failed group

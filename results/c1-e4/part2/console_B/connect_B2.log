@@ -1,0 +1,36 @@
+[17:17:51] phase connect, connect_smolvla_connect_plus_d0 (207 episodes): --brain smolvla --source plus --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[17:17:51] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-plus/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-plus-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX venv/bin/python scripts/c1e4m_run.py --device cuda --brain smolvla --source plus --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json --n-envs 8 --out results/c1-e4/part2/pod_B/connect_smolvla_connect_plus_d0.jsonl
+0 of 207 plus cases of connect to run, 1 episodes each; split 4beda8e750b4, Wand real
+done 0 of 0 cases, failed 0:
+[17:17:56] pass 2 skipped: pass 1 exited cleanly, no failed group
+[17:17:56] phase connect, connect_smolvla_connect_pro_d0 (93 episodes): --brain smolvla --source pro --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[17:17:56] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PRO/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX venv/bin/python scripts/c1e4m_run.py --device cuda --brain smolvla --source pro --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json --n-envs 8 --out results/c1-e4/part2/pod_B/connect_smolvla_connect_pro_d0.jsonl
+0 of 93 pro cases of connect to run, 1 episodes each; split 4beda8e750b4, Wand real
+done 0 of 0 cases, failed 0:
+[17:18:01] pass 2 skipped: pass 1 exited cleanly, no failed group
+[17:18:01] phase connect, connect_oft_connect_plus_d0 (207 episodes): --brain oft --source plus --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[17:18:01] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-plus/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-plus-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX /workspace/lmax-deps/venv-oft/bin/python scripts/c1e4m_run.py --device cuda --brain oft --source plus --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json --n-envs 6 --out results/c1-e4/part2/pod_B/connect_oft_connect_plus_d0.jsonl
+0 of 207 plus cases of connect to run, 1 episodes each; split 4beda8e750b4, Wand real
+done 0 of 0 cases, failed 0:
+[17:18:06] pass 2 skipped: pass 1 exited cleanly, no failed group
+[17:18:06] phase connect, connect_oft_connect_pro_d0 (93 episodes): --brain oft --source pro --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[17:18:06] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PRO/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX /workspace/lmax-deps/venv-oft/bin/python scripts/c1e4m_run.py --device cuda --brain oft --source pro --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json --n-envs 6 --out results/c1-e4/part2/pod_B/connect_oft_connect_pro_d0.jsonl
+0 of 93 pro cases of connect to run, 1 episodes each; split 4beda8e750b4, Wand real
+done 0 of 0 cases, failed 0:
+[17:18:11] pass 2 skipped: pass 1 exited cleanly, no failed group
+[17:18:11] phase connect, connect_oftplus_connect_plus_d0 (207 episodes): --brain oftplus --source plus --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[17:18:11] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-plus/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-plus-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX /workspace/lmax-deps/venv-oft/bin/python scripts/c1e4m_run.py --device cuda --brain oftplus --source plus --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json --n-envs 6 --out results/c1-e4/part2/pod_B/connect_oftplus_connect_plus_d0.jsonl
+0 of 207 plus cases of connect to run, 1 episodes each; split 4beda8e750b4, Wand real
+done 0 of 0 cases, failed 0:
+[17:18:16] pass 2 skipped: pass 1 exited cleanly, no failed group
+[17:18:16] phase connect, connect_oftplus_connect_pro_d0 (93 episodes): --brain oftplus --source pro --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json
+[17:18:16] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PRO/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX /workspace/lmax-deps/venv-oft/bin/python scripts/c1e4m_run.py --device cuda --brain oftplus --source pro --set connect --arms= --d 0 --split results/c1-e4/part2/pod_B/split0.json --n-envs 6 --out results/c1-e4/part2/pod_B/connect_oftplus_connect_pro_d0.jsonl
+0 of 93 pro cases of connect to run, 1 episodes each; split 4beda8e750b4, Wand real
+done 0 of 0 cases, failed 0:
+[17:18:21] pass 2 skipped: pass 1 exited cleanly, no failed group
+brain       n miss Base none % Table 2 %   diff  pass (+-10 pp)
+oftplus   300    0       69.33         -      -  report only
+oft       300    0       63.33      64.3   -1.0  True
+smolvla   300    0        6.33      26.1  -19.8  False (dropped: no LIBERO-MAX line after connect)
+C1-E4 part 2 connect B: PASS
+[17:18:25] packed c1e4m_results_B.tgz (332K)

@@ -1,0 +1,51 @@
+2026-10-17 10:18:12.255624: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:9261] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2026-10-17 10:18:12.255716: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:607] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2026-10-17 10:18:12.257435: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1515] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2026-10-17 10:18:12.265605: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-10-17 10:18:13.096060: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/lmax-deps/venv-oft/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+Using LIBERO constants:
+  NUM_ACTIONS_CHUNK = 8
+  ACTION_DIM = 7
+  PROPRIO_DIM = 8
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds_q99
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+Returning existing local_dir `/workspace/oft-ckpt/openvla-7b-oft-finetuned-libero-spatial-object-goal-10-638918f3d1` as remote repo cannot be accessed in `snapshot_download` (Cannot reach https://huggingface.co/api/models/moojink/openvla-7b-oft-finetuned-libero-spatial-object-goal-10/revision/638918f3d1c2e43a39a8a20772bdb8b91835e4b7: offline mode is enabled. To disable it, please unset the `HF_HUB_OFFLINE` environment variable.).
+10/17 [10:18:28] WARNING  | >> Returning existing      _snapshot_download.py:224
+                          local_dir                                             
+                          `/workspace/oft-ckpt/openvla                          
+                          -7b-oft-finetuned-libero-spa                          
+                          tial-object-goal-10-638918f3                          
+                          d1` as remote repo cannot be                          
+                          accessed in                                           
+                          `snapshot_download` (Cannot                           
+                          reach                                                 
+                          https://huggingface.co/api/m                          
+                          odels/moojink/openvla-7b-oft                          
+                          -finetuned-libero-spatial-ob                          
+                          ject-goal-10/revision/638918                          
+                          f3d1c2e43a39a8a20772bdb8b918                          
+                          35e4b7: offline mode is                               
+                          enabled. To disable it,                               
+                          please unset the                                      
+                          `HF_HUB_OFFLINE` environment                          
+                          variable.).                                           
+Instantiating pretrained VLA policy...
+Created backup of original config at: /workspace/oft-ckpt/openvla-7b-oft-finetuned-libero-spatial-object-goal-10-638918f3d1/config.json.back.20261017_101828
+Updated config.json at: /workspace/oft-ckpt/openvla-7b-oft-finetuned-libero-spatial-object-goal-10-638918f3d1/config.json
+Changes made:
+  - Set AutoConfig to "configuration_prismatic.OpenVLAConfig"
+  - Set AutoModelForVision2Seq to "modeling_prismatic.OpenVLAForActionPrediction"
+WARNING: `modeling_prismatic.py` is not found anywhere in the current directory.
+WARNING: `configuration_prismatic.py` is not found anywhere in the current directory.
+<frozen importlib._bootstrap>:283: DeprecationWarning: the load_module() method is deprecated and slated for removal in Python 3.12; use exec_module() instead
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:01,  2.16it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:00<00:00,  2.28it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  2.34it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  2.31it/s]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+oft: 'pick up the black bowl between the plate and the ramekin and place it on the plate' shape=(1, 8, 7) dtype=float32 first call 846 ms repeat_bitwise=1
+min [0.12189999967813492, 0.03620000183582306, 0.056699998676776886, -0.005499999970197678, 0.003100000089034438, 0.007899999618530273, -1.0] max [0.8684999942779541, 0.47049999237060547, 0.16529999673366547, 0.003599999938160181, 0.07530000060796738, 0.015399999916553497, -1.0]
+gripper [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0] (+1 close, -1 open; at the start: -1)

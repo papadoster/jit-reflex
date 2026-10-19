@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 687, in <module>
+    main()
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 616, in main
+    validate(arms, conf, cases)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 155, in validate
+    assert conf["s"] + conf["d"] <= h, f"s + d = {conf['s'] + conf['d']} > {conf['brain']}'s chunk H = {h}"
+AssertionError: s + d = 16 > oft's chunk H = 8

@@ -1,0 +1,12 @@
+=== Sat Oct 17 17:17:28 UTC 2026 connect gate, pod B
+brain       n miss Base none % Table 2 %   diff  pass (+-10 pp)
+oftplus   300    0       69.33         -      -  report only
+oft       300    0       63.33      64.3   -1.0  True
+smolvla   300    0        6.33      26.1  -19.8  False
+C1-E4 part 2 connect B: FAIL
+=== Sat Oct 17 17:18:21 UTC 2026 connect gate, pod B
+brain       n miss Base none % Table 2 %   diff  pass (+-10 pp)
+oftplus   300    0       69.33         -      -  report only
+oft       300    0       63.33      64.3   -1.0  True
+smolvla   300    0        6.33      26.1  -19.8  False (dropped: no LIBERO-MAX line after connect)
+C1-E4 part 2 connect B: PASS

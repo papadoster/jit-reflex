@@ -1,0 +1,8 @@
+[18:41:29] phase grid, M1oftplus_oftplus_eval_plus_d0 (3290 episodes): --brain oftplus --source plus --set eval --arms=none,G,Gauto,PPC --d 0 --kbar 0.121
+[19:32:32] phase grid, M1oftplus_oftplus_eval_plus_d0 (3290 episodes): --brain oftplus --source plus --set eval --arms=none,G,Gauto,PPC --d 0 --kbar 0.121
+[20:40:14] phase grid, M1oftplus_oftplus_eval_plus_d0 (3290 episodes): --brain oftplus --source plus --set eval --arms=none,G,Gauto,PPC --d 0 --kbar 0.121
+[09:18:08] phase grid, M1oftplus_oftplus_eval_pro_d0 (1410 episodes): --brain oftplus --source pro --set eval --arms=none,G,Gauto,PPC --d 0 --kbar 0.121
+[14:12:27] phase grid, Boracle_smolvla (2080 episodes): --brain smolvla --kinds move --cells A,A20 --methods none,Gauto,Glead,PPC --inits 0-9 --kbar 0.067
+[18:00:56] phase grid, Bnoisy_smolvla (520 episodes): --brain smolvla --kinds move --cells A20 --methods Gauto@cv,Glead@cv --inits 0-9 --kbar 0.067
+[18:55:22] phase grid, M4oft_oft_eval300_plus_d0 (935 episodes): --brain oft --source plus --set eval300 --arms=none,G,Gauto,PPC --d 0 --kbar 0.088
+[22:56:48] phase grid, M4oft_oft_eval300_pro_d0 (565 episodes): --brain oft --source pro --set eval300 --arms=none,G,Gauto,PPC --d 0 --kbar 0.088

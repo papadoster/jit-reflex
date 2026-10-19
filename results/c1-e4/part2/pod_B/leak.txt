@@ -1,0 +1,202 @@
+10:32:42 oftplus groups=2 gpu_mib=4 worker_rss_mib=
+10:33:02 oftplus groups=2 gpu_mib=18333 worker_rss_mib=2359 2082 1767 2080 2000 2069 
+10:33:22 oftplus groups=2 gpu_mib=18333 worker_rss_mib=2359 2082 1767 2080 2000 2069 
+10:33:42 oftplus groups=2 gpu_mib=18333 worker_rss_mib=2359 2082 1767 2080 2000 2069 
+10:34:02 oftplus groups=2 gpu_mib=18333 worker_rss_mib=2359 2082 1768 2080 2000 2069 
+10:34:22 oftplus groups=2 gpu_mib=18333 worker_rss_mib=2359 2082 1768 2080 2000 2069 
+10:34:42 oftplus groups=2 gpu_mib=19130 worker_rss_mib=2504 2836 2691 2817 2715 2451 
+10:35:02 oftplus groups=2 gpu_mib=19130 worker_rss_mib=2504 2836 2692 2817 2715 2451 
+10:35:22 oftplus groups=2 gpu_mib=19130 worker_rss_mib=2504 2836 2692 2817 2715 2451 
+10:35:42 oftplus groups=2 gpu_mib=19130 worker_rss_mib=2504 2836 2692 2818 2715 2451 
+10:36:02 oftplus groups=2 gpu_mib=19130 worker_rss_mib=2504 2836 2692 2818 2715 2451 
+10:36:22 oftplus groups=2 gpu_mib=19130 worker_rss_mib=2504 2836 2692 2818 2715 2451 
+10:36:42 oftplus groups=2 gpu_mib=19130 worker_rss_mib=2504 2836 2692 2818 2715 2451 
+10:37:02 oftplus groups=2 gpu_mib=19130 worker_rss_mib=2504 2836 2692 2818 2715 2451 
+10:37:22 oftplus groups=2 gpu_mib=18047 worker_rss_mib=2403 2420 2441 2432 2287 2589 
+10:37:43 oftplus groups=2 gpu_mib=18034 worker_rss_mib=2472 2491 2513 2582 2458 2555 
+10:38:03 oftplus groups=2 gpu_mib=18034 worker_rss_mib=2472 2491 2513 2582 2458 2555 
+10:38:23 oftplus groups=2 gpu_mib=18034 worker_rss_mib=2472 2491 2513 2582 2458 2555 
+10:38:43 oftplus groups=2 gpu_mib=18328 worker_rss_mib=2477 2478 2616 2843 2745 2795 
+10:39:03 oftplus groups=2 gpu_mib=18328 worker_rss_mib=2477 2478 2616 2843 2745 2795 
+10:39:23 oftplus groups=2 gpu_mib=18328 worker_rss_mib=2477 2478 2616 2843 2745 2796 
+10:39:43 oftplus groups=2 gpu_mib=18126 worker_rss_mib=2780 2623 2599 2609 2539 2560 
+10:40:03 oftplus groups=2 gpu_mib=18126 worker_rss_mib=2780 2623 2599 2609 2539 2560 
+10:40:23 oftplus groups=2 gpu_mib=18126 worker_rss_mib=2780 2623 2599 2609 2539 2560 
+10:40:43 oftplus groups=3 gpu_mib=17878 worker_rss_mib=2318 2623 2599 2609 2539 2560 
+10:41:03 oftplus groups=3 gpu_mib=17878 worker_rss_mib=2318 2623 2599 2609 2539 2560 
+10:41:23 oftplus groups=3 gpu_mib=17878 worker_rss_mib=2318 2623 2599 2609 2539 2560 
+10:41:43 oftplus groups=3 gpu_mib=17150 worker_rss_mib=2313 2409 2378 2393 2365 2560 
+10:42:03 oftplus groups=3 gpu_mib=17150 worker_rss_mib=2313 2409 2378 2393 2365 2560 
+10:42:23 oftplus groups=3 gpu_mib=17150 worker_rss_mib=2313 2409 2378 2393 2365 2560 
+10:42:43 oftplus groups=3 gpu_mib=17150 worker_rss_mib=2313 2409 2378 2393 2365 2560 
+10:43:03 oftplus groups=3 gpu_mib=17150 worker_rss_mib=2313 2409 2378 2393 2365 2560 
+10:43:23 oftplus groups=3 gpu_mib=17150 worker_rss_mib=2313 2409 2378 2393 2365 2560 
+10:43:43 oftplus groups=3 gpu_mib=17150 worker_rss_mib=2313 2409 2378 2393 2365 2560 
+10:44:03 oftplus groups=3 gpu_mib=17150 worker_rss_mib=2313 2409 2378 2393 2365 2560 
+10:44:23 oftplus groups=4 gpu_mib=1 worker_rss_mib=
+10:44:43 oftplus groups=4 gpu_mib=4 worker_rss_mib=
+10:45:04 oftplus groups=4 gpu_mib=18403 worker_rss_mib=1905 1466 1799 2063 2139 1803 
+10:45:24 oftplus groups=4 gpu_mib=18403 worker_rss_mib=1905 1466 1799 2063 2139 1803 
+10:45:44 oftplus groups=4 gpu_mib=18403 worker_rss_mib=1905 1466 1799 2063 2139 1803 
+10:46:04 oftplus groups=4 gpu_mib=16449 worker_rss_mib=2060 1698 1813 1945 2092 1766 
+10:46:24 oftplus groups=4 gpu_mib=18219 worker_rss_mib=2060 2165 2246 2297 2469 1767 
+10:46:44 oftplus groups=4 gpu_mib=17845 worker_rss_mib=1863 1892 2046 2047 2478 2132 
+10:47:04 oftplus groups=4 gpu_mib=17845 worker_rss_mib=1864 1892 2046 2047 2478 2132 
+10:47:24 oftplus groups=4 gpu_mib=17845 worker_rss_mib=1864 1892 2046 2047 2478 2132 
+10:47:44 oftplus groups=4 gpu_mib=18728 worker_rss_mib=2344 2314 2373 2548 2674 2331 
+10:48:04 oftplus groups=4 gpu_mib=18728 worker_rss_mib=2344 2314 2373 2548 2674 2331 
+10:48:24 oftplus groups=4 gpu_mib=18728 worker_rss_mib=2344 2314 2373 2548 2674 2331 
+10:48:44 oftplus groups=4 gpu_mib=18711 worker_rss_mib=2524 2530 2520 2577 2580 2558 
+10:49:04 oftplus groups=4 gpu_mib=18513 worker_rss_mib=2579 2381 2596 2641 2649 2627 
+10:49:24 oftplus groups=4 gpu_mib=18513 worker_rss_mib=2579 2381 2596 2641 2649 2627 
+10:49:44 oftplus groups=4 gpu_mib=18513 worker_rss_mib=2579 2381 2596 2641 2649 2627 
+10:50:04 oftplus groups=4 gpu_mib=18513 worker_rss_mib=2579 2381 2596 2641 2649 2627 
+10:50:24 oftplus groups=5 gpu_mib=16170 worker_rss_mib=2241 2033 2253 2298 2305 2627 
+10:50:44 oftplus groups=5 gpu_mib=18050 worker_rss_mib=2516 2333 2422 2461 2435 2627 
+10:51:04 oftplus groups=5 gpu_mib=18050 worker_rss_mib=2516 2333 2422 2461 2435 2627 
+10:51:24 oftplus groups=6 gpu_mib=16168 worker_rss_mib=2228 2627 
+11:02:45 oft groups=2 gpu_mib=4 worker_rss_mib=
+11:03:05 oft groups=2 gpu_mib=18333 worker_rss_mib=2359 2093 1767 2095 2023 2093 
+11:03:25 oft groups=2 gpu_mib=18333 worker_rss_mib=2359 2093 1768 2095 2023 2093 
+11:03:45 oft groups=2 gpu_mib=18333 worker_rss_mib=2359 2093 1768 2095 2024 2093 
+11:04:05 oft groups=2 gpu_mib=18333 worker_rss_mib=2359 2093 1768 2096 2024 2093 
+11:04:25 oft groups=2 gpu_mib=18333 worker_rss_mib=2359 2093 1768 2096 2024 2093 
+11:04:45 oft groups=2 gpu_mib=19130 worker_rss_mib=2503 2833 2681 2837 2727 2464 
+11:05:05 oft groups=2 gpu_mib=19130 worker_rss_mib=2503 2833 2681 2837 2728 2464 
+11:05:25 oft groups=2 gpu_mib=19130 worker_rss_mib=2503 2833 2681 2837 2728 2464 
+11:05:45 oft groups=2 gpu_mib=19130 worker_rss_mib=2503 2833 2681 2837 2728 2464 
+11:06:05 oft groups=2 gpu_mib=19130 worker_rss_mib=2503 2833 2681 2837 2728 2464 
+11:06:25 oft groups=2 gpu_mib=19130 worker_rss_mib=2503 2833 2681 2837 2728 2464 
+11:06:45 oft groups=2 gpu_mib=19130 worker_rss_mib=2503 2833 2681 2837 2728 2464 
+11:07:05 oft groups=2 gpu_mib=19130 worker_rss_mib=2503 2833 2681 2837 2728 2464 
+11:07:25 oft groups=2 gpu_mib=18047 worker_rss_mib=2388 2418 2421 2441 2299 2593 
+11:07:45 oft groups=2 gpu_mib=17248 worker_rss_mib=2449 2399 2501 2598 2337 2556 
+11:08:05 oft groups=2 gpu_mib=18034 worker_rss_mib=2453 2498 2501 2598 2465 2556 
+11:08:26 oft groups=2 gpu_mib=18034 worker_rss_mib=2453 2498 2501 2598 2465 2556 
+11:08:46 oft groups=2 gpu_mib=18328 worker_rss_mib=2456 2504 2584 2850 2726 2797 
+11:09:06 oft groups=2 gpu_mib=18328 worker_rss_mib=2456 2504 2584 2850 2726 2797 
+11:09:26 oft groups=2 gpu_mib=18328 worker_rss_mib=2456 2504 2584 2850 2726 2797 
+11:09:46 oft groups=2 gpu_mib=18328 worker_rss_mib=2456 2504 2584 2850 2726 2797 
+11:10:06 oft groups=2 gpu_mib=18126 worker_rss_mib=2754 2647 2587 2634 2522 2560 
+11:10:26 oft groups=2 gpu_mib=18126 worker_rss_mib=2754 2647 2587 2634 2522 2560 
+11:10:46 oft groups=2 gpu_mib=18126 worker_rss_mib=2754 2647 2587 2634 2522 2560 
+11:11:06 oft groups=2 gpu_mib=18126 worker_rss_mib=2754 2647 2587 2634 2522 2560 
+11:11:26 oft groups=3 gpu_mib=17878 worker_rss_mib=2293 2647 2587 2634 2522 2560 
+11:11:46 oft groups=3 gpu_mib=17878 worker_rss_mib=2293 2647 2587 2634 2522 2560 
+11:12:06 oft groups=3 gpu_mib=17878 worker_rss_mib=2293 2647 2587 2634 2522 2560 
+11:12:26 oft groups=3 gpu_mib=17878 worker_rss_mib=2293 2647 2587 2634 2522 2560 
+11:12:46 oft groups=3 gpu_mib=17878 worker_rss_mib=2293 2647 2587 2634 2522 2560 
+11:13:06 oft groups=3 gpu_mib=17878 worker_rss_mib=2293 2647 2587 2634 2522 2560 
+11:13:26 oft groups=3 gpu_mib=17878 worker_rss_mib=2293 2647 2587 2634 2522 2560 
+11:13:46 oft groups=3 gpu_mib=17878 worker_rss_mib=2293 2647 2587 2634 2522 2560 
+11:14:06 oft groups=3 gpu_mib=17150 worker_rss_mib=2288 2424 2359 2411 2343 2560 
+11:14:26 oft groups=3 gpu_mib=17150 worker_rss_mib=2288 2424 2359 2411 2343 2560 
+11:14:46 oft groups=3 gpu_mib=17150 worker_rss_mib=2288 2424 2359 2411 2343 2560 
+11:15:06 oft groups=3 gpu_mib=17150 worker_rss_mib=2288 2424 2359 2411 2343 2560 
+11:15:26 oft groups=3 gpu_mib=17150 worker_rss_mib=2288 2424 2359 2411 2343 2560 
+11:15:47 oft groups=3 gpu_mib=17150 worker_rss_mib=2288 2424 2359 2411 2343 2560 
+11:16:07 oft groups=3 gpu_mib=17150 worker_rss_mib=2288 2424 2359 2411 2343 2560 
+11:16:27 oft groups=3 gpu_mib=17150 worker_rss_mib=2288 2424 2359 2411 2343 2560 
+11:16:47 oft groups=4 gpu_mib=16735 worker_rss_mib=2275 2359 2411 2343 2560 
+11:17:07 oft groups=4 gpu_mib=4 worker_rss_mib=
+11:17:27 oft groups=4 gpu_mib=15304 worker_rss_mib=911 848 888 889 879 878 
+11:17:47 oft groups=4 gpu_mib=18403 worker_rss_mib=1921 1466 1802 2047 2135 1814 
+11:18:07 oft groups=4 gpu_mib=18403 worker_rss_mib=1921 1466 1803 2047 2135 1814 
+11:18:27 oft groups=4 gpu_mib=18403 worker_rss_mib=1922 1466 1803 2047 2135 1814 
+11:18:47 oft groups=4 gpu_mib=18219 worker_rss_mib=2074 2157 2237 2261 2442 1776 
+11:19:07 oft groups=4 gpu_mib=18219 worker_rss_mib=2074 2157 2237 2261 2442 1776 
+11:19:27 oft groups=4 gpu_mib=18219 worker_rss_mib=2074 2157 2237 2261 2442 1776 
+11:19:47 oft groups=4 gpu_mib=18219 worker_rss_mib=2074 2157 2237 2261 2442 1776 
+11:20:07 oft groups=4 gpu_mib=18219 worker_rss_mib=2074 2157 2237 2261 2442 1776 
+11:20:27 oft groups=4 gpu_mib=18219 worker_rss_mib=2074 2157 2237 2261 2442 1776 
+11:20:47 oft groups=4 gpu_mib=17845 worker_rss_mib=1872 1882 2053 2005 2450 2124 
+11:21:07 oft groups=4 gpu_mib=17845 worker_rss_mib=1872 1882 2053 2005 2450 2124 
+11:21:27 oft groups=4 gpu_mib=17845 worker_rss_mib=1872 1882 2053 2005 2450 2124 
+11:21:47 oft groups=4 gpu_mib=17845 worker_rss_mib=1872 1882 2053 2005 2450 2124 
+11:22:07 oft groups=4 gpu_mib=18728 worker_rss_mib=2352 2314 2374 2513 2646 2319 
+11:22:27 oft groups=4 gpu_mib=18728 worker_rss_mib=2352 2314 2374 2513 2646 2319 
+11:22:47 oft groups=4 gpu_mib=18728 worker_rss_mib=2352 2314 2374 2513 2646 2319 
+11:23:08 oft groups=4 gpu_mib=18711 worker_rss_mib=2550 2530 2544 2547 2558 2562 
+11:23:28 oft groups=4 gpu_mib=18513 worker_rss_mib=2584 2388 2612 2627 2626 2639 
+11:23:48 oft groups=4 gpu_mib=18513 worker_rss_mib=2584 2388 2612 2627 2626 2639 
+11:24:08 oft groups=4 gpu_mib=18513 worker_rss_mib=2584 2388 2612 2627 2626 2639 
+11:24:28 oft groups=4 gpu_mib=18513 worker_rss_mib=2584 2388 2612 2627 2626 2639 
+11:24:48 oft groups=5 gpu_mib=18408 worker_rss_mib=2458 2388 2612 2627 2626 2639 
+11:25:08 oft groups=5 gpu_mib=18050 worker_rss_mib=2526 2330 2415 2440 2412 2639 
+11:25:28 oft groups=5 gpu_mib=18050 worker_rss_mib=2526 2330 2415 2440 2412 2639 
+11:25:48 oft groups=5 gpu_mib=18050 worker_rss_mib=2526 2330 2415 2440 2412 2639 
+11:34:33 smolvla groups=2 gpu_mib=4 worker_rss_mib=
+11:34:53 smolvla groups=2 gpu_mib=5476 worker_rss_mib=2464 2168 1869 2189 2095 2159 1664 44 
+11:35:13 smolvla groups=2 gpu_mib=5870 worker_rss_mib=2464 2168 1869 2189 2095 2159 1664 44 
+11:35:33 smolvla groups=2 gpu_mib=5870 worker_rss_mib=2464 2168 1869 2189 2095 2159 1664 44 
+11:35:53 smolvla groups=2 gpu_mib=5870 worker_rss_mib=2464 2168 1869 2189 2095 2159 1664 44 
+11:36:13 smolvla groups=2 gpu_mib=5870 worker_rss_mib=2464 2168 1869 2189 2095 2159 1664 44 
+11:36:33 smolvla groups=2 gpu_mib=5870 worker_rss_mib=2464 2168 1869 2189 2095 2159 1664 44 
+11:36:53 smolvla groups=2 gpu_mib=5870 worker_rss_mib=2464 2168 1869 2189 2096 2159 1664 44 
+11:37:13 smolvla groups=2 gpu_mib=5870 worker_rss_mib=2464 2168 1869 2189 2096 2159 1664 44 
+11:37:33 smolvla groups=2 gpu_mib=5870 worker_rss_mib=2464 2168 1869 2189 2096 2159 1664 44 
+11:37:53 smolvla groups=2 gpu_mib=5900 worker_rss_mib=2464 2168 1869 2189 2096 2159 1664 44 
+11:38:13 smolvla groups=2 gpu_mib=5900 worker_rss_mib=2464 2168 1869 2189 2096 2159 1664 44 
+11:38:33 smolvla groups=2 gpu_mib=5900 worker_rss_mib=2464 2168 1869 2189 2096 2159 1664 44 
+11:38:54 smolvla groups=2 gpu_mib=5900 worker_rss_mib=2464 2168 1869 2189 2096 2159 1664 44 
+11:39:14 smolvla groups=2 gpu_mib=5900 worker_rss_mib=2464 2168 1869 2189 2096 2159 1664 44 
+11:39:34 smolvla groups=2 gpu_mib=5900 worker_rss_mib=2464 2168 1869 2189 2096 2159 1664 44 
+11:39:54 smolvla groups=2 gpu_mib=7275 worker_rss_mib=2597 2932 2765 2935 2801 2532 2575 2166 
+11:40:14 smolvla groups=2 gpu_mib=7275 worker_rss_mib=2597 2932 2765 2935 2801 2532 2575 2166 
+11:40:34 smolvla groups=2 gpu_mib=7275 worker_rss_mib=2597 2932 2765 2935 2801 2532 2575 2166 
+11:40:54 smolvla groups=2 gpu_mib=7275 worker_rss_mib=2597 2932 2765 2935 2801 2532 2576 2166 
+11:41:14 smolvla groups=2 gpu_mib=7275 worker_rss_mib=2597 2932 2765 2935 2801 2532 2576 2166 
+11:41:34 smolvla groups=2 gpu_mib=7275 worker_rss_mib=2597 2932 2765 2935 2801 2532 2576 2166 
+11:41:54 smolvla groups=2 gpu_mib=7275 worker_rss_mib=2597 2932 2765 2935 2801 2532 2576 2166 
+11:42:14 smolvla groups=2 gpu_mib=7275 worker_rss_mib=2597 2933 2765 2935 2801 2532 2576 2166 
+11:42:34 smolvla groups=2 gpu_mib=7275 worker_rss_mib=2597 2933 2765 2935 2801 2532 2576 2166 
+11:42:54 smolvla groups=2 gpu_mib=7275 worker_rss_mib=2597 2933 2765 2935 2801 2532 2576 2166 
+11:43:14 smolvla groups=2 gpu_mib=7275 worker_rss_mib=2597 2933 2766 2935 2802 2532 2576 2166 
+11:43:34 smolvla groups=2 gpu_mib=6152 worker_rss_mib=2484 2518 2345 2516 2373 2673 2673 2451 
+11:43:54 smolvla groups=2 gpu_mib=6488 worker_rss_mib=2678 2673 2547 2581 2575 2868 2877 2782 
+11:44:14 smolvla groups=2 gpu_mib=6488 worker_rss_mib=2678 2673 2547 2581 2575 2868 2877 2782 
+11:44:34 smolvla groups=2 gpu_mib=6488 worker_rss_mib=2678 2673 2547 2581 2575 2868 2877 2782 
+11:44:54 smolvla groups=2 gpu_mib=5918 worker_rss_mib=2895 2695 2689 2726 2561 2638 2416 2337 
+11:45:14 smolvla groups=2 gpu_mib=5922 worker_rss_mib=2895 2695 2689 2726 2561 2638 2416 2337 
+11:45:34 smolvla groups=2 gpu_mib=5922 worker_rss_mib=2895 2695 2689 2726 2561 2638 2416 2337 
+11:45:55 smolvla groups=2 gpu_mib=5922 worker_rss_mib=2895 2695 2689 2726 2561 2638 2416 2337 
+11:46:15 smolvla groups=2 gpu_mib=5922 worker_rss_mib=2895 2695 2689 2726 2561 2638 2416 2337 
+11:46:35 smolvla groups=2 gpu_mib=5922 worker_rss_mib=2895 2695 2689 2726 2561 2638 2416 2337 
+11:46:55 smolvla groups=2 gpu_mib=5922 worker_rss_mib=2895 2695 2689 2726 2561 2638 2416 2337 
+11:47:15 smolvla groups=2 gpu_mib=5922 worker_rss_mib=2895 2695 2689 2726 2561 2638 2416 2337 
+11:47:35 smolvla groups=2 gpu_mib=5922 worker_rss_mib=2895 2695 2689 2726 2561 2638 2416 2337 
+11:47:55 smolvla groups=2 gpu_mib=5922 worker_rss_mib=2895 2695 2689 2726 2561 2638 2416 2337 
+11:48:15 smolvla groups=2 gpu_mib=5922 worker_rss_mib=2895 2695 2689 2726 2561 2638 2416 2337 
+11:48:35 smolvla groups=2 gpu_mib=5922 worker_rss_mib=2895 2695 2689 2726 2561 2638 2416 2337 
+11:48:55 smolvla groups=2 gpu_mib=5922 worker_rss_mib=2895 2695 2689 2726 2561 2638 2416 2337 
+11:49:15 smolvla groups=2 gpu_mib=5922 worker_rss_mib=2895 2695 2689 2726 2561 2638 2416 2337 
+11:49:35 smolvla groups=2 gpu_mib=5310 worker_rss_mib=2485 2475 2471 2726 2561 2638 2416 2337 
+11:49:55 smolvla groups=2 gpu_mib=5310 worker_rss_mib=2485 2475 2471 2726 2561 2638 2416 2337 
+11:50:15 smolvla groups=2 gpu_mib=5310 worker_rss_mib=2485 2475 2471 2726 2561 2638 2416 2337 
+11:50:35 smolvla groups=2 gpu_mib=5310 worker_rss_mib=2485 2475 2471 2726 2561 2638 2416 2337 
+11:50:55 smolvla groups=2 gpu_mib=5310 worker_rss_mib=2485 2475 2471 2726 2561 2638 2416 2337 
+11:51:15 smolvla groups=2 gpu_mib=5310 worker_rss_mib=2485 2475 2471 2726 2561 2638 2416 2337 
+11:51:35 smolvla groups=2 gpu_mib=5310 worker_rss_mib=2485 2475 2471 2726 2561 2638 2416 2337 
+11:51:55 smolvla groups=2 gpu_mib=5310 worker_rss_mib=2485 2475 2471 2726 2561 2638 2416 2337 
+11:52:15 smolvla groups=2 gpu_mib=5310 worker_rss_mib=2485 2475 2471 2726 2561 2638 2416 2337 
+11:52:36 smolvla groups=2 gpu_mib=5310 worker_rss_mib=2485 2475 2471 2726 2561 2638 2416 2337 
+11:52:56 smolvla groups=2 gpu_mib=5310 worker_rss_mib=2486 2475 2471 2726 2561 2638 2416 2337 
+11:53:16 smolvla groups=2 gpu_mib=5310 worker_rss_mib=2486 2475 2471 2726 2561 2638 2416 2337 
+11:53:36 smolvla groups=3 gpu_mib=4895 worker_rss_mib=2331 2471 2726 2561 2638 2416 2337 
+11:53:56 smolvla groups=3 gpu_mib=1 worker_rss_mib=
+11:54:16 smolvla groups=3 gpu_mib=1444 worker_rss_mib=
+11:54:36 smolvla groups=3 gpu_mib=6129 worker_rss_mib=1986 1556 1895 2155 2222 1896 1913 45 
+11:54:56 smolvla groups=3 gpu_mib=6129 worker_rss_mib=1986 1556 1896 2155 2222 1896 1913 45 
+11:55:16 smolvla groups=3 gpu_mib=6173 worker_rss_mib=1986 1556 1896 2155 2222 1896 1913 45 
+11:55:36 smolvla groups=3 gpu_mib=6219 worker_rss_mib=2152 2233 2330 2389 2549 1880 2014 1559 
+11:55:56 smolvla groups=3 gpu_mib=6219 worker_rss_mib=2152 2234 2331 2389 2549 1881 2015 1559 
+11:56:16 smolvla groups=3 gpu_mib=6574 worker_rss_mib=1925 1955 2372 2399 2555 2197 2437 2328 
+11:56:36 smolvla groups=3 gpu_mib=6574 worker_rss_mib=1925 1955 2372 2399 2555 2197 2437 2328 
+11:56:56 smolvla groups=3 gpu_mib=6574 worker_rss_mib=1925 1955 2372 2399 2555 2197 2438 2328 
+11:57:16 smolvla groups=3 gpu_mib=7191 worker_rss_mib=2603 2604 2579 2619 2644 2611 2624 2590 
+11:57:36 smolvla groups=3 gpu_mib=7191 worker_rss_mib=2604 2604 2579 2619 2644 2611 2624 2590 
+11:57:56 smolvla groups=3 gpu_mib=6660 worker_rss_mib=2617 2455 2450 2474 2724 2697 2537 2509 
+11:58:16 smolvla groups=3 gpu_mib=6660 worker_rss_mib=2617 2455 2450 2474 2724 2697 2537 2509 
+11:58:36 smolvla groups=3 gpu_mib=6660 worker_rss_mib=2617 2455 2450 2474 2724 2697 2537 2509 
+11:58:56 smolvla groups=3 gpu_mib=6377 worker_rss_mib=2530 2415 2418 2474 2724 2697 2537 2509 
+11:59:16 smolvla groups=4 gpu_mib=3849 worker_rss_mib=2351 2537 2509 

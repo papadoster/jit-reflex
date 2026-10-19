@@ -1,0 +1,230 @@
+Using CPython 3.10.18 interpreter at: /usr/bin/python3.10
+warning: The requested interpreter resolved to Python 3.10.18, which is incompatible with the project's Python requirement: `>=3.11` (from `project.requires-python`)
+Creating virtual environment at: /workspace/lmax-deps/venv-oft
+Activate with: source /workspace/lmax-deps/venv-oft/bin/activate
+Using Python 3.10.18 environment at: /workspace/lmax-deps/venv-oft
+Resolved 172 packages in 397ms
+   Building openvla-oft @ file:///workspace/lmax-deps/openvla-oft
+      Built openvla-oft @ file:///workspace/lmax-deps/openvla-oft
+Prepared 1 package in 636ms
+Installed 172 packages in 1.00s
+ + absl-py==2.5.1
+ + accelerate==1.15.0
+ + annotated-doc==0.0.5
+ + annotated-types==0.8.0
+ + antlr4-python3-runtime==4.9.3
+ + anyio==4.15.1
+ + array-record==0.8.1
+ + astunparse==1.6.3
+ + attrs==26.1.0
+ + bddl==1.0.1
+ + certifi==2026.7.22
+ + cffi==2.1.1
+ + charset-normalizer==3.5.2
+ + click==8.5.0
+ + cloudpickle==3.1.2
+ + contourpy==1.3.2
+ + cryptography==50.0.2
+ + cycler==0.12.1
+ + diffusers==0.30.3
+ + dlimp==0.0.1 (from git+https://github.com/moojink/dlimp_openvla.git@040105d256bd28866cc6620621a3d5f7b6b91b46)
+ + dm-tree==0.1.10
+ + draccus==0.8.0
+ + easydict==1.13
+ + einops==0.8.2
+ + etils==1.13.0
+ + exceptiongroup==1.3.1
+ + farama-notifications==0.0.6
+ + fastapi==0.143.3
+ + fastjsonschema==2.22.2
+ + filelock==4.1.0
+ + flatbuffers==25.12.19
+ + fonttools==4.65.0
+ + fsspec==2026.9.0
+ + future==1.0.0
+ + gast==0.7.0
+ + gitdb==4.0.12
+ + gitpython==3.2.1
+ + glfw==2.11.0
+ + google-auth==2.62.0
+ + google-auth-oauthlib==1.5.0
+ + google-pasta==0.2.0
+ + grpcio==1.84.0
+ + gymnasium==1.3.0
+ + h11==0.16.0
+ + h5py==3.16.0
+ + hf-xet==1.7.0
+ + huggingface-hub==0.36.2
+ + hydra-core==1.3.7
+ + idna==3.20
+ + imageio==2.38.0
+ + importlib-metadata==9.0.1
+ + importlib-resources==7.1.0
+ + iniconfig==2.3.1
+ + jinja2==3.1.6
+ + json-numpy==2.1.1
+ + jsonlines==4.0.0
+ + jsonschema==4.26.0
+ + jsonschema-specifications==2025.9.1
+ + jupyter-core==5.9.1
+ + jupytext==1.19.6
+ + keras==2.15.0
+ + kiwisolver==1.5.1
+ + lazy-loader==0.6
+ + libclang==18.1.1
+ + llvmlite==0.50.0
+ + markdown==3.10.3
+ + markdown-it-py==4.2.0
+ + markupsafe==3.0.4
+ + matplotlib==3.10.9
+ + mdit-py-plugins==0.6.1
+ + mdurl==0.1.2
+ + mergedeep==1.3.4
+ + ml-dtypes==0.2.0
+ + mpmath==1.3.0
+ + mujoco==3.3.2
+ + mypy-extensions==1.1.0
+ + nbformat==5.11.1
+ + networkx==3.4.2
+ + numba==0.68.0
+ + numpy==1.26.4
+ + nvidia-cublas-cu12==12.1.3.1
+ + nvidia-cuda-cupti-cu12==12.1.105
+ + nvidia-cuda-nvrtc-cu12==12.1.105
+ + nvidia-cuda-runtime-cu12==12.1.105
+ + nvidia-cudnn-cu12==8.9.2.26
+ + nvidia-cufft-cu12==11.0.2.54
+ + nvidia-curand-cu12==10.3.2.106
+ + nvidia-cusolver-cu12==11.4.5.107
+ + nvidia-cusparse-cu12==12.1.0.106
+ + nvidia-nccl-cu12==2.19.3
+ + nvidia-nvjitlink-cu12==12.9.86
+ + nvidia-nvtx-cu12==12.1.105
+ + oauthlib==4.0.0
+ + omegaconf==2.3.1
+ + opencv-python==4.11.0.86
+ + openexr==3.5.2
+ + opentelemetry-api==1.45.1
+ + openvla-oft==0.0.1 (from file:///workspace/lmax-deps/openvla-oft)
+ + opt-einsum==3.4.0
+ + packaging==26.3
+ + peft==0.11.1
+ + pillow==12.3.0
+ + platformdirs==4.12.4
+ + pluggy==1.7.0
+ + promise==2.3
+ + protobuf==4.25.9
+ + psutil==7.2.2
+ + pyasn1==0.6.4
+ + pyasn1-modules==0.4.2
+ + pycparser==3.11
+ + pydantic==2.14.1
+ + pydantic-core==2.50.1
+ + pygments==2.21.0
+ + pyopengl==3.1.10
+ + pyparsing==3.3.3
+ + pytest==9.1.1
+ + python-dateutil==2.9.0.post0
+ + pyyaml==6.0.3
+ + pyyaml-include==1.4.1
+ + referencing==0.37.0
+ + regex==2026.9.29
+ + requests==2.34.2
+ + requests-oauthlib==2.0.0
+ + rich==15.0.0
+ + robosuite==1.4.0
+ + rpds-py==0.30.0
+ + safetensors==0.8.0
+ + scikit-image==0.25.2
+ + scipy==1.15.3
+ + sentencepiece==0.1.99
+ + sentry-sdk==2.72.0
+ + setuptools==84.0.0
+ + six==1.17.0
+ + smmap==5.0.3
+ + starlette==1.7.0
+ + sympy==1.14.0
+ + tensorboard==2.15.2
+ + tensorboard-data-server==0.7.2
+ + tensorflow==2.15.0
+ + tensorflow-addons==0.23.0
+ + tensorflow-datasets==4.9.3
+ + tensorflow-estimator==2.15.0
+ + tensorflow-graphics==2021.12.3
+ + tensorflow-io-gcs-filesystem==0.37.1
+ + tensorflow-metadata==1.16.1
+ + termcolor==3.3.0
+ + thop==0.1.1.post2209072238
+ + tifffile==2025.5.10
+ + timm==0.9.10
+ + tokenizers==0.19.1
+ + toml==0.10.2
+ + tomli==2.5.0
+ + torch==2.2.0
+ + torchaudio==2.2.0
+ + torchvision==0.17.0
+ + tqdm==4.70.1
+ + traitlets==5.16.1
+ + transformers==4.40.1 (from git+https://github.com/moojink/transformers-openvla-oft.git@bc339d9ad707454c0c115970db43c260067c61ab)
+ + trimesh==5.1.1
+ + triton==2.2.0
+ + typeguard==2.13.3
+ + typing-extensions==4.16.0
+ + typing-inspect==0.9.0
+ + typing-inspection==0.4.4
+ + urllib3==2.8.0
+ + uvicorn==0.54.0
+ + wand==0.6.13
+ + wandb==0.28.0
+ + werkzeug==3.1.9
+ + wheel==0.48.0
+ + wrapt==1.14.2
+ + zipp==4.1.1
+Using Python 3.10.18 environment at: /workspace/lmax-deps/venv-oft
+Resolved 2 packages in 129ms
+Installed 2 packages in 15ms
+ + hf-libero==0.1.4
+ + robomimic==0.2.0
+2026-10-17 10:12:44.668356: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:9261] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2026-10-17 10:12:44.668435: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:607] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2026-10-17 10:12:44.670141: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1515] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2026-10-17 10:12:44.678424: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-10-17 10:12:47.267775: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+Fetching 674 files:   0%|          | 0/674 [00:00<?, ?it/s]Fetching 674 files:   6%|▌         | 39/674 [00:00<00:01, 381.28it/s]Fetching 674 files:  15%|█▍        | 98/674 [00:00<00:01, 498.49it/s]Fetching 674 files:  22%|██▏       | 148/674 [00:00<00:01, 491.49it/s]Fetching 674 files:  30%|██▉       | 202/674 [00:00<00:00, 508.45it/s]Fetching 674 files:  39%|███▉      | 264/674 [00:00<00:00, 546.69it/s]Fetching 674 files:  48%|████▊     | 321/674 [00:00<00:00, 552.87it/s]Fetching 674 files:  56%|█████▌    | 377/674 [00:00<00:00, 516.08it/s]Fetching 674 files:  64%|██████▍   | 430/674 [00:00<00:00, 485.36it/s]Fetching 674 files:  72%|███████▏  | 487/674 [00:00<00:00, 505.72it/s]Fetching 674 files:  82%|████████▏ | 551/674 [00:01<00:00, 538.76it/s]Fetching 674 files:  90%|████████▉ | 606/674 [00:01<00:00, 508.80it/s]Fetching 674 files:  98%|█████████▊| 658/674 [00:01<00:00, 489.29it/s]Fetching 674 files: 100%|██████████| 674/674 [00:01<00:00, 510.94it/s]
+[32m✓ Downloaded[0m
+  path: /workspace/lmax-deps/libero-pro-data
+{
+  "config_dir": "/workspace/lmax-deps/libero-pro-config",
+  "dataset": "zhouxueyang/LIBERO-Pro",
+  "dataset_root": "/workspace/lmax-deps/libero-pro-data",
+  "libero_pro_root": "/workspace/lmax-deps/LIBERO-PRO",
+  "revision": "c86fc3b8293185a6f373677018ff3e37f8391602",
+  "runtime_revision": "2b910b5b5f53016bef9907632f6f840f1ce2229c"
+}
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+LIBERO assets: /root/.cache/libero/assets
+Wand: MagickWand loads
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+LIBERO assets: /root/.cache/libero/assets
+Wand: MagickWand loads
+torch 2.11.0+cu126 CUDA 12.6 NVIDIA GeForce RTX 3090
+EGL vendor: NVIDIA GL renderer: NVIDIA GeForce RTX 3090/PCIe/SSE2
+Exception ignored in: <function GLContext.__del__ at 0x7de0187ee020>
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/__init__.py", line 138, in __del__
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/__init__.py", line 131, in free
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/OpenGL/error.py", line 230, in glCheckError
+OpenGL.raw.EGL._errors.EGLError: <exception str() failed>
+Fetching 8 files:   0%|          | 0/8 [00:00<?, ?it/s]Fetching 8 files: 100%|██████████| 8/8 [00:00<00:00, 1017.05it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights from local directory
+smolvla cached
+Fetching 22 files:   0%|          | 0/22 [00:00<?, ?it/s]Fetching 22 files: 100%|██████████| 22/22 [00:00<00:00, 624.11it/s]
+Fetching 22 files:   0%|          | 0/22 [00:00<?, ?it/s]Fetching 22 files: 100%|██████████| 22/22 [00:00<00:00, 709.28it/s]
+name, driver_version, memory.total [MiB]
+NVIDIA GeForce RTX 3090, 580.178.04, 24576 MiB
+[10:13:51] packed c1e4m_results_B.tgz (44K)

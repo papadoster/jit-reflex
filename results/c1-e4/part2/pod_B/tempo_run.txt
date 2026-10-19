@@ -1,0 +1,5 @@
+oftplus, 6 envs: GPU peak 19636 MiB (max 23552); C1-E4m repeat: rows=3 max_abs=0.000e+00 bitwise=1 C1-E4m repeat: rows=3 max_abs=0.000e+00 bitwise=1 
+oft, 6 envs: GPU peak 19636 MiB (max 23552); C1-E4m repeat: rows=3 max_abs=0.000e+00 bitwise=1 C1-E4m repeat: rows=3 max_abs=0.000e+00 bitwise=1 
+smolvla, 8 envs: GPU peak 8030 MiB (max 23552); C1-E4m repeat: rows=3 max_abs=0.000e+00 bitwise=1 C1-E4m repeat: rows=3 max_abs=0.000e+00 bitwise=1 
+tempo (s/episode): lmax_oftplus=13.211 lmax_oft=15.917 lmax_smolvla=15.253 bench_smolvla=7.242
+C1-E4m envs: oftplus=6 oft=6 smolvla=8
