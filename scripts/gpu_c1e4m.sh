@@ -6,6 +6,9 @@
 #          google/paligemma-3b-pt-224 (pi0.5's tokenizer; huggingface-cli login). >= 16 vCPUs, 48 GB RAM, 80 GB disk
 #   POD=B  OFT+, OFT, SmolVLA: connect, M0, B-cal, M1 OFT+, M4 S, block B SmolVLA, M4 OFT. No token (open models; one
 #          present is ignored). >= 16 vCPUs, 64 GB RAM, 120 GB disk (LIBERO-plus assets 9.4 GB, OFT and OFT+ 15 GB each)
+#   POD=C  the controls (docs/superpowers/specs/2026-10-20-c1-e4-controls-design.md, "controls spec" §7, §12): pi0.5 +
+#          OFT+ (OFT with TAIL=1) on one pod, results under results/c1-e4/controls/pod_C; its stages are below. A token
+#          as pod A. >= 16 vCPUs, 64 GB RAM, 120 GB disk
 # Each pod: RunPod Community RTX 4090 (~$0.34/h), EGL, root (apt-get), tmux, /workspace.
 #   tmux new -s c1e4m   (after a lost SSH session: tmux attach -t c1e4m)
 #   cd /workspace && git clone https://github.com/papadoster/jit-reflex.git && cd jit-reflex && git checkout c1-e4
@@ -42,6 +45,17 @@
 #               evaluation cases), the split has calib's extra, HEAD is pushed, the tree is clean, connect passed and
 #               the runner code is connect's ($O/CODE). ONLY=<id regex>: only those lines (bench lines alone need no
 #               line of the other pod). The reading: on the Mac with both pods' grid_all files
+# POD=C pi0.5 + OFT+ (OFT with TAIL=1), the controls (controls spec): setup | cprobe | csmoke | cgrid | ctail, each
+# after the previous one passed; every runner line at n-envs 6, part 2's batches (controls spec §7):
+#   setup       A's and B's without SmolVLA: the token check and pi0.5's SHA-256, venv-oft and OFT+'s weights (OFT's
+#               with TAIL=1), pytest
+#   cprobe      §7.1: part 2's pieces repeated as they ran (scripts/c1e4c_summary.py --probe-plan), act_hash against the
+#               saved records -> mode.json (P or S per probe)
+#   csmoke      §12: tests/ on the pod; PPCL and VS0.3 on 6 pi0.5 cases (prefix_ok >= 5 of 6 each, else stop) and on the
+#               bench -> the GPU peak, tempo_smoke.txt, forecast.txt: the owner decides
+#   cgrid       lines 1-7 by priority (--plan --line N, from mode.json and k_select.json), the k selection after lines 1
+#               and 4, the forecast after each runner line; with a mode S, PPC on PPCL's latched cases; grid_all_C.jsonl
+#   ctail       TAIL=1, after cgrid and the owner's go: line 8 (OFT), grid_all_C.jsonl again
 # One stage at a time on a pod (flock). Each runner line has its own --out (block, brain, set, source, d), runs twice
 # (pass 2 resumes and retries failed groups, scripts/gpu_c1e3.sh's watchdog STALL, default 7200 s) and a stage fails if a
 # runner still exits non-zero after pass 2. Every exit appends the environment to $O/pod_env_<stage>.txt, refreshes
@@ -53,14 +67,19 @@ cd "$(dirname "$0")/.."
 DRY=${DRY:-}
 dry() { [ -n "$DRY" ]; }
 POD=${POD:-}
-case $POD in  # the pod's LIBERO-MAX brains and its bench brain (spec §13)
-  A) BRAINS=pi05; BB=pi05 ;;
-  B) BRAINS="oftplus oft smolvla"; BB=smolvla ;;
-  *) echo "!!! POD=A (pi0.5) or POD=B (OFT+, OFT, SmolVLA) is required (spec §13)"; exit 1 ;;
+TAIL=${TAIL:-}  # POD=C: 1 adds OFT (controls spec §12, line 8)
+case $POD in  # the pod's LIBERO-MAX brains, its bench brain (spec §13) and its brains in venv-oft
+  A) BRAINS=pi05; BB=pi05; OFTB= ;;
+  B) BRAINS="oftplus oft smolvla"; BB=smolvla; OFTB="oft oftplus" ;;
+  C) OFTB=oftplus; [ "$TAIL" = 1 ] && OFTB="oft oftplus"; BRAINS="pi05 $OFTB"; BB=pi05 ;;
+  *) echo "!!! POD=A (pi0.5), POD=B (OFT+, OFT, SmolVLA) or POD=C (the controls) is required (spec §13)"; exit 1 ;;
 esac
+has_pi() { [ $POD = A ] || [ $POD = C ]; }  # pi0.5: its gated tokenizer (a token), its weights' SHA-256
+has_oft() { [ -n "$OFTB" ]; }  # venv-oft, openvla-oft
 dry || [ -n "${TMUX:-}" ] || { echo "!!! not inside tmux: a lost SSH session kills the workers (tmux new -s c1e4m)"
   sleep 10; }
 O=results/c1-e4/part2/pod_$POD  # the runners' records
+[ $POD = C ] && O=results/c1-e4/controls/pod_C
 W=$O  # this script's own files; a dry run writes them to a temporary dir, never into the repository
 dry && W=$(mktemp -d)
 LOG=$W/logs
@@ -74,7 +93,7 @@ DEPS=${DEPS:-/workspace/lmax-deps}  # outside the repository: no LIBERO-MAX file
 LMAX=$DEPS/LIBERO-MAX
 VO=$DEPS/venv-oft
 PO=$VO/bin/python
-PYS=$P; [ $POD = B ] && PYS="$P $PO"  # the pod's venvs
+PYS=$P; has_oft && PYS="$P $PO"  # the pod's venvs
 VID=${VID:-/workspace/c1e4m_videos}  # outside the repository
 STALL=${STALL:-7200}  # an M1/M2 pi0.5 group (6 cases x 8 episodes) runs 15-30 min without output
 K=${K:-20}  # calib_more: the next K evaluation cases (bench: spare pairs) in order, spec §5
@@ -156,10 +175,11 @@ setup() {
       cloudpickle opencv-python future "lerobot[dataset,scipy-dep]==0.6.1" "${PIN[@]}" "${SCENE[@]}" || exit 1
     x touch venv/c1e4m-installed
   fi
-  # pod A: pi0.5's tokenizer is gated; a missing token or unaccepted terms stop here, before anything big is fetched
-  [ $POD = A ] && { x $P -c "from huggingface_hub import model_info, whoami
+  [ $POD != C ] || x uv pip install --python $P pytest==9.1.1 || exit 1  # csmoke runs tests/ (controls spec §12)
+  # pods A, C: pi0.5's tokenizer is gated; a missing token or unaccepted terms stop here, before anything big is fetched
+  has_pi && { x $P -c "from huggingface_hub import model_info, whoami
 print('HF user:', whoami()['name']); model_info('google/paligemma-3b-pt-224'); print('paligemma: access ok')" \
-    || fail "pod A needs a Hugging Face token with access to the gated google/paligemma-3b-pt-224 (pi0.5's tokenizer):
+    || fail "pod $POD needs a Hugging Face token with access to the gated google/paligemma-3b-pt-224 (pi0.5's tokenizer):
     accept its terms on the model page, then huggingface-cli login (or: hf auth login), then setup again"; }
   x mkdir -p $DEPS
   clone() {  # clone <url> <dir> <commit>
@@ -170,11 +190,11 @@ print('HF user:', whoami()['name']); model_info('google/paligemma-3b-pt-224'); p
   clone https://github.com/Zxy-MLlab/LIBERO-PRO.git $DEPS/LIBERO-PRO $PRO_REV  # its assets are in its git tree
   # pod B: openvla-oft's venv (python 3.10, torch 2.2.0 as its pyproject) with the transformers fork: plain transformers
   # silently gives wrong chunks (parallel decoding needs the fork's bidirectional attention); plus the scenes
-  [ $POD = B ] && clone https://github.com/moojink/openvla-oft.git $DEPS/openvla-oft $OFT_GIT
+  has_oft && clone https://github.com/moojink/openvla-oft.git $DEPS/openvla-oft $OFT_GIT
   # tensorflow-metadata >= 1.17 is generated for protobuf 5 (TF 2.15 keeps 4.25); 1.16.1 asks protobuf < 4.21 on python
   # 3.10, which breaks wandb: both forced; wandb >= 0.29 has protos for protobuf 5+ only: 0.28.0 (imports checked on the
   # pod, 2026-10-17). Marker 3: venvs built before rebuild
-  if [ $POD = B ] && { dry || [ "$(cat $VO/c1e4m-installed 2>/dev/null)" != 3 ] || ! $PO -V >/dev/null 2>&1; }; then
+  if has_oft && { dry || [ "$(cat $VO/c1e4m-installed 2>/dev/null)" != 3 ] || ! $PO -V >/dev/null 2>&1; }; then
     x uv venv --clear --python 3.10 $VO || exit 1
     wr $DEPS/oft-overrides.txt "transformers @ git+https://github.com/moojink/transformers-openvla-oft.git@$TF_GIT" \
       "dlimp @ git+https://github.com/moojink/dlimp_openvla.git@$DLIMP_GIT" tensorflow-metadata==1.16.1 protobuf==4.25.9 \
@@ -235,7 +255,7 @@ assert v == "NVIDIA" and not any(s in r.lower() for s in ("llvmpipe", "softpipe"
   # (PaliGemma's gated tokenizer, SmolVLM's processor), so later stages run HF offline
   x $P -c "import sys; sys.path.insert(0, 'scripts'); import c1e4m_brains as cb
 cb.make_brain('$BB', 'cpu', 'fp32'); print('$BB cached')" || fail "$BB does not build"
-  if [ $POD = A ]; then  # pi0.5's SHA-256 (part 1)
+  if has_pi; then  # pi0.5's SHA-256 (part 1)
     x $P -c "from huggingface_hub import snapshot_download as d
 p = d('$PI_REPO', revision='$PI_REV'); assert '$PI_REV' in p; open('venv/pi05-snapshot', 'w').write(p)" || exit 1
     if dry || [ "$(cat venv/pi05-sha-ok 2>/dev/null)" != "$(cat venv/pi05-snapshot)" ]; then
@@ -244,10 +264,10 @@ p = d('$PI_REPO', revision='$PI_REV'); assert '$PI_REV' in p; open('venv/pi05-sn
       x cp venv/pi05-snapshot venv/pi05-sha-ok
     fi
   fi
-  # pod B, OFT / OFT+: the local_dir copy scripts/c1e4m_brains.py OFTBrain loads (same path, no lora_adapter/), then the
-  # SHA-256 of its weight files and the git blob id of its dataset statistics (checked once)
+  # pods B, C, OFT / OFT+: the local_dir copy scripts/c1e4m_brains.py OFTBrain loads (same path, no lora_adapter/), then
+  # the SHA-256 of its weight files and the git blob id of its dataset statistics (checked once)
   local b dir get
-  for b in $([ $POD = B ] && echo oft oftplus); do
+  for b in $OFTB; do
     get="import sys; sys.path.insert(0, 'scripts'); import c1e4m_brains as cb
 from huggingface_hub import snapshot_download as d; r, v = cb.OFT['$b']
 print(d(r, revision=v, local_dir='$C1E4_OFT_CKPT/' + r.split('/')[1] + '-' + v[:10], ignore_patterns=['lora_adapter/*']))"
@@ -268,12 +288,12 @@ print(d(r, revision=v, local_dir='$C1E4_OFT_CKPT/' + r.split('/')[1] + '-' + v[:
 record() {  # record <stage>: appends this run's environment to $O/pod_env_<stage>.txt
   { echo "=== $(date -u) pod $POD $1, HEAD $(git rev-parse HEAD), MUJOCO_GL=$MUJOCO_GL, vCPUs $(nproc)"
     echo "code ($CODE_PATHS):" $(code_hash)
-    for d in $LMAX $DEPS/LIBERO-plus $DEPS/LIBERO-PRO $([ $POD = B ] && echo $DEPS/openvla-oft); do
+    for d in $LMAX $DEPS/LIBERO-plus $DEPS/LIBERO-PRO $(has_oft && echo $DEPS/openvla-oft); do
       echo "$d: $(git -C $d rev-parse HEAD)"; done
     cat $DEPS/libero-pro-config/source_lock.json
     echo "LIBERO-plus assets SHA-256: $(cat $DEPS/plus-assets-ok 2>/dev/null || echo no)"
-    [ $POD = A ] && echo "pi0.5 weights SHA-256 checked: $(cat venv/pi05-sha-ok 2>/dev/null || echo no)"
-    for b in $([ $POD = B ] && echo oft oftplus); do
+    has_pi && echo "pi0.5 weights SHA-256 checked: $(cat venv/pi05-sha-ok 2>/dev/null || echo no)"
+    for b in $OFTB; do
       echo "$b weights SHA-256 checked: $(cat $C1E4_OFT_CKPT/$b-sha-ok 2>/dev/null || echo no)"; done
     [ $POD = B ] && echo "HuggingFaceVLA/smolvla_libero snapshots:" \
       $(ls "${HF_HOME:-$HOME/.cache/huggingface}"/hub/models--HuggingFaceVLA--smolvla_libero/snapshots)
@@ -383,13 +403,31 @@ envs() {  # envs <runner c1e4m|c1e4> <brain>: LIBERO-MAX the smoke's choice; the
   local e
   [ $1 = c1e4 ] && { [ $2 = pi05 ] && echo 6 || echo 10; return; }
   e=$(grep -oE "C1-E4m envs: .*" $W/tempo_smoke.txt 2>/dev/null | tail -1 | grep -oE " $2=[0-9]+" | cut -d= -f2)
-  echo "${e:-$([ $2 = smolvla ] && echo 8 || echo 6)}"  # the default: a dry run only (the stages need the smoke's)
+  echo "${e:-$([ $2 = smolvla ] && echo 8 || echo 6)}"  # default: a dry run; POD=C (part 2's 6, controls spec §7)
 }
 dbg() {  # dbg <source> <k>: the first k calibration cases of that source (debug cases, comma-separated)
   $SP -c "import json; c = json.load(open('$SPLIT'))['calib']
 print(','.join([i for i in c if i.startswith('pro-') == ('$1' == 'pro')][:$2]))"
 }
 summ() { $SP scripts/c1e4m_summary.py "$@"; }
+cc() { $SP scripts/c1e4c_summary.py "$@"; }  # POD=C: the controls summary (controls spec §5, §7, §12)
+cphase() {  # cphase <phase> <cc args..>: the summary's plan, run by run_phase. A dry run where the summary cannot plan
+  local ph=$1 p; shift  # (on the Mac: no mode.json or k_select.json yet) prints the call instead
+  if dry; then p=$(cc "$@" 2>/dev/null) || { echo "+ cc $*"; return 0; }
+  else p=$(cc "$@") || { echo "!!! cc $* failed (exit $?)"; return 1; }; fi
+  # run_phase skips other phases' lines silently: a line the summary names otherwise would never run
+  [ -z "$p" ] || [ "$(cut -f1 <<< "$p" | sort -u)" = "$ph" ] || { echo "!!! cc $*: lines of a phase other than $ph"
+    return 1; }
+  run_phase $ph "$p"
+}
+cfc() {  # cfc <tempo file>: the controls forecast (controls spec §12), with mode.json and k_select.json once written
+  local a=
+  dry && { echo "+ cc --forecast $1 [--mode $O/mode.json] [--k $O/k_select.json] --done <the pod's records>"; return; }
+  [ -f $O/mode.json ] && a+=" --mode $O/mode.json"
+  [ -f $O/k_select.json ] && a+=" --k $O/k_select.json"
+  # shellcheck disable=SC2046,SC2086
+  cc --forecast "$1" $a --done $(ls $O/*.jsonl 2>/dev/null | grep -v /grid_all_)
+}
 oft_numpy() {  # spec §4: openvla-oft's import makes json.dumps pass numpy silently; the runner writes strict JSON
   dry || [ $POD = A ] && return 0
   ! grep -l '"__numpy__"' $O/*oft*.jsonl $SM/*oft*.jsonl 2>/dev/null || fail "\"__numpy__\" in the OFT records above"
@@ -411,21 +449,23 @@ run_phase() {  # run_phase <phase> <plan>: the phase's lines one after another (
       # shellcheck disable=SC2086
       run2 $id $BRUN $args --n-envs $(envs c1e4 $b) --out $out </dev/null || bad+=" $id"
     fi
-    [ "$1" = grid ] && fcast $id $([ $rn = c1e4m ] && echo lmax || echo bench)_$b
+    case $1 in grid | c[1-8] | cc5) fcast $id $([ $rn = c1e4m ] && echo lmax || echo bench)_$b ;; esac
   done <<< "$2"
   [ -z "$bad" ] || { echo "!!! still failing after pass 2:$bad" | tee -a $LOG/$1.log; return 1; }
 }
 fcast() {  # fcast <line id> <tempo key>: this line's tempo replaces the last one for that brain, then the forecast
   local r t
-  dry && { echo "+ summ <the pod's records> --forecast $W/tempo_grid.txt --pod $POD (after $1)"; return; }
+  dry && { [ $POD = C ] && { cfc $W/tempo_grid.txt; return; }
+    echo "+ summ <the pod's records> --forecast $W/tempo_grid.txt --pod $POD (after $1)"; return; }
   r=$([ "${2%%_*}" = lmax ] && gtempo $LOG/$1.log || full_rate $LOG/$1.log)
   t=$(cat $W/tempo_smoke.txt $W/tempo_grid.txt 2>/dev/null | grep -E '^tempo \(s/episode\): ' | tail -1)
   [ -n "$r" ] && t=$(sed -E "s/ $2=[0-9.]+/ $2=$r/" <<< "$t")
   echo "$t" >> $W/tempo_grid.txt
   # shellcheck disable=SC2046
   { echo "[$(date +%T)] forecast after $1 ($2 ${r:-?} s/episode)"
-    summ $(ls $O/*.jsonl 2>/dev/null | grep -v /grid_all_) --forecast $W/tempo_grid.txt --pod $POD; } \
-    | tee -a $W/forecast.txt | grep -E '"(total|left)"' -A3
+    if [ $POD = C ]; then cfc $W/tempo_grid.txt
+    else summ $(ls $O/*.jsonl 2>/dev/null | grep -v /grid_all_) --forecast $W/tempo_grid.txt --pod $POD; fi; } \
+    | tee -a $W/forecast.txt | if [ $POD = C ]; then cat; else grep -E '"(total|left)"' -A3; fi
 }
 calib_line() {  # the pod's line from M0, B-cal and calib_more's records -> calib.txt; N < 45: calib_more first
   local q
@@ -439,9 +479,11 @@ calib_line() {  # the pod's line from M0, B-cal and calib_more's records -> cali
     "(over ~\$27: told before the grid, spec §13). Here: git pull, then POD=$POD ./scripts/gpu_c1e4m.sh grid"
 }
 
-case "${1:-}" in
-  setup | smoke | connect | calib | calib_more | grid) ;;
-  *) echo "usage: POD=A|B $0 setup | smoke | connect | calib | calib_more | grid"; exit 1 ;;
+case "$POD:${1:-}" in
+  [ABC]:setup | [AB]:smoke | [AB]:connect | [AB]:calib | [AB]:calib_more | [AB]:grid) ;;
+  C:cprobe | C:csmoke | C:cgrid | C:ctail) ;;
+  *) echo "usage: POD=A|B $0 setup | smoke | connect | calib | calib_more | grid"
+     echo "       POD=C [TAIL=1] $0 setup | cprobe | csmoke | cgrid | ctail"; exit 1 ;;
 esac
 STAGE=$1
 # one stage at a time: a second instance would run the same episodes into the same files (the lock is outside results)
@@ -458,10 +500,10 @@ if [ $STAGE = setup ]; then
   setup 2>&1 | tee -a $LOG/setup.log
   exit "${PIPESTATUS[0]}"
 fi
-summ --plan --pod $POD >/dev/null || exit 1
-S0=$(summ --split0 $W/split0.json) || exit 1  # the split as first frozen: connect, calib and calib_more's --split
+[ $POD = C ] || summ --plan --pod $POD >/dev/null || exit 1
+[ $POD = C ] || S0=$(summ --split0 $W/split0.json) || exit 1  # the split as first frozen: connect, calib, calib_more's
 dry || [ -f $DEPS/c1e4m-setup-ok ] || fail "no $DEPS/c1e4m-setup-ok: POD=$POD ./scripts/gpu_c1e4m.sh setup first"
-[ $STAGE = smoke ] || dry || grep -q '^C1-E4m envs:' $W/tempo_smoke.txt 2>/dev/null \
+[ $STAGE = smoke ] || [ $POD = C ] || dry || grep -q '^C1-E4m envs:' $W/tempo_smoke.txt 2>/dev/null \
   || fail "no passed smoke ($W/tempo_smoke.txt): POD=$POD ./scripts/gpu_c1e4m.sh smoke first"
 export HF_HUB_OFFLINE=1  # everything is cached by setup: no silent weight change, no Hub outage mid-run
 case "$STAGE" in
@@ -683,5 +725,63 @@ json.dump(more[:$K], open('$O/bench_more.json', 'w'))" || exit 1  # a list: the 
     echo "On the Mac, with both pods' results: python scripts/c1e4m_summary.py" \
       "results/c1-e4/part2/pod_A/grid_all_A.jsonl results/c1-e4/part2/pod_B/grid_all_B.jsonl --fig fig.png"
     [ $rc = 0 ] || fail "grid lines still failing after pass 2 (above): the summary's completeness gate shows them"
+    ;;
+  cprobe)  # controls spec §7.1: part 2's pieces repeated as they ran, act_hash against the saved -> P or S per probe
+    check_code record
+    cphase cprobe --probe-plan || fail "cprobe: a probe line failed (above); no mode computed"
+    oft_numpy
+    x cc --probe $O/P1_*.jsonl $O/P2_*.jsonl $O/P3_*.jsonl | tee $W/mode.txt  # -> $O/mode.json
+    [ "${PIPESTATUS[0]}" = 0 ] || fail "the probe summary failed (above): no mode"
+    ;;
+  csmoke)  # controls spec §12 (outcomes never read): the tests, PPCL and VS0.3 with the Base prefix, tempo, forecast
+    dry || [ -f $O/mode.json ] || fail "no $O/mode.json: POD=C ./scripts/gpu_c1e4m.sh cprobe first"
+    check_code require
+    dry || rm -f $O/Csmoke_*.jsonl $LOG/Csmoke_*.log $LOG/csmoke*.log $W/tempo_run.txt $W/peak_csmoke*
+    # HF online for the tests only: SmolVLA's Jacobian test (C1-E2) reads SmolVLA's config, not cached on this pod
+    x env -u HF_HUB_OFFLINE $P -m pytest tests/ -q 2>&1 | tee $LOG/csmoke_tests.log
+    [ "${PIPESTATUS[0]}" = 0 ] || fail "tests/ fail on the pod (above): the owner decides"
+    peak_run $W/peak_csmoke cphase csmoke --plan --line smoke || fail "csmoke: a runner line failed (above)"
+    x cc --smoke-check $O/Csmoke_pi05*.jsonl \
+      || fail "PPCL or VS0.3 has prefix_ok < 5 of 6 (above): stop, the owner decides (controls spec §12)"
+    # OFT+ and OFT: part 2's (results/c1-e4/part2/pod_B/tempo_grid.txt) until a grid line measures them
+    t=" lmax_pi05=$(gtempo $LOG/Csmoke_pi05*.log) lmax_oftplus=12.497 lmax_oft=15.917"
+    t+=" bench_pi05=$(full_rate $LOG/Csmoke_bench*.log)"
+    dry || ! grep -qE '=( |$)' <<< "$t" || fail "a tempo is missing (no group / full batch in its log)"
+    { echo "csmoke: GPU peak $(cat $W/peak_csmoke) MiB (max $PEAK_MAX)"; echo "tempo (s/episode):$t"; } \
+      | tee $W/tempo_run.txt
+    x cp $W/tempo_run.txt $W/tempo_smoke.txt  # cgrid's gate and first tempo: the last passed csmoke's
+    cfc $W/tempo_smoke.txt | tee $W/forecast.txt
+    echo "[$(date +%T)] csmoke done. The forecast is above ($W/forecast.txt), the modes in mode.txt: the owner decides"
+    ;;
+  cgrid)  # controls spec §12: lines 1-7 strictly by priority, k after lines 1 and 4 (§5), PPC on the latched (§7.2)
+    dry || grep -q '^tempo (s/episode): ' $W/tempo_smoke.txt 2>/dev/null \
+      || fail "no passed csmoke ($W/tempo_smoke.txt): POD=C ./scripts/gpu_c1e4m.sh csmoke first"
+    check_code require
+    echo "[$(date +%T)] cgrid, pod C" | tee -a $W/forecast.txt
+    for L in 1 2 3 4 5 6 7; do
+      cphase c$L --plan --line $L || fail "cgrid: line $L still fails after pass 2 (above)"
+      b=; [ $L = 1 ] && b=pi05; [ $L = 4 ] && b=oftplus
+      [ -z "$b" ] && continue
+      x cc --select $b $O/C${L}_*.jsonl | tee -a $W/k_select.txt  # -> $O/k_select.json
+      [ "${PIPESTATUS[0]}" = 0 ] || fail "the k selection of $b failed (above)"
+    done
+    C5="--plan --line c5 --records $O/C2_*.jsonl $O/C3_*.jsonl $O/C7_*.jsonl"
+    if dry; then echo "+ cc $C5   # with a mode S; it writes latched_bench.json"
+    elif grep -qE '"mode": *"S"' $O/mode.json; then
+      # shellcheck disable=SC2086
+      cphase cc5 $C5 || fail "cgrid: the PPC pass on the latched cases still fails after pass 2 (above)"
+    fi
+    oft_numpy
+    x sh -c "cat $O/C[1-8]*.jsonl > $O/grid_all_C.jsonl"  # the grid lines' records, not the probe's or the smoke's
+    echo "On the Mac: python scripts/c1e4c_summary.py $O/grid_all_C.jsonl (mode.json, k_select.json beside it)"
+    ;;
+  ctail)  # controls spec §12 line 8: OFT, VS(k_pi) and G-auto, always self-contained; after cgrid, on the owner's go
+    [ "$TAIL" = 1 ] || fail "ctail runs with TAIL=1 (after POD=C TAIL=1 ./scripts/gpu_c1e4m.sh setup: OFT's weights)"
+    dry || [ -f $O/grid_all_C.jsonl ] || fail "no finished cgrid (no $O/grid_all_C.jsonl): cgrid first"
+    dry || [ -f $C1E4_OFT_CKPT/oft-sha-ok ] || fail "no OFT weights: POD=C TAIL=1 ./scripts/gpu_c1e4m.sh setup first"
+    check_code require
+    cphase c8 --plan --line 8 || fail "ctail: line 8 still fails after pass 2 (above)"
+    oft_numpy
+    x sh -c "cat $O/C[1-8]*.jsonl > $O/grid_all_C.jsonl"
     ;;
 esac
