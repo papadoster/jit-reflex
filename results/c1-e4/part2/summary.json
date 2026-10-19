@@ -1,0 +1,2216 @@
+{
+ "read_gate": {
+  "records": 21080,
+  "skipped": 0,
+  "other_split": 0,
+  "outside_plan": 0,
+  "connect": {
+   "pi05": {
+    "n": 300,
+    "missing": 0,
+    "base_none": 81.33,
+    "table2": 79.7,
+    "pass": true,
+    "dropped": false
+   },
+   "oftplus": {
+    "n": 300,
+    "missing": 0,
+    "base_none": 69.33,
+    "table2": null,
+    "pass": null,
+    "dropped": false
+   },
+   "oft": {
+    "n": 300,
+    "missing": 0,
+    "base_none": 63.33,
+    "table2": 64.3,
+    "pass": true,
+    "dropped": false
+   },
+   "smolvla": {
+    "n": 300,
+    "missing": 0,
+    "base_none": 6.33,
+    "table2": 26.1,
+    "pass": false,
+    "dropped": true
+   },
+   "pass": true
+  },
+  "g_check_M1": {
+   "ok": 1771,
+   "of": 1771,
+   "with_event": 1771,
+   "pass": true
+  },
+  "complete": {
+   "M1 pi05": {
+    "expected": 4700,
+    "missing": 0,
+    "pass": true
+   },
+   "M1 oftplus": {
+    "expected": 4700,
+    "missing": 0,
+    "pass": true
+   },
+   "B oracle": {
+    "expected": 4160,
+    "missing": 0,
+    "pass": true
+   }
+  },
+  "invalid_pairs": {
+   "Q4a/pi05": {
+    "pairs": 940,
+    "invalid": 2,
+    "pass": true
+   },
+   "Q4b/oftplus": {
+    "pairs": 940,
+    "invalid": 2,
+    "pass": true
+   },
+   "Q4c/pi05": {
+    "pairs": 940,
+    "invalid": 2,
+    "pass": true
+   },
+   "Q4c/oftplus": {
+    "pairs": 940,
+    "invalid": 2,
+    "pass": true
+   },
+   "Q4d/pi05": {
+    "pairs": 940,
+    "invalid": 2,
+    "pass": true
+   },
+   "Q4d/oftplus": {
+    "pairs": 940,
+    "invalid": 2,
+    "pass": true
+   }
+  },
+  "calib_lines": {
+   "A": "C1-E4 part 2 calib A: kbar_pi05=0.306 [0.262, 0.391] N=55 · bench: kbar_pi05=0.324 [0.230, 0.429] N=59",
+   "B": "C1-E4 part 2 calib B: kbar_oftplus=0.121 [0.072, 0.176] N=49 · kbar_oft=0.088 [0.025, 0.159] N=49 · bench: kbar_smolvla=0.067 [0.052, 0.094] N=56"
+  },
+  "kbar_mismatch": [],
+  "pass": true
+ },
+ "verdicts": {
+  "ВНЕШНИЙ ТЕСТ: G-AUTO ПОМОГАЕТ": "НЕТ",
+  "G-AUTO НЕ ХУЖЕ PPC НА ИХ ТЕСТЕ": "ДА",
+  "УПРЕЖДЕНИЕ НА ПЛАВНОМ ДВИЖЕНИИ": "НЕТ"
+ },
+ "rules": {
+  "Q4a": {
+   "test": "pi05, M1, d = 0: (Gauto - none) >= +5 and lo2.5 > 0",
+   "pi05": {
+    "diff_pp": 7.356,
+    "lo2.5": 3.631,
+    "lo5_one_sided": 4.219,
+    "hi97.5": 10.993,
+    "pairs": 938,
+    "clusters": 33,
+    "invalid_pairs": 2,
+    "pass": true
+   },
+   "pass": true
+  },
+  "Q4b": {
+   "test": "oftplus, M1, d = 0: (Gauto - none) >= +5 and lo2.5 > 0",
+   "oftplus": {
+    "diff_pp": 13.433,
+    "lo2.5": 8.922,
+    "lo5_one_sided": 9.659,
+    "hi97.5": 17.96,
+    "pairs": 938,
+    "clusters": 33,
+    "invalid_pairs": 2,
+    "pass": true
+   },
+   "pass": true
+  },
+  "Q4c": {
+   "test": "pi05 and oftplus, M1: one-sided (Gauto - G) >= -2 for each",
+   "pi05": {
+    "diff_pp": -1.599,
+    "lo2.5": -4.592,
+    "lo5_one_sided": -4.171,
+    "hi97.5": 1.374,
+    "pairs": 938,
+    "clusters": 33,
+    "invalid_pairs": 2,
+    "pass": false
+   },
+   "oftplus": {
+    "diff_pp": 4.158,
+    "lo2.5": 0.436,
+    "lo5_one_sided": 1.051,
+    "hi97.5": 7.815,
+    "pairs": 938,
+    "clusters": 33,
+    "invalid_pairs": 2,
+    "pass": true
+   },
+   "pass": false
+  },
+  "Q4d": {
+   "test": "pi05 and oftplus, M1: one-sided (Gauto - PPC) >= -2 for each",
+   "pi05": {
+    "diff_pp": 2.665,
+    "lo2.5": -0.866,
+    "lo5_one_sided": -0.316,
+    "hi97.5": 5.888,
+    "pairs": 938,
+    "clusters": 33,
+    "invalid_pairs": 2,
+    "pass": true
+   },
+   "oftplus": {
+    "diff_pp": 7.143,
+    "lo2.5": 3.052,
+    "lo5_one_sided": 3.686,
+    "hi97.5": 11.291,
+    "pairs": 938,
+    "clusters": 33,
+    "invalid_pairs": 2,
+    "pass": true
+   },
+   "pass": true
+  },
+  "Q5": {
+   "test": "bench, move, oracle, pi05 + smolvla, A + A20, inits 0-9: (Glead - Gauto) >= +3 and lo2.5 > 0",
+   "diff_pp": -2.115,
+   "lo2.5": -5.483,
+   "lo5_one_sided": -5.096,
+   "hi97.5": 1.541,
+   "pairs": 1040,
+   "clusters": 26,
+   "pass": false
+  }
+ },
+ "figure": {
+  "pi05": {
+   "none": {
+    "diff_pp": -38.83,
+    "lo2.5": -42.415,
+    "lo5_one_sided": -41.789,
+    "hi97.5": -35.105,
+    "pairs": 940,
+    "clusters": 33
+   },
+   "Gauto": {
+    "diff_pp": -31.557,
+    "lo2.5": -36.749,
+    "lo5_one_sided": -35.959,
+    "hi97.5": -26.124,
+    "pairs": 938,
+    "clusters": 33
+   }
+  },
+  "smolvla": {
+   "none": null,
+   "Gauto": null
+  },
+  "oft": {
+   "none": {
+    "diff_pp": -41.667,
+    "lo2.5": -48.495,
+    "lo5_one_sided": -47.492,
+    "hi97.5": -34.783,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "Gauto": {
+    "diff_pp": -30.333,
+    "lo2.5": -38.872,
+    "lo5_one_sided": -37.544,
+    "hi97.5": -22.591,
+    "pairs": 300,
+    "clusters": 33
+   }
+  },
+  "oftplus": {
+   "none": {
+    "diff_pp": -46.702,
+    "lo2.5": -51.034,
+    "lo5_one_sided": -50.307,
+    "hi97.5": -42.294,
+    "pairs": 940,
+    "clusters": 33
+   },
+   "Gauto": {
+    "diff_pp": -33.369,
+    "lo2.5": -37.776,
+    "lo5_one_sided": -37.121,
+    "hi97.5": -28.787,
+    "pairs": 938,
+    "clusters": 33
+   }
+  }
+ },
+ "report": {
+  "success": {
+   "oft/base/none/0": {
+    "n": 360,
+    "success": 0.6361,
+    "grasp": 0.725,
+    "no_event": 0.0889,
+    "calls": [29.33, 0.0, 29.33, 0.0]
+   },
+   "oft/dynamic/G/0": {
+    "n": 300,
+    "success": 0.2967,
+    "grasp": 0.4767,
+    "no_event": 0.09,
+    "calls": [37.81, 0.0, 28.42, 0.0]
+   },
+   "oft/dynamic/Gauto/0": {
+    "n": 300,
+    "success": 0.34,
+    "grasp": 0.55,
+    "no_event": 0.09,
+    "calls": [37.04, 0.0, 27.66, 0.0]
+   },
+   "oft/dynamic/Gcal/0": {
+    "n": 60,
+    "success": 0.3167,
+    "grasp": 0.5,
+    "no_event": 0.0833,
+    "calls": [37.78, 0.0, 27.05, 1.63]
+   },
+   "oft/dynamic/PPC/0": {
+    "n": 300,
+    "success": 0.2767,
+    "grasp": 0.42,
+    "no_event": 0.09,
+    "calls": [38.11, 0.87, 29.59, 0.0]
+   },
+   "oft/dynamic/none/0": {
+    "n": 300,
+    "success": 0.2267,
+    "grasp": 0.3467,
+    "no_event": 0.09,
+    "calls": [39.49, 0.0, 30.1, 0.0]
+   },
+   "oftplus/base/none/0": {
+    "n": 1000,
+    "success": 0.75,
+    "grasp": 0.797,
+    "no_event": 0.079,
+    "calls": [27.12, 0.0, 27.12, 0.0]
+   },
+   "oftplus/dynamic/G/0": {
+    "n": 940,
+    "success": 0.3745,
+    "grasp": 0.5628,
+    "no_event": 0.0787,
+    "calls": [37.2, 0.0, 27.35, 0.0]
+   },
+   "oftplus/dynamic/Gauto/0": {
+    "n": 940,
+    "success": 0.416,
+    "grasp": 0.6255,
+    "no_event": 0.0787,
+    "calls": [36.8, 0.0, 26.95, 0.0]
+   },
+   "oftplus/dynamic/Gcal/0": {
+    "n": 60,
+    "success": 0.4333,
+    "grasp": 0.5667,
+    "no_event": 0.0833,
+    "calls": [35.42, 0.0, 25.03, 1.63]
+   },
+   "oftplus/dynamic/PPC/0": {
+    "n": 940,
+    "success": 0.3447,
+    "grasp": 0.5106,
+    "no_event": 0.0787,
+    "calls": [37.63, 0.78, 28.57, 0.0]
+   },
+   "oftplus/dynamic/none/0": {
+    "n": 940,
+    "success": 0.2819,
+    "grasp": 0.4521,
+    "no_event": 0.0787,
+    "calls": [40.05, 0.0, 30.2, 0.0]
+   },
+   "pi05/base/none/0": {
+    "n": 1000,
+    "success": 0.816,
+    "grasp": 0.876,
+    "no_event": 0.036,
+    "calls": [21.08, 0.0, 21.08, 0.0]
+   },
+   "pi05/base/none/10": {
+    "n": 300,
+    "success": 0.6233,
+    "grasp": 0.7433,
+    "no_event": 0.02,
+    "calls": [23.56, 0.0, 23.56, 0.0]
+   },
+   "pi05/base/none/20": {
+    "n": 300,
+    "success": 0.4333,
+    "grasp": 0.6367,
+    "no_event": 0.0433,
+    "calls": [27.21, 0.0, 27.21, 0.0]
+   },
+   "pi05/dynamic/G/0": {
+    "n": 940,
+    "success": 0.5128,
+    "grasp": 0.717,
+    "no_event": 0.0372,
+    "calls": [27.84, 0.0, 21.3, 0.0]
+   },
+   "pi05/dynamic/G@glr/0": {
+    "n": 300,
+    "success": 0.4733,
+    "grasp": 0.7067,
+    "no_event": 0.0233,
+    "calls": [28.13, 0.0, 22.5, 0.0]
+   },
+   "pi05/dynamic/Gauto/0": {
+    "n": 940,
+    "success": 0.4968,
+    "grasp": 0.717,
+    "no_event": 0.0372,
+    "calls": [28.25, 0.0, 21.7, 0.0]
+   },
+   "pi05/dynamic/Gauto/10": {
+    "n": 300,
+    "success": 0.31,
+    "grasp": 0.5933,
+    "no_event": 0.02,
+    "calls": [30.15, 0.0, 24.6, 0.0]
+   },
+   "pi05/dynamic/Gauto/20": {
+    "n": 300,
+    "success": 0.1667,
+    "grasp": 0.4967,
+    "no_event": 0.0433,
+    "calls": [31.89, 0.0, 25.71, 0.0]
+   },
+   "pi05/dynamic/Gcal/0": {
+    "n": 60,
+    "success": 0.5167,
+    "grasp": 0.6333,
+    "no_event": 0.0167,
+    "calls": [26.32, 0.0, 21.02, 1.83]
+   },
+   "pi05/dynamic/PPC/0": {
+    "n": 940,
+    "success": 0.4702,
+    "grasp": 0.6713,
+    "no_event": 0.0372,
+    "calls": [28.54, 0.99, 23.06, 0.0]
+   },
+   "pi05/dynamic/PPC/10": {
+    "n": 300,
+    "success": 0.1933,
+    "grasp": 0.4067,
+    "no_event": 0.02,
+    "calls": [31.42, 1.47, 27.34, 0.0]
+   },
+   "pi05/dynamic/PPC/20": {
+    "n": 300,
+    "success": 0.09,
+    "grasp": 0.2533,
+    "no_event": 0.0433,
+    "calls": [33.16, 1.09, 28.07, 0.0]
+   },
+   "pi05/dynamic/PPC@glr/0": {
+    "n": 300,
+    "success": 0.4133,
+    "grasp": 0.6067,
+    "no_event": 0.0233,
+    "calls": [26.87, 3.38, 24.62, 0.0]
+   },
+   "pi05/dynamic/T0/0": {
+    "n": 300,
+    "success": 0.4467,
+    "grasp": 0.62,
+    "no_event": 0.0233,
+    "calls": [28.0, 2.1, 24.46, 0.0]
+   },
+   "pi05/dynamic/none/0": {
+    "n": 940,
+    "success": 0.4234,
+    "grasp": 0.6255,
+    "no_event": 0.0372,
+    "calls": [30.19, 0.0, 23.64, 0.0]
+   },
+   "pi05/dynamic/none/10": {
+    "n": 300,
+    "success": 0.12,
+    "grasp": 0.3033,
+    "no_event": 0.02,
+    "calls": [33.28, 0.0, 27.73, 0.0]
+   },
+   "pi05/dynamic/none/20": {
+    "n": 300,
+    "success": 0.04,
+    "grasp": 0.17,
+    "no_event": 0.0433,
+    "calls": [34.06, 0.0, 27.89, 0.0]
+   }
+  },
+  "dyn_minus_base": {
+   "oft/dynamic/G/0": {
+    "diff_pp": -34.667,
+    "lo2.5": -41.333,
+    "lo5_one_sided": -40.199,
+    "hi97.5": -28.333,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "oft/dynamic/Gauto/0": {
+    "diff_pp": -30.333,
+    "lo2.5": -38.872,
+    "lo5_one_sided": -37.544,
+    "hi97.5": -22.591,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "oft/dynamic/Gcal/0": {
+    "diff_pp": -28.333,
+    "lo2.5": -40.678,
+    "lo5_one_sided": -39.286,
+    "hi97.5": -15.0,
+    "pairs": 60,
+    "clusters": 33
+   },
+   "oft/dynamic/PPC/0": {
+    "diff_pp": -36.667,
+    "lo2.5": -43.0,
+    "lo5_one_sided": -42.0,
+    "hi97.5": -30.564,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "oft/dynamic/none/0": {
+    "diff_pp": -41.667,
+    "lo2.5": -48.495,
+    "lo5_one_sided": -47.492,
+    "hi97.5": -34.783,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "oftplus/dynamic/G/0": {
+    "diff_pp": -37.527,
+    "lo2.5": -41.57,
+    "lo5_one_sided": -40.986,
+    "hi97.5": -33.105,
+    "pairs": 938,
+    "clusters": 33
+   },
+   "oftplus/dynamic/Gauto/0": {
+    "diff_pp": -33.369,
+    "lo2.5": -37.776,
+    "lo5_one_sided": -37.121,
+    "hi97.5": -28.787,
+    "pairs": 938,
+    "clusters": 33
+   },
+   "oftplus/dynamic/Gcal/0": {
+    "diff_pp": -33.333,
+    "lo2.5": -46.552,
+    "lo5_one_sided": -44.262,
+    "hi97.5": -21.426,
+    "pairs": 60,
+    "clusters": 33
+   },
+   "oftplus/dynamic/PPC/0": {
+    "diff_pp": -40.512,
+    "lo2.5": -44.951,
+    "lo5_one_sided": -44.201,
+    "hi97.5": -35.721,
+    "pairs": 938,
+    "clusters": 33
+   },
+   "oftplus/dynamic/none/0": {
+    "diff_pp": -46.702,
+    "lo2.5": -51.034,
+    "lo5_one_sided": -50.307,
+    "hi97.5": -42.294,
+    "pairs": 940,
+    "clusters": 33
+   },
+   "pi05/dynamic/G/0": {
+    "diff_pp": -29.957,
+    "lo2.5": -35.119,
+    "lo5_one_sided": -34.278,
+    "hi97.5": -24.41,
+    "pairs": 938,
+    "clusters": 33
+   },
+   "pi05/dynamic/G@glr/0": {
+    "diff_pp": -32.0,
+    "lo2.5": -39.335,
+    "lo5_one_sided": -38.0,
+    "hi97.5": -24.422,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "pi05/dynamic/Gauto/0": {
+    "diff_pp": -31.557,
+    "lo2.5": -36.749,
+    "lo5_one_sided": -35.959,
+    "hi97.5": -26.124,
+    "pairs": 938,
+    "clusters": 33
+   },
+   "pi05/dynamic/Gauto/10": {
+    "diff_pp": -31.333,
+    "lo2.5": -39.204,
+    "lo5_one_sided": -38.0,
+    "hi97.5": -23.102,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "pi05/dynamic/Gauto/20": {
+    "diff_pp": -26.667,
+    "lo2.5": -32.886,
+    "lo5_one_sided": -31.773,
+    "hi97.5": -20.804,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "pi05/dynamic/Gcal/0": {
+    "diff_pp": -36.667,
+    "lo2.5": -50.794,
+    "lo5_one_sided": -48.333,
+    "hi97.5": -22.807,
+    "pairs": 60,
+    "clusters": 33
+   },
+   "pi05/dynamic/PPC/0": {
+    "diff_pp": -34.222,
+    "lo2.5": -39.508,
+    "lo5_one_sided": -38.604,
+    "hi97.5": -28.624,
+    "pairs": 938,
+    "clusters": 33
+   },
+   "pi05/dynamic/PPC/10": {
+    "diff_pp": -43.0,
+    "lo2.5": -50.667,
+    "lo5_one_sided": -49.346,
+    "hi97.5": -35.117,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "pi05/dynamic/PPC/20": {
+    "diff_pp": -34.333,
+    "lo2.5": -40.606,
+    "lo5_one_sided": -39.799,
+    "hi97.5": -27.573,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "pi05/dynamic/PPC@glr/0": {
+    "diff_pp": -38.0,
+    "lo2.5": -44.85,
+    "lo5_one_sided": -43.854,
+    "hi97.5": -31.206,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "pi05/dynamic/T0/0": {
+    "diff_pp": -34.667,
+    "lo2.5": -40.94,
+    "lo5_one_sided": -40.0,
+    "hi97.5": -27.906,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "pi05/dynamic/none/0": {
+    "diff_pp": -38.83,
+    "lo2.5": -42.415,
+    "lo5_one_sided": -41.789,
+    "hi97.5": -35.105,
+    "pairs": 940,
+    "clusters": 33
+   },
+   "pi05/dynamic/none/10": {
+    "diff_pp": -50.333,
+    "lo2.5": -57.143,
+    "lo5_one_sided": -56.04,
+    "hi97.5": -43.522,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "pi05/dynamic/none/20": {
+    "diff_pp": -39.333,
+    "lo2.5": -45.847,
+    "lo5_one_sided": -44.889,
+    "hi97.5": -32.556,
+    "pairs": 300,
+    "clusters": 33
+   }
+  },
+  "base_kept": {
+   "oft/dynamic/G/0": 0.4093,
+   "oft/dynamic/Gauto/0": 0.4715,
+   "oft/dynamic/Gcal/0": 0.4444,
+   "oft/dynamic/PPC/0": 0.3886,
+   "oft/dynamic/none/0": 0.3161,
+   "oftplus/dynamic/G/0": 0.4787,
+   "oftplus/dynamic/Gauto/0": 0.5398,
+   "oftplus/dynamic/Gcal/0": 0.5435,
+   "oftplus/dynamic/PPC/0": 0.4375,
+   "oftplus/dynamic/none/0": 0.358,
+   "pi05/dynamic/G/0": 0.6134,
+   "pi05/dynamic/G@glr/0": 0.5504,
+   "pi05/dynamic/Gauto/0": 0.5885,
+   "pi05/dynamic/Gauto/10": 0.4118,
+   "pi05/dynamic/Gauto/20": 0.3,
+   "pi05/dynamic/Gcal/0": 0.5849,
+   "pi05/dynamic/PPC/0": 0.557,
+   "pi05/dynamic/PPC/10": 0.2406,
+   "pi05/dynamic/PPC/20": 0.1308,
+   "pi05/dynamic/PPC@glr/0": 0.4832,
+   "pi05/dynamic/T0/0": 0.521,
+   "pi05/dynamic/none/0": 0.5033,
+   "pi05/dynamic/none/10": 0.1765,
+   "pi05/dynamic/none/20": 0.0692
+  },
+  "vs_none_invalid_pairs": {
+   "oft/dynamic/G/0": 0,
+   "oft/dynamic/Gauto/0": 0,
+   "oft/dynamic/Gcal/0": 0,
+   "oft/dynamic/PPC/0": 0,
+   "oft/dynamic/none/0": 0,
+   "oftplus/dynamic/G/0": 2,
+   "oftplus/dynamic/Gauto/0": 2,
+   "oftplus/dynamic/Gcal/0": 0,
+   "oftplus/dynamic/PPC/0": 2,
+   "oftplus/dynamic/none/0": 0,
+   "pi05/dynamic/G/0": 2,
+   "pi05/dynamic/G@glr/0": 0,
+   "pi05/dynamic/Gauto/0": 2,
+   "pi05/dynamic/Gauto/10": 0,
+   "pi05/dynamic/Gauto/20": 0,
+   "pi05/dynamic/Gcal/0": 0,
+   "pi05/dynamic/PPC/0": 2,
+   "pi05/dynamic/PPC/10": 0,
+   "pi05/dynamic/PPC/20": 0,
+   "pi05/dynamic/PPC@glr/0": 0,
+   "pi05/dynamic/T0/0": 0,
+   "pi05/dynamic/none/0": 0,
+   "pi05/dynamic/none/10": 0,
+   "pi05/dynamic/none/20": 0
+  },
+  "by": {
+   "oft/base/none/0": {
+    "distance_m": {
+     "0.06": [0.6235, 170],
+     "0.12": [0.6474, 190]
+    },
+    "source": {
+     "plus": [0.6638, 229],
+     "pro": [0.5878, 131]
+    },
+    "substrate_category": {
+     "Background Textures": [0.8286, 35],
+     "Camera Viewpoints": [0.3939, 33],
+     "LIBERO-PRO/camera_view_angle": [0.2, 10],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0, 14],
+     "LIBERO-PRO/object": [0.75, 12],
+     "LIBERO-PRO/object_shape": [1.0, 14],
+     "LIBERO-PRO/object_texture": [0.9333, 15],
+     "LIBERO-PRO/position": [0.0, 13],
+     "LIBERO-PRO/semantic": [1.0, 12],
+     "LIBERO-PRO/task": [0.0, 12],
+     "LIBERO-PRO/view_occlusion": [0.8667, 15],
+     "LIBERO-PRO/visual_noise_glare": [0.9286, 14],
+     "Language Instructions": [0.8696, 23],
+     "Light Conditions": [0.9688, 32],
+     "Objects Layout": [0.6571, 35],
+     "Robot Initial States": [0.2353, 34],
+     "Sensor Noise": [0.7568, 37]
+    }
+   },
+   "oft/dynamic/G/0": {
+    "distance_m": {
+     "0.06": [0.4406, 143],
+     "0.12": [0.1656, 157]
+    },
+    "source": {
+     "plus": [0.3102, 187],
+     "pro": [0.2743, 113]
+    },
+    "substrate_category": {
+     "Background Textures": [0.2222, 27],
+     "Camera Viewpoints": [0.1852, 27],
+     "LIBERO-PRO/camera_view_angle": [0.0, 8],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0, 13],
+     "LIBERO-PRO/object": [0.3333, 9],
+     "LIBERO-PRO/object_shape": [0.6154, 13],
+     "LIBERO-PRO/object_texture": [0.3846, 13],
+     "LIBERO-PRO/position": [0.0909, 11],
+     "LIBERO-PRO/semantic": [0.7778, 9],
+     "LIBERO-PRO/task": [0.0, 10],
+     "LIBERO-PRO/view_occlusion": [0.3333, 15],
+     "LIBERO-PRO/visual_noise_glare": [0.1667, 12],
+     "Language Instructions": [0.2857, 21],
+     "Light Conditions": [0.3704, 27],
+     "Objects Layout": [0.4667, 30],
+     "Robot Initial States": [0.2, 25],
+     "Sensor Noise": [0.4, 30]
+    }
+   },
+   "oft/dynamic/Gauto/0": {
+    "distance_m": {
+     "0.06": [0.4476, 143],
+     "0.12": [0.242, 157]
+    },
+    "source": {
+     "plus": [0.369, 187],
+     "pro": [0.292, 113]
+    },
+    "substrate_category": {
+     "Background Textures": [0.4074, 27],
+     "Camera Viewpoints": [0.1481, 27],
+     "LIBERO-PRO/camera_view_angle": [0.0, 8],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0, 13],
+     "LIBERO-PRO/object": [0.4444, 9],
+     "LIBERO-PRO/object_shape": [0.7692, 13],
+     "LIBERO-PRO/object_texture": [0.3077, 13],
+     "LIBERO-PRO/position": [0.0, 11],
+     "LIBERO-PRO/semantic": [0.7778, 9],
+     "LIBERO-PRO/task": [0.0, 10],
+     "LIBERO-PRO/view_occlusion": [0.4667, 15],
+     "LIBERO-PRO/visual_noise_glare": [0.0833, 12],
+     "Language Instructions": [0.5714, 21],
+     "Light Conditions": [0.4815, 27],
+     "Objects Layout": [0.3667, 30],
+     "Robot Initial States": [0.2, 25],
+     "Sensor Noise": [0.4333, 30]
+    }
+   },
+   "oft/dynamic/Gcal/0": {
+    "distance_m": {
+     "0.06": [0.4074, 27],
+     "0.12": [0.2424, 33]
+    },
+    "source": {
+     "plus": [0.3333, 42],
+     "pro": [0.2778, 18]
+    },
+    "substrate_category": {
+     "Background Textures": [0.25, 8],
+     "Camera Viewpoints": [0.3333, 6],
+     "LIBERO-PRO/camera_view_angle": [0.0, 2],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0, 1],
+     "LIBERO-PRO/object": [0.3333, 3],
+     "LIBERO-PRO/object_shape": [1.0, 1],
+     "LIBERO-PRO/object_texture": [0.5, 2],
+     "LIBERO-PRO/position": [0.0, 2],
+     "LIBERO-PRO/semantic": [0.3333, 3],
+     "LIBERO-PRO/task": [0.0, 2],
+     "LIBERO-PRO/visual_noise_glare": [0.5, 2],
+     "Language Instructions": [0.0, 2],
+     "Light Conditions": [0.4, 5],
+     "Objects Layout": [0.6, 5],
+     "Robot Initial States": [0.2222, 9],
+     "Sensor Noise": [0.4286, 7]
+    }
+   },
+   "oft/dynamic/PPC/0": {
+    "distance_m": {
+     "0.06": [0.4545, 143],
+     "0.12": [0.1146, 157]
+    },
+    "source": {
+     "plus": [0.2834, 187],
+     "pro": [0.2655, 113]
+    },
+    "substrate_category": {
+     "Background Textures": [0.2963, 27],
+     "Camera Viewpoints": [0.1481, 27],
+     "LIBERO-PRO/camera_view_angle": [0.125, 8],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0, 13],
+     "LIBERO-PRO/object": [0.3333, 9],
+     "LIBERO-PRO/object_shape": [0.6923, 13],
+     "LIBERO-PRO/object_texture": [0.3077, 13],
+     "LIBERO-PRO/position": [0.0, 11],
+     "LIBERO-PRO/semantic": [0.6667, 9],
+     "LIBERO-PRO/task": [0.0, 10],
+     "LIBERO-PRO/view_occlusion": [0.2667, 15],
+     "LIBERO-PRO/visual_noise_glare": [0.25, 12],
+     "Language Instructions": [0.381, 21],
+     "Light Conditions": [0.2963, 27],
+     "Objects Layout": [0.3333, 30],
+     "Robot Initial States": [0.16, 25],
+     "Sensor Noise": [0.3667, 30]
+    }
+   },
+   "oft/dynamic/none/0": {
+    "distance_m": {
+     "0.06": [0.3706, 143],
+     "0.12": [0.0955, 157]
+    },
+    "source": {
+     "plus": [0.2299, 187],
+     "pro": [0.2212, 113]
+    },
+    "substrate_category": {
+     "Background Textures": [0.2222, 27],
+     "Camera Viewpoints": [0.1111, 27],
+     "LIBERO-PRO/camera_view_angle": [0.0, 8],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0, 13],
+     "LIBERO-PRO/object": [0.2222, 9],
+     "LIBERO-PRO/object_shape": [0.6923, 13],
+     "LIBERO-PRO/object_texture": [0.3077, 13],
+     "LIBERO-PRO/position": [0.0, 11],
+     "LIBERO-PRO/semantic": [0.6667, 9],
+     "LIBERO-PRO/task": [0.0, 10],
+     "LIBERO-PRO/view_occlusion": [0.2, 15],
+     "LIBERO-PRO/visual_noise_glare": [0.0833, 12],
+     "Language Instructions": [0.2381, 21],
+     "Light Conditions": [0.2593, 27],
+     "Objects Layout": [0.1667, 30],
+     "Robot Initial States": [0.16, 25],
+     "Sensor Noise": [0.4333, 30]
+    }
+   },
+   "oftplus/base/none/0": {
+    "distance_m": {
+     "0.06": [0.754, 500],
+     "0.12": [0.746, 500]
+    },
+    "source": {
+     "plus": [0.8129, 700],
+     "pro": [0.6033, 300]
+    },
+    "substrate_category": {
+     "Background Textures": [0.95, 100],
+     "Camera Viewpoints": [0.97, 100],
+     "LIBERO-PRO/camera_view_angle": [0.5667, 30],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0333, 30],
+     "LIBERO-PRO/object": [0.6667, 30],
+     "LIBERO-PRO/object_shape": [0.9667, 30],
+     "LIBERO-PRO/object_texture": [1.0, 30],
+     "LIBERO-PRO/position": [0.1, 30],
+     "LIBERO-PRO/semantic": [0.9333, 30],
+     "LIBERO-PRO/task": [0.0, 30],
+     "LIBERO-PRO/view_occlusion": [0.7667, 30],
+     "LIBERO-PRO/visual_noise_glare": [1.0, 30],
+     "Language Instructions": [0.84, 100],
+     "Light Conditions": [0.97, 100],
+     "Objects Layout": [0.6, 100],
+     "Robot Initial States": [0.39, 100],
+     "Sensor Noise": [0.97, 100]
+    }
+   },
+   "oftplus/dynamic/G/0": {
+    "distance_m": {
+     "0.06": [0.5497, 473],
+     "0.12": [0.197, 467]
+    },
+    "source": {
+     "plus": [0.4027, 658],
+     "pro": [0.3085, 282]
+    },
+    "substrate_category": {
+     "Background Textures": [0.4565, 92],
+     "Camera Viewpoints": [0.4468, 94],
+     "LIBERO-PRO/camera_view_angle": [0.2143, 28],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0, 29],
+     "LIBERO-PRO/object": [0.4074, 27],
+     "LIBERO-PRO/object_shape": [0.5862, 29],
+     "LIBERO-PRO/object_texture": [0.5, 28],
+     "LIBERO-PRO/position": [0.0, 28],
+     "LIBERO-PRO/semantic": [0.5926, 27],
+     "LIBERO-PRO/task": [0.0, 28],
+     "LIBERO-PRO/view_occlusion": [0.3, 30],
+     "LIBERO-PRO/visual_noise_glare": [0.5, 28],
+     "Language Instructions": [0.3367, 98],
+     "Light Conditions": [0.5368, 95],
+     "Objects Layout": [0.4316, 95],
+     "Robot Initial States": [0.1868, 91],
+     "Sensor Noise": [0.4194, 93]
+    }
+   },
+   "oftplus/dynamic/Gauto/0": {
+    "distance_m": {
+     "0.06": [0.5518, 473],
+     "0.12": [0.2784, 467]
+    },
+    "source": {
+     "plus": [0.4559, 658],
+     "pro": [0.3227, 282]
+    },
+    "substrate_category": {
+     "Background Textures": [0.4891, 92],
+     "Camera Viewpoints": [0.5, 94],
+     "LIBERO-PRO/camera_view_angle": [0.2143, 28],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0, 29],
+     "LIBERO-PRO/object": [0.4074, 27],
+     "LIBERO-PRO/object_shape": [0.5517, 29],
+     "LIBERO-PRO/object_texture": [0.4286, 28],
+     "LIBERO-PRO/position": [0.0357, 28],
+     "LIBERO-PRO/semantic": [0.6667, 27],
+     "LIBERO-PRO/task": [0.0, 28],
+     "LIBERO-PRO/view_occlusion": [0.3333, 30],
+     "LIBERO-PRO/visual_noise_glare": [0.6071, 28],
+     "Language Instructions": [0.4286, 98],
+     "Light Conditions": [0.6105, 95],
+     "Objects Layout": [0.4632, 95],
+     "Robot Initial States": [0.1868, 91],
+     "Sensor Noise": [0.5054, 93]
+    }
+   },
+   "oftplus/dynamic/Gcal/0": {
+    "distance_m": {
+     "0.06": [0.5926, 27],
+     "0.12": [0.303, 33]
+    },
+    "source": {
+     "plus": [0.4524, 42],
+     "pro": [0.3889, 18]
+    },
+    "substrate_category": {
+     "Background Textures": [0.375, 8],
+     "Camera Viewpoints": [0.8333, 6],
+     "LIBERO-PRO/camera_view_angle": [0.0, 2],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0, 1],
+     "LIBERO-PRO/object": [0.6667, 3],
+     "LIBERO-PRO/object_shape": [1.0, 1],
+     "LIBERO-PRO/object_texture": [0.5, 2],
+     "LIBERO-PRO/position": [0.0, 2],
+     "LIBERO-PRO/semantic": [0.3333, 3],
+     "LIBERO-PRO/task": [0.0, 2],
+     "LIBERO-PRO/visual_noise_glare": [1.0, 2],
+     "Language Instructions": [1.0, 2],
+     "Light Conditions": [0.2, 5],
+     "Objects Layout": [0.4, 5],
+     "Robot Initial States": [0.2222, 9],
+     "Sensor Noise": [0.5714, 7]
+    }
+   },
+   "oftplus/dynamic/PPC/0": {
+    "distance_m": {
+     "0.06": [0.5497, 473],
+     "0.12": [0.137, 467]
+    },
+    "source": {
+     "plus": [0.3663, 658],
+     "pro": [0.2943, 282]
+    },
+    "substrate_category": {
+     "Background Textures": [0.4022, 92],
+     "Camera Viewpoints": [0.3936, 94],
+     "LIBERO-PRO/camera_view_angle": [0.1786, 28],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0345, 29],
+     "LIBERO-PRO/object": [0.4444, 27],
+     "LIBERO-PRO/object_shape": [0.5862, 29],
+     "LIBERO-PRO/object_texture": [0.4643, 28],
+     "LIBERO-PRO/position": [0.0357, 28],
+     "LIBERO-PRO/semantic": [0.4815, 27],
+     "LIBERO-PRO/task": [0.0, 28],
+     "LIBERO-PRO/view_occlusion": [0.2667, 30],
+     "LIBERO-PRO/visual_noise_glare": [0.4643, 28],
+     "Language Instructions": [0.3776, 98],
+     "Light Conditions": [0.4632, 95],
+     "Objects Layout": [0.3579, 95],
+     "Robot Initial States": [0.1429, 91],
+     "Sensor Noise": [0.4194, 93]
+    }
+   },
+   "oftplus/dynamic/none/0": {
+    "distance_m": {
+     "0.06": [0.4249, 473],
+     "0.12": [0.137, 467]
+    },
+    "source": {
+     "plus": [0.2948, 658],
+     "pro": [0.2518, 282]
+    },
+    "substrate_category": {
+     "Background Textures": [0.337, 92],
+     "Camera Viewpoints": [0.3617, 94],
+     "LIBERO-PRO/camera_view_angle": [0.1429, 28],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0345, 29],
+     "LIBERO-PRO/object": [0.2963, 27],
+     "LIBERO-PRO/object_shape": [0.4828, 29],
+     "LIBERO-PRO/object_texture": [0.3571, 28],
+     "LIBERO-PRO/position": [0.0, 28],
+     "LIBERO-PRO/semantic": [0.4444, 27],
+     "LIBERO-PRO/task": [0.0, 28],
+     "LIBERO-PRO/view_occlusion": [0.2667, 30],
+     "LIBERO-PRO/visual_noise_glare": [0.5, 28],
+     "Language Instructions": [0.2755, 98],
+     "Light Conditions": [0.4105, 95],
+     "Objects Layout": [0.2421, 95],
+     "Robot Initial States": [0.1099, 91],
+     "Sensor Noise": [0.3226, 93]
+    }
+   },
+   "pi05/base/none/0": {
+    "distance_m": {
+     "0.06": [0.832, 500],
+     "0.12": [0.8, 500]
+    },
+    "source": {
+     "plus": [0.8886, 700],
+     "pro": [0.6467, 300]
+    },
+    "substrate_category": {
+     "Background Textures": [0.98, 100],
+     "Camera Viewpoints": [0.78, 100],
+     "LIBERO-PRO/camera_view_angle": [0.4333, 30],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0667, 30],
+     "LIBERO-PRO/object": [0.9333, 30],
+     "LIBERO-PRO/object_shape": [1.0, 30],
+     "LIBERO-PRO/object_texture": [0.9667, 30],
+     "LIBERO-PRO/position": [0.3, 30],
+     "LIBERO-PRO/semantic": [1.0, 30],
+     "LIBERO-PRO/task": [0.1333, 30],
+     "LIBERO-PRO/view_occlusion": [0.6667, 30],
+     "LIBERO-PRO/visual_noise_glare": [0.9667, 30],
+     "Language Instructions": [0.9, 100],
+     "Light Conditions": [1.0, 100],
+     "Objects Layout": [0.73, 100],
+     "Robot Initial States": [0.85, 100],
+     "Sensor Noise": [0.98, 100]
+    }
+   },
+   "pi05/base/none/10": {
+    "distance_m": {
+     "0.06": [0.5455, 143],
+     "0.12": [0.6943, 157]
+    },
+    "source": {
+     "plus": [0.6684, 187],
+     "pro": [0.5487, 113]
+    },
+    "substrate_category": {
+     "Background Textures": [0.7407, 27],
+     "Camera Viewpoints": [0.2963, 27],
+     "LIBERO-PRO/camera_view_angle": [0.25, 8],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0769, 13],
+     "LIBERO-PRO/object": [0.5556, 9],
+     "LIBERO-PRO/object_shape": [0.9231, 13],
+     "LIBERO-PRO/object_texture": [0.9231, 13],
+     "LIBERO-PRO/position": [0.0909, 11],
+     "LIBERO-PRO/semantic": [0.7778, 9],
+     "LIBERO-PRO/task": [0.2, 10],
+     "LIBERO-PRO/view_occlusion": [0.6667, 15],
+     "LIBERO-PRO/visual_noise_glare": [0.8333, 12],
+     "Language Instructions": [0.8095, 21],
+     "Light Conditions": [0.8519, 27],
+     "Objects Layout": [0.7, 30],
+     "Robot Initial States": [0.56, 25],
+     "Sensor Noise": [0.7333, 30]
+    }
+   },
+   "pi05/base/none/20": {
+    "distance_m": {
+     "0.06": [0.3706, 143],
+     "0.12": [0.4904, 157]
+    },
+    "source": {
+     "plus": [0.4652, 187],
+     "pro": [0.3805, 113]
+    },
+    "substrate_category": {
+     "Background Textures": [0.5185, 27],
+     "Camera Viewpoints": [0.2963, 27],
+     "LIBERO-PRO/camera_view_angle": [0.125, 8],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0, 13],
+     "LIBERO-PRO/object": [0.5556, 9],
+     "LIBERO-PRO/object_shape": [0.7692, 13],
+     "LIBERO-PRO/object_texture": [0.6923, 13],
+     "LIBERO-PRO/position": [0.0, 11],
+     "LIBERO-PRO/semantic": [0.6667, 9],
+     "LIBERO-PRO/task": [0.0, 10],
+     "LIBERO-PRO/view_occlusion": [0.3333, 15],
+     "LIBERO-PRO/visual_noise_glare": [0.5833, 12],
+     "Language Instructions": [0.5714, 21],
+     "Light Conditions": [0.5926, 27],
+     "Objects Layout": [0.4333, 30],
+     "Robot Initial States": [0.24, 25],
+     "Sensor Noise": [0.6, 30]
+    }
+   },
+   "pi05/dynamic/G/0": {
+    "distance_m": {
+     "0.06": [0.6638, 473],
+     "0.12": [0.3597, 467]
+    },
+    "source": {
+     "plus": [0.5562, 658],
+     "pro": [0.4113, 282]
+    },
+    "substrate_category": {
+     "Background Textures": [0.5326, 92],
+     "Camera Viewpoints": [0.4574, 94],
+     "LIBERO-PRO/camera_view_angle": [0.25, 28],
+     "LIBERO-PRO/initial_pose_position_angle": [0.069, 29],
+     "LIBERO-PRO/object": [0.4815, 27],
+     "LIBERO-PRO/object_shape": [0.7241, 29],
+     "LIBERO-PRO/object_texture": [0.6786, 28],
+     "LIBERO-PRO/position": [0.1429, 28],
+     "LIBERO-PRO/semantic": [0.5556, 27],
+     "LIBERO-PRO/task": [0.1786, 28],
+     "LIBERO-PRO/view_occlusion": [0.3667, 30],
+     "LIBERO-PRO/visual_noise_glare": [0.6786, 28],
+     "Language Instructions": [0.6531, 98],
+     "Light Conditions": [0.6316, 95],
+     "Objects Layout": [0.5368, 95],
+     "Robot Initial States": [0.5165, 91],
+     "Sensor Noise": [0.5591, 93]
+    }
+   },
+   "pi05/dynamic/G@glr/0": {
+    "distance_m": {
+     "0.06": [0.5734, 143],
+     "0.12": [0.3822, 157]
+    },
+    "source": {
+     "plus": [0.5294, 187],
+     "pro": [0.3805, 113]
+    },
+    "substrate_category": {
+     "Background Textures": [0.3333, 27],
+     "Camera Viewpoints": [0.3704, 27],
+     "LIBERO-PRO/camera_view_angle": [0.125, 8],
+     "LIBERO-PRO/initial_pose_position_angle": [0.1538, 13],
+     "LIBERO-PRO/object": [0.3333, 9],
+     "LIBERO-PRO/object_shape": [0.7692, 13],
+     "LIBERO-PRO/object_texture": [0.5385, 13],
+     "LIBERO-PRO/position": [0.0, 11],
+     "LIBERO-PRO/semantic": [0.6667, 9],
+     "LIBERO-PRO/task": [0.3, 10],
+     "LIBERO-PRO/view_occlusion": [0.4667, 15],
+     "LIBERO-PRO/visual_noise_glare": [0.3333, 12],
+     "Language Instructions": [0.619, 21],
+     "Light Conditions": [0.6296, 27],
+     "Objects Layout": [0.6, 30],
+     "Robot Initial States": [0.6, 25],
+     "Sensor Noise": [0.5667, 30]
+    }
+   },
+   "pi05/dynamic/Gauto/0": {
+    "distance_m": {
+     "0.06": [0.6533, 473],
+     "0.12": [0.3383, 467]
+    },
+    "source": {
+     "plus": [0.541, 658],
+     "pro": [0.3936, 282]
+    },
+    "substrate_category": {
+     "Background Textures": [0.5, 92],
+     "Camera Viewpoints": [0.4574, 94],
+     "LIBERO-PRO/camera_view_angle": [0.1786, 28],
+     "LIBERO-PRO/initial_pose_position_angle": [0.1034, 29],
+     "LIBERO-PRO/object": [0.5556, 27],
+     "LIBERO-PRO/object_shape": [0.5172, 29],
+     "LIBERO-PRO/object_texture": [0.6786, 28],
+     "LIBERO-PRO/position": [0.1429, 28],
+     "LIBERO-PRO/semantic": [0.6296, 27],
+     "LIBERO-PRO/task": [0.1071, 28],
+     "LIBERO-PRO/view_occlusion": [0.4, 30],
+     "LIBERO-PRO/visual_noise_glare": [0.6429, 28],
+     "Language Instructions": [0.6735, 98],
+     "Light Conditions": [0.6526, 95],
+     "Objects Layout": [0.5053, 95],
+     "Robot Initial States": [0.4615, 91],
+     "Sensor Noise": [0.5269, 93]
+    }
+   },
+   "pi05/dynamic/Gauto/10": {
+    "distance_m": {
+     "0.06": [0.4126, 143],
+     "0.12": [0.2166, 157]
+    },
+    "source": {
+     "plus": [0.3155, 187],
+     "pro": [0.3009, 113]
+    },
+    "substrate_category": {
+     "Background Textures": [0.2222, 27],
+     "Camera Viewpoints": [0.1111, 27],
+     "LIBERO-PRO/camera_view_angle": [0.125, 8],
+     "LIBERO-PRO/initial_pose_position_angle": [0.1538, 13],
+     "LIBERO-PRO/object": [0.3333, 9],
+     "LIBERO-PRO/object_shape": [0.5385, 13],
+     "LIBERO-PRO/object_texture": [0.4615, 13],
+     "LIBERO-PRO/position": [0.0, 11],
+     "LIBERO-PRO/semantic": [0.4444, 9],
+     "LIBERO-PRO/task": [0.2, 10],
+     "LIBERO-PRO/view_occlusion": [0.3333, 15],
+     "LIBERO-PRO/visual_noise_glare": [0.3333, 12],
+     "Language Instructions": [0.4286, 21],
+     "Light Conditions": [0.2963, 27],
+     "Objects Layout": [0.2667, 30],
+     "Robot Initial States": [0.32, 25],
+     "Sensor Noise": [0.5667, 30]
+    }
+   },
+   "pi05/dynamic/Gauto/20": {
+    "distance_m": {
+     "0.06": [0.2168, 143],
+     "0.12": [0.121, 157]
+    },
+    "source": {
+     "plus": [0.1765, 187],
+     "pro": [0.1504, 113]
+    },
+    "substrate_category": {
+     "Background Textures": [0.2222, 27],
+     "Camera Viewpoints": [0.0741, 27],
+     "LIBERO-PRO/camera_view_angle": [0.125, 8],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0, 13],
+     "LIBERO-PRO/object": [0.1111, 9],
+     "LIBERO-PRO/object_shape": [0.3077, 13],
+     "LIBERO-PRO/object_texture": [0.1538, 13],
+     "LIBERO-PRO/position": [0.0, 11],
+     "LIBERO-PRO/semantic": [0.3333, 9],
+     "LIBERO-PRO/task": [0.2, 10],
+     "LIBERO-PRO/view_occlusion": [0.1333, 15],
+     "LIBERO-PRO/visual_noise_glare": [0.1667, 12],
+     "Language Instructions": [0.2381, 21],
+     "Light Conditions": [0.1481, 27],
+     "Objects Layout": [0.2, 30],
+     "Robot Initial States": [0.2, 25],
+     "Sensor Noise": [0.1667, 30]
+    }
+   },
+   "pi05/dynamic/Gcal/0": {
+    "distance_m": {
+     "0.06": [0.7407, 27],
+     "0.12": [0.3333, 33]
+    },
+    "source": {
+     "plus": [0.5238, 42],
+     "pro": [0.5, 18]
+    },
+    "substrate_category": {
+     "Background Textures": [0.5, 8],
+     "Camera Viewpoints": [0.6667, 6],
+     "LIBERO-PRO/camera_view_angle": [0.5, 2],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0, 1],
+     "LIBERO-PRO/object": [1.0, 3],
+     "LIBERO-PRO/object_shape": [1.0, 1],
+     "LIBERO-PRO/object_texture": [0.0, 2],
+     "LIBERO-PRO/position": [0.5, 2],
+     "LIBERO-PRO/semantic": [0.6667, 3],
+     "LIBERO-PRO/task": [0.0, 2],
+     "LIBERO-PRO/visual_noise_glare": [0.5, 2],
+     "Language Instructions": [1.0, 2],
+     "Light Conditions": [0.4, 5],
+     "Objects Layout": [0.2, 5],
+     "Robot Initial States": [0.6667, 9],
+     "Sensor Noise": [0.4286, 7]
+    }
+   },
+   "pi05/dynamic/PPC/0": {
+    "distance_m": {
+     "0.06": [0.6469, 473],
+     "0.12": [0.2912, 467]
+    },
+    "source": {
+     "plus": [0.5061, 658],
+     "pro": [0.3865, 282]
+    },
+    "substrate_category": {
+     "Background Textures": [0.4891, 92],
+     "Camera Viewpoints": [0.4255, 94],
+     "LIBERO-PRO/camera_view_angle": [0.2857, 28],
+     "LIBERO-PRO/initial_pose_position_angle": [0.069, 29],
+     "LIBERO-PRO/object": [0.4074, 27],
+     "LIBERO-PRO/object_shape": [0.6552, 29],
+     "LIBERO-PRO/object_texture": [0.5714, 28],
+     "LIBERO-PRO/position": [0.1071, 28],
+     "LIBERO-PRO/semantic": [0.5926, 27],
+     "LIBERO-PRO/task": [0.1786, 28],
+     "LIBERO-PRO/view_occlusion": [0.4, 30],
+     "LIBERO-PRO/visual_noise_glare": [0.6071, 28],
+     "Language Instructions": [0.602, 98],
+     "Light Conditions": [0.5263, 95],
+     "Objects Layout": [0.5053, 95],
+     "Robot Initial States": [0.4725, 91],
+     "Sensor Noise": [0.5161, 93]
+    }
+   },
+   "pi05/dynamic/PPC/10": {
+    "distance_m": {
+     "0.06": [0.3287, 143],
+     "0.12": [0.0701, 157]
+    },
+    "source": {
+     "plus": [0.2246, 187],
+     "pro": [0.1416, 113]
+    },
+    "substrate_category": {
+     "Background Textures": [0.1852, 27],
+     "Camera Viewpoints": [0.0741, 27],
+     "LIBERO-PRO/camera_view_angle": [0.125, 8],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0, 13],
+     "LIBERO-PRO/object": [0.2222, 9],
+     "LIBERO-PRO/object_shape": [0.2308, 13],
+     "LIBERO-PRO/object_texture": [0.1538, 13],
+     "LIBERO-PRO/position": [0.0909, 11],
+     "LIBERO-PRO/semantic": [0.3333, 9],
+     "LIBERO-PRO/task": [0.1, 10],
+     "LIBERO-PRO/view_occlusion": [0.2, 15],
+     "LIBERO-PRO/visual_noise_glare": [0.0, 12],
+     "Language Instructions": [0.3333, 21],
+     "Light Conditions": [0.1481, 27],
+     "Objects Layout": [0.1667, 30],
+     "Robot Initial States": [0.36, 25],
+     "Sensor Noise": [0.3333, 30]
+    }
+   },
+   "pi05/dynamic/PPC/20": {
+    "distance_m": {
+     "0.06": [0.1678, 143],
+     "0.12": [0.0191, 157]
+    },
+    "source": {
+     "plus": [0.0909, 187],
+     "pro": [0.0885, 113]
+    },
+    "substrate_category": {
+     "Background Textures": [0.1111, 27],
+     "Camera Viewpoints": [0.0, 27],
+     "LIBERO-PRO/camera_view_angle": [0.125, 8],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0, 13],
+     "LIBERO-PRO/object": [0.1111, 9],
+     "LIBERO-PRO/object_shape": [0.1538, 13],
+     "LIBERO-PRO/object_texture": [0.1538, 13],
+     "LIBERO-PRO/position": [0.0, 11],
+     "LIBERO-PRO/semantic": [0.2222, 9],
+     "LIBERO-PRO/task": [0.0, 10],
+     "LIBERO-PRO/view_occlusion": [0.1333, 15],
+     "LIBERO-PRO/visual_noise_glare": [0.0, 12],
+     "Language Instructions": [0.1429, 21],
+     "Light Conditions": [0.1111, 27],
+     "Objects Layout": [0.1333, 30],
+     "Robot Initial States": [0.04, 25],
+     "Sensor Noise": [0.1, 30]
+    }
+   },
+   "pi05/dynamic/PPC@glr/0": {
+    "distance_m": {
+     "0.06": [0.5594, 143],
+     "0.12": [0.2803, 157]
+    },
+    "source": {
+     "plus": [0.4332, 187],
+     "pro": [0.3805, 113]
+    },
+    "substrate_category": {
+     "Background Textures": [0.3333, 27],
+     "Camera Viewpoints": [0.2593, 27],
+     "LIBERO-PRO/camera_view_angle": [0.25, 8],
+     "LIBERO-PRO/initial_pose_position_angle": [0.1538, 13],
+     "LIBERO-PRO/object": [0.3333, 9],
+     "LIBERO-PRO/object_shape": [0.7692, 13],
+     "LIBERO-PRO/object_texture": [0.4615, 13],
+     "LIBERO-PRO/position": [0.0, 11],
+     "LIBERO-PRO/semantic": [0.7778, 9],
+     "LIBERO-PRO/task": [0.1, 10],
+     "LIBERO-PRO/view_occlusion": [0.5333, 15],
+     "LIBERO-PRO/visual_noise_glare": [0.3333, 12],
+     "Language Instructions": [0.5714, 21],
+     "Light Conditions": [0.4815, 27],
+     "Objects Layout": [0.5, 30],
+     "Robot Initial States": [0.48, 25],
+     "Sensor Noise": [0.4333, 30]
+    }
+   },
+   "pi05/dynamic/T0/0": {
+    "distance_m": {
+     "0.06": [0.5944, 143],
+     "0.12": [0.3121, 157]
+    },
+    "source": {
+     "plus": [0.4973, 187],
+     "pro": [0.3628, 113]
+    },
+    "substrate_category": {
+     "Background Textures": [0.3704, 27],
+     "Camera Viewpoints": [0.2963, 27],
+     "LIBERO-PRO/camera_view_angle": [0.375, 8],
+     "LIBERO-PRO/initial_pose_position_angle": [0.2308, 13],
+     "LIBERO-PRO/object": [0.3333, 9],
+     "LIBERO-PRO/object_shape": [0.6923, 13],
+     "LIBERO-PRO/object_texture": [0.6154, 13],
+     "LIBERO-PRO/position": [0.0, 11],
+     "LIBERO-PRO/semantic": [0.4444, 9],
+     "LIBERO-PRO/task": [0.2, 10],
+     "LIBERO-PRO/view_occlusion": [0.4667, 15],
+     "LIBERO-PRO/visual_noise_glare": [0.1667, 12],
+     "Language Instructions": [0.619, 21],
+     "Light Conditions": [0.5926, 27],
+     "Objects Layout": [0.5333, 30],
+     "Robot Initial States": [0.6, 25],
+     "Sensor Noise": [0.5, 30]
+    }
+   },
+   "pi05/dynamic/none/0": {
+    "distance_m": {
+     "0.06": [0.5793, 473],
+     "0.12": [0.2655, 467]
+    },
+    "source": {
+     "plus": [0.4605, 658],
+     "pro": [0.3369, 282]
+    },
+    "substrate_category": {
+     "Background Textures": [0.4239, 92],
+     "Camera Viewpoints": [0.2872, 94],
+     "LIBERO-PRO/camera_view_angle": [0.2857, 28],
+     "LIBERO-PRO/initial_pose_position_angle": [0.1379, 29],
+     "LIBERO-PRO/object": [0.3704, 27],
+     "LIBERO-PRO/object_shape": [0.5517, 29],
+     "LIBERO-PRO/object_texture": [0.5357, 28],
+     "LIBERO-PRO/position": [0.0714, 28],
+     "LIBERO-PRO/semantic": [0.5926, 27],
+     "LIBERO-PRO/task": [0.1429, 28],
+     "LIBERO-PRO/view_occlusion": [0.3, 30],
+     "LIBERO-PRO/visual_noise_glare": [0.3929, 28],
+     "Language Instructions": [0.5612, 98],
+     "Light Conditions": [0.5158, 95],
+     "Objects Layout": [0.4526, 95],
+     "Robot Initial States": [0.4286, 91],
+     "Sensor Noise": [0.5484, 93]
+    }
+   },
+   "pi05/dynamic/none/10": {
+    "distance_m": {
+     "0.06": [0.1958, 143],
+     "0.12": [0.051, 157]
+    },
+    "source": {
+     "plus": [0.139, 187],
+     "pro": [0.0885, 113]
+    },
+    "substrate_category": {
+     "Background Textures": [0.2222, 27],
+     "Camera Viewpoints": [0.037, 27],
+     "LIBERO-PRO/camera_view_angle": [0.125, 8],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0, 13],
+     "LIBERO-PRO/object": [0.0, 9],
+     "LIBERO-PRO/object_shape": [0.2308, 13],
+     "LIBERO-PRO/object_texture": [0.1538, 13],
+     "LIBERO-PRO/position": [0.0, 11],
+     "LIBERO-PRO/semantic": [0.3333, 9],
+     "LIBERO-PRO/task": [0.0, 10],
+     "LIBERO-PRO/view_occlusion": [0.0667, 15],
+     "LIBERO-PRO/visual_noise_glare": [0.0, 12],
+     "Language Instructions": [0.1905, 21],
+     "Light Conditions": [0.1852, 27],
+     "Objects Layout": [0.1, 30],
+     "Robot Initial States": [0.12, 25],
+     "Sensor Noise": [0.1333, 30]
+    }
+   },
+   "pi05/dynamic/none/20": {
+    "distance_m": {
+     "0.06": [0.0699, 143],
+     "0.12": [0.0127, 157]
+    },
+    "source": {
+     "plus": [0.0481, 187],
+     "pro": [0.0265, 113]
+    },
+    "substrate_category": {
+     "Background Textures": [0.037, 27],
+     "Camera Viewpoints": [0.0, 27],
+     "LIBERO-PRO/camera_view_angle": [0.125, 8],
+     "LIBERO-PRO/initial_pose_position_angle": [0.0, 13],
+     "LIBERO-PRO/object": [0.0, 9],
+     "LIBERO-PRO/object_shape": [0.0, 13],
+     "LIBERO-PRO/object_texture": [0.0, 13],
+     "LIBERO-PRO/position": [0.0, 11],
+     "LIBERO-PRO/semantic": [0.2222, 9],
+     "LIBERO-PRO/task": [0.0, 10],
+     "LIBERO-PRO/view_occlusion": [0.0, 15],
+     "LIBERO-PRO/visual_noise_glare": [0.0, 12],
+     "Language Instructions": [0.0476, 21],
+     "Light Conditions": [0.0741, 27],
+     "Objects Layout": [0.0, 30],
+     "Robot Initial States": [0.12, 25],
+     "Sensor Noise": [0.0667, 30]
+    }
+   }
+  },
+  "connect_by": {
+   "pi05": {
+    "change_type": {
+     "camera_shift": [0.8684, 38],
+     "distractor_burst": [0.8158, 38],
+     "illumination_switch": [0.7105, 38],
+     "obstacle_insertion": [0.8421, 38],
+     "receptacle_relocation": [0.7838, 37],
+     "sensor_noise_onset": [0.8108, 37],
+     "target_relocation": [0.8378, 37],
+     "visual_theme_switch": [0.8378, 37]
+    },
+    "source": {
+     "plus": [0.8889, 207],
+     "pro": [0.6452, 93]
+    }
+   },
+   "smolvla": {
+    "change_type": {
+     "camera_shift": [0.0789, 38],
+     "distractor_burst": [0.0, 38],
+     "illumination_switch": [0.0526, 38],
+     "obstacle_insertion": [0.0526, 38],
+     "receptacle_relocation": [0.027, 37],
+     "sensor_noise_onset": [0.0811, 37],
+     "target_relocation": [0.1892, 37],
+     "visual_theme_switch": [0.027, 37]
+    },
+    "source": {
+     "plus": [0.0386, 207],
+     "pro": [0.1183, 93]
+    }
+   },
+   "oft": {
+    "change_type": {
+     "camera_shift": [0.6842, 38],
+     "distractor_burst": [0.5, 38],
+     "illumination_switch": [0.6316, 38],
+     "obstacle_insertion": [0.4211, 38],
+     "receptacle_relocation": [0.7027, 37],
+     "sensor_noise_onset": [0.6486, 37],
+     "target_relocation": [0.7297, 37],
+     "visual_theme_switch": [0.7568, 37]
+    },
+    "source": {
+     "plus": [0.6812, 207],
+     "pro": [0.5269, 93]
+    }
+   },
+   "oftplus": {
+    "change_type": {
+     "camera_shift": [0.7105, 38],
+     "distractor_burst": [0.4211, 38],
+     "illumination_switch": [0.6842, 38],
+     "obstacle_insertion": [0.6579, 38],
+     "receptacle_relocation": [0.8378, 37],
+     "sensor_noise_onset": [0.7297, 37],
+     "target_relocation": [0.7568, 37],
+     "visual_theme_switch": [0.7568, 37]
+    },
+    "source": {
+     "plus": [0.7488, 207],
+     "pro": [0.5699, 93]
+    }
+   }
+  },
+  "delay_D": {
+   "d0": {
+    "Gauto-none": {
+     "diff_pp": 7.0,
+     "lo2.5": 1.678,
+     "lo5_one_sided": 2.658,
+     "hi97.5": 12.752,
+     "pairs": 300,
+     "clusters": 33
+    },
+    "PPC-none": {
+     "diff_pp": 4.0,
+     "lo2.5": -1.325,
+     "lo5_one_sided": -0.662,
+     "hi97.5": 9.0,
+     "pairs": 300,
+     "clusters": 33
+    },
+    "fresh_before_close_none": 0.9215
+   },
+   "d10": {
+    "Gauto-none": {
+     "diff_pp": 19.0,
+     "lo2.5": 13.086,
+     "lo5_one_sided": 14.0,
+     "hi97.5": 24.749,
+     "pairs": 300,
+     "clusters": 33
+    },
+    "PPC-none": {
+     "diff_pp": 7.333,
+     "lo2.5": 3.0,
+     "lo5_one_sided": 3.974,
+     "hi97.5": 11.371,
+     "pairs": 300,
+     "clusters": 33
+    },
+    "fresh_before_close_none": 0.6429
+   },
+   "d20": {
+    "Gauto-none": {
+     "diff_pp": 12.667,
+     "lo2.5": 8.245,
+     "lo5_one_sided": 8.94,
+     "hi97.5": 17.057,
+     "pairs": 300,
+     "clusters": 33
+    },
+    "PPC-none": {
+     "diff_pp": 5.0,
+     "lo2.5": 0.997,
+     "lo5_one_sided": 1.65,
+     "hi97.5": 9.06,
+     "pairs": 300,
+     "clusters": 33
+    },
+    "fresh_before_close_none": 0.2404
+   }
+  },
+  "M2": {
+   "G@glr-none": {
+    "diff_pp": 5.333,
+    "lo2.5": 0.0,
+    "lo5_one_sided": 0.971,
+    "hi97.5": 11.259,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "PPC@glr-none": {
+    "diff_pp": -0.667,
+    "lo2.5": -6.0,
+    "lo5_one_sided": -5.017,
+    "hi97.5": 4.348,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "T0-none": {
+    "diff_pp": 2.667,
+    "lo2.5": -1.003,
+    "lo5_one_sided": -0.335,
+    "hi97.5": 6.623,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "G@glr-G": {
+    "diff_pp": -3.333,
+    "lo2.5": -8.638,
+    "lo5_one_sided": -7.692,
+    "hi97.5": 2.007,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "PPC@glr-PPC": {
+    "diff_pp": -4.667,
+    "lo2.5": -9.06,
+    "lo5_one_sided": -8.333,
+    "hi97.5": -0.99,
+    "pairs": 300,
+    "clusters": 33
+   }
+  },
+  "gauto_vs_ppc": {
+   "pi05": {
+    "diff_pp": 2.665,
+    "lo2.5": -0.866,
+    "lo5_one_sided": -0.316,
+    "hi97.5": 5.888,
+    "pairs": 938,
+    "clusters": 33,
+    "superior": false
+   },
+   "oftplus": {
+    "diff_pp": 7.143,
+    "lo2.5": 3.052,
+    "lo5_one_sided": 3.686,
+    "hi97.5": 11.291,
+    "pairs": 938,
+    "clusters": 33,
+    "superior": true
+   }
+  },
+  "B": {
+   "pi05": {
+    "A/0.02": {
+     "Glead-Gauto": {
+      "diff_pp": 2.299,
+      "lo2.5": -4.653,
+      "lo5_one_sided": -3.488,
+      "hi97.5": 9.527,
+      "pairs": 87,
+      "clusters": 26
+     },
+     "PPC-Gauto": {
+      "diff_pp": -3.448,
+      "lo2.5": -12.794,
+      "lo5_one_sided": -11.236,
+      "hi97.5": 5.814,
+      "pairs": 87,
+      "clusters": 26
+     }
+    },
+    "A/0.04": {
+     "Glead-Gauto": {
+      "diff_pp": 5.814,
+      "lo2.5": -5.882,
+      "lo5_one_sided": -4.444,
+      "hi97.5": 16.667,
+      "pairs": 86,
+      "clusters": 26
+     },
+     "PPC-Gauto": {
+      "diff_pp": -3.488,
+      "lo2.5": -15.294,
+      "lo5_one_sided": -13.793,
+      "hi97.5": 8.235,
+      "pairs": 86,
+      "clusters": 26
+     }
+    },
+    "A/0.06": {
+     "Glead-Gauto": {
+      "diff_pp": 1.149,
+      "lo2.5": -10.345,
+      "lo5_one_sided": -8.645,
+      "hi97.5": 12.941,
+      "pairs": 87,
+      "clusters": 26
+     },
+     "PPC-Gauto": {
+      "diff_pp": -1.149,
+      "lo2.5": -12.791,
+      "lo5_one_sided": -10.227,
+      "hi97.5": 9.412,
+      "pairs": 87,
+      "clusters": 26
+     }
+    },
+    "A20/0.02": {
+     "Glead-Gauto": {
+      "diff_pp": -14.943,
+      "lo2.5": -25.287,
+      "lo5_one_sided": -23.26,
+      "hi97.5": -5.682,
+      "pairs": 87,
+      "clusters": 26
+     },
+     "PPC-Gauto": {
+      "diff_pp": -13.793,
+      "lo2.5": -26.746,
+      "lo5_one_sided": -25.0,
+      "hi97.5": -2.198,
+      "pairs": 87,
+      "clusters": 26
+     }
+    },
+    "A20/0.04": {
+     "Glead-Gauto": {
+      "diff_pp": -11.628,
+      "lo2.5": -19.048,
+      "lo5_one_sided": -17.857,
+      "hi97.5": -4.598,
+      "pairs": 86,
+      "clusters": 26
+     },
+     "PPC-Gauto": {
+      "diff_pp": -5.814,
+      "lo2.5": -14.286,
+      "lo5_one_sided": -12.941,
+      "hi97.5": 1.243,
+      "pairs": 86,
+      "clusters": 26
+     }
+    },
+    "A20/0.06": {
+     "Glead-Gauto": {
+      "diff_pp": -3.448,
+      "lo2.5": -13.483,
+      "lo5_one_sided": -11.765,
+      "hi97.5": 5.747,
+      "pairs": 87,
+      "clusters": 26
+     },
+     "PPC-Gauto": {
+      "diff_pp": -12.644,
+      "lo2.5": -21.591,
+      "lo5_one_sided": -20.0,
+      "hi97.5": -4.878,
+      "pairs": 87,
+      "clusters": 26
+     }
+    },
+    "A20/Gauto@cv-none": {
+     "diff_pp": 9.615,
+     "lo2.5": 5.385,
+     "lo5_one_sided": 5.769,
+     "hi97.5": 14.231,
+     "pairs": 260,
+     "clusters": 26
+    },
+    "A20/Glead@cv-Gauto@cv": {
+     "diff_pp": -1.923,
+     "lo2.5": -5.779,
+     "lo5_one_sided": -5.385,
+     "hi97.5": 2.308,
+     "pairs": 260,
+     "clusters": 26
+    },
+    "A20/Gauto@cv-Gauto": {
+     "diff_pp": -10.769,
+     "lo2.5": -16.923,
+     "lo5_one_sided": -15.769,
+     "hi97.5": -5.0,
+     "pairs": 260,
+     "clusters": 26
+    },
+    "A20/Glead@cv-Glead": {
+     "diff_pp": -2.692,
+     "lo2.5": -6.923,
+     "lo5_one_sided": -6.154,
+     "hi97.5": 1.538,
+     "pairs": 260,
+     "clusters": 26
+    },
+    "A/Gauto/lead_on_share": null,
+    "A/Gauto/stop": {
+     "tau": 189,
+     "path": 46,
+     "held": 25
+    },
+    "A/Gauto/grasp_miss_along_m_mm": -2.3157,
+    "A/Gauto/contact_at_shift": 0.0,
+    "A/Gauto/pushed_before_fire": 0.0,
+    "A/Glead/lead_on_share": 0.5706,
+    "A/Glead/stop": {
+     "tau": 179,
+     "path": 56,
+     "held": 25
+    },
+    "A/Glead/grasp_miss_along_m_mm": 9.5258,
+    "A/Glead/contact_at_shift": 0.0,
+    "A/Glead/pushed_before_fire": 0.0,
+    "A/PPC/lead_on_share": null,
+    "A/PPC/stop": {
+     "tau": 189,
+     "path": 53,
+     "held": 18
+    },
+    "A/PPC/grasp_miss_along_m_mm": -15.4934,
+    "A/PPC/contact_at_shift": 0.0,
+    "A/PPC/pushed_before_fire": 0.0,
+    "A/none/lead_on_share": null,
+    "A/none/stop": {
+     "tau": 196,
+     "path": 55,
+     "held": 9
+    },
+    "A/none/grasp_miss_along_m_mm": -43.9498,
+    "A/none/contact_at_shift": 0.0,
+    "A/none/pushed_before_fire": 0.0,
+    "A20/Gauto/lead_on_share": null,
+    "A20/Gauto/stop": {
+     "tau": 188,
+     "held": 31,
+     "path": 41
+    },
+    "A20/Gauto/grasp_miss_along_m_mm": 2.5076,
+    "A20/Gauto/contact_at_shift": 0.0,
+    "A20/Gauto/pushed_before_fire": 0.0,
+    "A20/Gauto@cv/lead_on_share": null,
+    "A20/Gauto@cv/stop": {
+     "tau": 194,
+     "path": 45,
+     "held": 21
+    },
+    "A20/Gauto@cv/grasp_miss_along_m_mm": -15.7368,
+    "A20/Gauto@cv/contact_at_shift": 0.0,
+    "A20/Gauto@cv/pushed_before_fire": 0.0,
+    "A20/Glead/lead_on_share": 0.553,
+    "A20/Glead/stop": {
+     "tau": 202,
+     "path": 47,
+     "held": 11
+    },
+    "A20/Glead/grasp_miss_along_m_mm": 22.8211,
+    "A20/Glead/contact_at_shift": 0.0,
+    "A20/Glead/pushed_before_fire": 0.0,
+    "A20/Glead@cv/lead_on_share": 0.0569,
+    "A20/Glead@cv/stop": {
+     "tau": 193,
+     "held": 22,
+     "path": 45
+    },
+    "A20/Glead@cv/grasp_miss_along_m_mm": -7.819,
+    "A20/Glead@cv/contact_at_shift": 0.0,
+    "A20/Glead@cv/pushed_before_fire": 0.0,
+    "A20/PPC/lead_on_share": null,
+    "A20/PPC/stop": {
+     "tau": 203,
+     "held": 13,
+     "path": 44
+    },
+    "A20/PPC/grasp_miss_along_m_mm": -26.7639,
+    "A20/PPC/contact_at_shift": 0.0,
+    "A20/PPC/pushed_before_fire": 0.0,
+    "A20/none/lead_on_share": null,
+    "A20/none/stop": {
+     "tau": 213,
+     "path": 43,
+     "held": 4
+    },
+    "A20/none/grasp_miss_along_m_mm": -75.4883,
+    "A20/none/contact_at_shift": 0.0,
+    "A20/none/pushed_before_fire": 0.0
+   },
+   "smolvla": {
+    "A/0.02": {
+     "Glead-Gauto": {
+      "diff_pp": -1.149,
+      "lo2.5": -11.628,
+      "lo5_one_sided": -9.89,
+      "hi97.5": 8.991,
+      "pairs": 87,
+      "clusters": 26
+     },
+     "PPC-Gauto": {
+      "diff_pp": -12.644,
+      "lo2.5": -22.73,
+      "lo5_one_sided": -21.348,
+      "hi97.5": -2.299,
+      "pairs": 87,
+      "clusters": 26
+     }
+    },
+    "A/0.04": {
+     "Glead-Gauto": {
+      "diff_pp": 15.116,
+      "lo2.5": 5.814,
+      "lo5_one_sided": 7.059,
+      "hi97.5": 26.374,
+      "pairs": 86,
+      "clusters": 26
+     },
+     "PPC-Gauto": {
+      "diff_pp": 0.0,
+      "lo2.5": -8.994,
+      "lo5_one_sided": -7.147,
+      "hi97.5": 7.865,
+      "pairs": 86,
+      "clusters": 26
+     }
+    },
+    "A/0.06": {
+     "Glead-Gauto": {
+      "diff_pp": -6.897,
+      "lo2.5": -14.607,
+      "lo5_one_sided": -12.941,
+      "hi97.5": 0.0,
+      "pairs": 87,
+      "clusters": 26
+     },
+     "PPC-Gauto": {
+      "diff_pp": -8.046,
+      "lo2.5": -14.773,
+      "lo5_one_sided": -13.483,
+      "hi97.5": -1.176,
+      "pairs": 87,
+      "clusters": 26
+     }
+    },
+    "A20/0.02": {
+     "Glead-Gauto": {
+      "diff_pp": 0.0,
+      "lo2.5": -9.524,
+      "lo5_one_sided": -8.14,
+      "hi97.5": 9.639,
+      "pairs": 87,
+      "clusters": 26
+     },
+     "PPC-Gauto": {
+      "diff_pp": -2.299,
+      "lo2.5": -8.889,
+      "lo5_one_sided": -7.865,
+      "hi97.5": 3.571,
+      "pairs": 87,
+      "clusters": 26
+     }
+    },
+    "A20/0.04": {
+     "Glead-Gauto": {
+      "diff_pp": -8.14,
+      "lo2.5": -16.309,
+      "lo5_one_sided": -14.943,
+      "hi97.5": -1.149,
+      "pairs": 86,
+      "clusters": 26
+     },
+     "PPC-Gauto": {
+      "diff_pp": -1.163,
+      "lo2.5": -11.765,
+      "lo5_one_sided": -10.0,
+      "hi97.5": 8.235,
+      "pairs": 86,
+      "clusters": 26
+     }
+    },
+    "A20/0.06": {
+     "Glead-Gauto": {
+      "diff_pp": -3.448,
+      "lo2.5": -10.345,
+      "lo5_one_sided": -9.096,
+      "hi97.5": 3.409,
+      "pairs": 87,
+      "clusters": 26
+     },
+     "PPC-Gauto": {
+      "diff_pp": -5.747,
+      "lo2.5": -13.487,
+      "lo5_one_sided": -12.048,
+      "hi97.5": 1.149,
+      "pairs": 87,
+      "clusters": 26
+     }
+    },
+    "A20/Gauto@cv-none": {
+     "diff_pp": 3.846,
+     "lo2.5": 0.769,
+     "lo5_one_sided": 1.154,
+     "hi97.5": 6.923,
+     "pairs": 260,
+     "clusters": 26
+    },
+    "A20/Glead@cv-Gauto@cv": {
+     "diff_pp": 3.462,
+     "lo2.5": 0.0,
+     "lo5_one_sided": 0.385,
+     "hi97.5": 7.692,
+     "pairs": 260,
+     "clusters": 26
+    },
+    "A20/Gauto@cv-Gauto": {
+     "diff_pp": -5.385,
+     "lo2.5": -11.538,
+     "lo5_one_sided": -10.769,
+     "hi97.5": -0.385,
+     "pairs": 260,
+     "clusters": 26
+    },
+    "A20/Glead@cv-Glead": {
+     "diff_pp": 1.923,
+     "lo2.5": -1.154,
+     "lo5_one_sided": -0.769,
+     "hi97.5": 5.0,
+     "pairs": 260,
+     "clusters": 26
+    },
+    "A/Gauto/lead_on_share": null,
+    "A/Gauto/stop": {
+     "tau": 208,
+     "held": 18,
+     "path": 34
+    },
+    "A/Gauto/grasp_miss_along_m_mm": -14.6325,
+    "A/Gauto/contact_at_shift": 0.0,
+    "A/Gauto/pushed_before_fire": 0.0,
+    "A/Glead/lead_on_share": 0.5552,
+    "A/Glead/stop": {
+     "tau": 193,
+     "held": 21,
+     "path": 46
+    },
+    "A/Glead/grasp_miss_along_m_mm": 1.3615,
+    "A/Glead/contact_at_shift": 0.0,
+    "A/Glead/pushed_before_fire": 0.0,
+    "A/PPC/lead_on_share": null,
+    "A/PPC/stop": {
+     "tau": 206,
+     "path": 40,
+     "held": 14
+    },
+    "A/PPC/grasp_miss_along_m_mm": -34.8107,
+    "A/PPC/contact_at_shift": 0.0,
+    "A/PPC/pushed_before_fire": 0.0,
+    "A/none/lead_on_share": null,
+    "A/none/stop": {
+     "tau": 212,
+     "held": 8,
+     "path": 40
+    },
+    "A/none/grasp_miss_along_m_mm": -67.4645,
+    "A/none/contact_at_shift": 0.0,
+    "A/none/pushed_before_fire": 0.0,
+    "A20/Gauto/lead_on_share": null,
+    "A20/Gauto/stop": {
+     "tau": 213,
+     "path": 33,
+     "held": 14
+    },
+    "A20/Gauto/grasp_miss_along_m_mm": 3.3221,
+    "A20/Gauto/contact_at_shift": 0.0,
+    "A20/Gauto/pushed_before_fire": 0.0,
+    "A20/Gauto@cv/lead_on_share": null,
+    "A20/Gauto@cv/stop": {
+     "tau": 216,
+     "path": 31,
+     "held": 13
+    },
+    "A20/Gauto@cv/grasp_miss_along_m_mm": -15.8836,
+    "A20/Gauto@cv/contact_at_shift": 0.0,
+    "A20/Gauto@cv/pushed_before_fire": 0.0,
+    "A20/Glead/lead_on_share": 0.5373,
+    "A20/Glead/stop": {
+     "tau": 211,
+     "held": 15,
+     "path": 34
+    },
+    "A20/Glead/grasp_miss_along_m_mm": 27.9576,
+    "A20/Glead/contact_at_shift": 0.0,
+    "A20/Glead/pushed_before_fire": 0.0,
+    "A20/Glead@cv/lead_on_share": 0.0416,
+    "A20/Glead@cv/stop": {
+     "tau": 212,
+     "path": 31,
+     "held": 17
+    },
+    "A20/Glead@cv/grasp_miss_along_m_mm": -10.8974,
+    "A20/Glead@cv/contact_at_shift": 0.0,
+    "A20/Glead@cv/pushed_before_fire": 0.0,
+    "A20/PPC/lead_on_share": null,
+    "A20/PPC/stop": {
+     "tau": 213,
+     "path": 31,
+     "held": 16
+    },
+    "A20/PPC/grasp_miss_along_m_mm": -24.662,
+    "A20/PPC/contact_at_shift": 0.0,
+    "A20/PPC/pushed_before_fire": 0.0,
+    "A20/none/lead_on_share": null,
+    "A20/none/stop": {
+     "tau": 222,
+     "path": 32,
+     "held": 6
+    },
+    "A20/none/grasp_miss_along_m_mm": -64.0255,
+    "A20/none/contact_at_shift": 0.0,
+    "A20/none/pushed_before_fire": 0.0
+   }
+  },
+  "batch_rows_smolvla": {
+   "entries": 9897,
+   "rows_mean": 7.0436,
+   "texts_mean": 6.8915,
+   "mixed_share": 0.9831,
+   "note": "one entry per episode and call: a batch of n rows counts n times"
+  },
+  "ppc_cv_offline": {
+   "ppc_v_min_cv_mm_per_step": 7.03,
+   "speeds_mm_per_step": [1.0, 2.0, 3.0],
+   "band_at_or_below_max_speed": false,
+   "note": "PPC@cv is not in the grid: under our noise model and an equal false-engagement budget (<= 5%) its band is above the object's speed, so it equals none by construction; not 'PPC cannot see motion at all' (spec §7, §11)"
+  }
+ }
+}
