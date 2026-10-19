@@ -230,7 +230,7 @@ class HAgent(orx.Agent):
     for every method (the runner logs t_engage for all arms); only the kappa family acts on them."""
 
     FAMILY = {"G": 1.0, "GT": 1.0, "Gkeep": 0.0, "GkeepT": 0.0, "GR": None, "GRT": None, "GRret": None}
-    METHODS = ("none", "T0", "PPC", *FAMILY)
+    METHODS = ("none", "T0", "PPC", "PPCL", *FAMILY)
 
     def __init__(self, method, s, d, t_ramp=5, k_p=1.0, eps=orx.EPS, tau_k=0.01, K=20, tracker=None, push=None,
                  ppc_v_min=orx.PPC_V_MIN):
@@ -289,6 +289,8 @@ class HAgent(orx.Agent):
             if self.method in self.FAMILY:
                 a = self._g(t, a)
             elif self.method == "PPC":
+                a = self._ppc(t, a)
+            elif self.method == "PPCL":
                 a = self._ppc(t, a)
             if a[6] > 0:
                 self.grasp_started, self.z_close = True, self.p_hist[t][2]

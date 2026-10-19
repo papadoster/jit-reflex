@@ -354,3 +354,24 @@ def test_parse_arm_noisy_ppc():
     assert gauto.parse_arm("GautoU") == ("GautoU", "")
     with pytest.raises(AssertionError):
         gauto.parse_arm("PPC@ema")
+
+
+def test_gagent_ppcl_dispatches_like_ppc():
+    import math
+    a, b = gauto.GAgent("PPC", 10, 0), gauto.GAgent("PPCL", 10, 0)
+    b.latch_th = math.inf
+    x, p = np.zeros(3), np.array([0.3, 0.0, 0.0])
+    ch = np.tile([0.5, 0, 0, 0, 0, 0, -1.0], (50, 1))
+    for ag in (a, b):
+        ag.observe(0, x, p)
+        ag.sched.issue(0, ch)
+        ag.sched.arrive(0)
+        ag.on_new_chunk()
+    for t in range(1, 8):
+        q = p + np.array([0.0, 0.003 * t, 0.0])
+        outs = []
+        for ag in (a, b):
+            ag.observe(t, x, q)
+            ag.trigger(t)
+            outs.append(ag.act(t, ag.sched.action(t)))
+        assert np.array_equal(*outs)

@@ -466,3 +466,113 @@ def test_grasp_ok_needs_the_lift_at_a_closed_step():
     acts[:, 6] = [-1, 1, -1]  # closes at step 1, opens again at step 2
     objs = np.array([[0.0, 0, 0.90], [0.0, 0, 0.90], [0.0, 0, 0.95]])  # pushed up 5 cm with the gripper open
     assert not orx.episode_metrics(xs, acts, objs)["grasp_ok"]
+
+
+def _latch_agent(readings, th=None):
+    """A PPCL agent whose chunk resets read the given object velocities (one per reset, m/step), 10 steps apart, the
+    object far from the arm; returns the agent and the latched flag after each reset."""
+    ag = orx.Agent("PPCL", 10, 0)
+    if th is not None:
+        ag.latch_th = th
+    p, on = np.array([0.5, 0.0, 0.0]), []
+    for n, v in enumerate(readings):
+        t = 10 * n + 1
+        ag.p_hist[t - 1], ag.p_hist[t] = p.copy(), p + np.asarray(v, float)
+        p = p + np.asarray(v, float)
+        ag.sched.t_obs = t
+        ag.on_new_chunk()
+        on.append(ag.latch_next < math.inf)
+    return ag, on
+
+
+def test_ppcl_latch_constants_are_the_papers():
+    assert orx.PPCL_BETA_OUT == pytest.approx(0.0830, abs=1e-4)
+    assert orx.PPCL_R_TH == pytest.approx(0.147)
+    assert orx.PPCL_K_CAP == 4 and orx.PPCL_R_GRIP == 0.03
+
+
+def test_ppcl_sustained_irregularity_latches():
+    vx, vy = [0.002, 0, 0], [0, 0.002, 0]
+    ag, on = _latch_agent([vx, vy, vx, vy, vx, vy, vx, vy])
+    assert on == [False] + [True] * 7  # tau = 1 from the second reset on, latched from the first trigger
+    assert ag.latch_stats["trig"] == 7 and ag.latch_stats["chunks"] == 7
+    assert ag.latch_next == ag.sched.t_obs + orx.PPCL_K_CAP
+
+
+def test_ppcl_isolated_turn_latches_four_chunks():
+    vx, vy = [0.002, 0, 0], [0, 0.002, 0]
+    ag, on = _latch_agent([vx] * 3 + [vy] * 8)
+    assert on == [False] * 3 + [True] * 4 + [False] * 4  # L = .300 .241 .192 .152 > .147, then .119 (spec §3.1)
+    assert all(type(v) is int for v in ag.latch_stats.values())  # JSON-clean: cos = 1 must not leak np.bool_
+
+
+def test_ppcl_magnitude_outliers_never_trigger():
+    jump = [[0, 0, 0]] * 3 + [[0.06, 0, 0]] + [[0, 0, 0]] * 4  # a jump from rest: neighbours are still readings
+    spike = [[0.002, 0, 0]] * 3 + [[0.1, 0, 0]] + [[0.002, 0, 0]] * 4  # a 50x spike along a steady stream
+    for r in (jump, spike):
+        ag, on = _latch_agent(r)
+        assert not any(on) and ag.latch_stats["trig"] == 0
+
+
+def test_ppcl_direction_outlier_latches_by_design():
+    vx = [0.002, 0, 0]
+    _, on = _latch_agent([vx] * 3 + [[-0.002, 0.001, 0]] + [vx] * 10)
+    assert sum(on) == 8  # two triggers in a row (spec §3.1): the latch reacts to direction, not to magnitude
+
+
+def test_ppcl_near_object_reset_clears_only_the_latch():
+    vx, vy = [0.002, 0, 0], [0, 0.002, 0]
+    a, _ = _latch_agent([vx, vy, vx, vy])
+    b, _ = _latch_agent([vx, vy, vx, vy])
+    a.ppc_next, a.ppc_off = b.ppc_next, b.ppc_off = 99, {40: np.ones(3)}
+    t = 40
+    a.observe(t, a.p_hist[31] + np.array([0.02, 0, 0]), a.p_hist[31])  # EEF 2 cm from the object
+    b.observe(t, b.p_hist[31] + np.array([0.20, 0, 0]), b.p_hist[31])  # 20 cm: no reset
+    assert a.latch_L == a.latch_C == 0.0 and a.latch_next == math.inf and a.latch_stats["resets"] == 1
+    assert b.latch_next < math.inf
+    assert a.ppc_next == b.ppc_next == 99 and a.ppc_off.keys() == b.ppc_off.keys()
+    assert np.array_equal(a.latch_v, b.latch_v)
+    assert all(type(v) is int for v in a.latch_stats.values())
+
+
+def _ppc_run(method, path, th=None, s=10, steps=60):
+    """PPC / PPCL on one object path (positions by step), the arm walking to the seen object, d = 0."""
+    ag = orx.Agent(method, s, 0)
+    if th is not None:
+        ag.latch_th = th
+    x, acts, calls = np.zeros(3), [], []
+    for t in range(steps):
+        ag.observe(t, x, path[t])
+        if ag.sched.arrive(t):
+            ag.on_new_chunk()
+        if ag.sched.wants_call(t, ag.trigger(t)):
+            calls.append(t)
+            ag.sched.issue(t, _brain(x, path[t]))
+            if ag.sched.arrive(t):
+                ag.on_new_chunk()
+        a = ag.act(t, ag.sched.action(t))
+        acts.append(a)
+        x = x + orx.G_POS * a[:3]
+    return np.array(acts), calls, ag
+
+
+def _wiggle(seed, steps=60):
+    rng = np.random.default_rng(seed)
+    v = rng.normal(0, 0.003, (steps, 3)) * np.array([1, 1, 0])  # irregular motion in the table plane
+    return np.array([0.30, 0.0, 0.0]) + np.cumsum(v, axis=0)
+
+
+def test_ppcl_without_latch_is_ppc_bitwise():
+    for seed in range(5):
+        path = _wiggle(seed)
+        a0, c0, g0 = _ppc_run("PPC", path)
+        a1, c1, g1 = _ppc_run("PPCL", path, th=math.inf)
+        assert np.array_equal(a0, a1) and c0 == c1 and g0.sched.n_trig == g1.sched.n_trig
+
+
+def test_ppcl_on_a_jump_from_rest_is_ppc_bitwise():
+    path = np.array([[0.30, 0.0, 0.0]] * 60)
+    path[17:] += np.array([0.0, 0.06, 0.0])  # LIBERO-MAX's 6 cm relocation
+    a0, c0, _ = _ppc_run("PPC", path)
+    a1, c1, g1 = _ppc_run("PPCL", path)
+    assert np.array_equal(a0, a1) and c0 == c1 and g1.latch_stats["trig"] == 0

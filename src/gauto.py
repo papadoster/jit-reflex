@@ -180,7 +180,7 @@ class GAgent(hf.HAgent):
     LAW = ("Gk0", "Gk0T", "Gauto", "GautoT", "GautoU")
     # LAW: 1.0 placeholder, on_new_chunk sets Z1's kappa
     FAMILY = {"G": 1.0, "GT": 1.0, "Gkeep": 0.0, "GR": None, **dict.fromkeys(LAW, 1.0), "Gcal": 1.0}
-    METHODS = ("none", "T0", "PPC", *FAMILY)
+    METHODS = ("none", "T0", "PPC", "PPCL", *FAMILY)
 
     def __init__(self, method, s, d, kbar=None, tau_close=None, **kw):
         assert (method in self.LAW) == (kbar is not None), f"{method}: kbar {kbar}"

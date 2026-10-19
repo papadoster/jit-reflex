@@ -17,6 +17,12 @@ T0_THR = 0.01  # T0 re-queries at |U| >= 1 cm
 T_THR = 0.05  # the T switch re-queries at |U| > 5 cm
 PPC_K = 2  # PPC minimum execution steps (paper default)
 PPC_V_MIN = 0.001  # object speed counted by PPC, m/step
+# PPCL: the paper's 2-EMA latch (arXiv 2605.11459 §3.4, App. A.10; controls spec §3.1)
+PPCL_BETA_IN = 0.3  # inner EMA, the paper's only free parameter
+PPCL_BETA_OUT = 1 - 2 ** (-PPC_K / 16)  # outer EMA, 1 - 2^(-K/T), T = 16
+PPCL_R_TH = PPCL_BETA_IN * (1 - PPCL_BETA_IN) ** 2  # L_th = R_TH = beta_in (1 - beta_in)^2 = 0.147
+PPCL_K_CAP = 4  # K_exec <= T/4 while latched
+PPCL_R_GRIP = 0.03  # m: the near-object reset (their grasp-gate radius; A.10 names no number)
 H = 50  # SmolVLA chunk length
 SMOOTH_STEPS = 20
 
@@ -144,7 +150,8 @@ class Agent:
     plan's observation. G adds e = K_p (U - E), |e| <= |U| / T_ramp, converted to action units by G_POS.
     """
 
-    METHODS = ("none", "T0", "G", "GT", "PPC", "PPC9", "Gpost", "GJ")
+    METHODS = ("none", "T0", "G", "GT", "PPC", "PPC9", "Gpost", "GJ", "PPCL")
+    latch_th = PPCL_R_TH  # a test sets inf: the latch off (spec §13 item 5)
 
     def __init__(self, method, s, d, t_ramp=5, k_p=1.0):
         assert method in self.METHODS, method
@@ -160,14 +167,23 @@ class Agent:
         # G engaged at least once (|U| > EPS), even if clipping sent nothing (report: false triggers in control)
         self.g_on = False
         self.ppc_next, self.ppc_off = math.inf, {}
+        # PPCL (controls spec §3.1): the latch's EMAs, its call deadline, the last reading (None: still) and counters
+        self.latch_C = self.latch_L = 0.0
+        self.latch_next, self.latch_v = math.inf, None
+        self.latch_stats = {"trig": 0, "chunks": 0, "resets": 0}
         self.j_corr, self.o_raw = None, {}  # GJ: callable(t, k) -> J_k (o_t - o_hat_k); raw states by step
 
     def on_new_chunk(self):
         """Called when a new chunk starts being used (G's anchor moves with sched.t_obs by itself)."""
         self.ppc_next, self.ppc_off = math.inf, {}  # PPC: the next chunk starts unbiased (delta_K = 0)
+        if self.method == "PPCL" and not self.grasp_started:
+            self._latch_update()
 
     def observe(self, t, eef, obj):
         self.p_hist[t], self.c_hist[t] = np.array(obj, float), self.c.copy()
+        if (self.method == "PPCL" and not self.grasp_started
+                and np.linalg.norm(np.asarray(eef, float) - self.p_hist[t]) < PPCL_R_GRIP):
+            self._latch_reset()
 
     def unknown_shift(self, t):
         if self.method == "Gpost" and self.p_pre is not None:
@@ -180,6 +196,9 @@ class Agent:
         offsets here."""
         if self.grasp_started or self.sched.chunk is None:
             return False
+        if self.method == "PPCL":
+            self._ppc_measure(t)
+            return t >= min(self.ppc_next, self.latch_next)
         if self.method in ("PPC", "PPC9"):
             self._ppc_measure(t)
             return t >= self.ppc_next
@@ -198,6 +217,8 @@ class Agent:
             if self.method in ("G", "GT", "Gpost", "GJ"):
                 a = self._g(t, a)
             if self.method in ("PPC", "PPC9"):
+                a = self._ppc(t, a)
+            if self.method == "PPCL":
                 a = self._ppc(t, a)
         if a[6] > 0:
             self.grasp_started = True
@@ -224,7 +245,7 @@ class Agent:
         through the execution horizon K_exec (the next call at t_obs + K_exec); the plan's steps are not scaled.
         Path: offsets (1 - F_{2k+1}/F_{2K+1}) v_perp for steps t..t+K-1, v_perp against the clipped plan step,
         re-planned at each measurement (the latest one wins) and cleared at a new chunk. No near-object reset
-        (the paper's reset only clears the latch) and no 2-EMA latch stabiliser.
+        (the paper's reset only clears the latch) and no 2-EMA latch stabiliser (PPCL adds it, controls spec §3.1).
         PPC9: App. A.9 variant (profile over K_exec) — report-only row on the smooth-motion set; a still
         measurement (|v| <= PPC_V_MIN) clears its pending offsets, so the latest measurement always wins."""
         if t - self.sched.t_obs >= len(self.sched.chunk):
@@ -250,6 +271,33 @@ class Agent:
         if off is not None:
             a[:3] = np.clip(np.clip(a[:3], -1, 1) + off / G_POS, -1, 1)
         return a
+
+    def _latch_update(self):
+        """PPCL at a chunk reset (controls spec §3.1, the paper's App. A.10): the reading v_N = p(t_obs) - p(t_obs - 1)
+        of the plan now starting; tau = 1 when cos(v_N, v_N-1) < 1/2, both readings above ppc_v_min (a still reading
+        never triggers: our convention, the paper's cosine is undefined there); the outer EMA C, the sticky factor on
+        the updated C, the inner EMA L; latched (L > L_th): the next call at t_obs + 4 at the latest. tau and the
+        latch flag are Python bools, so the counters stay JSON ints."""
+        t = self.sched.t_obs
+        v = self.p_hist[t] - self.p_hist[t - 1] if t - 1 in self.p_hist else None
+        v = v if v is not None and np.linalg.norm(v) > self.ppc_v_min else None
+        prev, self.latch_v = self.latch_v, v
+        tau = bool(prev is not None and v is not None
+                   and max(0.0, float(v @ prev / (np.linalg.norm(v) * np.linalg.norm(prev)))) < 0.5)
+        self.latch_C = PPCL_BETA_OUT * tau + (1 - PPCL_BETA_OUT) * self.latch_C
+        s = self.latch_C / (self.latch_C + PPCL_R_TH)
+        self.latch_L = (PPCL_BETA_IN + (1 - PPCL_BETA_IN) * self.latch_L if tau
+                        else (1 - PPCL_BETA_IN * (1 - s)) * self.latch_L)
+        on = bool(self.latch_L > self.latch_th)
+        self.latch_next = t + PPCL_K_CAP if on else math.inf
+        self.latch_stats["trig"] += tau
+        self.latch_stats["chunks"] += on
+
+    def _latch_reset(self):
+        """PPCL's near-object reset: (L, C) <- 0 and the latch off; pace, path, offsets and the last reading stay."""
+        self.latch_stats["resets"] += bool(self.latch_L or self.latch_C)
+        self.latch_C = self.latch_L = 0.0
+        self.latch_next = math.inf
 
 
 def episode_metrics(xs, acts, objs, lift=0.03):
