@@ -1,0 +1,1 @@
+{"brain": "pi05", "precision": "fp32", "device": "cuda", "torch": "2.11.0+cu126", "calls": 20, "ms_med_p10_p90": [563.9, 552.4, 572.0], "steps20hz_med_p10_p90": [11.28, 11.05, 11.44], "reflex_us_per_step": 36.5}

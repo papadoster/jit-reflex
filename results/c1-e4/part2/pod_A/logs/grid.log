@@ -1,0 +1,18 @@
+[09:31:03] phase grid, Boracle_pi05 (2080 episodes): --brain pi05 --kinds move --cells A,A20 --methods none,Gauto,Glead,PPC --inits 0-9 --kbar 0.324
+[13:30:22] phase grid, Boracle_pi05 (2080 episodes): --brain pi05 --kinds move --cells A,A20 --methods none,Gauto,Glead,PPC --inits 0-9 --kbar 0.324
+[17:31:54] phase grid, Bnoisy_pi05 (520 episodes): --brain pi05 --kinds move --cells A20 --methods Gauto@cv,Glead@cv --inits 0-9 --kbar 0.324
+[19:43:55] phase grid, M1M2_pi05_eval300_plus_d0 (1496 episodes): --brain pi05 --source plus --set eval300 --arms=none,G,Gauto,PPC,G@glr,PPC@glr,T0 --d 0 --kbar 0.306
+[20:41:09] phase grid, M1M2_pi05_eval300_plus_d0 (1496 episodes): --brain pi05 --source plus --set eval300 --arms=none,G,Gauto,PPC,G@glr,PPC@glr,T0 --d 0 --kbar 0.306
+[03:11:32] phase grid, M1M2_pi05_eval300_pro_d0 (904 episodes): --brain pi05 --source pro --set eval300 --arms=none,G,Gauto,PPC,G@glr,PPC@glr,T0 --d 0 --kbar 0.306
+[07:11:16] phase grid, M1pi_pi05_evalrest_plus_d0 (2355 episodes): --brain pi05 --source plus --set evalrest --arms=none,G,Gauto,PPC --d 0 --kbar 0.306
+[18:30:57] phase grid, M1pi_pi05_evalrest_pro_d0 (845 episodes): --brain pi05 --source pro --set evalrest --arms=none,G,Gauto,PPC --d 0 --kbar 0.306
+[22:03:48] phase grid, M1M2_pi05_eval300_plus_d0 (1496 episodes): --brain pi05 --source plus --set eval300 --arms=none,G,Gauto,PPC,G@glr,PPC@glr,T0 --d 0 --kbar 0.306
+[22:03:54] phase grid, M1M2_pi05_eval300_pro_d0 (904 episodes): --brain pi05 --source pro --set eval300 --arms=none,G,Gauto,PPC,G@glr,PPC@glr,T0 --d 0 --kbar 0.306
+[22:04:00] phase grid, M1pi_pi05_evalrest_plus_d0 (2355 episodes): --brain pi05 --source plus --set evalrest --arms=none,G,Gauto,PPC --d 0 --kbar 0.306
+[22:04:06] phase grid, M1pi_pi05_evalrest_pro_d0 (845 episodes): --brain pi05 --source pro --set evalrest --arms=none,G,Gauto,PPC --d 0 --kbar 0.306
+[22:50:20] phase grid, Boracle_pi05 (2080 episodes): --brain pi05 --kinds move --cells A,A20 --methods none,Gauto,Glead,PPC --inits 0-9 --kbar 0.324
+[22:50:31] phase grid, Bnoisy_pi05 (520 episodes): --brain pi05 --kinds move --cells A20 --methods Gauto@cv,Glead@cv --inits 0-9 --kbar 0.324
+[22:50:42] phase grid, D_pi05_eval300_plus_d10 (748 episodes): --brain pi05 --source plus --set eval300 --arms=none,Gauto,PPC --d 10 --kbar 0.306
+[03:15:44] phase grid, D_pi05_eval300_pro_d10 (452 episodes): --brain pi05 --source pro --set eval300 --arms=none,Gauto,PPC --d 10 --kbar 0.306
+[05:29:18] phase grid, D_pi05_eval300_plus_d20 (748 episodes): --brain pi05 --source plus --set eval300 --arms=none,Gauto,PPC --d 20 --kbar 0.306
+[10:20:37] phase grid, D_pi05_eval300_pro_d20 (452 episodes): --brain pi05 --source pro --set eval300 --arms=none,Gauto,PPC --d 20 --kbar 0.306

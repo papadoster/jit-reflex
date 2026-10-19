@@ -1,0 +1,56 @@
+[03:15:44] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PRO/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX venv/bin/python scripts/c1e4m_run.py --device cuda --brain pi05 --source pro --set eval300 --arms=none,Gauto,PPC --d 10 --kbar 0.306 --n-envs 6 --out results/c1-e4/part2/pod_A/D_pi05_eval300_pro_d10.jsonl
+113 of 113 pro cases of eval300 to run, 4 episodes each; split 4beda8e750b4, Wand real
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 947.08it/s]
+The PI05 model is a direct port of the OpenPI implementation. 
+This implementation follows the original OpenPI structure for compatibility. 
+Original implementation: https://github.com/Physical-Intelligence/openpi
+Loading model from: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+✓ Loaded state dict from model.safetensors
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.bias
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.weight
+All keys loaded successfully!
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+group 0: 6 cases 24 episodes 569.5 s, brain 487.3 s 345 calls 808 rows; 6/113 cases, 94.9 s/case, eta 2.82 h
+group 1: 6 cases 24 episodes 461.4 s, brain 378.7 s 261 calls 626 rows; 12/113 cases, 85.9 s/case, eta 2.41 h
+group 2: 6 cases 24 episodes 356.6 s, brain 291.1 s 237 calls 467 rows; 18/113 cases, 77.1 s/case, eta 2.03 h
+group 3: 6 cases 24 episodes 484.2 s, brain 399.8 s 313 calls 622 rows; 24/113 cases, 78.0 s/case, eta 1.93 h
+group 4: 6 cases 24 episodes 419.6 s, brain 338.9 s 270 calls 582 rows; 30/113 cases, 76.4 s/case, eta 1.76 h
+group 5: 6 cases 24 episodes 536.7 s, brain 444.9 s 345 calls 746 rows; 36/113 cases, 78.6 s/case, eta 1.68 h
+group 6: 6 cases 24 episodes 427.2 s, brain 341.4 s 298 calls 598 rows; 42/113 cases, 77.5 s/case, eta 1.53 h
+group 7: 6 cases 24 episodes 314.5 s, brain 252.1 s 289 calls 557 rows; 48/113 cases, 74.4 s/case, eta 1.34 h
+group 8: 6 cases 24 episodes 370.9 s, brain 286.2 s 322 calls 615 rows; 54/113 cases, 73.0 s/case, eta 1.20 h
+group 9: 6 cases 24 episodes 395.5 s, brain 315.7 s 343 calls 664 rows; 60/113 cases, 72.3 s/case, eta 1.06 h
+group 10: 6 cases 24 episodes 380.3 s, brain 292.7 s 258 calls 638 rows; 66/113 cases, 71.5 s/case, eta 0.93 h
+group 11: 6 cases 24 episodes 372.1 s, brain 289.2 s 302 calls 585 rows; 72/113 cases, 70.7 s/case, eta 0.80 h
+group 12: 6 cases 24 episodes 307.5 s, brain 237.5 s 216 calls 479 rows; 78/113 cases, 69.2 s/case, eta 0.67 h
+group 13: 6 cases 24 episodes 411.1 s, brain 296.2 s 278 calls 595 rows; 84/113 cases, 69.1 s/case, eta 0.56 h
+group 14: 6 cases 24 episodes 341.9 s, brain 253.9 s 248 calls 515 rows; 90/113 cases, 68.3 s/case, eta 0.44 h
+group 15: 6 cases 24 episodes 455.4 s, brain 354.1 s 356 calls 695 rows; 96/113 cases, 68.8 s/case, eta 0.32 h
+group 16: 6 cases 24 episodes 435.9 s, brain 319.0 s 328 calls 658 rows; 102/113 cases, 69.0 s/case, eta 0.21 h
+group 17: 6 cases 24 episodes 376.9 s, brain 285.9 s 285 calls 578 rows; 108/113 cases, 68.7 s/case, eta 0.10 h
+group 18: 5 cases 20 episodes 458.0 s, brain 351.6 s 330 calls 712 rows; 113/113 cases, 69.7 s/case, eta 0.00 h
+done 113 of 113 cases, failed 0:
+[05:29:17] pass 2 skipped: pass 1 exited cleanly, no failed group

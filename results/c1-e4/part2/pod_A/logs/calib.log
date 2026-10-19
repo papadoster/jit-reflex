@@ -1,0 +1,3 @@
+[08:34:05] phase calib, M0_pi05_calib_plus_d0 (84 episodes): --brain pi05 --source plus --set calib --arms=Gcal --d 0 --split results/c1-e4/part2/pod_A/split0.json
+[09:03:37] phase calib, M0_pi05_calib_pro_d0 (36 episodes): --brain pi05 --source pro --set calib --arms=Gcal --d 0 --split results/c1-e4/part2/pod_A/split0.json
+[09:13:27] phase calib, Bcal_pi05 (60 episodes): --brain pi05 --kinds step --cells A --methods Gcal --pairs-file results/c1-e4/part2/bench_calib_pairs.json

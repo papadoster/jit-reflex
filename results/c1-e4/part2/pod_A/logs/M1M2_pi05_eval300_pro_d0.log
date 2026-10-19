@@ -1,0 +1,60 @@
+[03:11:32] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PRO/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX venv/bin/python scripts/c1e4m_run.py --device cuda --brain pi05 --source pro --set eval300 --arms=none,G,Gauto,PPC,G@glr,PPC@glr,T0 --d 0 --kbar 0.306 --n-envs 6 --out results/c1-e4/part2/pod_A/M1M2_pi05_eval300_pro_d0.jsonl
+113 of 113 pro cases of eval300 to run, 8 episodes each; split 4beda8e750b4, Wand real
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 947.72it/s]
+The PI05 model is a direct port of the OpenPI implementation. 
+This implementation follows the original OpenPI structure for compatibility. 
+Original implementation: https://github.com/Physical-Intelligence/openpi
+Loading model from: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+✓ Loaded state dict from model.safetensors
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.bias
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.weight
+All keys loaded successfully!
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+group 0: 6 cases 48 episodes 648.3 s, brain 512.8 s 366 calls 1011 rows; 6/113 cases, 108.1 s/case, eta 3.21 h
+group 1: 6 cases 48 episodes 798.3 s, brain 640.8 s 571 calls 1221 rows; 12/113 cases, 120.5 s/case, eta 3.38 h
+group 2: 6 cases 48 episodes 580.7 s, brain 457.7 s 445 calls 853 rows; 18/113 cases, 112.6 s/case, eta 2.97 h
+group 3: 6 cases 48 episodes 689.3 s, brain 547.5 s 595 calls 1050 rows; 24/113 cases, 113.2 s/case, eta 2.80 h
+group 4: 6 cases 48 episodes 762.5 s, brain 594.5 s 593 calls 1142 rows; 30/113 cases, 116.0 s/case, eta 2.67 h
+group 5: 6 cases 48 episodes 896.6 s, brain 749.0 s 669 calls 1441 rows; 36/113 cases, 121.5 s/case, eta 2.60 h
+group 6: 6 cases 48 episodes 685.9 s, brain 556.0 s 521 calls 1032 rows; 42/113 cases, 120.5 s/case, eta 2.38 h
+group 7: 6 cases 48 episodes 691.3 s, brain 569.3 s 598 calls 1065 rows; 48/113 cases, 119.9 s/case, eta 2.16 h
+group 8: 6 cases 48 episodes 801.7 s, brain 635.9 s 604 calls 1214 rows; 54/113 cases, 121.4 s/case, eta 1.99 h
+group 9: 6 cases 48 episodes 817.9 s, brain 675.7 s 647 calls 1181 rows; 60/113 cases, 122.9 s/case, eta 1.81 h
+group 10: 6 cases 48 episodes 650.2 s, brain 505.0 s 422 calls 940 rows; 66/113 cases, 121.6 s/case, eta 1.59 h
+group 11: 6 cases 48 episodes 809.4 s, brain 671.8 s 551 calls 1159 rows; 72/113 cases, 122.7 s/case, eta 1.40 h
+group 12: 6 cases 48 episodes 567.2 s, brain 448.2 s 440 calls 768 rows; 78/113 cases, 120.5 s/case, eta 1.17 h
+group 13: 6 cases 48 episodes 735.7 s, brain 567.8 s 514 calls 1044 rows; 84/113 cases, 120.7 s/case, eta 0.97 h
+group 14: 6 cases 48 episodes 661.7 s, brain 534.0 s 482 calls 959 rows; 90/113 cases, 120.0 s/case, eta 0.77 h
+group 15: 6 cases 48 episodes 900.2 s, brain 749.9 s 684 calls 1339 rows; 96/113 cases, 121.8 s/case, eta 0.58 h
+group 16: 6 cases 48 episodes 863.2 s, brain 684.9 s 593 calls 1201 rows; 102/113 cases, 123.1 s/case, eta 0.38 h
+group 17: 6 cases 48 episodes 736.6 s, brain 602.8 s 516 calls 1076 rows; 108/113 cases, 123.1 s/case, eta 0.17 h
+group 18: 5 cases 40 episodes 954.6 s, brain 795.3 s 638 calls 1414 rows; 113/113 cases, 126.1 s/case, eta 0.00 h
+done 113 of 113 cases, failed 0:
+[07:11:16] pass 2 skipped: pass 1 exited cleanly, no failed group
+[22:03:54] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PRO/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX venv/bin/python scripts/c1e4m_run.py --device cuda --brain pi05 --source pro --set eval300 --arms=none,G,Gauto,PPC,G@glr,PPC@glr,T0 --d 0 --kbar 0.306 --n-envs 6 --out results/c1-e4/part2/pod_A/M1M2_pi05_eval300_pro_d0.jsonl
+0 of 113 pro cases of eval300 to run, 8 episodes each; split 4beda8e750b4, Wand real
+done 0 of 0 cases, failed 0:
+[22:03:59] pass 2 skipped: pass 1 exited cleanly, no failed group

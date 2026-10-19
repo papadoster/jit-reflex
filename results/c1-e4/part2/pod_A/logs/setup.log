@@ -1,0 +1,947 @@
+W: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
+debconf: delaying package configuration, since apt-utils is not installed
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 49062 files and directories currently installed.)
+Preparing to unpack .../bsdutils_1%3a2.39.3-9ubuntu6.6_amd64.deb ...
+Unpacking bsdutils (1:2.39.3-9ubuntu6.6) over (1:2.39.3-9ubuntu6.3) ...
+Setting up bsdutils (1:2.39.3-9ubuntu6.6) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 49062 files and directories currently installed.)
+Preparing to unpack .../util-linux_2.39.3-9ubuntu6.6_amd64.deb ...
+Unpacking util-linux (2.39.3-9ubuntu6.6) over (2.39.3-9ubuntu6.3) ...
+Setting up util-linux (2.39.3-9ubuntu6.6) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 49062 files and directories currently installed.)
+Preparing to unpack .../0-mount_2.39.3-9ubuntu6.6_amd64.deb ...
+Unpacking mount (2.39.3-9ubuntu6.6) over (2.39.3-9ubuntu6.3) ...
+Selecting previously unselected package fonts-droid-fallback.
+Preparing to unpack .../1-fonts-droid-fallback_1%3a6.0.1r16-1.1build1_all.deb ...
+Unpacking fonts-droid-fallback (1:6.0.1r16-1.1build1) ...
+Selecting previously unselected package imagemagick-6-common.
+Preparing to unpack .../2-imagemagick-6-common_8%3a6.9.12.98+dfsg1-5.2build2_all.deb ...
+Unpacking imagemagick-6-common (8:6.9.12.98+dfsg1-5.2build2) ...
+Selecting previously unselected package libmagickcore-6-headers.
+Preparing to unpack .../3-libmagickcore-6-headers_8%3a6.9.12.98+dfsg1-5.2build2_all.deb ...
+Unpacking libmagickcore-6-headers (8:6.9.12.98+dfsg1-5.2build2) ...
+Selecting previously unselected package libmagickcore-6-arch-config:amd64.
+Preparing to unpack .../4-libmagickcore-6-arch-config_8%3a6.9.12.98+dfsg1-5.2build2_amd64.deb ...
+Unpacking libmagickcore-6-arch-config:amd64 (8:6.9.12.98+dfsg1-5.2build2) ...
+Preparing to unpack .../5-bzip2_1.0.8-5.1ubuntu0.1_amd64.deb ...
+Unpacking bzip2 (1.0.8-5.1ubuntu0.1) over (1.0.8-5.1build0.1) ...
+Preparing to unpack .../6-libbz2-1.0_1.0.8-5.1ubuntu0.1_amd64.deb ...
+Unpacking libbz2-1.0:amd64 (1.0.8-5.1ubuntu0.1) over (1.0.8-5.1build0.1) ...
+Setting up libbz2-1.0:amd64 (1.0.8-5.1ubuntu0.1) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 49220 files and directories currently installed.)
+Preparing to unpack .../0-libfreetype6_2.13.2+dfsg-1ubuntu0.2_amd64.deb ...
+Unpacking libfreetype6:amd64 (2.13.2+dfsg-1ubuntu0.2) over (2.13.2+dfsg-1build3) ...
+Selecting previously unselected package libheif-plugin-aomdec:amd64.
+Preparing to unpack .../1-libheif-plugin-aomdec_1.17.6-1ubuntu4.9_amd64.deb ...
+Unpacking libheif-plugin-aomdec:amd64 (1.17.6-1ubuntu4.9) ...
+Selecting previously unselected package libheif1:amd64.
+Preparing to unpack .../2-libheif1_1.17.6-1ubuntu4.9_amd64.deb ...
+Unpacking libheif1:amd64 (1.17.6-1ubuntu4.9) ...
+Preparing to unpack .../3-liblcms2-2_2.14-2ubuntu0.1_amd64.deb ...
+Unpacking liblcms2-2:amd64 (2.14-2ubuntu0.1) over (2.14-2build1) ...
+Preparing to unpack .../4-gir1.2-glib-2.0_2.80.0-6ubuntu3.9_amd64.deb ...
+Unpacking gir1.2-glib-2.0:amd64 (2.80.0-6ubuntu3.9) over (2.80.0-6ubuntu3.4) ...
+Preparing to unpack .../5-libglib2.0-data_2.80.0-6ubuntu3.9_all.deb ...
+Unpacking libglib2.0-data (2.80.0-6ubuntu3.9) over (2.80.0-6ubuntu3.4) ...
+Preparing to unpack .../6-libglib2.0-bin_2.80.0-6ubuntu3.9_amd64.deb ...
+Unpacking libglib2.0-bin (2.80.0-6ubuntu3.9) over (2.80.0-6ubuntu3.4) ...
+Preparing to unpack .../7-libblkid1_2.39.3-9ubuntu6.6_amd64.deb ...
+Unpacking libblkid1:amd64 (2.39.3-9ubuntu6.6) over (2.39.3-9ubuntu6.3) ...
+Setting up libblkid1:amd64 (2.39.3-9ubuntu6.6) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 49231 files and directories currently installed.)
+Preparing to unpack .../libmount1_2.39.3-9ubuntu6.6_amd64.deb ...
+Unpacking libmount1:amd64 (2.39.3-9ubuntu6.6) over (2.39.3-9ubuntu6.3) ...
+Setting up libmount1:amd64 (2.39.3-9ubuntu6.6) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 49231 files and directories currently installed.)
+Preparing to unpack .../00-libglib2.0-0t64_2.80.0-6ubuntu3.9_amd64.deb ...
+Unpacking libglib2.0-0t64:amd64 (2.80.0-6ubuntu3.9) over (2.80.0-6ubuntu3.4) ...
+Selecting previously unselected package liblqr-1-0:amd64.
+Preparing to unpack .../01-liblqr-1-0_0.4.2-2.1build2_amd64.deb ...
+Unpacking liblqr-1-0:amd64 (0.4.2-2.1build2) ...
+Selecting previously unselected package libltdl7:amd64.
+Preparing to unpack .../02-libltdl7_2.4.7-7build1_amd64.deb ...
+Unpacking libltdl7:amd64 (2.4.7-7build1) ...
+Preparing to unpack .../03-libopenjp2-7_2.5.0-2ubuntu0.5_amd64.deb ...
+Unpacking libopenjp2-7:amd64 (2.5.0-2ubuntu0.5) over (2.5.0-2ubuntu0.4) ...
+Selecting previously unselected package libraw23t64:amd64.
+Preparing to unpack .../04-libraw23t64_0.21.2-2.1ubuntu0.24.04.2_amd64.deb ...
+Unpacking libraw23t64:amd64 (0.21.2-2.1ubuntu0.24.04.2) ...
+Preparing to unpack .../05-libxml2_2.9.14+dfsg-1.3ubuntu3.10_amd64.deb ...
+Unpacking libxml2:amd64 (2.9.14+dfsg-1.3ubuntu3.10) over (2.9.14+dfsg-1.3ubuntu3.5) ...
+Selecting previously unselected package libmagickcore-6.q16-7t64:amd64.
+Preparing to unpack .../06-libmagickcore-6.q16-7t64_8%3a6.9.12.98+dfsg1-5.2build2_amd64.deb ...
+Unpacking libmagickcore-6.q16-7t64:amd64 (8:6.9.12.98+dfsg1-5.2build2) ...
+Selecting previously unselected package libdjvulibre-text.
+Preparing to unpack .../07-libdjvulibre-text_3.5.28-2ubuntu0.24.04.2_all.deb ...
+Unpacking libdjvulibre-text (3.5.28-2ubuntu0.24.04.2) ...
+Selecting previously unselected package libdjvulibre21:amd64.
+Preparing to unpack .../08-libdjvulibre21_3.5.28-2ubuntu0.24.04.2_amd64.deb ...
+Unpacking libdjvulibre21:amd64 (3.5.28-2ubuntu0.24.04.2) ...
+Selecting previously unselected package libmagickwand-6.q16-7t64:amd64.
+Preparing to unpack .../09-libmagickwand-6.q16-7t64_8%3a6.9.12.98+dfsg1-5.2build2_amd64.deb ...
+Unpacking libmagickwand-6.q16-7t64:amd64 (8:6.9.12.98+dfsg1-5.2build2) ...
+Selecting previously unselected package libimath-3-1-29t64:amd64.
+Preparing to unpack .../10-libimath-3-1-29t64_3.1.9-3.1ubuntu2_amd64.deb ...
+Unpacking libimath-3-1-29t64:amd64 (3.1.9-3.1ubuntu2) ...
+Selecting previously unselected package libopenexr-3-1-30:amd64.
+Preparing to unpack .../11-libopenexr-3-1-30_3.1.5-5.1build3_amd64.deb ...
+Unpacking libopenexr-3-1-30:amd64 (3.1.5-5.1build3) ...
+Selecting previously unselected package libwmflite-0.2-7:amd64.
+Preparing to unpack .../12-libwmflite-0.2-7_0.2.13-1.1build3_amd64.deb ...
+Unpacking libwmflite-0.2-7:amd64 (0.2.13-1.1build3) ...
+Selecting previously unselected package libmagickcore-6.q16-7-extra:amd64.
+Preparing to unpack .../13-libmagickcore-6.q16-7-extra_8%3a6.9.12.98+dfsg1-5.2build2_amd64.deb ...
+Unpacking libmagickcore-6.q16-7-extra:amd64 (8:6.9.12.98+dfsg1-5.2build2) ...
+Selecting previously unselected package libbz2-dev:amd64.
+Preparing to unpack .../14-libbz2-dev_1.0.8-5.1ubuntu0.1_amd64.deb ...
+Unpacking libbz2-dev:amd64 (1.0.8-5.1ubuntu0.1) ...
+Selecting previously unselected package libdjvulibre-dev:amd64.
+Preparing to unpack .../15-libdjvulibre-dev_3.5.28-2ubuntu0.24.04.2_amd64.deb ...
+Unpacking libdjvulibre-dev:amd64 (3.5.28-2ubuntu0.24.04.2) ...
+Selecting previously unselected package libexif12:amd64.
+Preparing to unpack .../16-libexif12_0.6.24-1ubuntu0.24.04.1_amd64.deb ...
+Unpacking libexif12:amd64 (0.6.24-1ubuntu0.24.04.1) ...
+Selecting previously unselected package libexif-dev:amd64.
+Preparing to unpack .../17-libexif-dev_0.6.24-1ubuntu0.24.04.1_amd64.deb ...
+Unpacking libexif-dev:amd64 (0.6.24-1ubuntu0.24.04.1) ...
+Selecting previously unselected package libbrotli-dev:amd64.
+Preparing to unpack .../18-libbrotli-dev_1.1.0-2build2_amd64.deb ...
+Unpacking libbrotli-dev:amd64 (1.1.0-2build2) ...
+Selecting previously unselected package libfreetype-dev:amd64.
+Preparing to unpack .../19-libfreetype-dev_2.13.2+dfsg-1ubuntu0.2_amd64.deb ...
+Unpacking libfreetype-dev:amd64 (2.13.2+dfsg-1ubuntu0.2) ...
+Selecting previously unselected package libopenjp2-7-dev:amd64.
+Preparing to unpack .../20-libopenjp2-7-dev_2.5.0-2ubuntu0.5_amd64.deb ...
+Unpacking libopenjp2-7-dev:amd64 (2.5.0-2ubuntu0.5) ...
+Selecting previously unselected package liblcms2-dev:amd64.
+Preparing to unpack .../21-liblcms2-dev_2.14-2ubuntu0.1_amd64.deb ...
+Unpacking liblcms2-dev:amd64 (2.14-2ubuntu0.1) ...
+Selecting previously unselected package liblqr-1-0-dev:amd64.
+Preparing to unpack .../22-liblqr-1-0-dev_0.4.2-2.1build2_amd64.deb ...
+Unpacking liblqr-1-0-dev:amd64 (0.4.2-2.1build2) ...
+Selecting previously unselected package m4.
+Preparing to unpack .../23-m4_1.4.19-4build1_amd64.deb ...
+Unpacking m4 (1.4.19-4build1) ...
+Selecting previously unselected package autoconf.
+Preparing to unpack .../24-autoconf_2.71-3_all.deb ...
+Unpacking autoconf (2.71-3) ...
+Selecting previously unselected package autotools-dev.
+Preparing to unpack .../25-autotools-dev_20220109.1_all.deb ...
+Unpacking autotools-dev (20220109.1) ...
+Selecting previously unselected package automake.
+Preparing to unpack .../26-automake_1%3a1.16.5-1.3ubuntu1_all.deb ...
+Unpacking automake (1:1.16.5-1.3ubuntu1) ...
+Selecting previously unselected package libltdl-dev:amd64.
+Preparing to unpack .../27-libltdl-dev_2.4.7-7build1_amd64.deb ...
+Unpacking libltdl-dev:amd64 (2.4.7-7build1) ...
+Selecting previously unselected package libimath-dev:amd64.
+Preparing to unpack .../28-libimath-dev_3.1.9-3.1ubuntu2_amd64.deb ...
+Unpacking libimath-dev:amd64 (3.1.9-3.1ubuntu2) ...
+Selecting previously unselected package libopenexr-dev.
+Preparing to unpack .../29-libopenexr-dev_3.1.5-5.1build3_amd64.deb ...
+Unpacking libopenexr-dev (3.1.5-5.1build3) ...
+Selecting previously unselected package gir1.2-freedesktop:amd64.
+Preparing to unpack .../30-gir1.2-freedesktop_1.80.1-1_amd64.deb ...
+Unpacking gir1.2-freedesktop:amd64 (1.80.1-1) ...
+Preparing to unpack .../31-libgdk-pixbuf2.0-common_2.42.10+dfsg-3ubuntu3.3_all.deb ...
+Unpacking libgdk-pixbuf2.0-common (2.42.10+dfsg-3ubuntu3.3) over (2.42.10+dfsg-3ubuntu3.2) ...
+Preparing to unpack .../32-libgdk-pixbuf-2.0-0_2.42.10+dfsg-3ubuntu3.3_amd64.deb ...
+Unpacking libgdk-pixbuf-2.0-0:amd64 (2.42.10+dfsg-3ubuntu3.3) over (2.42.10+dfsg-3ubuntu3.2) ...
+Selecting previously unselected package gir1.2-gdkpixbuf-2.0:amd64.
+Preparing to unpack .../33-gir1.2-gdkpixbuf-2.0_2.42.10+dfsg-3ubuntu3.3_amd64.deb ...
+Unpacking gir1.2-gdkpixbuf-2.0:amd64 (2.42.10+dfsg-3ubuntu3.3) ...
+Preparing to unpack .../34-librsvg2-2_2.58.0+dfsg-1ubuntu0.1_amd64.deb ...
+Unpacking librsvg2-2:amd64 (2.58.0+dfsg-1ubuntu0.1) over (2.58.0+dfsg-1build1) ...
+Selecting previously unselected package gir1.2-rsvg-2.0:amd64.
+Preparing to unpack .../35-gir1.2-rsvg-2.0_2.58.0+dfsg-1ubuntu0.1_amd64.deb ...
+Unpacking gir1.2-rsvg-2.0:amd64 (2.58.0+dfsg-1ubuntu0.1) ...
+Selecting previously unselected package liblzo2-2:amd64.
+Preparing to unpack .../36-liblzo2-2_2.10-2build4_amd64.deb ...
+Unpacking liblzo2-2:amd64 (2.10-2build4) ...
+Selecting previously unselected package libcairo-script-interpreter2:amd64.
+Preparing to unpack .../37-libcairo-script-interpreter2_1.18.0-3build1_amd64.deb ...
+Unpacking libcairo-script-interpreter2:amd64 (1.18.0-3build1) ...
+Preparing to unpack .../38-libuuid1_2.39.3-9ubuntu6.6_amd64.deb ...
+Unpacking libuuid1:amd64 (2.39.3-9ubuntu6.6) over (2.39.3-9ubuntu6.3) ...
+Setting up libuuid1:amd64 (2.39.3-9ubuntu6.6) ...
+Selecting previously unselected package uuid-dev:amd64.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 50509 files and directories currently installed.)
+Preparing to unpack .../00-uuid-dev_2.39.3-9ubuntu6.6_amd64.deb ...
+Unpacking uuid-dev:amd64 (2.39.3-9ubuntu6.6) ...
+Selecting previously unselected package libpkgconf3:amd64.
+Preparing to unpack .../01-libpkgconf3_1.8.1-2build1_amd64.deb ...
+Unpacking libpkgconf3:amd64 (1.8.1-2build1) ...
+Selecting previously unselected package pkgconf-bin.
+Preparing to unpack .../02-pkgconf-bin_1.8.1-2build1_amd64.deb ...
+Unpacking pkgconf-bin (1.8.1-2build1) ...
+Selecting previously unselected package pkgconf:amd64.
+Preparing to unpack .../03-pkgconf_1.8.1-2build1_amd64.deb ...
+Unpacking pkgconf:amd64 (1.8.1-2build1) ...
+Selecting previously unselected package libfontconfig-dev:amd64.
+Preparing to unpack .../04-libfontconfig-dev_2.15.0-1.1ubuntu2_amd64.deb ...
+Unpacking libfontconfig-dev:amd64 (2.15.0-1.1ubuntu2) ...
+Selecting previously unselected package python3-packaging.
+Preparing to unpack .../05-python3-packaging_24.0-1_all.deb ...
+Unpacking python3-packaging (24.0-1) ...
+Selecting previously unselected package libglib2.0-dev-bin.
+Preparing to unpack .../06-libglib2.0-dev-bin_2.80.0-6ubuntu3.9_amd64.deb ...
+Unpacking libglib2.0-dev-bin (2.80.0-6ubuntu3.9) ...
+Selecting previously unselected package libblkid-dev:amd64.
+Preparing to unpack .../07-libblkid-dev_2.39.3-9ubuntu6.6_amd64.deb ...
+Unpacking libblkid-dev:amd64 (2.39.3-9ubuntu6.6) ...
+Selecting previously unselected package libsepol-dev:amd64.
+Preparing to unpack .../08-libsepol-dev_3.5-2build1_amd64.deb ...
+Unpacking libsepol-dev:amd64 (3.5-2build1) ...
+Selecting previously unselected package libpcre2-16-0:amd64.
+Preparing to unpack .../09-libpcre2-16-0_10.42-4ubuntu2.1_amd64.deb ...
+Unpacking libpcre2-16-0:amd64 (10.42-4ubuntu2.1) ...
+Selecting previously unselected package libpcre2-32-0:amd64.
+Preparing to unpack .../10-libpcre2-32-0_10.42-4ubuntu2.1_amd64.deb ...
+Unpacking libpcre2-32-0:amd64 (10.42-4ubuntu2.1) ...
+Selecting previously unselected package libpcre2-posix3:amd64.
+Preparing to unpack .../11-libpcre2-posix3_10.42-4ubuntu2.1_amd64.deb ...
+Unpacking libpcre2-posix3:amd64 (10.42-4ubuntu2.1) ...
+Selecting previously unselected package libpcre2-dev:amd64.
+Preparing to unpack .../12-libpcre2-dev_10.42-4ubuntu2.1_amd64.deb ...
+Unpacking libpcre2-dev:amd64 (10.42-4ubuntu2.1) ...
+Selecting previously unselected package libselinux1-dev:amd64.
+Preparing to unpack .../13-libselinux1-dev_3.5-2ubuntu2.1_amd64.deb ...
+Unpacking libselinux1-dev:amd64 (3.5-2ubuntu2.1) ...
+Selecting previously unselected package libmount-dev:amd64.
+Preparing to unpack .../14-libmount-dev_2.39.3-9ubuntu6.6_amd64.deb ...
+Unpacking libmount-dev:amd64 (2.39.3-9ubuntu6.6) ...
+Selecting previously unselected package libgirepository-2.0-0:amd64.
+Preparing to unpack .../15-libgirepository-2.0-0_2.80.0-6ubuntu3.9_amd64.deb ...
+Unpacking libgirepository-2.0-0:amd64 (2.80.0-6ubuntu3.9) ...
+Selecting previously unselected package libglib2.0-dev:amd64.
+Preparing to unpack .../16-libglib2.0-dev_2.80.0-6ubuntu3.9_amd64.deb ...
+Unpacking libglib2.0-dev:amd64 (2.80.0-6ubuntu3.9) ...
+Selecting previously unselected package libpixman-1-dev:amd64.
+Preparing to unpack .../17-libpixman-1-dev_0.42.2-1build1_amd64.deb ...
+Unpacking libpixman-1-dev:amd64 (0.42.2-1build1) ...
+Selecting previously unselected package libice-dev:amd64.
+Preparing to unpack .../18-libice-dev_2%3a1.0.10-1build3_amd64.deb ...
+Unpacking libice-dev:amd64 (2:1.0.10-1build3) ...
+Selecting previously unselected package libsm-dev:amd64.
+Preparing to unpack .../19-libsm-dev_2%3a1.2.3-1build3_amd64.deb ...
+Unpacking libsm-dev:amd64 (2:1.2.3-1build3) ...
+Selecting previously unselected package libxcb-render0-dev:amd64.
+Preparing to unpack .../20-libxcb-render0-dev_1.15-1ubuntu2_amd64.deb ...
+Unpacking libxcb-render0-dev:amd64 (1.15-1ubuntu2) ...
+Selecting previously unselected package libxcb-shm0-dev:amd64.
+Preparing to unpack .../21-libxcb-shm0-dev_1.15-1ubuntu2_amd64.deb ...
+Unpacking libxcb-shm0-dev:amd64 (1.15-1ubuntu2) ...
+Selecting previously unselected package libxext-dev:amd64.
+Preparing to unpack .../22-libxext-dev_2%3a1.3.4-1build2_amd64.deb ...
+Unpacking libxext-dev:amd64 (2:1.3.4-1build2) ...
+Selecting previously unselected package libcairo2-dev:amd64.
+Preparing to unpack .../23-libcairo2-dev_1.18.0-3build1_amd64.deb ...
+Unpacking libcairo2-dev:amd64 (1.18.0-3build1) ...
+Selecting previously unselected package libgdk-pixbuf2.0-bin.
+Preparing to unpack .../24-libgdk-pixbuf2.0-bin_2.42.10+dfsg-3ubuntu3.3_amd64.deb ...
+Unpacking libgdk-pixbuf2.0-bin (2.42.10+dfsg-3ubuntu3.3) ...
+Selecting previously unselected package gir1.2-glib-2.0-dev:amd64.
+Preparing to unpack .../25-gir1.2-glib-2.0-dev_2.80.0-6ubuntu3.9_amd64.deb ...
+Unpacking gir1.2-glib-2.0-dev:amd64 (2.80.0-6ubuntu3.9) ...
+Selecting previously unselected package libgdk-pixbuf-2.0-dev:amd64.
+Preparing to unpack .../26-libgdk-pixbuf-2.0-dev_2.42.10+dfsg-3ubuntu3.3_amd64.deb ...
+Unpacking libgdk-pixbuf-2.0-dev:amd64 (2.42.10+dfsg-3ubuntu3.3) ...
+Selecting previously unselected package librsvg2-common:amd64.
+Preparing to unpack .../27-librsvg2-common_2.58.0+dfsg-1ubuntu0.1_amd64.deb ...
+Unpacking librsvg2-common:amd64 (2.58.0+dfsg-1ubuntu0.1) ...
+Selecting previously unselected package gir1.2-freedesktop-dev:amd64.
+Preparing to unpack .../28-gir1.2-freedesktop-dev_1.80.1-1_amd64.deb ...
+Unpacking gir1.2-freedesktop-dev:amd64 (1.80.1-1) ...
+Selecting previously unselected package librsvg2-dev:amd64.
+Preparing to unpack .../29-librsvg2-dev_2.58.0+dfsg-1ubuntu0.1_amd64.deb ...
+Unpacking librsvg2-dev:amd64 (2.58.0+dfsg-1ubuntu0.1) ...
+Selecting previously unselected package libwmf-0.2-7:amd64.
+Preparing to unpack .../30-libwmf-0.2-7_0.2.13-1.1build3_amd64.deb ...
+Unpacking libwmf-0.2-7:amd64 (0.2.13-1.1build3) ...
+Selecting previously unselected package libwmf-dev.
+Preparing to unpack .../31-libwmf-dev_0.2.13-1.1build3_amd64.deb ...
+Unpacking libwmf-dev (0.2.13-1.1build3) ...
+Selecting previously unselected package icu-devtools.
+Preparing to unpack .../32-icu-devtools_74.2-1ubuntu3.1_amd64.deb ...
+Unpacking icu-devtools (74.2-1ubuntu3.1) ...
+Selecting previously unselected package libicu-dev:amd64.
+Preparing to unpack .../33-libicu-dev_74.2-1ubuntu3.1_amd64.deb ...
+Unpacking libicu-dev:amd64 (74.2-1ubuntu3.1) ...
+Selecting previously unselected package libxml2-dev:amd64.
+Preparing to unpack .../34-libxml2-dev_2.9.14+dfsg-1.3ubuntu3.10_amd64.deb ...
+Unpacking libxml2-dev:amd64 (2.9.14+dfsg-1.3ubuntu3.10) ...
+Selecting previously unselected package libxt6t64:amd64.
+Preparing to unpack .../35-libxt6t64_1%3a1.2.1-1.2build1_amd64.deb ...
+Unpacking libxt6t64:amd64 (1:1.2.1-1.2build1) ...
+Selecting previously unselected package libxt-dev:amd64.
+Preparing to unpack .../36-libxt-dev_1%3a1.2.1-1.2build1_amd64.deb ...
+Unpacking libxt-dev:amd64 (1:1.2.1-1.2build1) ...
+Selecting previously unselected package libmagickcore-6.q16-dev:amd64.
+Preparing to unpack .../37-libmagickcore-6.q16-dev_8%3a6.9.12.98+dfsg1-5.2build2_amd64.deb ...
+Unpacking libmagickcore-6.q16-dev:amd64 (8:6.9.12.98+dfsg1-5.2build2) ...
+Selecting previously unselected package libmagickwand-6-headers.
+Preparing to unpack .../38-libmagickwand-6-headers_8%3a6.9.12.98+dfsg1-5.2build2_all.deb ...
+Unpacking libmagickwand-6-headers (8:6.9.12.98+dfsg1-5.2build2) ...
+Selecting previously unselected package libmagickwand-6.q16-dev:amd64.
+Preparing to unpack .../39-libmagickwand-6.q16-dev_8%3a6.9.12.98+dfsg1-5.2build2_amd64.deb ...
+Unpacking libmagickwand-6.q16-dev:amd64 (8:6.9.12.98+dfsg1-5.2build2) ...
+Selecting previously unselected package libmagickwand-dev.
+Preparing to unpack .../40-libmagickwand-dev_8%3a6.9.12.98+dfsg1-5.2build2_all.deb ...
+Unpacking libmagickwand-dev (8:6.9.12.98+dfsg1-5.2build2) ...
+Selecting previously unselected package poppler-data.
+Preparing to unpack .../41-poppler-data_0.4.12-1_all.deb ...
+Unpacking poppler-data (0.4.12-1) ...
+Preparing to unpack .../42-libsmartcols1_2.39.3-9ubuntu6.6_amd64.deb ...
+Unpacking libsmartcols1:amd64 (2.39.3-9ubuntu6.6) over (2.39.3-9ubuntu6.3) ...
+Setting up libsmartcols1:amd64 (2.39.3-9ubuntu6.6) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 52918 files and directories currently installed.)
+Preparing to unpack .../00-libfdisk1_2.39.3-9ubuntu6.6_amd64.deb ...
+Unpacking libfdisk1:amd64 (2.39.3-9ubuntu6.6) over (2.39.3-9ubuntu6.3) ...
+Selecting previously unselected package bzip2-doc.
+Preparing to unpack .../01-bzip2-doc_1.0.8-5.1ubuntu0.1_all.deb ...
+Unpacking bzip2-doc (1.0.8-5.1ubuntu0.1) ...
+Selecting previously unselected package fonts-noto-mono.
+Preparing to unpack .../02-fonts-noto-mono_20201225-2_all.deb ...
+Unpacking fonts-noto-mono (20201225-2) ...
+Selecting previously unselected package libfontenc1:amd64.
+Preparing to unpack .../03-libfontenc1_1%3a1.1.8-1build1_amd64.deb ...
+Unpacking libfontenc1:amd64 (1:1.1.8-1build1) ...
+Selecting previously unselected package xfonts-encodings.
+Preparing to unpack .../04-xfonts-encodings_1%3a1.0.5-0ubuntu2_all.deb ...
+Unpacking xfonts-encodings (1:1.0.5-0ubuntu2) ...
+Selecting previously unselected package xfonts-utils.
+Preparing to unpack .../05-xfonts-utils_1%3a7.7+6build3_amd64.deb ...
+Unpacking xfonts-utils (1:7.7+6build3) ...
+Selecting previously unselected package fonts-urw-base35.
+Preparing to unpack .../06-fonts-urw-base35_20200910-8_all.deb ...
+Unpacking fonts-urw-base35 (20200910-8) ...
+Selecting previously unselected package libgs-common.
+Preparing to unpack .../07-libgs-common_10.02.1~dfsg1-0ubuntu7.9_all.deb ...
+Unpacking libgs-common (10.02.1~dfsg1-0ubuntu7.9) ...
+Selecting previously unselected package libgs10-common.
+Preparing to unpack .../08-libgs10-common_10.02.1~dfsg1-0ubuntu7.9_all.deb ...
+Unpacking libgs10-common (10.02.1~dfsg1-0ubuntu7.9) ...
+Selecting previously unselected package libidn12:amd64.
+Preparing to unpack .../09-libidn12_1.42-1ubuntu0.1_amd64.deb ...
+Unpacking libidn12:amd64 (1.42-1ubuntu0.1) ...
+Selecting previously unselected package libijs-0.35:amd64.
+Preparing to unpack .../10-libijs-0.35_0.35-15.1build1_amd64.deb ...
+Unpacking libijs-0.35:amd64 (0.35-15.1build1) ...
+Selecting previously unselected package libjbig2dec0:amd64.
+Preparing to unpack .../11-libjbig2dec0_0.20-1ubuntu0.24.04.1_amd64.deb ...
+Unpacking libjbig2dec0:amd64 (0.20-1ubuntu0.24.04.1) ...
+Selecting previously unselected package libpaper1:amd64.
+Preparing to unpack .../12-libpaper1_1.1.29build1_amd64.deb ...
+Unpacking libpaper1:amd64 (1.1.29build1) ...
+Selecting previously unselected package libgs10:amd64.
+Preparing to unpack .../13-libgs10_10.02.1~dfsg1-0ubuntu7.9_amd64.deb ...
+Unpacking libgs10:amd64 (10.02.1~dfsg1-0ubuntu7.9) ...
+Selecting previously unselected package ghostscript.
+Preparing to unpack .../14-ghostscript_10.02.1~dfsg1-0ubuntu7.9_amd64.deb ...
+Unpacking ghostscript (10.02.1~dfsg1-0ubuntu7.9) ...
+Selecting previously unselected package libexif-doc.
+Preparing to unpack .../15-libexif-doc_0.6.24-1ubuntu0.24.04.1_all.deb ...
+Unpacking libexif-doc (0.6.24-1ubuntu0.24.04.1) ...
+Selecting previously unselected package libheif-plugin-aomenc:amd64.
+Preparing to unpack .../16-libheif-plugin-aomenc_1.17.6-1ubuntu4.9_amd64.deb ...
+Unpacking libheif-plugin-aomenc:amd64 (1.17.6-1ubuntu4.9) ...
+Selecting previously unselected package libjxr0t64:amd64.
+Preparing to unpack .../17-libjxr0t64_1.2~git20170615.f752187-5.1ubuntu2_amd64.deb ...
+Unpacking libjxr0t64:amd64 (1.2~git20170615.f752187-5.1ubuntu2) ...
+Selecting previously unselected package libjxr-tools.
+Preparing to unpack .../18-libjxr-tools_1.2~git20170615.f752187-5.1ubuntu2_amd64.deb ...
+Unpacking libjxr-tools (1.2~git20170615.f752187-5.1ubuntu2) ...
+Selecting previously unselected package libpaper-utils.
+Preparing to unpack .../19-libpaper-utils_1.1.29build1_amd64.deb ...
+Unpacking libpaper-utils (1.1.29build1) ...
+Selecting previously unselected package libtool.
+Preparing to unpack .../20-libtool_2.4.7-7build1_all.deb ...
+Unpacking libtool (2.4.7-7build1) ...
+Setting up liblcms2-2:amd64 (2.14-2ubuntu0.1) ...
+Setting up bzip2-doc (1.0.8-5.1ubuntu0.1) ...
+Setting up libpaper1:amd64 (1.1.29build1) ...
+
+Creating config file /etc/papersize with new version
+Setting up imagemagick-6-common (8:6.9.12.98+dfsg1-5.2build2) ...
+Setting up libpixman-1-dev:amd64 (0.42.2-1build1) ...
+Setting up fonts-noto-mono (20201225-2) ...
+Setting up libwmflite-0.2-7:amd64 (0.2.13-1.1build3) ...
+Setting up libice-dev:amd64 (2:1.0.10-1build3) ...
+Setting up libsm-dev:amd64 (2:1.2.3-1build3) ...
+Setting up libijs-0.35:amd64 (0.35-15.1build1) ...
+Setting up libgs-common (10.02.1~dfsg1-0ubuntu7.9) ...
+Setting up libgdk-pixbuf2.0-common (2.42.10+dfsg-3ubuntu3.3) ...
+Setting up m4 (1.4.19-4build1) ...
+Setting up liblzo2-2:amd64 (2.10-2build4) ...
+Setting up libpaper-utils (1.1.29build1) ...
+Setting up bzip2 (1.0.8-5.1ubuntu0.1) ...
+Setting up libpcre2-16-0:amd64 (10.42-4ubuntu2.1) ...
+Setting up poppler-data (0.4.12-1) ...
+Setting up libxcb-shm0-dev:amd64 (1.15-1ubuntu2) ...
+Setting up libfontenc1:amd64 (1:1.1.8-1build1) ...
+Setting up autotools-dev (20220109.1) ...
+Setting up libpcre2-32-0:amd64 (10.42-4ubuntu2.1) ...
+Setting up libglib2.0-0t64:amd64 (2.80.0-6ubuntu3.9) ...
+Setting up libglib2.0-data (2.80.0-6ubuntu3.9) ...
+Setting up python3-packaging (24.0-1) ...
+Setting up libpkgconf3:amd64 (1.8.1-2build1) ...
+Setting up libjxr0t64:amd64 (1.2~git20170615.f752187-5.1ubuntu2) ...
+Setting up libfreetype6:amd64 (2.13.2+dfsg-1ubuntu0.2) ...
+Setting up libjbig2dec0:amd64 (0.20-1ubuntu0.24.04.1) ...
+Setting up uuid-dev:amd64 (2.39.3-9ubuntu6.6) ...
+Setting up xfonts-encodings (1:1.0.5-0ubuntu2) ...
+Setting up libexif12:amd64 (0.6.24-1ubuntu0.24.04.1) ...
+Setting up libxt6t64:amd64 (1:1.2.1-1.2build1) ...
+Setting up libimath-3-1-29t64:amd64 (3.1.9-3.1ubuntu2) ...
+Setting up libidn12:amd64 (1.42-1ubuntu0.1) ...
+Setting up icu-devtools (74.2-1ubuntu3.1) ...
+Setting up libsepol-dev:amd64 (3.5-2build1) ...
+Setting up libxcb-render0-dev:amd64 (1.15-1ubuntu2) ...
+Setting up pkgconf-bin (1.8.1-2build1) ...
+Setting up gir1.2-glib-2.0:amd64 (2.80.0-6ubuntu3.9) ...
+Setting up libltdl7:amd64 (2.4.7-7build1) ...
+Setting up libraw23t64:amd64 (0.21.2-2.1ubuntu0.24.04.2) ...
+Setting up autoconf (2.71-3) ...
+Setting up libfdisk1:amd64 (2.39.3-9ubuntu6.6) ...
+Setting up libxext-dev:amd64 (2:1.3.4-1build2) ...
+Setting up liblcms2-dev:amd64 (2.14-2ubuntu0.1) ...
+Setting up libpcre2-posix3:amd64 (10.42-4ubuntu2.1) ...
+Setting up mount (2.39.3-9ubuntu6.6) ...
+Setting up liblqr-1-0:amd64 (0.4.2-2.1build2) ...
+Setting up gir1.2-glib-2.0-dev:amd64 (2.80.0-6ubuntu3.9) ...
+Setting up libexif-doc (0.6.24-1ubuntu0.24.04.1) ...
+Setting up libopenjp2-7:amd64 (2.5.0-2ubuntu0.5) ...
+Setting up libgdk-pixbuf-2.0-0:amd64 (2.42.10+dfsg-3ubuntu3.3) ...
+Setting up fonts-droid-fallback (1:6.0.1r16-1.1build1) ...
+Setting up libmagickcore-6-headers (8:6.9.12.98+dfsg1-5.2build2) ...
+Setting up libdjvulibre-text (3.5.28-2ubuntu0.24.04.2) ...
+Setting up libicu-dev:amd64 (74.2-1ubuntu3.1) ...
+Setting up libxml2:amd64 (2.9.14+dfsg-1.3ubuntu3.10) ...
+Setting up libbrotli-dev:amd64 (1.1.0-2build2) ...
+Setting up libbz2-dev:amd64 (1.0.8-5.1ubuntu0.1) ...
+Setting up automake (1:1.16.5-1.3ubuntu1) ...
+update-alternatives: using /usr/bin/automake-1.16 to provide /usr/bin/automake (automake) in auto mode
+update-alternatives: warning: skip creation of /usr/share/man/man1/automake.1.gz because associated file /usr/share/man/man1/automake-1.16.1.gz (of link group automake) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/man1/aclocal.1.gz because associated file /usr/share/man/man1/aclocal-1.16.1.gz (of link group automake) doesn't exist
+Setting up libcairo-script-interpreter2:amd64 (1.18.0-3build1) ...
+Setting up libglib2.0-dev-bin (2.80.0-6ubuntu3.9) ...
+Setting up libblkid-dev:amd64 (2.39.3-9ubuntu6.6) ...
+Setting up libimath-dev:amd64 (3.1.9-3.1ubuntu2) ...
+Setting up libmagickcore-6-arch-config:amd64 (8:6.9.12.98+dfsg1-5.2build2) ...
+Setting up libexif-dev:amd64 (0.6.24-1ubuntu0.24.04.1) ...
+Setting up gir1.2-freedesktop:amd64 (1.80.1-1) ...
+Setting up libjxr-tools (1.2~git20170615.f752187-5.1ubuntu2) ...
+Setting up libpcre2-dev:amd64 (10.42-4ubuntu2.1) ...
+Setting up gir1.2-gdkpixbuf-2.0:amd64 (2.42.10+dfsg-3ubuntu3.3) ...
+Setting up libtool (2.4.7-7build1) ...
+Setting up libgirepository-2.0-0:amd64 (2.80.0-6ubuntu3.9) ...
+Setting up libselinux1-dev:amd64 (3.5-2ubuntu2.1) ...
+Setting up libmagickwand-6-headers (8:6.9.12.98+dfsg1-5.2build2) ...
+Setting up libdjvulibre21:amd64 (3.5.28-2ubuntu0.24.04.2) ...
+Setting up libglib2.0-bin (2.80.0-6ubuntu3.9) ...
+Setting up liblqr-1-0-dev:amd64 (0.4.2-2.1build2) ...
+Setting up xfonts-utils (1:7.7+6build3) ...
+Setting up libdjvulibre-dev:amd64 (3.5.28-2ubuntu0.24.04.2) ...
+Setting up pkgconf:amd64 (1.8.1-2build1) ...
+Setting up libfreetype-dev:amd64 (2.13.2+dfsg-1ubuntu0.2) ...
+Setting up librsvg2-2:amd64 (2.58.0+dfsg-1ubuntu0.1) ...
+Setting up libltdl-dev:amd64 (2.4.7-7build1) ...
+Setting up libxml2-dev:amd64 (2.9.14+dfsg-1.3ubuntu3.10) ...
+Setting up libwmf-0.2-7:amd64 (0.2.13-1.1build3) ...
+Setting up libopenjp2-7-dev:amd64 (2.5.0-2ubuntu0.5) ...
+Setting up libxt-dev:amd64 (1:1.2.1-1.2build1) ...
+Setting up libopenexr-3-1-30:amd64 (3.1.5-5.1build3) ...
+Setting up gir1.2-freedesktop-dev:amd64 (1.80.1-1) ...
+Setting up librsvg2-common:amd64 (2.58.0+dfsg-1ubuntu0.1) ...
+Setting up libgdk-pixbuf2.0-bin (2.42.10+dfsg-3ubuntu3.3) ...
+Setting up gir1.2-rsvg-2.0:amd64 (2.58.0+dfsg-1ubuntu0.1) ...
+Setting up libmount-dev:amd64 (2.39.3-9ubuntu6.6) ...
+Setting up libfontconfig-dev:amd64 (2.15.0-1.1ubuntu2) ...
+Setting up fonts-urw-base35 (20200910-8) ...
+Setting up libwmf-dev (0.2.13-1.1build3) ...
+Setting up libopenexr-dev (3.1.5-5.1build3) ...
+Setting up libglib2.0-dev:amd64 (2.80.0-6ubuntu3.9) ...
+Setting up libcairo2-dev:amd64 (1.18.0-3build1) ...
+Setting up libgdk-pixbuf-2.0-dev:amd64 (2.42.10+dfsg-3ubuntu3.3) ...
+Setting up libgs10-common (10.02.1~dfsg1-0ubuntu7.9) ...
+Setting up librsvg2-dev:amd64 (2.58.0+dfsg-1ubuntu0.1) ...
+Setting up libgs10:amd64 (10.02.1~dfsg1-0ubuntu7.9) ...
+Setting up ghostscript (10.02.1~dfsg1-0ubuntu7.9) ...
+Setting up libheif-plugin-aomdec:amd64 (1.17.6-1ubuntu4.9) ...
+Setting up libheif1:amd64 (1.17.6-1ubuntu4.9) ...
+Setting up libmagickcore-6.q16-7t64:amd64 (8:6.9.12.98+dfsg1-5.2build2) ...
+Setting up libmagickwand-6.q16-7t64:amd64 (8:6.9.12.98+dfsg1-5.2build2) ...
+Setting up libmagickcore-6.q16-7-extra:amd64 (8:6.9.12.98+dfsg1-5.2build2) ...
+Setting up libheif-plugin-aomenc:amd64 (1.17.6-1ubuntu4.9) ...
+Setting up libmagickcore-6.q16-dev:amd64 (8:6.9.12.98+dfsg1-5.2build2) ...
+Setting up libmagickwand-6.q16-dev:amd64 (8:6.9.12.98+dfsg1-5.2build2) ...
+Setting up libmagickwand-dev (8:6.9.12.98+dfsg1-5.2build2) ...
+Processing triggers for fontconfig (2.15.0-1.1ubuntu2) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.6) ...
+Processing triggers for libgdk-pixbuf-2.0-0:amd64 (2.42.10+dfsg-3ubuntu3.3) ...
+Using CPython 3.12.3 interpreter at: /usr/local/bin/python
+Creating virtual environment at: venv
+Activate with: source venv/bin/activate
+Using Python 3.12.3 environment at: venv
+Resolved 81 packages in 4.33s
+Downloading networkx (2.0MiB)
+Downloading nvidia-nvshmem-cu12 (132.7MiB)
+Downloading opencv-python-headless (57.6MiB)
+Downloading hf-xet (4.0MiB)
+Downloading sympy (6.0MiB)
+Downloading tokenizers (3.1MiB)
+Downloading nvidia-cudnn-cu12 (674.0MiB)
+Downloading nvidia-nvjitlink-cu12 (18.8MiB)
+Downloading nvidia-cusparselt-cu12 (273.9MiB)
+Downloading nvidia-cuda-nvrtc-cu12 (22.6MiB)
+Downloading cmake (28.3MiB)
+Downloading nvidia-cusparse-cu12 (206.5MiB)
+Downloading pygments (1.2MiB)
+Downloading nvidia-curand-cu12 (53.7MiB)
+Downloading triton (179.5MiB)
+Downloading nvidia-cufile-cu12 (1.1MiB)
+Downloading nvidia-cufft-cu12 (190.9MiB)
+Downloading lerobot (1.6MiB)
+Downloading transformers (9.8MiB)
+Downloading pillow (6.6MiB)
+Downloading cuda-bindings (7.3MiB)
+Downloading pyopengl (3.0MiB)
+Downloading setuptools (1.0MiB)
+Downloading nvidia-cuda-cupti-cu12 (8.5MiB)
+Downloading nvidia-nccl-cu12 (283.0MiB)
+Downloading nvidia-cublas-cu12 (374.9MiB)
+Downloading nvidia-cusolver-cu12 (150.9MiB)
+Downloading numpy (15.8MiB)
+Downloading mujoco (6.4MiB)
+Downloading torchvision (7.0MiB)
+Downloading torch (792.1MiB)
+   Building docopt==0.6.2
+ Downloading nvidia-cufile-cu12
+      Built docopt==0.6.2
+ Downloading pygments
+ Downloading setuptools
+ Downloading torchvision
+ Downloading lerobot
+ Downloading networkx
+ Downloading tokenizers
+ Downloading hf-xet
+ Downloading pillow
+ Downloading mujoco
+ Downloading cuda-bindings
+ Downloading sympy
+ Downloading nvidia-cuda-cupti-cu12
+ Downloading numpy
+ Downloading nvidia-nvjitlink-cu12
+ Downloading nvidia-cuda-nvrtc-cu12
+ Downloading transformers
+ Downloading pyopengl
+ Downloading nvidia-curand-cu12
+ Downloading opencv-python-headless
+ Downloading nvidia-nvshmem-cu12
+ Downloading nvidia-cusolver-cu12
+ Downloading nvidia-cufft-cu12
+ Downloading triton
+ Downloading nvidia-cusparse-cu12
+ Downloading nvidia-cusparselt-cu12
+ Downloading nvidia-nccl-cu12
+ Downloading nvidia-cublas-cu12
+ Downloading cmake
+ Downloading nvidia-cudnn-cu12
+ Downloading torch
+Prepared 81 packages in 38.17s
+Installed 81 packages in 339ms
+ + absl-py==2.5.1
+ + accelerate==1.15.0
+ + annotated-doc==0.0.5
+ + anyio==4.15.1
+ + certifi==2026.7.22
+ + charset-normalizer==3.5.2
+ + click==8.5.0
+ + cloudpickle==3.1.2
+ + cmake==4.1.3
+ + cuda-bindings==12.9.10
+ + cuda-pathfinder==1.8.3
+ + cuda-toolkit==12.6.3
+ + docopt==0.6.2
+ + draccus==0.11.6
+ + einops==0.8.2
+ + etils==1.14.0
+ + farama-notifications==0.0.6
+ + filelock==4.2.0
+ + fsspec==2026.9.0
+ + glfw==2.11.0
+ + gymnasium==1.3.0
+ + h11==0.16.0
+ + hf-xet==1.7.0
+ + httpcore==1.0.9
+ + httpx==0.28.1
+ + huggingface-hub==1.33.0
+ + idna==3.20
+ + jinja2==3.1.6
+ + lerobot==0.6.1
+ + markdown-it-py==4.2.0
+ + markupsafe==3.0.4
+ + mdurl==0.1.2
+ + mergedeep==1.3.4
+ + mpmath==1.3.0
+ + mujoco==3.3.2
+ + mypy-extensions==1.1.0
+ + networkx==3.7
+ + num2words==0.5.14
+ + numpy==2.2.6
+ + nvidia-cublas-cu12==12.6.4.1
+ + nvidia-cuda-cupti-cu12==12.6.80
+ + nvidia-cuda-nvrtc-cu12==12.6.85
+ + nvidia-cuda-runtime-cu12==12.6.77
+ + nvidia-cudnn-cu12==9.10.2.21
+ + nvidia-cufft-cu12==11.3.0.4
+ + nvidia-cufile-cu12==1.11.1.6
+ + nvidia-curand-cu12==10.3.7.77
+ + nvidia-cusolver-cu12==11.7.1.2
+ + nvidia-cusparse-cu12==12.5.4.2
+ + nvidia-cusparselt-cu12==0.7.1
+ + nvidia-nccl-cu12==2.28.9
+ + nvidia-nvjitlink-cu12==12.6.85
+ + nvidia-nvshmem-cu12==3.4.5
+ + nvidia-nvtx-cu12==12.6.77
+ + opencv-python-headless==4.13.0.92
+ + packaging==25.0
+ + pillow==12.3.0
+ + psutil==7.2.2
+ + pygments==2.21.0
+ + pyopengl==3.1.10
+ + pyyaml==6.0.3
+ + regex==2026.9.29
+ + requests==2.34.2
+ + rich==15.0.0
+ + safetensors==0.8.0
+ + setuptools==81.0.0
+ + shellingham==1.5.4
+ + sympy==1.14.0
+ + termcolor==3.3.0
+ + tokenizers==0.22.2
+ + toml==0.10.2
+ + torch==2.11.0+cu126 (from https://download.pytorch.org/whl/cu126/torch-2.11.0%2Bcu126-cp312-cp312-manylinux_2_28_x86_64.whl)
+ + torchvision==0.26.0+cu126 (from https://download.pytorch.org/whl/cu126/torchvision-0.26.0%2Bcu126-cp312-cp312-manylinux_2_28_x86_64.whl)
+ + tqdm==4.70.1
+ + transformers==5.5.4
+ + triton==3.6.0
+ + typer==0.27.3
+ + typing-extensions==4.16.0
+ + typing-inspect==0.9.0
+ + urllib3==2.8.0
+ + zipp==4.1.1
+Using Python 3.12.3 environment at: venv
+Resolved 2 packages in 123ms
+Downloading hf-libero (3.0MiB)
+   Building robomimic==0.2.0
+ Downloading hf-libero
+      Built robomimic==0.2.0
+Prepared 2 packages in 706ms
+Installed 2 packages in 11ms
+ + hf-libero==0.1.4
+ + robomimic==0.2.0
+Using Python 3.12.3 environment at: venv
+Resolved 135 packages in 1.50s
+   Building bddl==1.0.1
+   Building antlr4-python3-runtime==4.9.3
+Downloading scikit-image (12.9MiB)
+Downloading pyarrow (51.4MiB)
+Downloading aiohttp (1.8MiB)
+Downloading fonttools (5.2MiB)
+Downloading torchcodec (2.2MiB)
+Downloading matplotlib (9.4MiB)
+Downloading numba (3.7MiB)
+Downloading kiwisolver (1.4MiB)
+Downloading pandas (11.8MiB)
+Downloading scipy (33.7MiB)
+Downloading av (38.1MiB)
+Downloading opencv-python (70.4MiB)
+Downloading robosuite (184.5MiB)
+Downloading llvmlite (56.9MiB)
+      Built antlr4-python3-runtime==4.9.3
+      Built bddl==1.0.1
+ Downloading kiwisolver
+ Downloading aiohttp
+ Downloading torchcodec
+ Downloading numba
+ Downloading fonttools
+ Downloading matplotlib
+ Downloading pandas
+ Downloading scikit-image
+ Downloading scipy
+ Downloading av
+ Downloading pyarrow
+ Downloading llvmlite
+ Downloading opencv-python
+ Downloading robosuite
+Prepared 59 packages in 9.96s
+Uninstalled 1 package in 1ms
+Installed 59 packages in 82ms
+ + aiohappyeyeballs==2.7.1
+ + aiohttp==3.14.5
+ + aiosignal==1.4.0
+ + antlr4-python3-runtime==4.9.3
+ + attrs==26.1.0
+ + av==15.1.0
+ + bddl==1.0.1
+ + contourpy==1.4.0
+ + cycler==0.12.1
+ + datasets==4.8.5
+ + dill==0.4.1
+ + easydict==1.13
+ + fastjsonschema==2.22.2
+ + fonttools==4.67.0
+ + frozenlist==1.8.0
+ - fsspec==2026.9.0
+ + fsspec==2026.2.0
+ + future==1.0.0
+ + hydra-core==1.3.7
+ + imageio==2.38.0
+ + iniconfig==2.3.1
+ + jsonlines==4.0.0
+ + jsonschema==4.26.0
+ + jsonschema-specifications==2025.9.1
+ + jupyter-core==5.9.1
+ + jupytext==1.19.6
+ + kiwisolver==1.5.1
+ + lazy-loader==0.6
+ + llvmlite==0.50.0
+ + matplotlib==3.11.2
+ + mdit-py-plugins==0.6.1
+ + multidict==7.1.0
+ + multiprocess==0.70.19
+ + nbformat==5.11.1
+ + numba==0.68.0
+ + omegaconf==2.3.1
+ + opencv-python==5.0.0.93
+ + pandas==2.3.3
+ + platformdirs==4.13.3
+ + pluggy==1.7.0
+ + propcache==0.5.4
+ + pyarrow==26.0.0
+ + pyparsing==3.3.3
+ + pytest==9.1.1
+ + python-dateutil==2.9.0.post0
+ + pytz==2026.5
+ + referencing==0.37.0
+ + robosuite==1.4.0
+ + rpds-py==2026.9.1
+ + scikit-image==0.26.0
+ + scipy==1.18.1
+ + six==1.17.0
+ + thop==0.1.1.post2209072238
+ + tifffile==2026.9.20
+ + torchcodec==0.11.1
+ + traitlets==5.16.1
+ + tzdata==2026.5
+ + wand==0.6.13
+ + xxhash==4.0.1
+ + yarl==1.25.1
+HF user: papadoster
+paligemma: access ok
+[90mHint: A new version of huggingface_hub (2.2.0) is available! You are using version 1.33.0.[0m
+[90mHint: The `hf-cli` skill is not installed. Run `hf skills add -g` to teach your AI agents how to use the `hf` CLI.[0m
+Fetching 674 files:   0%|          | 0/674 [00:00<?, ?it/s]Fetching 674 files:   0%|          | 1/674 [00:00<03:44,  2.99it/s]Fetching 674 files:   1%|          | 8/674 [00:00<00:30, 21.95it/s]Fetching 674 files:   2%|▏         | 12/674 [00:00<00:35, 18.80it/s]Fetching 674 files:   3%|▎         | 17/674 [00:00<00:35, 18.64it/s]Fetching 674 files:   4%|▎         | 24/674 [00:01<00:23, 27.53it/s]Fetching 674 files:   4%|▍         | 28/674 [00:01<00:28, 22.48it/s]Fetching 674 files:   5%|▍         | 33/674 [00:01<00:30, 21.22it/s]Fetching 674 files:   6%|▌         | 40/674 [00:01<00:24, 25.58it/s]Fetching 674 files:   6%|▋         | 43/674 [00:01<00:27, 22.79it/s]Fetching 674 files:   7%|▋         | 48/674 [00:02<00:23, 26.30it/s]Fetching 674 files:   8%|▊         | 51/674 [00:02<00:27, 22.89it/s]Fetching 674 files:   8%|▊         | 56/674 [00:02<00:23, 26.78it/s]Fetching 674 files:   9%|▉         | 59/674 [00:02<00:26, 22.97it/s]Fetching 674 files:   9%|▉         | 64/674 [00:02<00:22, 26.99it/s]Fetching 674 files:  10%|▉         | 67/674 [00:02<00:26, 23.13it/s]Fetching 674 files:  11%|█         | 72/674 [00:03<00:22, 26.39it/s]Fetching 674 files:  11%|█         | 75/674 [00:03<00:25, 23.33it/s]Fetching 674 files:  12%|█▏        | 80/674 [00:03<00:22, 26.59it/s]Fetching 674 files:  12%|█▏        | 83/674 [00:03<00:25, 23.15it/s]Fetching 674 files:  13%|█▎        | 88/674 [00:03<00:21, 26.91it/s]Fetching 674 files:  14%|█▎        | 91/674 [00:03<00:25, 23.09it/s]Fetching 674 files:  14%|█▍        | 96/674 [00:04<00:21, 27.15it/s]Fetching 674 files:  15%|█▍        | 99/674 [00:04<00:24, 23.20it/s]Fetching 674 files:  15%|█▌        | 104/674 [00:04<00:21, 26.96it/s]Fetching 674 files:  16%|█▌        | 107/674 [00:04<00:24, 23.17it/s]Fetching 674 files:  17%|█▋        | 112/674 [00:04<00:20, 27.26it/s]Fetching 674 files:  17%|█▋        | 115/674 [00:04<00:24, 22.96it/s]Fetching 674 files:  18%|█▊        | 120/674 [00:04<00:20, 27.26it/s]Fetching 674 files:  18%|█▊        | 123/674 [00:05<00:23, 23.01it/s]Fetching 674 files:  19%|█▉        | 128/674 [00:05<00:19, 27.43it/s]Fetching 674 files:  20%|█▉        | 132/674 [00:05<00:22, 24.33it/s]Fetching 674 files:  20%|██        | 136/674 [00:05<00:19, 27.00it/s]Fetching 674 files:  21%|██        | 139/674 [00:05<00:23, 22.51it/s]Fetching 674 files:  21%|██▏       | 144/674 [00:05<00:19, 27.18it/s]Fetching 674 files:  22%|██▏       | 148/674 [00:06<00:21, 24.45it/s]Fetching 674 files:  23%|██▎       | 152/674 [00:06<00:19, 26.90it/s]Fetching 674 files:  23%|██▎       | 155/674 [00:06<00:23, 22.49it/s]Fetching 674 files:  24%|██▎       | 160/674 [00:06<00:18, 27.49it/s]Fetching 674 files:  24%|██▍       | 164/674 [00:06<00:21, 24.11it/s]Fetching 674 files:  25%|██▍       | 168/674 [00:06<00:18, 26.79it/s]Fetching 674 files:  26%|██▌       | 172/674 [00:07<00:21, 23.56it/s]Fetching 674 files:  26%|██▌       | 176/674 [00:07<00:18, 26.68it/s]Fetching 674 files:  27%|██▋       | 180/674 [00:07<00:21, 23.32it/s]Fetching 674 files:  27%|██▋       | 185/674 [00:07<00:21, 22.48it/s]Fetching 674 files:  28%|██▊       | 189/674 [00:07<00:18, 25.66it/s]Fetching 674 files:  29%|██▊       | 193/674 [00:08<00:21, 22.85it/s]Fetching 674 files:  29%|██▉       | 198/674 [00:08<00:17, 27.74it/s]Fetching 674 files:  30%|██▉       | 202/674 [00:08<00:20, 22.98it/s]Fetching 674 files:  31%|███       | 208/674 [00:08<00:16, 28.09it/s]Fetching 674 files:  31%|███▏      | 212/674 [00:08<00:19, 23.82it/s]Fetching 674 files:  32%|███▏      | 217/674 [00:08<00:19, 23.13it/s]Fetching 674 files:  33%|███▎      | 221/674 [00:09<00:17, 25.80it/s]Fetching 674 files:  33%|███▎      | 225/674 [00:09<00:19, 23.37it/s]Fetching 674 files:  34%|███▍      | 229/674 [00:09<00:17, 25.83it/s]Fetching 674 files:  35%|███▍      | 233/674 [00:09<00:18, 23.67it/s]Fetching 674 files:  35%|███▌      | 237/674 [00:09<00:16, 26.09it/s]Fetching 674 files:  36%|███▌      | 241/674 [00:09<00:18, 23.94it/s]Fetching 674 files:  36%|███▋      | 245/674 [00:10<00:16, 26.19it/s]Fetching 674 files:  37%|███▋      | 249/674 [00:10<00:17, 23.96it/s]Fetching 674 files:  38%|███▊      | 253/674 [00:10<00:16, 26.28it/s]Fetching 674 files:  38%|███▊      | 257/674 [00:10<00:17, 23.94it/s]Fetching 674 files:  39%|███▊      | 261/674 [00:10<00:15, 26.64it/s]Fetching 674 files:  39%|███▉      | 265/674 [00:10<00:17, 24.02it/s]Fetching 674 files:  40%|███▉      | 268/674 [00:10<00:16, 24.74it/s]Fetching 674 files:  41%|████      | 273/674 [00:11<00:16, 24.10it/s]Fetching 674 files:  41%|████      | 276/674 [00:11<00:15, 25.05it/s]Fetching 674 files:  42%|████▏     | 281/674 [00:11<00:16, 24.53it/s]Fetching 674 files:  42%|████▏     | 284/674 [00:11<00:15, 25.37it/s]Fetching 674 files:  43%|████▎     | 289/674 [00:11<00:15, 24.23it/s]Fetching 674 files:  44%|████▎     | 294/674 [00:11<00:13, 28.45it/s]Fetching 674 files:  44%|████▍     | 298/674 [00:12<00:15, 24.83it/s]Fetching 674 files:  45%|████▍     | 302/674 [00:12<00:13, 27.85it/s]Fetching 674 files:  45%|████▌     | 306/674 [00:12<00:15, 24.02it/s]Fetching 674 files:  46%|████▌     | 311/674 [00:12<00:12, 28.01it/s]Fetching 674 files:  47%|████▋     | 315/674 [00:12<00:14, 24.24it/s]Fetching 674 files:  47%|████▋     | 319/674 [00:12<00:13, 27.11it/s]Fetching 674 files:  48%|████▊     | 323/674 [00:13<00:14, 23.76it/s]Fetching 674 files:  49%|████▊     | 328/674 [00:13<00:11, 28.93it/s]Fetching 674 files:  49%|████▉     | 332/674 [00:13<00:14, 23.19it/s]Fetching 674 files:  50%|█████     | 337/674 [00:13<00:14, 22.60it/s]Fetching 674 files:  51%|█████     | 342/674 [00:13<00:12, 27.17it/s]Fetching 674 files:  51%|█████▏    | 346/674 [00:14<00:13, 23.75it/s]Fetching 674 files:  52%|█████▏    | 350/674 [00:14<00:12, 26.07it/s]Fetching 674 files:  53%|█████▎    | 354/674 [00:14<00:13, 23.87it/s]Fetching 674 files:  53%|█████▎    | 358/674 [00:14<00:11, 26.39it/s]Fetching 674 files:  54%|█████▎    | 361/674 [00:14<00:13, 22.83it/s]Fetching 674 files:  54%|█████▍    | 365/674 [00:14<00:12, 25.72it/s]Fetching 674 files:  55%|█████▍    | 369/674 [00:15<00:13, 23.23it/s]Fetching 674 files:  55%|█████▌    | 373/674 [00:15<00:11, 25.57it/s]Fetching 674 files:  56%|█████▌    | 377/674 [00:15<00:12, 23.86it/s]Fetching 674 files:  57%|█████▋    | 381/674 [00:15<00:11, 25.82it/s]Fetching 674 files:  57%|█████▋    | 385/674 [00:15<00:11, 24.09it/s]Fetching 674 files:  58%|█████▊    | 389/674 [00:15<00:10, 26.06it/s]Fetching 674 files:  58%|█████▊    | 393/674 [00:15<00:11, 24.32it/s]Fetching 674 files:  59%|█████▉    | 397/674 [00:16<00:10, 26.12it/s]Fetching 674 files:  59%|█████▉    | 401/674 [00:16<00:11, 24.36it/s]Fetching 674 files:  60%|██████    | 405/674 [00:16<00:10, 26.13it/s]Fetching 674 files:  61%|██████    | 409/674 [00:16<00:10, 24.41it/s]Fetching 674 files:  61%|██████▏   | 413/674 [00:16<00:10, 26.01it/s]Fetching 674 files:  62%|██████▏   | 417/674 [00:16<00:10, 24.33it/s]Fetching 674 files:  62%|██████▏   | 421/674 [00:17<00:10, 24.61it/s]Fetching 674 files:  63%|██████▎   | 425/674 [00:17<00:10, 24.87it/s]Fetching 674 files:  64%|██████▎   | 429/674 [00:17<00:10, 24.29it/s]Fetching 674 files:  64%|██████▍   | 433/674 [00:17<00:09, 25.21it/s]Fetching 674 files:  65%|██████▍   | 437/674 [00:17<00:09, 24.32it/s]Fetching 674 files:  65%|██████▌   | 441/674 [00:17<00:09, 25.45it/s]Fetching 674 files:  66%|██████▌   | 445/674 [00:18<00:09, 24.44it/s]Fetching 674 files:  67%|██████▋   | 449/674 [00:18<00:08, 25.26it/s]Fetching 674 files:  67%|██████▋   | 452/674 [00:18<00:10, 21.94it/s]Fetching 674 files:  68%|██████▊   | 455/674 [00:18<00:09, 22.53it/s]Fetching 674 files:  68%|██████▊   | 458/674 [00:18<00:10, 19.81it/s]Fetching 674 files:  68%|██████▊   | 461/674 [00:18<00:10, 20.83it/s]Fetching 674 files:  69%|██████▉   | 466/674 [00:19<00:09, 22.47it/s]Fetching 674 files:  70%|██████▉   | 469/674 [00:19<00:08, 22.96it/s]Fetching 674 files:  70%|███████   | 474/674 [00:19<00:08, 24.01it/s]Fetching 674 files:  71%|███████   | 477/674 [00:19<00:08, 22.96it/s]Fetching 674 files:  72%|███████▏  | 482/674 [00:19<00:07, 25.02it/s]Fetching 674 files:  72%|███████▏  | 485/674 [00:19<00:07, 23.66it/s]Fetching 674 files:  73%|███████▎  | 490/674 [00:19<00:07, 25.65it/s]Fetching 674 files:  73%|███████▎  | 493/674 [00:20<00:07, 23.97it/s]Fetching 674 files:  74%|███████▍  | 498/674 [00:20<00:06, 25.79it/s]Fetching 674 files:  74%|███████▍  | 501/674 [00:20<00:07, 24.29it/s]Fetching 674 files:  75%|███████▌  | 506/674 [00:20<00:06, 25.73it/s]Fetching 674 files:  76%|███████▌  | 509/674 [00:20<00:06, 24.25it/s]Fetching 674 files:  76%|███████▋  | 514/674 [00:20<00:06, 25.80it/s]Fetching 674 files:  77%|███████▋  | 517/674 [00:21<00:06, 24.03it/s]Fetching 674 files:  77%|███████▋  | 522/674 [00:21<00:05, 25.78it/s]Fetching 674 files:  78%|███████▊  | 525/674 [00:21<00:06, 24.23it/s]Fetching 674 files:  79%|███████▊  | 530/674 [00:21<00:05, 25.67it/s]Fetching 674 files:  79%|███████▉  | 533/674 [00:21<00:05, 24.26it/s]Fetching 674 files:  80%|███████▉  | 538/674 [00:21<00:05, 25.84it/s]Fetching 674 files:  80%|████████  | 541/674 [00:22<00:05, 24.46it/s]Fetching 674 files:  81%|████████  | 545/674 [00:22<00:05, 24.66it/s]Fetching 674 files:  81%|████████▏ | 549/674 [00:22<00:05, 24.86it/s]Fetching 674 files:  82%|████████▏ | 553/674 [00:22<00:04, 24.68it/s]Fetching 674 files:  83%|████████▎ | 557/674 [00:22<00:04, 24.86it/s]Fetching 674 files:  83%|████████▎ | 561/674 [00:22<00:04, 24.70it/s]Fetching 674 files:  84%|████████▍ | 565/674 [00:23<00:04, 24.89it/s]Fetching 674 files:  84%|████████▍ | 569/674 [00:23<00:04, 24.84it/s]Fetching 674 files:  85%|████████▌ | 573/674 [00:23<00:04, 25.04it/s]Fetching 674 files:  86%|████████▌ | 577/674 [00:23<00:03, 25.06it/s]Fetching 674 files:  86%|████████▌ | 581/674 [00:23<00:03, 24.94it/s]Fetching 674 files:  87%|████████▋ | 585/674 [00:23<00:03, 25.32it/s]Fetching 674 files:  87%|████████▋ | 589/674 [00:23<00:03, 24.99it/s]Fetching 674 files:  88%|████████▊ | 593/674 [00:24<00:03, 25.16it/s]Fetching 674 files:  89%|████████▊ | 597/674 [00:24<00:03, 25.17it/s]Fetching 674 files:  89%|████████▉ | 601/674 [00:24<00:02, 25.25it/s]Fetching 674 files:  90%|████████▉ | 605/674 [00:24<00:02, 25.05it/s]Fetching 674 files:  90%|█████████ | 609/674 [00:24<00:02, 25.42it/s]Fetching 674 files:  91%|█████████ | 613/674 [00:24<00:02, 24.17it/s]Fetching 674 files:  91%|█████████▏| 616/674 [00:25<00:02, 23.46it/s]Fetching 674 files:  92%|█████████▏| 621/674 [00:25<00:02, 25.01it/s]Fetching 674 files:  93%|█████████▎| 624/674 [00:25<00:02, 22.07it/s]Fetching 674 files:  93%|█████████▎| 629/674 [00:25<00:01, 24.20it/s]Fetching 674 files:  94%|█████████▍| 632/674 [00:25<00:01, 23.32it/s]Fetching 674 files:  95%|█████████▍| 637/674 [00:25<00:01, 25.03it/s]Fetching 674 files:  95%|█████████▍| 640/674 [00:26<00:01, 23.96it/s]Fetching 674 files:  96%|█████████▌| 645/674 [00:26<00:01, 25.53it/s]Fetching 674 files:  96%|█████████▌| 648/674 [00:26<00:01, 23.85it/s]Fetching 674 files:  97%|█████████▋| 653/674 [00:26<00:00, 25.82it/s]Fetching 674 files:  97%|█████████▋| 656/674 [00:26<00:00, 23.97it/s]Fetching 674 files:  98%|█████████▊| 661/674 [00:26<00:00, 26.15it/s]Fetching 674 files:  99%|█████████▊| 664/674 [00:27<00:00, 23.97it/s]Fetching 674 files:  99%|█████████▉| 669/674 [00:27<00:00, 26.30it/s]Fetching 674 files: 100%|█████████▉| 672/674 [00:27<00:00, 23.56it/s]Fetching 674 files: 100%|██████████| 674/674 [00:27<00:00, 24.60it/s]
+[32m✓ Downloaded[0m
+  path: /workspace/lmax-deps/libero-pro-data
+{
+  "config_dir": "/workspace/lmax-deps/libero-pro-config",
+  "dataset": "zhouxueyang/LIBERO-Pro",
+  "dataset_root": "/workspace/lmax-deps/libero-pro-data",
+  "libero_pro_root": "/workspace/lmax-deps/LIBERO-PRO",
+  "revision": "c86fc3b8293185a6f373677018ff3e37f8391602",
+  "runtime_revision": "2b910b5b5f53016bef9907632f6f840f1ce2229c"
+}
+/workspace/lmax-deps/dl/assets.zip: OK
+Do you want to specify a custom path for the dataset folder? (Y/N): Initializing the default config file...
+The following information is stored in the config file: /root/.libero/config.yaml
+benchmark_root: /workspace/jit-reflex/venv/lib/python3.12/site-packages/libero/libero
+bddl_files: /workspace/jit-reflex/venv/lib/python3.12/site-packages/libero/libero/./bddl_files
+init_states: /workspace/jit-reflex/venv/lib/python3.12/site-packages/libero/libero/./init_files
+datasets: /workspace/jit-reflex/venv/lib/python3.12/site-packages/libero/libero/../datasets
+assets: /workspace/jit-reflex/venv/lib/python3.12/site-packages/libero/libero/./assets
+Local assets not found. Downloading from HuggingFace Hub...
+Downloading LIBERO assets from Hugging Face...
+/workspace/jit-reflex/venv/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py:206: UserWarning: The `local_dir_use_symlinks` argument is deprecated and ignored in `snapshot_download`. Downloading to a local directory does not use symlinks anymore.
+  warnings.warn(
+Fetching 586 files:   0%|          | 0/586 [00:00<?, ?it/s]Fetching 586 files:   0%|          | 1/586 [00:00<03:14,  3.01it/s]Fetching 586 files:   1%|          | 3/586 [00:00<01:11,  8.10it/s]Fetching 586 files:   1%|▏         | 8/586 [00:00<00:37, 15.29it/s]Fetching 586 files:   2%|▏         | 10/586 [00:00<00:35, 16.26it/s]Fetching 586 files:   2%|▏         | 14/586 [00:01<00:40, 14.23it/s]Fetching 586 files:   3%|▎         | 17/586 [00:01<00:34, 16.46it/s]Fetching 586 files:   3%|▎         | 19/586 [00:01<00:38, 14.72it/s]Fetching 586 files:   4%|▍         | 24/586 [00:01<00:26, 21.55it/s]Fetching 586 files:   5%|▍         | 27/586 [00:01<00:31, 17.90it/s]Fetching 586 files:   5%|▌         | 31/586 [00:01<00:25, 21.86it/s]Fetching 586 files:   6%|▌         | 34/586 [00:02<00:29, 18.97it/s]Fetching 586 files:   7%|▋         | 39/586 [00:02<00:21, 24.96it/s]Fetching 586 files:   7%|▋         | 43/586 [00:02<00:24, 21.92it/s]Fetching 586 files:   8%|▊         | 48/586 [00:02<00:27, 19.87it/s]Fetching 586 files:   9%|▉         | 55/586 [00:02<00:18, 27.95it/s]Fetching 586 files:  10%|█         | 59/586 [00:03<00:21, 24.16it/s]Fetching 586 files:  11%|█         | 64/586 [00:03<00:24, 21.34it/s]Fetching 586 files:  12%|█▏        | 70/586 [00:03<00:19, 26.97it/s]Fetching 586 files:  13%|█▎        | 74/586 [00:03<00:21, 23.52it/s]Fetching 586 files:  13%|█▎        | 78/586 [00:03<00:25, 19.69it/s]Fetching 586 files:  14%|█▍        | 83/586 [00:04<00:20, 24.28it/s]Fetching 586 files:  15%|█▍        | 87/586 [00:04<00:23, 21.37it/s]Fetching 586 files:  16%|█▌        | 91/586 [00:04<00:20, 24.32it/s]Fetching 586 files:  16%|█▌        | 95/586 [00:04<00:22, 21.47it/s]Fetching 586 files:  17%|█▋        | 98/586 [00:04<00:28, 17.13it/s]Fetching 586 files:  17%|█▋        | 101/586 [00:05<00:25, 19.15it/s]Fetching 586 files:  18%|█▊        | 104/586 [00:05<00:30, 15.88it/s]Fetching 586 files:  19%|█▉        | 111/586 [00:05<00:26, 18.12it/s]Fetching 586 files:  20%|█▉        | 115/586 [00:05<00:29, 16.21it/s]Fetching 586 files:  21%|██        | 122/586 [00:06<00:25, 18.11it/s]Fetching 586 files:  22%|██▏       | 128/586 [00:06<00:19, 23.51it/s]Fetching 586 files:  23%|██▎       | 132/586 [00:06<00:22, 20.03it/s]Fetching 586 files:  23%|██▎       | 136/586 [00:06<00:23, 18.96it/s]Fetching 586 files:  24%|██▍       | 140/586 [00:07<00:20, 21.96it/s]Fetching 586 files:  24%|██▍       | 143/586 [00:07<00:22, 19.52it/s]Fetching 586 files:  25%|██▍       | 146/586 [00:07<00:21, 20.91it/s]Fetching 586 files:  26%|██▌       | 150/586 [00:07<00:21, 20.22it/s]Fetching 586 files:  26%|██▌       | 153/586 [00:07<00:19, 21.76it/s]Fetching 586 files:  27%|██▋       | 157/586 [00:07<00:20, 20.74it/s]Fetching 586 files:  27%|██▋       | 161/586 [00:07<00:17, 24.03it/s]Fetching 586 files:  28%|██▊       | 164/586 [00:08<00:24, 17.33it/s]Fetching 586 files:  28%|██▊       | 167/586 [00:08<00:25, 16.49it/s]Fetching 586 files:  29%|██▉       | 169/586 [00:08<00:24, 16.85it/s]Fetching 586 files:  30%|██▉       | 173/586 [00:08<00:19, 21.24it/s]Fetching 586 files:  30%|███       | 176/586 [00:09<00:25, 15.94it/s]Fetching 586 files:  31%|███       | 179/586 [00:09<00:27, 14.97it/s]Fetching 586 files:  31%|███       | 182/586 [00:09<00:24, 16.58it/s]Fetching 586 files:  32%|███▏      | 185/586 [00:09<00:27, 14.81it/s]Fetching 586 files:  32%|███▏      | 188/586 [00:09<00:25, 15.44it/s]Fetching 586 files:  32%|███▏      | 190/586 [00:09<00:26, 14.75it/s]Fetching 586 files:  33%|███▎      | 193/586 [00:10<00:23, 16.78it/s]Fetching 586 files:  33%|███▎      | 195/586 [00:10<00:25, 15.08it/s]Fetching 586 files:  34%|███▍      | 199/586 [00:10<00:22, 17.47it/s]Fetching 586 files:  34%|███▍      | 201/586 [00:10<00:24, 15.69it/s]Fetching 586 files:  35%|███▍      | 203/586 [00:10<00:25, 15.18it/s]Fetching 586 files:  35%|███▌      | 206/586 [00:10<00:24, 15.46it/s]Fetching 586 files:  36%|███▌      | 209/586 [00:11<00:21, 17.37it/s]Fetching 586 files:  36%|███▌      | 211/586 [00:11<00:25, 14.91it/s]Fetching 586 files:  37%|███▋      | 216/586 [00:11<00:17, 21.01it/s]Fetching 586 files:  37%|███▋      | 219/586 [00:11<00:19, 19.24it/s]Fetching 586 files:  38%|███▊      | 224/586 [00:11<00:14, 24.35it/s]Fetching 586 files:  39%|███▊      | 227/586 [00:11<00:17, 20.44it/s]Fetching 586 files:  39%|███▉      | 230/586 [00:12<00:18, 19.62it/s]Fetching 586 files:  40%|███▉      | 233/586 [00:12<00:18, 18.70it/s]Fetching 586 files:  40%|████      | 235/586 [00:12<00:20, 16.96it/s]Fetching 586 files:  40%|████      | 237/586 [00:12<00:21, 16.39it/s]Fetching 586 files:  41%|████      | 239/586 [00:12<00:20, 16.85it/s]Fetching 586 files:  41%|████▏     | 242/586 [00:12<00:18, 18.63it/s]Fetching 586 files:  42%|████▏     | 245/586 [00:12<00:16, 20.69it/s]Fetching 586 files:  42%|████▏     | 248/586 [00:13<00:15, 21.29it/s]Fetching 586 files:  43%|████▎     | 251/586 [00:13<00:18, 17.89it/s]Fetching 586 files:  43%|████▎     | 254/586 [00:13<00:19, 17.47it/s]Fetching 586 files:  44%|████▍     | 258/586 [00:13<00:16, 20.19it/s]Fetching 586 files:  45%|████▍     | 261/586 [00:13<00:18, 17.33it/s]Fetching 586 files:  45%|████▌     | 264/586 [00:13<00:16, 19.22it/s]Fetching 586 files:  46%|████▌     | 267/586 [00:14<00:18, 17.42it/s]Fetching 586 files:  46%|████▌     | 271/586 [00:14<00:15, 20.76it/s]Fetching 586 files:  47%|████▋     | 274/586 [00:14<00:16, 18.85it/s]Fetching 586 files:  47%|████▋     | 277/586 [00:14<00:17, 17.98it/s]Fetching 586 files:  48%|████▊     | 279/586 [00:14<00:17, 17.22it/s]Fetching 586 files:  48%|████▊     | 282/586 [00:14<00:15, 19.37it/s]Fetching 586 files:  49%|████▊     | 285/586 [00:15<00:17, 17.65it/s]Fetching 586 files:  49%|████▉     | 288/586 [00:15<00:15, 19.55it/s]Fetching 586 files:  50%|████▉     | 291/586 [00:15<00:17, 16.57it/s]Fetching 586 files:  50%|█████     | 294/586 [00:15<00:20, 14.55it/s]Fetching 586 files:  51%|█████     | 299/586 [00:15<00:14, 19.94it/s]Fetching 586 files:  52%|█████▏    | 302/586 [00:16<00:17, 16.49it/s]Fetching 586 files:  52%|█████▏    | 304/586 [00:16<00:20, 14.05it/s]Fetching 586 files:  52%|█████▏    | 307/586 [00:16<00:16, 16.55it/s]Fetching 586 files:  53%|█████▎    | 310/586 [00:16<00:17, 15.55it/s]Fetching 586 files:  53%|█████▎    | 312/586 [00:16<00:16, 16.23it/s]Fetching 586 files:  54%|█████▍    | 315/586 [00:16<00:15, 17.71it/s]Fetching 586 files:  54%|█████▍    | 317/586 [00:17<00:17, 15.35it/s]Fetching 586 files:  55%|█████▍    | 321/586 [00:17<00:13, 19.16it/s]Fetching 586 files:  55%|█████▌    | 324/586 [00:17<00:15, 17.34it/s]Fetching 586 files:  56%|█████▌    | 326/586 [00:17<00:14, 17.44it/s]Fetching 586 files:  56%|█████▌    | 328/586 [00:17<00:16, 15.30it/s]Fetching 586 files:  57%|█████▋    | 332/586 [00:17<00:13, 18.97it/s]Fetching 586 files:  57%|█████▋    | 335/586 [00:18<00:15, 16.64it/s]Fetching 586 files:  58%|█████▊    | 338/586 [00:18<00:13, 18.78it/s]Fetching 586 files:  58%|█████▊    | 341/586 [00:18<00:14, 16.94it/s]Fetching 586 files:  59%|█████▊    | 344/586 [00:18<00:14, 16.62it/s]Fetching 586 files:  59%|█████▉    | 346/586 [00:18<00:15, 15.57it/s]Fetching 586 files:  60%|█████▉    | 349/586 [00:18<00:13, 17.88it/s]Fetching 586 files:  60%|█████▉    | 351/586 [00:19<00:15, 14.87it/s]Fetching 586 files:  60%|██████    | 354/586 [00:19<00:13, 17.77it/s]Fetching 586 files:  61%|██████    | 357/586 [00:19<00:14, 16.27it/s]Fetching 586 files:  62%|██████▏   | 361/586 [00:19<00:10, 21.00it/s]Fetching 586 files:  62%|██████▏   | 364/586 [00:19<00:13, 16.35it/s]Fetching 586 files:  63%|██████▎   | 367/586 [00:20<00:14, 14.69it/s]Fetching 586 files:  64%|██████▎   | 373/586 [00:20<00:10, 20.19it/s]Fetching 586 files:  64%|██████▍   | 376/586 [00:20<00:10, 19.15it/s]Fetching 586 files:  65%|██████▍   | 379/586 [00:20<00:12, 16.17it/s]Fetching 586 files:  65%|██████▌   | 383/586 [00:20<00:12, 16.47it/s]Fetching 586 files:  66%|██████▌   | 385/586 [00:21<00:11, 16.80it/s]Fetching 586 files:  66%|██████▋   | 389/586 [00:21<00:10, 17.96it/s]Fetching 586 files:  67%|██████▋   | 391/586 [00:21<00:11, 17.24it/s]Fetching 586 files:  67%|██████▋   | 395/586 [00:21<00:10, 18.85it/s]Fetching 586 files:  68%|██████▊   | 397/586 [00:21<00:11, 16.82it/s]Fetching 586 files:  68%|██████▊   | 401/586 [00:21<00:09, 19.60it/s]Fetching 586 files:  69%|██████▉   | 404/586 [00:22<00:09, 18.57it/s]Fetching 586 files:  69%|██████▉   | 407/586 [00:22<00:09, 19.14it/s]Fetching 586 files:  70%|██████▉   | 409/586 [00:22<00:10, 16.93it/s]Fetching 586 files:  70%|███████   | 412/586 [00:22<00:09, 17.95it/s]Fetching 586 files:  71%|███████   | 414/586 [00:22<00:10, 15.70it/s]Fetching 586 files:  71%|███████   | 416/586 [00:22<00:13, 12.17it/s]Fetching 586 files:  71%|███████▏  | 418/586 [00:23<00:14, 11.94it/s]Fetching 586 files:  72%|███████▏  | 421/586 [00:23<00:13, 12.60it/s]Fetching 586 files:  72%|███████▏  | 423/586 [00:23<00:14, 11.24it/s]Fetching 586 files:  73%|███████▎  | 425/586 [00:23<00:13, 11.89it/s]Fetching 586 files:  73%|███████▎  | 427/586 [00:23<00:13, 11.63it/s]Fetching 586 files:  73%|███████▎  | 429/586 [00:24<00:13, 12.07it/s]Fetching 586 files:  74%|███████▎  | 431/586 [00:24<00:14, 10.74it/s]Fetching 586 files:  74%|███████▍  | 433/586 [00:24<00:14, 10.89it/s]Fetching 586 files:  74%|███████▍  | 436/586 [00:24<00:12, 12.34it/s]Fetching 586 files:  75%|███████▍  | 438/586 [00:24<00:11, 13.42it/s]Fetching 586 files:  75%|███████▌  | 440/586 [00:25<00:14, 10.05it/s]Fetching 586 files:  75%|███████▌  | 442/586 [00:25<00:13, 11.02it/s]Fetching 586 files:  76%|███████▌  | 444/586 [00:25<00:12, 11.08it/s]Fetching 586 files:  76%|███████▋  | 447/586 [00:25<00:12, 11.13it/s]Fetching 586 files:  77%|███████▋  | 452/586 [00:25<00:08, 15.58it/s]Fetching 586 files:  77%|███████▋  | 454/586 [00:26<00:08, 15.95it/s]Fetching 586 files:  78%|███████▊  | 457/586 [00:26<00:07, 17.79it/s]Fetching 586 files:  78%|███████▊  | 459/586 [00:26<00:07, 15.96it/s]Fetching 586 files:  79%|███████▊  | 461/586 [00:26<00:08, 14.93it/s]Fetching 586 files:  79%|███████▉  | 465/586 [00:26<00:06, 17.94it/s]Fetching 586 files:  80%|███████▉  | 467/586 [00:26<00:06, 17.88it/s]Fetching 586 files:  80%|████████  | 470/586 [00:26<00:05, 19.48it/s]Fetching 586 files:  81%|████████  | 472/586 [00:27<00:06, 16.79it/s]Fetching 586 files:  81%|████████  | 474/586 [00:27<00:08, 13.78it/s]Fetching 586 files:  81%|████████▏ | 477/586 [00:27<00:06, 15.58it/s]Fetching 586 files:  82%|████████▏ | 480/586 [00:27<00:06, 16.69it/s]Fetching 586 files:  83%|████████▎ | 484/586 [00:27<00:04, 21.14it/s]Fetching 586 files:  83%|████████▎ | 487/586 [00:27<00:05, 18.15it/s]Fetching 586 files:  84%|████████▎ | 490/586 [00:27<00:04, 20.55it/s]Fetching 586 files:  84%|████████▍ | 493/586 [00:28<00:05, 17.91it/s]Fetching 586 files:  85%|████████▍ | 497/586 [00:28<00:05, 14.95it/s]Fetching 586 files:  85%|████████▌ | 501/586 [00:28<00:04, 18.90it/s]Fetching 586 files:  86%|████████▌ | 504/586 [00:28<00:04, 17.11it/s]Fetching 586 files:  87%|████████▋ | 508/586 [00:28<00:03, 21.19it/s]Fetching 586 files:  87%|████████▋ | 511/586 [00:29<00:04, 15.78it/s]Fetching 586 files:  88%|████████▊ | 514/586 [00:29<00:05, 13.31it/s]Fetching 586 files:  89%|████████▊ | 520/586 [00:29<00:03, 18.37it/s]Fetching 586 files:  89%|████████▉ | 523/586 [00:29<00:03, 18.51it/s]Fetching 586 files:  90%|█████████ | 528/586 [00:30<00:03, 17.18it/s]Fetching 586 files:  91%|█████████ | 531/586 [00:30<00:03, 16.76it/s]Fetching 586 files:  91%|█████████ | 533/586 [00:30<00:03, 16.82it/s]Fetching 586 files:  92%|█████████▏| 537/586 [00:30<00:02, 20.93it/s]Fetching 586 files:  92%|█████████▏| 540/586 [00:30<00:02, 18.97it/s]Fetching 586 files:  93%|█████████▎| 545/586 [00:30<00:01, 24.16it/s]Fetching 586 files:  94%|█████████▎| 548/586 [00:31<00:01, 20.19it/s]Fetching 586 files:  94%|█████████▍| 553/586 [00:31<00:01, 20.79it/s]Fetching 586 files:  95%|█████████▍| 556/586 [00:31<00:01, 22.44it/s]Fetching 586 files:  95%|█████████▌| 559/586 [00:31<00:01, 19.34it/s]Fetching 586 files:  96%|█████████▌| 562/586 [00:31<00:01, 21.35it/s]Fetching 586 files:  96%|█████████▋| 565/586 [00:31<00:00, 22.65it/s]Fetching 586 files:  97%|█████████▋| 568/586 [00:32<00:00, 19.61it/s]Fetching 586 files:  97%|█████████▋| 571/586 [00:32<00:00, 21.07it/s]Fetching 586 files:  98%|█████████▊| 574/586 [00:32<00:00, 22.19it/s]Fetching 586 files:  99%|█████████▊| 578/586 [00:32<00:00, 22.45it/s]Fetching 586 files:  99%|█████████▉| 581/586 [00:32<00:00, 18.78it/s]Fetching 586 files: 100%|█████████▉| 585/586 [00:33<00:00, 19.34it/s]Fetching 586 files: 100%|██████████| 586/586 [00:33<00:00, 17.69it/s]
+Assets downloaded successfully to /root/.cache/libero/assets
+LIBERO assets: /root/.cache/libero/assets
+Wand: MagickWand loads
+torch 2.11.0+cu126 CUDA 12.6 NVIDIA GeForce RTX 4090
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/__init__.py", line 62, in <module>
+    from mujoco.gl_context import *
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/gl_context.py", line 41, in <module>
+    from mujoco.egl import GLContext as _GLContext
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/__init__.py", line 31, in <module>
+    from mujoco.egl import egl_ext as EGL
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/egl_ext.py", line 27, in <module>
+    from OpenGL import EGL
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/OpenGL/EGL/__init__.py", line 2, in <module>
+    from OpenGL.raw.EGL._types import *
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/OpenGL/raw/EGL/_types.py", line 87, in <module>
+    raw_eglQueryString = _p.PLATFORM.EGL.eglQueryString
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'eglQueryString'
+W: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
+debconf: delaying package configuration, since apt-utils is not installed
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 53810 files and directories currently installed.)
+Preparing to unpack .../00-libdrm-common_2.4.125-1ubuntu0.1~24.04.2_all.deb ...
+Unpacking libdrm-common (2.4.125-1ubuntu0.1~24.04.2) over (2.4.122-1~ubuntu0.24.04.1) ...
+Preparing to unpack .../01-libdrm2_2.4.125-1ubuntu0.1~24.04.2_amd64.deb ...
+Unpacking libdrm2:amd64 (2.4.125-1ubuntu0.1~24.04.2) over (2.4.122-1~ubuntu0.24.04.1) ...
+Preparing to unpack .../02-libdrm-amdgpu1_2.4.125-1ubuntu0.1~24.04.2_amd64.deb ...
+Unpacking libdrm-amdgpu1:amd64 (2.4.125-1ubuntu0.1~24.04.2) over (2.4.122-1~ubuntu0.24.04.1) ...
+Preparing to unpack .../03-libdrm-intel1_2.4.125-1ubuntu0.1~24.04.2_amd64.deb ...
+Unpacking libdrm-intel1:amd64 (2.4.125-1ubuntu0.1~24.04.2) over (2.4.122-1~ubuntu0.24.04.1) ...
+Preparing to unpack .../04-libgl1-mesa-dri_25.2.8-0ubuntu0.24.04.4_amd64.deb ...
+Unpacking libgl1-mesa-dri:amd64 (25.2.8-0ubuntu0.24.04.4) over (25.0.7-0ubuntu0.24.04.2) ...
+Preparing to unpack .../05-libglx-mesa0_25.2.8-0ubuntu0.24.04.4_amd64.deb ...
+Unpacking libglx-mesa0:amd64 (25.2.8-0ubuntu0.24.04.4) over (25.0.7-0ubuntu0.24.04.2) ...
+Preparing to unpack .../06-libgbm1_25.2.8-0ubuntu0.24.04.4_amd64.deb ...
+Unpacking libgbm1:amd64 (25.2.8-0ubuntu0.24.04.4) over (25.0.7-0ubuntu0.24.04.2) ...
+Preparing to unpack .../07-mesa-libgallium_25.2.8-0ubuntu0.24.04.4_amd64.deb ...
+Unpacking mesa-libgallium:amd64 (25.2.8-0ubuntu0.24.04.4) over (25.0.7-0ubuntu0.24.04.2) ...
+Selecting previously unselected package libegl-mesa0:amd64.
+Preparing to unpack .../08-libegl-mesa0_25.2.8-0ubuntu0.24.04.4_amd64.deb ...
+Unpacking libegl-mesa0:amd64 (25.2.8-0ubuntu0.24.04.4) ...
+Selecting previously unselected package libegl1:amd64.
+Preparing to unpack .../09-libegl1_1.7.0-1build1_amd64.deb ...
+Unpacking libegl1:amd64 (1.7.0-1build1) ...
+Selecting previously unselected package libopengl0:amd64.
+Preparing to unpack .../10-libopengl0_1.7.0-1build1_amd64.deb ...
+Unpacking libopengl0:amd64 (1.7.0-1build1) ...
+Setting up libopengl0:amd64 (1.7.0-1build1) ...
+Setting up libdrm-common (2.4.125-1ubuntu0.1~24.04.2) ...
+Setting up libdrm2:amd64 (2.4.125-1ubuntu0.1~24.04.2) ...
+Setting up libdrm-amdgpu1:amd64 (2.4.125-1ubuntu0.1~24.04.2) ...
+Setting up libdrm-intel1:amd64 (2.4.125-1ubuntu0.1~24.04.2) ...
+Setting up mesa-libgallium:amd64 (25.2.8-0ubuntu0.24.04.4) ...
+Setting up libgbm1:amd64 (25.2.8-0ubuntu0.24.04.4) ...
+Setting up libgl1-mesa-dri:amd64 (25.2.8-0ubuntu0.24.04.4) ...
+Setting up libegl-mesa0:amd64 (25.2.8-0ubuntu0.24.04.4) ...
+Setting up libegl1:amd64 (1.7.0-1build1) ...
+Setting up libglx-mesa0:amd64 (25.2.8-0ubuntu0.24.04.4) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.6) ...
+Traceback (most recent call last):
+  File "<string>", line 3, in <module>
+AttributeError: 'NoneType' object has no attribute 'decode'
+!!! offscreen EGL rendering does not work on this pod: the owner decides
+HF user: papadoster
+paligemma: access ok
+Fetching 674 files:   0%|          | 0/674 [00:00<?, ?it/s]Fetching 674 files:   8%|▊         | 55/674 [00:00<00:01, 537.08it/s]Fetching 674 files:  18%|█▊        | 121/674 [00:00<00:00, 606.46it/s]Fetching 674 files:  28%|██▊       | 187/674 [00:00<00:00, 627.39it/s]Fetching 674 files:  38%|███▊      | 257/674 [00:00<00:00, 652.15it/s]Fetching 674 files:  49%|████▊     | 327/674 [00:00<00:00, 666.98it/s]Fetching 674 files:  59%|█████▉    | 399/674 [00:00<00:00, 683.22it/s]Fetching 674 files:  70%|██████▉   | 470/674 [00:00<00:00, 688.57it/s]Fetching 674 files:  81%|████████  | 545/674 [00:00<00:00, 707.12it/s]Fetching 674 files:  93%|█████████▎| 626/674 [00:00<00:00, 738.06it/s]Fetching 674 files: 100%|██████████| 674/674 [00:00<00:00, 696.44it/s]
+[32m✓ Downloaded[0m
+  path: /workspace/lmax-deps/libero-pro-data
+{
+  "config_dir": "/workspace/lmax-deps/libero-pro-config",
+  "dataset": "zhouxueyang/LIBERO-Pro",
+  "dataset_root": "/workspace/lmax-deps/libero-pro-data",
+  "libero_pro_root": "/workspace/lmax-deps/LIBERO-PRO",
+  "revision": "c86fc3b8293185a6f373677018ff3e37f8391602",
+  "runtime_revision": "2b910b5b5f53016bef9907632f6f840f1ce2229c"
+}
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+LIBERO assets: /root/.cache/libero/assets
+Wand: MagickWand loads
+torch 2.11.0+cu126 CUDA 12.6 NVIDIA GeForce RTX 4090
+EGL vendor: NVIDIA GL renderer: NVIDIA GeForce RTX 4090/PCIe/SSE2
+Exception ignored in: <function GLContext.__del__ at 0x7f2908716020>
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/__init__.py", line 138, in __del__
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/__init__.py", line 131, in free
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/OpenGL/error.py", line 230, in glCheckError
+OpenGL.raw.EGL._errors.EGLError: <exception str() failed>
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files:  11%|█         | 1/9 [00:00<00:02,  2.83it/s]Fetching 9 files:  67%|██████▋   | 6/9 [00:00<00:00,  8.94it/s]Fetching 9 files:  78%|███████▊  | 7/9 [00:00<00:00,  7.58it/s]Fetching 9 files: 100%|██████████| 9/9 [00:15<00:00,  2.66s/it]Fetching 9 files: 100%|██████████| 9/9 [00:15<00:00,  1.68s/it]
+The PI05 model is a direct port of the OpenPI implementation. 
+This implementation follows the original OpenPI structure for compatibility. 
+Original implementation: https://github.com/Physical-Intelligence/openpi
+Loading model from: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+✓ Loaded state dict from model.safetensors
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.bias
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.weight
+All keys loaded successfully!
+pi05 cached
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 1006.82it/s]
+/workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1/model.safetensors: OK
+name, driver_version, memory.total [MiB]
+NVIDIA GeForce RTX 4090, 580.178.04, 24564 MiB
+HF user: papadoster
+paligemma: access ok
+Fetching 674 files:   0%|          | 0/674 [00:00<?, ?it/s]Fetching 674 files:   9%|▉         | 64/674 [00:00<00:00, 637.50it/s]Fetching 674 files:  21%|██        | 143/674 [00:00<00:00, 714.02it/s]Fetching 674 files:  33%|███▎      | 223/674 [00:00<00:00, 749.18it/s]Fetching 674 files:  45%|████▌     | 304/674 [00:00<00:00, 771.78it/s]Fetching 674 files:  58%|█████▊    | 390/674 [00:00<00:00, 796.55it/s]Fetching 674 files:  71%|███████   | 476/674 [00:00<00:00, 812.84it/s]Fetching 674 files:  83%|████████▎ | 561/674 [00:00<00:00, 822.71it/s]Fetching 674 files:  96%|█████████▌| 648/674 [00:00<00:00, 829.96it/s]Fetching 674 files: 100%|██████████| 674/674 [00:00<00:00, 804.26it/s]
+[32m✓ Downloaded[0m
+  path: /workspace/lmax-deps/libero-pro-data
+{
+  "config_dir": "/workspace/lmax-deps/libero-pro-config",
+  "dataset": "zhouxueyang/LIBERO-Pro",
+  "dataset_root": "/workspace/lmax-deps/libero-pro-data",
+  "libero_pro_root": "/workspace/lmax-deps/LIBERO-PRO",
+  "revision": "c86fc3b8293185a6f373677018ff3e37f8391602",
+  "runtime_revision": "2b910b5b5f53016bef9907632f6f840f1ce2229c"
+}
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+LIBERO assets: /root/.cache/libero/assets
+Wand: MagickWand loads
+torch 2.11.0+cu126 CUDA 12.6 NVIDIA GeForce RTX 4090
+EGL vendor: NVIDIA GL renderer: NVIDIA GeForce RTX 4090/PCIe/SSE2
+Exception ignored in: <function GLContext.__del__ at 0x74eda8fb6020>
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/__init__.py", line 138, in __del__
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/__init__.py", line 131, in free
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/OpenGL/error.py", line 230, in glCheckError
+OpenGL.raw.EGL._errors.EGLError: <exception str() failed>
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 1116.10it/s]
+The PI05 model is a direct port of the OpenPI implementation. 
+This implementation follows the original OpenPI structure for compatibility. 
+Original implementation: https://github.com/Physical-Intelligence/openpi
+Loading model from: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+✓ Loaded state dict from model.safetensors
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.bias
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.weight
+All keys loaded successfully!
+pi05 cached
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 973.66it/s]
+name, driver_version, memory.total [MiB]
+NVIDIA GeForce RTX 4090, 580.178.04, 24564 MiB
+HF user: papadoster
+paligemma: access ok
+Fetching 674 files:   0%|          | 0/674 [00:00<?, ?it/s]Fetching 674 files:   9%|▉         | 59/674 [00:00<00:01, 585.22it/s]Fetching 674 files:  19%|█▉        | 130/674 [00:00<00:00, 650.64it/s]Fetching 674 files:  30%|██▉       | 200/674 [00:00<00:00, 667.58it/s]Fetching 674 files:  40%|███▉      | 269/674 [00:00<00:00, 673.01it/s]Fetching 674 files:  50%|█████     | 339/674 [00:00<00:00, 681.52it/s]Fetching 674 files:  61%|██████    | 409/674 [00:00<00:00, 683.55it/s]Fetching 674 files:  71%|███████   | 479/674 [00:00<00:00, 684.12it/s]Fetching 674 files:  82%|████████▏ | 553/674 [00:00<00:00, 697.92it/s]Fetching 674 files:  92%|█████████▏| 623/674 [00:00<00:00, 696.11it/s]Fetching 674 files: 100%|██████████| 674/674 [00:00<00:00, 688.62it/s]
+[32m✓ Downloaded[0m
+  path: /workspace/lmax-deps/libero-pro-data
+{
+  "config_dir": "/workspace/lmax-deps/libero-pro-config",
+  "dataset": "zhouxueyang/LIBERO-Pro",
+  "dataset_root": "/workspace/lmax-deps/libero-pro-data",
+  "libero_pro_root": "/workspace/lmax-deps/LIBERO-PRO",
+  "revision": "c86fc3b8293185a6f373677018ff3e37f8391602",
+  "runtime_revision": "2b910b5b5f53016bef9907632f6f840f1ce2229c"
+}
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+LIBERO assets: /root/.cache/libero/assets
+Wand: MagickWand loads
+torch 2.11.0+cu126 CUDA 12.6 NVIDIA GeForce RTX 4090
+EGL vendor: NVIDIA GL renderer: NVIDIA GeForce RTX 4090/PCIe/SSE2
+Exception ignored in: <function GLContext.__del__ at 0x790711d1e020>
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/__init__.py", line 138, in __del__
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/__init__.py", line 131, in free
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/OpenGL/error.py", line 230, in glCheckError
+OpenGL.raw.EGL._errors.EGLError: <exception str() failed>
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 1030.99it/s]
+The PI05 model is a direct port of the OpenPI implementation. 
+This implementation follows the original OpenPI structure for compatibility. 
+Original implementation: https://github.com/Physical-Intelligence/openpi
+Loading model from: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+✓ Loaded state dict from model.safetensors
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.bias
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.weight
+All keys loaded successfully!
+pi05 cached
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 934.28it/s]
+name, driver_version, memory.total [MiB]
+NVIDIA GeForce RTX 4090, 580.178.04, 24564 MiB

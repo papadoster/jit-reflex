@@ -1,0 +1,3 @@
+pi05, 6 envs: GPU peak 22959 MiB (max 23552); C1-E4m repeat: rows=3 max_abs=0.000e+00 bitwise=1 C1-E4m repeat: rows=3 max_abs=0.000e+00 bitwise=1 
+tempo (s/episode): lmax_pi05=19.474 bench_pi05=11.562
+C1-E4m envs: pi05=6

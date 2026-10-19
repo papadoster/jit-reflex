@@ -1,0 +1,846 @@
+{
+ "pod": "A",
+ "usd_per_h": 0.34,
+ "tempo_s": {
+  "lmax_pi05": 19.474,
+  "bench_pi05": 11.562
+ },
+ "blocks": {
+  "connect": {
+   "episodes": 300,
+   "hours": 1.62,
+   "usd": 0.55
+  },
+  "M0": {
+   "episodes": 120,
+   "hours": 0.65,
+   "usd": 0.22
+  },
+  "Bcal": {
+   "episodes": 60,
+   "hours": 0.19,
+   "usd": 0.07
+  },
+  "M1pi": {
+   "episodes": 5600,
+   "hours": 30.29,
+   "usd": 10.3
+  },
+  "Boracle": {
+   "episodes": 2080,
+   "hours": 6.68,
+   "usd": 2.27
+  },
+  "Bnoisy": {
+   "episodes": 520,
+   "hours": 1.67,
+   "usd": 0.57
+  },
+  "D": {
+   "episodes": 2400,
+   "hours": 12.98,
+   "usd": 4.41
+  }
+ },
+ "total": {
+  "episodes": 11080,
+  "hours": 54.09,
+  "usd": 18.39
+ },
+ "left": {
+  "episodes": 11080,
+  "hours": 54.09,
+  "usd": 18.39
+ }
+}
+[09:31:03] grid, pod A; C1-E4 part 2 calib A: kbar_pi05=0.306 [0.262, 0.391] N=55 · bench: kbar_pi05=0.324 [0.230, 0.429] N=59
+[13:30:22] grid, pod A; C1-E4 part 2 calib A: kbar_pi05=0.306 [0.262, 0.391] N=55 · bench: kbar_pi05=0.324 [0.230, 0.429] N=59
+[17:30:36] forecast after Boracle_pi05 (bench_pi05 12.560 s/episode)
+[17:31:54] grid, pod A; C1-E4 part 2 calib A: kbar_pi05=0.306 [0.262, 0.391] N=55 · bench: kbar_pi05=0.324 [0.230, 0.429] N=59
+[19:42:57] forecast after Bnoisy_pi05 (bench_pi05 14.308 s/episode)
+{
+ "pod": "A",
+ "usd_per_h": 0.34,
+ "tempo_s": {
+  "lmax_pi05": 19.474,
+  "bench_pi05": 14.308
+ },
+ "blocks": {
+  "connect": {
+   "episodes": 300,
+   "hours": 1.62,
+   "usd": 0.55
+  },
+  "M0": {
+   "episodes": 120,
+   "hours": 0.65,
+   "usd": 0.22
+  },
+  "Bcal": {
+   "episodes": 60,
+   "hours": 0.24,
+   "usd": 0.08
+  },
+  "M1pi": {
+   "episodes": 5600,
+   "hours": 30.29,
+   "usd": 10.3
+  },
+  "Boracle": {
+   "episodes": 2080,
+   "hours": 8.27,
+   "usd": 2.81
+  },
+  "Bnoisy": {
+   "episodes": 520,
+   "hours": 2.07,
+   "usd": 0.7
+  },
+  "D": {
+   "episodes": 2400,
+   "hours": 12.98,
+   "usd": 4.41
+  }
+ },
+ "total": {
+  "episodes": 11080,
+  "hours": 56.12,
+  "usd": 19.08
+ },
+ "left": {
+  "episodes": 8000,
+  "hours": 43.28,
+  "usd": 14.71
+ }
+}
+[19:43:55] grid, pod A; C1-E4 part 2 calib A: kbar_pi05=0.306 [0.262, 0.391] N=55 · bench: kbar_pi05=0.324 [0.230, 0.429] N=59
+[20:41:09] grid, pod A; C1-E4 part 2 calib A: kbar_pi05=0.306 [0.262, 0.391] N=55 · bench: kbar_pi05=0.324 [0.230, 0.429] N=59
+[03:11:31] forecast after M1M2_pi05_eval300_plus_d0 (lmax_pi05 16.643 s/episode)
+{
+ "pod": "A",
+ "usd_per_h": 0.34,
+ "tempo_s": {
+  "lmax_pi05": 16.643,
+  "bench_pi05": 14.308
+ },
+ "blocks": {
+  "connect": {
+   "episodes": 300,
+   "hours": 1.39,
+   "usd": 0.47
+  },
+  "M0": {
+   "episodes": 120,
+   "hours": 0.55,
+   "usd": 0.19
+  },
+  "Bcal": {
+   "episodes": 60,
+   "hours": 0.24,
+   "usd": 0.08
+  },
+  "M1pi": {
+   "episodes": 5600,
+   "hours": 25.89,
+   "usd": 8.8
+  },
+  "Boracle": {
+   "episodes": 2080,
+   "hours": 8.27,
+   "usd": 2.81
+  },
+  "Bnoisy": {
+   "episodes": 520,
+   "hours": 2.07,
+   "usd": 0.7
+  },
+  "D": {
+   "episodes": 2400,
+   "hours": 11.1,
+   "usd": 3.77
+  }
+ },
+ "total": {
+  "episodes": 11080,
+  "hours": 49.5,
+  "usd": 16.83
+ },
+ "left": {
+  "episodes": 6504,
+  "hours": 30.07,
+  "usd": 10.22
+ }
+}
+[07:11:16] forecast after M1M2_pi05_eval300_pro_d0 (lmax_pi05 15.765 s/episode)
+{
+ "pod": "A",
+ "usd_per_h": 0.34,
+ "tempo_s": {
+  "lmax_pi05": 15.765,
+  "bench_pi05": 14.308
+ },
+ "blocks": {
+  "connect": {
+   "episodes": 300,
+   "hours": 1.31,
+   "usd": 0.45
+  },
+  "M0": {
+   "episodes": 120,
+   "hours": 0.53,
+   "usd": 0.18
+  },
+  "Bcal": {
+   "episodes": 60,
+   "hours": 0.24,
+   "usd": 0.08
+  },
+  "M1pi": {
+   "episodes": 5600,
+   "hours": 24.52,
+   "usd": 8.34
+  },
+  "Boracle": {
+   "episodes": 2080,
+   "hours": 8.27,
+   "usd": 2.81
+  },
+  "Bnoisy": {
+   "episodes": 520,
+   "hours": 2.07,
+   "usd": 0.7
+  },
+  "D": {
+   "episodes": 2400,
+   "hours": 10.51,
+   "usd": 3.57
+  }
+ },
+ "total": {
+  "episodes": 11080,
+  "hours": 47.44,
+  "usd": 16.13
+ },
+ "left": {
+  "episodes": 5600,
+  "hours": 24.52,
+  "usd": 8.34
+ }
+}
+[18:30:56] forecast after M1pi_pi05_evalrest_plus_d0 (lmax_pi05 17.259 s/episode)
+{
+ "pod": "A",
+ "usd_per_h": 0.34,
+ "tempo_s": {
+  "lmax_pi05": 17.259,
+  "bench_pi05": 14.308
+ },
+ "blocks": {
+  "connect": {
+   "episodes": 300,
+   "hours": 1.44,
+   "usd": 0.49
+  },
+  "M0": {
+   "episodes": 120,
+   "hours": 0.58,
+   "usd": 0.2
+  },
+  "Bcal": {
+   "episodes": 60,
+   "hours": 0.24,
+   "usd": 0.08
+  },
+  "M1pi": {
+   "episodes": 5600,
+   "hours": 26.85,
+   "usd": 9.13
+  },
+  "Boracle": {
+   "episodes": 2080,
+   "hours": 8.27,
+   "usd": 2.81
+  },
+  "Bnoisy": {
+   "episodes": 520,
+   "hours": 2.07,
+   "usd": 0.7
+  },
+  "D": {
+   "episodes": 2400,
+   "hours": 11.51,
+   "usd": 3.91
+  }
+ },
+ "total": {
+  "episodes": 11080,
+  "hours": 50.94,
+  "usd": 17.32
+ },
+ "left": {
+  "episodes": 3245,
+  "hours": 15.56,
+  "usd": 5.29
+ }
+}
+[22:03:48] grid, pod A; C1-E4 part 2 calib A: kbar_pi05=0.306 [0.262, 0.391] N=55 · bench: kbar_pi05=0.324 [0.230, 0.429] N=59
+[22:03:53] forecast after M1M2_pi05_eval300_plus_d0 (lmax_pi05 16.643 s/episode)
+{
+ "pod": "A",
+ "usd_per_h": 0.34,
+ "tempo_s": {
+  "lmax_pi05": 16.643,
+  "bench_pi05": 14.308
+ },
+ "blocks": {
+  "connect": {
+   "episodes": 300,
+   "hours": 1.39,
+   "usd": 0.47
+  },
+  "M0": {
+   "episodes": 120,
+   "hours": 0.55,
+   "usd": 0.19
+  },
+  "Bcal": {
+   "episodes": 60,
+   "hours": 0.24,
+   "usd": 0.08
+  },
+  "M1pi": {
+   "episodes": 5600,
+   "hours": 25.89,
+   "usd": 8.8
+  },
+  "Boracle": {
+   "episodes": 2080,
+   "hours": 8.27,
+   "usd": 2.81
+  },
+  "Bnoisy": {
+   "episodes": 520,
+   "hours": 2.07,
+   "usd": 0.7
+  },
+  "D": {
+   "episodes": 2400,
+   "hours": 11.1,
+   "usd": 3.77
+  }
+ },
+ "total": {
+  "episodes": 11080,
+  "hours": 49.5,
+  "usd": 16.83
+ },
+ "left": {
+  "episodes": 2525,
+  "hours": 11.67,
+  "usd": 3.97
+ }
+}
+[22:03:59] forecast after M1M2_pi05_eval300_pro_d0 (lmax_pi05 15.765 s/episode)
+{
+ "pod": "A",
+ "usd_per_h": 0.34,
+ "tempo_s": {
+  "lmax_pi05": 15.765,
+  "bench_pi05": 14.308
+ },
+ "blocks": {
+  "connect": {
+   "episodes": 300,
+   "hours": 1.31,
+   "usd": 0.45
+  },
+  "M0": {
+   "episodes": 120,
+   "hours": 0.53,
+   "usd": 0.18
+  },
+  "Bcal": {
+   "episodes": 60,
+   "hours": 0.24,
+   "usd": 0.08
+  },
+  "M1pi": {
+   "episodes": 5600,
+   "hours": 24.52,
+   "usd": 8.34
+  },
+  "Boracle": {
+   "episodes": 2080,
+   "hours": 8.27,
+   "usd": 2.81
+  },
+  "Bnoisy": {
+   "episodes": 520,
+   "hours": 2.07,
+   "usd": 0.7
+  },
+  "D": {
+   "episodes": 2400,
+   "hours": 10.51,
+   "usd": 3.57
+  }
+ },
+ "total": {
+  "episodes": 11080,
+  "hours": 47.44,
+  "usd": 16.13
+ },
+ "left": {
+  "episodes": 2525,
+  "hours": 11.06,
+  "usd": 3.76
+ }
+}
+[22:04:05] forecast after M1pi_pi05_evalrest_plus_d0 (lmax_pi05 17.259 s/episode)
+{
+ "pod": "A",
+ "usd_per_h": 0.34,
+ "tempo_s": {
+  "lmax_pi05": 17.259,
+  "bench_pi05": 14.308
+ },
+ "blocks": {
+  "connect": {
+   "episodes": 300,
+   "hours": 1.44,
+   "usd": 0.49
+  },
+  "M0": {
+   "episodes": 120,
+   "hours": 0.58,
+   "usd": 0.2
+  },
+  "Bcal": {
+   "episodes": 60,
+   "hours": 0.24,
+   "usd": 0.08
+  },
+  "M1pi": {
+   "episodes": 5600,
+   "hours": 26.85,
+   "usd": 9.13
+  },
+  "Boracle": {
+   "episodes": 2080,
+   "hours": 8.27,
+   "usd": 2.81
+  },
+  "Bnoisy": {
+   "episodes": 520,
+   "hours": 2.07,
+   "usd": 0.7
+  },
+  "D": {
+   "episodes": 2400,
+   "hours": 11.51,
+   "usd": 3.91
+  }
+ },
+ "total": {
+  "episodes": 11080,
+  "hours": 50.94,
+  "usd": 17.32
+ },
+ "left": {
+  "episodes": 2525,
+  "hours": 12.11,
+  "usd": 4.12
+ }
+}
+[22:50:19] forecast after M1pi_pi05_evalrest_pro_d0 (lmax_pi05 15.673 s/episode)
+{
+ "pod": "A",
+ "usd_per_h": 0.34,
+ "tempo_s": {
+  "lmax_pi05": 15.673,
+  "bench_pi05": 14.308
+ },
+ "blocks": {
+  "connect": {
+   "episodes": 300,
+   "hours": 1.31,
+   "usd": 0.44
+  },
+  "M0": {
+   "episodes": 120,
+   "hours": 0.52,
+   "usd": 0.18
+  },
+  "Bcal": {
+   "episodes": 60,
+   "hours": 0.24,
+   "usd": 0.08
+  },
+  "M1pi": {
+   "episodes": 5600,
+   "hours": 24.38,
+   "usd": 8.29
+  },
+  "Boracle": {
+   "episodes": 2080,
+   "hours": 8.27,
+   "usd": 2.81
+  },
+  "Bnoisy": {
+   "episodes": 520,
+   "hours": 2.07,
+   "usd": 0.7
+  },
+  "D": {
+   "episodes": 2400,
+   "hours": 10.45,
+   "usd": 3.55
+  }
+ },
+ "total": {
+  "episodes": 11080,
+  "hours": 47.23,
+  "usd": 16.06
+ },
+ "left": {
+  "episodes": 2400,
+  "hours": 10.45,
+  "usd": 3.55
+ }
+}
+[22:50:30] forecast after Boracle_pi05 (bench_pi05 12.560 s/episode)
+{
+ "pod": "A",
+ "usd_per_h": 0.34,
+ "tempo_s": {
+  "lmax_pi05": 15.673,
+  "bench_pi05": 12.56
+ },
+ "blocks": {
+  "connect": {
+   "episodes": 300,
+   "hours": 1.31,
+   "usd": 0.44
+  },
+  "M0": {
+   "episodes": 120,
+   "hours": 0.52,
+   "usd": 0.18
+  },
+  "Bcal": {
+   "episodes": 60,
+   "hours": 0.21,
+   "usd": 0.07
+  },
+  "M1pi": {
+   "episodes": 5600,
+   "hours": 24.38,
+   "usd": 8.29
+  },
+  "Boracle": {
+   "episodes": 2080,
+   "hours": 7.26,
+   "usd": 2.47
+  },
+  "Bnoisy": {
+   "episodes": 520,
+   "hours": 1.81,
+   "usd": 0.62
+  },
+  "D": {
+   "episodes": 2400,
+   "hours": 10.45,
+   "usd": 3.55
+  }
+ },
+ "total": {
+  "episodes": 11080,
+  "hours": 45.94,
+  "usd": 15.62
+ },
+ "left": {
+  "episodes": 2400,
+  "hours": 10.45,
+  "usd": 3.55
+ }
+}
+[22:50:41] forecast after Bnoisy_pi05 (bench_pi05 14.308 s/episode)
+{
+ "pod": "A",
+ "usd_per_h": 0.34,
+ "tempo_s": {
+  "lmax_pi05": 15.673,
+  "bench_pi05": 14.308
+ },
+ "blocks": {
+  "connect": {
+   "episodes": 300,
+   "hours": 1.31,
+   "usd": 0.44
+  },
+  "M0": {
+   "episodes": 120,
+   "hours": 0.52,
+   "usd": 0.18
+  },
+  "Bcal": {
+   "episodes": 60,
+   "hours": 0.24,
+   "usd": 0.08
+  },
+  "M1pi": {
+   "episodes": 5600,
+   "hours": 24.38,
+   "usd": 8.29
+  },
+  "Boracle": {
+   "episodes": 2080,
+   "hours": 8.27,
+   "usd": 2.81
+  },
+  "Bnoisy": {
+   "episodes": 520,
+   "hours": 2.07,
+   "usd": 0.7
+  },
+  "D": {
+   "episodes": 2400,
+   "hours": 10.45,
+   "usd": 3.55
+  }
+ },
+ "total": {
+  "episodes": 11080,
+  "hours": 47.23,
+  "usd": 16.06
+ },
+ "left": {
+  "episodes": 2400,
+  "hours": 10.45,
+  "usd": 3.55
+ }
+}
+[03:15:42] forecast after D_pi05_eval300_plus_d10 (lmax_pi05 21.071 s/episode)
+{
+ "pod": "A",
+ "usd_per_h": 0.34,
+ "tempo_s": {
+  "lmax_pi05": 21.071,
+  "bench_pi05": 14.308
+ },
+ "blocks": {
+  "connect": {
+   "episodes": 300,
+   "hours": 1.76,
+   "usd": 0.6
+  },
+  "M0": {
+   "episodes": 120,
+   "hours": 0.7,
+   "usd": 0.24
+  },
+  "Bcal": {
+   "episodes": 60,
+   "hours": 0.24,
+   "usd": 0.08
+  },
+  "M1pi": {
+   "episodes": 5600,
+   "hours": 32.78,
+   "usd": 11.14
+  },
+  "Boracle": {
+   "episodes": 2080,
+   "hours": 8.27,
+   "usd": 2.81
+  },
+  "Bnoisy": {
+   "episodes": 520,
+   "hours": 2.07,
+   "usd": 0.7
+  },
+  "D": {
+   "episodes": 2400,
+   "hours": 14.05,
+   "usd": 4.78
+  }
+ },
+ "total": {
+  "episodes": 11080,
+  "hours": 59.85,
+  "usd": 20.35
+ },
+ "left": {
+  "episodes": 1652,
+  "hours": 9.67,
+  "usd": 3.29
+ }
+}
+[05:29:17] forecast after D_pi05_eval300_pro_d10 (lmax_pi05 17.423 s/episode)
+{
+ "pod": "A",
+ "usd_per_h": 0.34,
+ "tempo_s": {
+  "lmax_pi05": 17.423,
+  "bench_pi05": 14.308
+ },
+ "blocks": {
+  "connect": {
+   "episodes": 300,
+   "hours": 1.45,
+   "usd": 0.49
+  },
+  "M0": {
+   "episodes": 120,
+   "hours": 0.58,
+   "usd": 0.2
+  },
+  "Bcal": {
+   "episodes": 60,
+   "hours": 0.24,
+   "usd": 0.08
+  },
+  "M1pi": {
+   "episodes": 5600,
+   "hours": 27.1,
+   "usd": 9.21
+  },
+  "Boracle": {
+   "episodes": 2080,
+   "hours": 8.27,
+   "usd": 2.81
+  },
+  "Bnoisy": {
+   "episodes": 520,
+   "hours": 2.07,
+   "usd": 0.7
+  },
+  "D": {
+   "episodes": 2400,
+   "hours": 11.62,
+   "usd": 3.95
+  }
+ },
+ "total": {
+  "episodes": 11080,
+  "hours": 51.32,
+  "usd": 17.45
+ },
+ "left": {
+  "episodes": 1200,
+  "hours": 5.81,
+  "usd": 1.97
+ }
+}
+[10:20:35] forecast after D_pi05_eval300_plus_d20 (lmax_pi05 23.161 s/episode)
+{
+ "pod": "A",
+ "usd_per_h": 0.34,
+ "tempo_s": {
+  "lmax_pi05": 23.161,
+  "bench_pi05": 14.308
+ },
+ "blocks": {
+  "connect": {
+   "episodes": 300,
+   "hours": 1.93,
+   "usd": 0.66
+  },
+  "M0": {
+   "episodes": 120,
+   "hours": 0.77,
+   "usd": 0.26
+  },
+  "Bcal": {
+   "episodes": 60,
+   "hours": 0.24,
+   "usd": 0.08
+  },
+  "M1pi": {
+   "episodes": 5600,
+   "hours": 36.03,
+   "usd": 12.25
+  },
+  "Boracle": {
+   "episodes": 2080,
+   "hours": 8.27,
+   "usd": 2.81
+  },
+  "Bnoisy": {
+   "episodes": 520,
+   "hours": 2.07,
+   "usd": 0.7
+  },
+  "D": {
+   "episodes": 2400,
+   "hours": 15.44,
+   "usd": 5.25
+  }
+ },
+ "total": {
+  "episodes": 11080,
+  "hours": 64.74,
+  "usd": 22.01
+ },
+ "left": {
+  "episodes": 452,
+  "hours": 2.91,
+  "usd": 0.99
+ }
+}
+[12:46:20] forecast after D_pi05_eval300_pro_d20 (lmax_pi05 19.054 s/episode)
+{
+ "pod": "A",
+ "usd_per_h": 0.34,
+ "tempo_s": {
+  "lmax_pi05": 19.054,
+  "bench_pi05": 14.308
+ },
+ "blocks": {
+  "connect": {
+   "episodes": 300,
+   "hours": 1.59,
+   "usd": 0.54
+  },
+  "M0": {
+   "episodes": 120,
+   "hours": 0.64,
+   "usd": 0.22
+  },
+  "Bcal": {
+   "episodes": 60,
+   "hours": 0.24,
+   "usd": 0.08
+  },
+  "M1pi": {
+   "episodes": 5600,
+   "hours": 29.64,
+   "usd": 10.08
+  },
+  "Boracle": {
+   "episodes": 2080,
+   "hours": 8.27,
+   "usd": 2.81
+  },
+  "Bnoisy": {
+   "episodes": 520,
+   "hours": 2.07,
+   "usd": 0.7
+  },
+  "D": {
+   "episodes": 2400,
+   "hours": 12.7,
+   "usd": 4.32
+  }
+ },
+ "total": {
+  "episodes": 11080,
+  "hours": 55.14,
+  "usd": 18.75
+ },
+ "left": {
+  "episodes": 0,
+  "hours": 0.0,
+  "usd": 0.0
+ }
+}

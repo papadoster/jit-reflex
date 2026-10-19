@@ -1,0 +1,145 @@
+03:15:30 pi05 groups=2 gpu_mib=400 worker_rss_mib=
+03:15:50 pi05 groups=2 gpu_mib=400 worker_rss_mib=
+03:16:10 pi05 groups=2 gpu_mib=400 worker_rss_mib=
+03:16:30 pi05 groups=2 gpu_mib=400 worker_rss_mib=
+03:16:51 pi05 groups=2 gpu_mib=400 worker_rss_mib=
+03:17:11 pi05 groups=2 gpu_mib=400 worker_rss_mib=
+03:17:31 pi05 groups=2 gpu_mib=19365 worker_rss_mib=2483 2181 1888 2182 2110 2181 
+03:17:51 pi05 groups=2 gpu_mib=21337 worker_rss_mib=2483 2181 1888 2182 2110 2181 
+03:18:11 pi05 groups=2 gpu_mib=21337 worker_rss_mib=2483 2181 1888 2182 2110 2181 
+03:18:31 pi05 groups=2 gpu_mib=21337 worker_rss_mib=2483 2181 1888 2182 2110 2181 
+03:18:51 pi05 groups=2 gpu_mib=21337 worker_rss_mib=2483 2181 1888 2182 2110 2181 
+03:19:11 pi05 groups=2 gpu_mib=21337 worker_rss_mib=2483 2181 1888 2182 2110 2181 
+03:19:31 pi05 groups=2 gpu_mib=19406 worker_rss_mib=2611 2216 2075 2218 2143 2223 
+03:19:51 pi05 groups=2 gpu_mib=22438 worker_rss_mib=2611 2940 2794 2934 2821 2934 
+03:20:11 pi05 groups=2 gpu_mib=22438 worker_rss_mib=2611 2940 2794 2934 2821 2934 
+03:20:31 pi05 groups=2 gpu_mib=22438 worker_rss_mib=2611 2940 2794 2934 2821 2934 
+03:20:51 pi05 groups=2 gpu_mib=22438 worker_rss_mib=2611 2940 2794 2934 2821 2934 
+03:21:11 pi05 groups=2 gpu_mib=22438 worker_rss_mib=2611 2940 2794 2934 2821 2934 
+03:21:31 pi05 groups=2 gpu_mib=22438 worker_rss_mib=2611 2940 2794 2934 2821 2935 
+03:21:51 pi05 groups=2 gpu_mib=22438 worker_rss_mib=2612 2940 2794 2934 2821 2935 
+03:22:11 pi05 groups=2 gpu_mib=22438 worker_rss_mib=2612 2940 2794 2934 2821 2935 
+03:22:31 pi05 groups=2 gpu_mib=22438 worker_rss_mib=2612 2940 2794 2934 2822 2935 
+03:22:51 pi05 groups=2 gpu_mib=22438 worker_rss_mib=2612 2940 2794 2934 2822 2935 
+03:23:11 pi05 groups=2 gpu_mib=22438 worker_rss_mib=2612 2940 2794 2934 2822 2935 
+03:23:31 pi05 groups=2 gpu_mib=22438 worker_rss_mib=2612 2940 2794 2934 2822 2935 
+03:23:51 pi05 groups=2 gpu_mib=22438 worker_rss_mib=2612 2940 2794 2934 2822 2935 
+03:24:11 pi05 groups=2 gpu_mib=21577 worker_rss_mib=2635 2958 2545 2543 2552 2566 
+03:24:31 pi05 groups=2 gpu_mib=21592 worker_rss_mib=2635 2960 2545 2543 2552 2566 
+03:24:51 pi05 groups=2 gpu_mib=21592 worker_rss_mib=2635 2960 2545 2543 2552 2566 
+03:25:11 pi05 groups=2 gpu_mib=21592 worker_rss_mib=2635 2960 2545 2543 2552 2566 
+03:25:31 pi05 groups=2 gpu_mib=21592 worker_rss_mib=2635 2960 2545 2543 2552 2566 
+03:25:51 pi05 groups=2 gpu_mib=21592 worker_rss_mib=2635 2960 2545 2543 2552 2566 
+03:26:12 pi05 groups=2 gpu_mib=21592 worker_rss_mib=2635 2960 2545 2543 2552 2567 
+03:26:32 pi05 groups=2 gpu_mib=21592 worker_rss_mib=2635 2960 2545 2543 2552 2567 
+03:26:52 pi05 groups=2 gpu_mib=21592 worker_rss_mib=2635 2960 2545 2543 2552 2567 
+03:27:12 pi05 groups=2 gpu_mib=21592 worker_rss_mib=2635 2960 2545 2543 2552 2567 
+03:27:32 pi05 groups=2 gpu_mib=21592 worker_rss_mib=2635 2961 2545 2543 2552 2567 
+03:27:52 pi05 groups=2 gpu_mib=21592 worker_rss_mib=2635 2961 2545 2543 2552 2567 
+03:28:12 pi05 groups=2 gpu_mib=21592 worker_rss_mib=2635 2961 2545 2543 2552 2567 
+03:28:32 pi05 groups=2 gpu_mib=21592 worker_rss_mib=2635 2961 2545 2543 2552 2567 
+03:28:52 pi05 groups=2 gpu_mib=21143 worker_rss_mib=2581 2551 2698 2684 2625 2636 
+03:29:12 pi05 groups=2 gpu_mib=21143 worker_rss_mib=2581 2551 2698 2684 2625 2636 
+03:29:32 pi05 groups=2 gpu_mib=21143 worker_rss_mib=2581 2551 2698 2684 2625 2636 
+03:29:52 pi05 groups=2 gpu_mib=21143 worker_rss_mib=2581 2551 2698 2684 2625 2636 
+03:30:12 pi05 groups=2 gpu_mib=21090 worker_rss_mib=2600 2627 2723 2751 2535 2656 
+03:30:32 pi05 groups=2 gpu_mib=21090 worker_rss_mib=2600 2627 2723 2751 2535 2656 
+03:30:52 pi05 groups=2 gpu_mib=21090 worker_rss_mib=2600 2627 2723 2751 2535 2656 
+03:31:12 pi05 groups=2 gpu_mib=18800 worker_rss_mib=2264 2291 2387 2415 2200 2320 
+03:31:32 pi05 groups=2 gpu_mib=21170 worker_rss_mib=2612 2606 2657 2704 2661 2630 
+03:31:52 pi05 groups=2 gpu_mib=21170 worker_rss_mib=2612 2606 2657 2704 2661 2630 
+03:32:12 pi05 groups=2 gpu_mib=21170 worker_rss_mib=2612 2606 2657 2704 2661 2630 
+03:32:32 pi05 groups=2 gpu_mib=21170 worker_rss_mib=2612 2606 2657 2704 2661 2630 
+03:32:52 pi05 groups=2 gpu_mib=21424 worker_rss_mib=2753 2737 2817 2956 2819 2870 
+03:33:12 pi05 groups=2 gpu_mib=21424 worker_rss_mib=2753 2737 2817 2956 2819 2870 
+03:33:32 pi05 groups=2 gpu_mib=21424 worker_rss_mib=2753 2737 2817 2956 2819 2870 
+03:33:52 pi05 groups=2 gpu_mib=21419 worker_rss_mib=2993 2978 2901 2959 2693 2648 
+03:34:12 pi05 groups=2 gpu_mib=21419 worker_rss_mib=2993 2978 2901 2960 2693 2648 
+03:34:32 pi05 groups=2 gpu_mib=21419 worker_rss_mib=2993 2978 2901 2960 2693 2648 
+03:34:52 pi05 groups=2 gpu_mib=21419 worker_rss_mib=2993 2978 2901 2960 2693 2648 
+03:35:13 pi05 groups=2 gpu_mib=21156 worker_rss_mib=2767 2752 2728 2718 2739 2731 
+03:35:33 pi05 groups=2 gpu_mib=21156 worker_rss_mib=2767 2752 2728 2718 2739 2731 
+03:35:53 pi05 groups=2 gpu_mib=21156 worker_rss_mib=2767 2752 2728 2718 2739 2731 
+03:36:13 pi05 groups=2 gpu_mib=21156 worker_rss_mib=2767 2752 2728 2718 2739 2731 
+03:36:33 pi05 groups=3 gpu_mib=20974 worker_rss_mib=2592 2752 2728 2718 2739 2731 
+03:36:53 pi05 groups=3 gpu_mib=20974 worker_rss_mib=2592 2752 2728 2718 2739 2731 
+03:37:13 pi05 groups=3 gpu_mib=20974 worker_rss_mib=2592 2752 2728 2718 2739 2731 
+03:37:33 pi05 groups=3 gpu_mib=20974 worker_rss_mib=2592 2752 2728 2718 2739 2731 
+03:37:53 pi05 groups=3 gpu_mib=20974 worker_rss_mib=2592 2752 2728 2718 2739 2731 
+03:38:13 pi05 groups=3 gpu_mib=20974 worker_rss_mib=2592 2752 2728 2718 2739 2731 
+03:38:33 pi05 groups=3 gpu_mib=20974 worker_rss_mib=2592 2752 2728 2718 2739 2731 
+03:38:53 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2529 2560 2495 2569 2514 
+03:39:13 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2529 2560 2495 2569 2514 
+03:39:33 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2529 2560 2495 2569 2514 
+03:39:53 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2529 2560 2495 2569 2514 
+03:40:13 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2529 2560 2495 2569 2514 
+03:40:33 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2529 2560 2495 2569 2514 
+03:40:53 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2529 2560 2495 2569 2514 
+03:41:13 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2529 2560 2495 2569 2514 
+03:41:33 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2529 2560 2495 2569 2514 
+03:41:53 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2529 2560 2495 2569 2514 
+03:42:13 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2529 2560 2495 2569 2514 
+03:42:33 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2529 2560 2495 2569 2514 
+03:42:53 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2529 2560 2495 2569 2514 
+03:43:13 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2529 2560 2495 2569 2514 
+03:43:33 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2529 2560 2495 2569 2514 
+03:43:53 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2529 2560 2495 2569 2514 
+03:44:14 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2529 2560 2495 2569 2514 
+03:44:34 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2528 2560 2495 2569 2514 
+03:44:54 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2528 2560 2495 2569 2514 
+03:45:14 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2528 2560 2495 2569 2514 
+03:45:34 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2528 2560 2495 2569 2514 
+03:45:54 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2528 2560 2495 2569 2514 
+03:46:14 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2528 2560 2495 2569 2514 
+03:46:34 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2528 2560 2495 2569 2514 
+03:46:54 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2528 2560 2495 2569 2514 
+03:47:14 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2528 2560 2495 2569 2514 
+03:47:34 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2528 2560 2495 2569 2514 
+03:47:54 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2528 2560 2495 2569 2514 
+03:48:14 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2528 2560 2495 2569 2514 
+03:48:34 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2528 2560 2495 2569 2514 
+03:48:54 pi05 groups=3 gpu_mib=20064 worker_rss_mib=2591 2528 2560 2495 2569 2514 
+03:49:14 pi05 groups=4 gpu_mib=400 worker_rss_mib=
+03:49:34 pi05 groups=4 gpu_mib=400 worker_rss_mib=
+03:49:54 pi05 groups=4 gpu_mib=400 worker_rss_mib=
+03:50:14 pi05 groups=4 gpu_mib=400 worker_rss_mib=
+03:50:34 pi05 groups=4 gpu_mib=400 worker_rss_mib=
+03:50:54 pi05 groups=4 gpu_mib=400 worker_rss_mib=
+03:51:14 pi05 groups=4 gpu_mib=16731 worker_rss_mib=
+03:51:34 pi05 groups=4 gpu_mib=21427 worker_rss_mib=2015 1570 1923 2145 2229 1931 
+03:51:54 pi05 groups=4 gpu_mib=21427 worker_rss_mib=2015 1570 1923 2145 2229 1931 
+03:52:14 pi05 groups=4 gpu_mib=21475 worker_rss_mib=2163 2248 2328 2357 2526 2329 
+03:52:34 pi05 groups=4 gpu_mib=21475 worker_rss_mib=2163 2248 2328 2357 2526 2329 
+03:52:54 pi05 groups=4 gpu_mib=21475 worker_rss_mib=2163 2248 2328 2357 2526 2329 
+03:53:15 pi05 groups=4 gpu_mib=21475 worker_rss_mib=2163 2248 2328 2357 2526 2329 
+03:53:35 pi05 groups=4 gpu_mib=21475 worker_rss_mib=2163 2248 2328 2357 2526 2329 
+03:53:55 pi05 groups=4 gpu_mib=21475 worker_rss_mib=2163 2248 2328 2357 2526 2329 
+03:54:15 pi05 groups=4 gpu_mib=20915 worker_rss_mib=2208 2291 2138 2094 2260 2132 
+03:54:35 pi05 groups=4 gpu_mib=20915 worker_rss_mib=2208 2291 2138 2094 2260 2132 
+03:54:55 pi05 groups=4 gpu_mib=20915 worker_rss_mib=2208 2291 2138 2094 2260 2132 
+03:55:15 pi05 groups=4 gpu_mib=20915 worker_rss_mib=2208 2291 2138 2094 2260 2132 
+03:55:35 pi05 groups=4 gpu_mib=20961 worker_rss_mib=2011 2026 2185 2121 2562 2446 
+03:55:55 pi05 groups=4 gpu_mib=20961 worker_rss_mib=2011 2026 2185 2121 2562 2446 
+03:56:15 pi05 groups=4 gpu_mib=20961 worker_rss_mib=2011 2026 2185 2121 2562 2446 
+03:56:35 pi05 groups=4 gpu_mib=20961 worker_rss_mib=2011 2026 2185 2121 2563 2446 
+03:56:55 pi05 groups=4 gpu_mib=21613 worker_rss_mib=2448 2427 2480 2433 2563 2466 
+03:57:15 pi05 groups=4 gpu_mib=21613 worker_rss_mib=2448 2427 2480 2433 2563 2466 
+03:57:35 pi05 groups=4 gpu_mib=21613 worker_rss_mib=2448 2427 2480 2433 2563 2466 
+03:57:55 pi05 groups=4 gpu_mib=21613 worker_rss_mib=2448 2427 2480 2433 2563 2466 
+03:58:15 pi05 groups=4 gpu_mib=21613 worker_rss_mib=2448 2427 2480 2433 2563 2466 
+03:58:35 pi05 groups=4 gpu_mib=22074 worker_rss_mib=2639 2629 2673 2627 2757 2660 
+03:58:55 pi05 groups=4 gpu_mib=22074 worker_rss_mib=2639 2629 2673 2627 2757 2660 
+03:59:15 pi05 groups=4 gpu_mib=21827 worker_rss_mib=2689 2664 2677 2645 2694 2653 
+03:59:35 pi05 groups=4 gpu_mib=21674 worker_rss_mib=2690 2663 2755 2726 2761 2718 
+03:59:55 pi05 groups=4 gpu_mib=21674 worker_rss_mib=2690 2663 2755 2726 2761 2718 
+04:00:15 pi05 groups=4 gpu_mib=21614 worker_rss_mib=2754 2734 2777 2747 2762 2687 
+04:00:35 pi05 groups=4 gpu_mib=21614 worker_rss_mib=2754 2734 2777 2747 2762 2687 
+04:00:55 pi05 groups=4 gpu_mib=21614 worker_rss_mib=2754 2734 2777 2747 2762 2687 
+04:01:15 pi05 groups=4 gpu_mib=21614 worker_rss_mib=2754 2734 2777 2747 2762 2687 
+04:01:35 pi05 groups=4 gpu_mib=21614 worker_rss_mib=2759 2734 2777 2747 2762 2687 
+04:01:56 pi05 groups=4 gpu_mib=21614 worker_rss_mib=2759 2734 2777 2747 2762 2687 
+04:02:16 pi05 groups=5 gpu_mib=21524 worker_rss_mib=2546 2734 2777 2747 2762 2687 
+04:02:36 pi05 groups=5 gpu_mib=21077 worker_rss_mib=2587 2542 2596 2566 2548 2525 
+04:02:56 pi05 groups=5 gpu_mib=21077 worker_rss_mib=2587 2542 2596 2566 2548 2525 
+04:03:16 pi05 groups=5 gpu_mib=21077 worker_rss_mib=2606 2610 2596 2566 2548 2525 
+04:03:36 pi05 groups=5 gpu_mib=21077 worker_rss_mib=2606 2610 2596 2566 2548 2525 

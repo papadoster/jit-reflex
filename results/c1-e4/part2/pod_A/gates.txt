@@ -1,0 +1,4 @@
+=== Sat Oct 17 07:29:52 UTC 2026 connect gate, pod A
+brain       n miss Base none % Table 2 %   diff  pass (+-10 pp)
+pi05      300    0       81.33      79.7   +1.6  True
+C1-E4 part 2 connect A: PASS

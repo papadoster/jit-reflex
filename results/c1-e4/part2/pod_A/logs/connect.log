@@ -1,0 +1,2 @@
+[05:54:17] phase connect, connect_pi05_connect_plus_d0 (207 episodes): --brain pi05 --source plus --set connect --arms= --d 0 --split results/c1-e4/part2/pod_A/split0.json
+[07:06:21] phase connect, connect_pi05_connect_pro_d0 (93 episodes): --brain pi05 --source pro --set connect --arms= --d 0 --split results/c1-e4/part2/pod_A/split0.json

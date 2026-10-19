@@ -1,0 +1,725 @@
+=== Sat Oct 17 17:30:37 UTC 2026 pod A grid, HEAD ebfb1ffa001cc723f089148ced7c6e844b88ab34, MUJOCO_GL=egl, vCPUs 2
+code (src scripts/c1e4m_run.py scripts/c1e4m_brains.py scripts/c1e4_run.py): fa974713afa1a94483a89781b229525da33fc2d1 556fe14a012a362f15e75b1934289d3a41e06dcb 42191af07e3fb9375f3683c11704f7b6e5e1ab2c d87c785c62c5df756f96cb008227a11bf56009db
+/workspace/lmax-deps/LIBERO-MAX: a1e3cef258b3e00487db5282aef4e36010aaf401
+/workspace/lmax-deps/LIBERO-plus: 4976dc30028e805ff8094b55501d532c48fec182
+/workspace/lmax-deps/LIBERO-PRO: 2b910b5b5f53016bef9907632f6f840f1ce2229c
+{
+  "config_dir": "/workspace/lmax-deps/libero-pro-config",
+  "dataset": "zhouxueyang/LIBERO-Pro",
+  "dataset_root": "/workspace/lmax-deps/libero-pro-data",
+  "libero_pro_root": "/workspace/lmax-deps/LIBERO-PRO",
+  "revision": "c86fc3b8293185a6f373677018ff3e37f8391602",
+  "runtime_revision": "2b910b5b5f53016bef9907632f6f840f1ce2229c"
+}
+LIBERO-plus assets SHA-256: 96764a4bfbdaea98d4411598caeab235458318fe0f549611b93d1a323027b3cf
+pi0.5 weights SHA-256 checked: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+Sat Oct 17 17:30:37 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 4090        On  |   00000000:82:00.0 Off |                  Off |
+| 41%   60C    P2            182W /  183W |     400MiB /  24564MiB |    100%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+--- venv/bin/python
+torch 2.11.0+cu126 CUDA 12.6
+Using Python 3.12.3 environment at: venv
+scene packages: bddl==1.0.1 hf-libero==0.1.4 imageio==2.38.0 lazy-loader==0.6 mujoco==3.3.2 robosuite==1.4.0 scikit-image==0.26.0 tifffile==2026.9.20 wand==0.6.13
+Using Python 3.12.3 environment at: venv
+absl-py==2.5.1
+accelerate==1.15.0
+aiohappyeyeballs==2.7.1
+aiohttp==3.14.5
+aiosignal==1.4.0
+annotated-doc==0.0.5
+antlr4-python3-runtime==4.9.3
+anyio==4.15.1
+attrs==26.1.0
+av==15.1.0
+bddl==1.0.1
+certifi==2026.7.22
+charset-normalizer==3.5.2
+click==8.5.0
+cloudpickle==3.1.2
+cmake==4.1.3
+contourpy==1.4.0
+cuda-bindings==12.9.10
+cuda-pathfinder==1.8.3
+cuda-toolkit==12.6.3
+cycler==0.12.1
+datasets==4.8.5
+dill==0.4.1
+docopt==0.6.2
+draccus==0.11.6
+easydict==1.13
+einops==0.8.2
+etils==1.14.0
+farama-notifications==0.0.6
+fastjsonschema==2.22.2
+filelock==4.2.0
+fonttools==4.67.0
+frozenlist==1.8.0
+fsspec==2026.2.0
+future==1.0.0
+glfw==2.11.0
+gymnasium==1.3.0
+h11==0.16.0
+hf-libero==0.1.4
+hf-xet==1.7.0
+httpcore==1.0.9
+httpx==0.28.1
+huggingface-hub==1.33.0
+hydra-core==1.3.7
+idna==3.20
+imageio==2.38.0
+iniconfig==2.3.1
+jinja2==3.1.6
+jsonlines==4.0.0
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+jupyter-core==5.9.1
+jupytext==1.19.6
+kiwisolver==1.5.1
+lazy-loader==0.6
+lerobot==0.6.1
+llvmlite==0.50.0
+markdown-it-py==4.2.0
+markupsafe==3.0.4
+matplotlib==3.11.2
+mdit-py-plugins==0.6.1
+mdurl==0.1.2
+mergedeep==1.3.4
+mpmath==1.3.0
+mujoco==3.3.2
+multidict==7.1.0
+multiprocess==0.70.19
+mypy-extensions==1.1.0
+nbformat==5.11.1
+networkx==3.7
+num2words==0.5.14
+numba==0.68.0
+numpy==2.2.6
+nvidia-cublas-cu12==12.6.4.1
+nvidia-cuda-cupti-cu12==12.6.80
+nvidia-cuda-nvrtc-cu12==12.6.85
+nvidia-cuda-runtime-cu12==12.6.77
+nvidia-cudnn-cu12==9.10.2.21
+nvidia-cufft-cu12==11.3.0.4
+nvidia-cufile-cu12==1.11.1.6
+nvidia-curand-cu12==10.3.7.77
+nvidia-cusolver-cu12==11.7.1.2
+nvidia-cusparse-cu12==12.5.4.2
+nvidia-cusparselt-cu12==0.7.1
+nvidia-nccl-cu12==2.28.9
+nvidia-nvjitlink-cu12==12.6.85
+nvidia-nvshmem-cu12==3.4.5
+nvidia-nvtx-cu12==12.6.77
+omegaconf==2.3.1
+opencv-python==5.0.0.93
+opencv-python-headless==4.13.0.92
+packaging==25.0
+pandas==2.3.3
+pillow==12.3.0
+platformdirs==4.13.3
+pluggy==1.7.0
+propcache==0.5.4
+psutil==7.2.2
+pyarrow==26.0.0
+pygments==2.21.0
+pyopengl==3.1.10
+pyparsing==3.3.3
+pytest==9.1.1
+python-dateutil==2.9.0.post0
+pytz==2026.5
+pyyaml==6.0.3
+referencing==0.37.0
+regex==2026.9.29
+requests==2.34.2
+rich==15.0.0
+robomimic==0.2.0
+robosuite==1.4.0
+rpds-py==2026.9.1
+safetensors==0.8.0
+scikit-image==0.26.0
+scipy==1.18.1
+setuptools==81.0.0
+shellingham==1.5.4
+six==1.17.0
+sympy==1.14.0
+termcolor==3.3.0
+thop==0.1.1.post2209072238
+tifffile==2026.9.20
+tokenizers==0.22.2
+toml==0.10.2
+torch @ https://download.pytorch.org/whl/cu126/torch-2.11.0%2Bcu126-cp312-cp312-manylinux_2_28_x86_64.whl
+torchcodec==0.11.1
+torchvision @ https://download.pytorch.org/whl/cu126/torchvision-0.26.0%2Bcu126-cp312-cp312-manylinux_2_28_x86_64.whl
+tqdm==4.70.1
+traitlets==5.16.1
+transformers==5.5.4
+triton==3.6.0
+typer==0.27.3
+typing-extensions==4.16.0
+typing-inspect==0.9.0
+tzdata==2026.5
+urllib3==2.8.0
+wand==0.6.13
+xxhash==4.0.1
+yarl==1.25.1
+zipp==4.1.1
+=== Sat Oct 17 19:42:57 UTC 2026 pod A grid, HEAD a3f5f1399c219efd62ed764c632ba30bd5b83905, MUJOCO_GL=egl, vCPUs 2
+code (src scripts/c1e4m_run.py scripts/c1e4m_brains.py scripts/c1e4_run.py): fa974713afa1a94483a89781b229525da33fc2d1 556fe14a012a362f15e75b1934289d3a41e06dcb 42191af07e3fb9375f3683c11704f7b6e5e1ab2c d87c785c62c5df756f96cb008227a11bf56009db
+/workspace/lmax-deps/LIBERO-MAX: a1e3cef258b3e00487db5282aef4e36010aaf401
+/workspace/lmax-deps/LIBERO-plus: 4976dc30028e805ff8094b55501d532c48fec182
+/workspace/lmax-deps/LIBERO-PRO: 2b910b5b5f53016bef9907632f6f840f1ce2229c
+{
+  "config_dir": "/workspace/lmax-deps/libero-pro-config",
+  "dataset": "zhouxueyang/LIBERO-Pro",
+  "dataset_root": "/workspace/lmax-deps/libero-pro-data",
+  "libero_pro_root": "/workspace/lmax-deps/LIBERO-PRO",
+  "revision": "c86fc3b8293185a6f373677018ff3e37f8391602",
+  "runtime_revision": "2b910b5b5f53016bef9907632f6f840f1ce2229c"
+}
+LIBERO-plus assets SHA-256: 96764a4bfbdaea98d4411598caeab235458318fe0f549611b93d1a323027b3cf
+pi0.5 weights SHA-256 checked: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+Sat Oct 17 19:42:58 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 4090        On  |   00000000:82:00.0 Off |                  Off |
+| 41%   63C    P2            223W /  223W |     400MiB /  24564MiB |    100%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+--- venv/bin/python
+torch 2.11.0+cu126 CUDA 12.6
+Using Python 3.12.3 environment at: venv
+scene packages: bddl==1.0.1 hf-libero==0.1.4 imageio==2.38.0 lazy-loader==0.6 mujoco==3.3.2 robosuite==1.4.0 scikit-image==0.26.0 tifffile==2026.9.20 wand==0.6.13
+Using Python 3.12.3 environment at: venv
+absl-py==2.5.1
+accelerate==1.15.0
+aiohappyeyeballs==2.7.1
+aiohttp==3.14.5
+aiosignal==1.4.0
+annotated-doc==0.0.5
+antlr4-python3-runtime==4.9.3
+anyio==4.15.1
+attrs==26.1.0
+av==15.1.0
+bddl==1.0.1
+certifi==2026.7.22
+charset-normalizer==3.5.2
+click==8.5.0
+cloudpickle==3.1.2
+cmake==4.1.3
+contourpy==1.4.0
+cuda-bindings==12.9.10
+cuda-pathfinder==1.8.3
+cuda-toolkit==12.6.3
+cycler==0.12.1
+datasets==4.8.5
+dill==0.4.1
+docopt==0.6.2
+draccus==0.11.6
+easydict==1.13
+einops==0.8.2
+etils==1.14.0
+farama-notifications==0.0.6
+fastjsonschema==2.22.2
+filelock==4.2.0
+fonttools==4.67.0
+frozenlist==1.8.0
+fsspec==2026.2.0
+future==1.0.0
+glfw==2.11.0
+gymnasium==1.3.0
+h11==0.16.0
+hf-libero==0.1.4
+hf-xet==1.7.0
+httpcore==1.0.9
+httpx==0.28.1
+huggingface-hub==1.33.0
+hydra-core==1.3.7
+idna==3.20
+imageio==2.38.0
+iniconfig==2.3.1
+jinja2==3.1.6
+jsonlines==4.0.0
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+jupyter-core==5.9.1
+jupytext==1.19.6
+kiwisolver==1.5.1
+lazy-loader==0.6
+lerobot==0.6.1
+llvmlite==0.50.0
+markdown-it-py==4.2.0
+markupsafe==3.0.4
+matplotlib==3.11.2
+mdit-py-plugins==0.6.1
+mdurl==0.1.2
+mergedeep==1.3.4
+mpmath==1.3.0
+mujoco==3.3.2
+multidict==7.1.0
+multiprocess==0.70.19
+mypy-extensions==1.1.0
+nbformat==5.11.1
+networkx==3.7
+num2words==0.5.14
+numba==0.68.0
+numpy==2.2.6
+nvidia-cublas-cu12==12.6.4.1
+nvidia-cuda-cupti-cu12==12.6.80
+nvidia-cuda-nvrtc-cu12==12.6.85
+nvidia-cuda-runtime-cu12==12.6.77
+nvidia-cudnn-cu12==9.10.2.21
+nvidia-cufft-cu12==11.3.0.4
+nvidia-cufile-cu12==1.11.1.6
+nvidia-curand-cu12==10.3.7.77
+nvidia-cusolver-cu12==11.7.1.2
+nvidia-cusparse-cu12==12.5.4.2
+nvidia-cusparselt-cu12==0.7.1
+nvidia-nccl-cu12==2.28.9
+nvidia-nvjitlink-cu12==12.6.85
+nvidia-nvshmem-cu12==3.4.5
+nvidia-nvtx-cu12==12.6.77
+omegaconf==2.3.1
+opencv-python==5.0.0.93
+opencv-python-headless==4.13.0.92
+packaging==25.0
+pandas==2.3.3
+pillow==12.3.0
+platformdirs==4.13.3
+pluggy==1.7.0
+propcache==0.5.4
+psutil==7.2.2
+pyarrow==26.0.0
+pygments==2.21.0
+pyopengl==3.1.10
+pyparsing==3.3.3
+pytest==9.1.1
+python-dateutil==2.9.0.post0
+pytz==2026.5
+pyyaml==6.0.3
+referencing==0.37.0
+regex==2026.9.29
+requests==2.34.2
+rich==15.0.0
+robomimic==0.2.0
+robosuite==1.4.0
+rpds-py==2026.9.1
+safetensors==0.8.0
+scikit-image==0.26.0
+scipy==1.18.1
+setuptools==81.0.0
+shellingham==1.5.4
+six==1.17.0
+sympy==1.14.0
+termcolor==3.3.0
+thop==0.1.1.post2209072238
+tifffile==2026.9.20
+tokenizers==0.22.2
+toml==0.10.2
+torch @ https://download.pytorch.org/whl/cu126/torch-2.11.0%2Bcu126-cp312-cp312-manylinux_2_28_x86_64.whl
+torchcodec==0.11.1
+torchvision @ https://download.pytorch.org/whl/cu126/torchvision-0.26.0%2Bcu126-cp312-cp312-manylinux_2_28_x86_64.whl
+tqdm==4.70.1
+traitlets==5.16.1
+transformers==5.5.4
+triton==3.6.0
+typer==0.27.3
+typing-extensions==4.16.0
+typing-inspect==0.9.0
+tzdata==2026.5
+urllib3==2.8.0
+wand==0.6.13
+xxhash==4.0.1
+yarl==1.25.1
+zipp==4.1.1
+./scripts/gpu_c1e4m.sh: line 270: 20501 Killed                  setsid bash -o pipefail -c '"${@:2}" </dev/null 2>&1 | tee -a "$1"' wd "$log" "$@"
+=== Sat Oct 17 20:41:03 UTC 2026 pod A grid, HEAD 854dd623d1e32af10dcf5c5072658d3dbc3528fe, MUJOCO_GL=egl, vCPUs 2
+code (src scripts/c1e4m_run.py scripts/c1e4m_brains.py scripts/c1e4_run.py): fa974713afa1a94483a89781b229525da33fc2d1 556fe14a012a362f15e75b1934289d3a41e06dcb 42191af07e3fb9375f3683c11704f7b6e5e1ab2c d87c785c62c5df756f96cb008227a11bf56009db
+/workspace/lmax-deps/LIBERO-MAX: a1e3cef258b3e00487db5282aef4e36010aaf401
+/workspace/lmax-deps/LIBERO-plus: 4976dc30028e805ff8094b55501d532c48fec182
+/workspace/lmax-deps/LIBERO-PRO: 2b910b5b5f53016bef9907632f6f840f1ce2229c
+{
+  "config_dir": "/workspace/lmax-deps/libero-pro-config",
+  "dataset": "zhouxueyang/LIBERO-Pro",
+  "dataset_root": "/workspace/lmax-deps/libero-pro-data",
+  "libero_pro_root": "/workspace/lmax-deps/LIBERO-PRO",
+  "revision": "c86fc3b8293185a6f373677018ff3e37f8391602",
+  "runtime_revision": "2b910b5b5f53016bef9907632f6f840f1ce2229c"
+}
+LIBERO-plus assets SHA-256: 96764a4bfbdaea98d4411598caeab235458318fe0f549611b93d1a323027b3cf
+pi0.5 weights SHA-256 checked: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+Sat Oct 17 20:41:03 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 4090        On  |   00000000:82:00.0 Off |                  Off |
+| 44%   65C    P2            242W /  243W |   20089MiB /  24564MiB |    100%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+--- venv/bin/python
+torch 2.11.0+cu126 CUDA 12.6
+Using Python 3.12.3 environment at: venv
+scene packages: bddl==1.0.1 hf-libero==0.1.4 imageio==2.38.0 lazy-loader==0.6 mujoco==3.3.2 robosuite==1.4.0 scikit-image==0.26.0 tifffile==2026.9.20 wand==0.6.13
+Using Python 3.12.3 environment at: venv
+absl-py==2.5.1
+accelerate==1.15.0
+aiohappyeyeballs==2.7.1
+aiohttp==3.14.5
+aiosignal==1.4.0
+annotated-doc==0.0.5
+antlr4-python3-runtime==4.9.3
+anyio==4.15.1
+attrs==26.1.0
+av==15.1.0
+bddl==1.0.1
+certifi==2026.7.22
+charset-normalizer==3.5.2
+click==8.5.0
+cloudpickle==3.1.2
+cmake==4.1.3
+contourpy==1.4.0
+cuda-bindings==12.9.10
+cuda-pathfinder==1.8.3
+cuda-toolkit==12.6.3
+cycler==0.12.1
+datasets==4.8.5
+dill==0.4.1
+docopt==0.6.2
+draccus==0.11.6
+easydict==1.13
+einops==0.8.2
+etils==1.14.0
+farama-notifications==0.0.6
+fastjsonschema==2.22.2
+filelock==4.2.0
+fonttools==4.67.0
+frozenlist==1.8.0
+fsspec==2026.2.0
+future==1.0.0
+glfw==2.11.0
+gymnasium==1.3.0
+h11==0.16.0
+hf-libero==0.1.4
+hf-xet==1.7.0
+httpcore==1.0.9
+httpx==0.28.1
+huggingface-hub==1.33.0
+hydra-core==1.3.7
+idna==3.20
+imageio==2.38.0
+iniconfig==2.3.1
+jinja2==3.1.6
+jsonlines==4.0.0
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+jupyter-core==5.9.1
+jupytext==1.19.6
+kiwisolver==1.5.1
+lazy-loader==0.6
+lerobot==0.6.1
+llvmlite==0.50.0
+markdown-it-py==4.2.0
+markupsafe==3.0.4
+matplotlib==3.11.2
+mdit-py-plugins==0.6.1
+mdurl==0.1.2
+mergedeep==1.3.4
+mpmath==1.3.0
+mujoco==3.3.2
+multidict==7.1.0
+multiprocess==0.70.19
+mypy-extensions==1.1.0
+nbformat==5.11.1
+networkx==3.7
+num2words==0.5.14
+numba==0.68.0
+numpy==2.2.6
+nvidia-cublas-cu12==12.6.4.1
+nvidia-cuda-cupti-cu12==12.6.80
+nvidia-cuda-nvrtc-cu12==12.6.85
+nvidia-cuda-runtime-cu12==12.6.77
+nvidia-cudnn-cu12==9.10.2.21
+nvidia-cufft-cu12==11.3.0.4
+nvidia-cufile-cu12==1.11.1.6
+nvidia-curand-cu12==10.3.7.77
+nvidia-cusolver-cu12==11.7.1.2
+nvidia-cusparse-cu12==12.5.4.2
+nvidia-cusparselt-cu12==0.7.1
+nvidia-nccl-cu12==2.28.9
+nvidia-nvjitlink-cu12==12.6.85
+nvidia-nvshmem-cu12==3.4.5
+nvidia-nvtx-cu12==12.6.77
+omegaconf==2.3.1
+opencv-python==5.0.0.93
+opencv-python-headless==4.13.0.92
+packaging==25.0
+pandas==2.3.3
+pillow==12.3.0
+platformdirs==4.13.3
+pluggy==1.7.0
+propcache==0.5.4
+psutil==7.2.2
+pyarrow==26.0.0
+pygments==2.21.0
+pyopengl==3.1.10
+pyparsing==3.3.3
+pytest==9.1.1
+python-dateutil==2.9.0.post0
+pytz==2026.5
+pyyaml==6.0.3
+referencing==0.37.0
+regex==2026.9.29
+requests==2.34.2
+rich==15.0.0
+robomimic==0.2.0
+robosuite==1.4.0
+rpds-py==2026.9.1
+safetensors==0.8.0
+scikit-image==0.26.0
+scipy==1.18.1
+setuptools==81.0.0
+shellingham==1.5.4
+six==1.17.0
+sympy==1.14.0
+termcolor==3.3.0
+thop==0.1.1.post2209072238
+tifffile==2026.9.20
+tokenizers==0.22.2
+toml==0.10.2
+torch @ https://download.pytorch.org/whl/cu126/torch-2.11.0%2Bcu126-cp312-cp312-manylinux_2_28_x86_64.whl
+torchcodec==0.11.1
+torchvision @ https://download.pytorch.org/whl/cu126/torchvision-0.26.0%2Bcu126-cp312-cp312-manylinux_2_28_x86_64.whl
+tqdm==4.70.1
+traitlets==5.16.1
+transformers==5.5.4
+triton==3.6.0
+typer==0.27.3
+typing-extensions==4.16.0
+typing-inspect==0.9.0
+tzdata==2026.5
+urllib3==2.8.0
+wand==0.6.13
+xxhash==4.0.1
+yarl==1.25.1
+zipp==4.1.1
+=== Mon Oct 19 12:46:21 UTC 2026 pod A grid, HEAD 511bd3d6a3ca4d5df707629eaeda0b82e82bbb19, MUJOCO_GL=egl, vCPUs 2
+code (src scripts/c1e4m_run.py scripts/c1e4m_brains.py scripts/c1e4_run.py): fa974713afa1a94483a89781b229525da33fc2d1 69142c9157b88d8bc30d1a1632437b585f16183f 42191af07e3fb9375f3683c11704f7b6e5e1ab2c d87c785c62c5df756f96cb008227a11bf56009db
+/workspace/lmax-deps/LIBERO-MAX: a1e3cef258b3e00487db5282aef4e36010aaf401
+/workspace/lmax-deps/LIBERO-plus: 4976dc30028e805ff8094b55501d532c48fec182
+/workspace/lmax-deps/LIBERO-PRO: 2b910b5b5f53016bef9907632f6f840f1ce2229c
+{
+  "config_dir": "/workspace/lmax-deps/libero-pro-config",
+  "dataset": "zhouxueyang/LIBERO-Pro",
+  "dataset_root": "/workspace/lmax-deps/libero-pro-data",
+  "libero_pro_root": "/workspace/lmax-deps/LIBERO-PRO",
+  "revision": "c86fc3b8293185a6f373677018ff3e37f8391602",
+  "runtime_revision": "2b910b5b5f53016bef9907632f6f840f1ce2229c"
+}
+LIBERO-plus assets SHA-256: 96764a4bfbdaea98d4411598caeab235458318fe0f549611b93d1a323027b3cf
+pi0.5 weights SHA-256 checked: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+Mon Oct 19 12:46:22 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 4090        On  |   00000000:82:00.0 Off |                  Off |
+| 36%   57C    P2            182W /  183W |     803MiB /  24564MiB |    100%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+--- venv/bin/python
+torch 2.11.0+cu126 CUDA 12.6
+Using Python 3.12.3 environment at: venv
+scene packages: bddl==1.0.1 hf-libero==0.1.4 imageio==2.38.0 lazy-loader==0.6 mujoco==3.3.2 robosuite==1.4.0 scikit-image==0.26.0 tifffile==2026.9.20 wand==0.6.13
+Using Python 3.12.3 environment at: venv
+absl-py==2.5.1
+accelerate==1.15.0
+aiohappyeyeballs==2.7.1
+aiohttp==3.14.5
+aiosignal==1.4.0
+annotated-doc==0.0.5
+antlr4-python3-runtime==4.9.3
+anyio==4.15.1
+attrs==26.1.0
+av==15.1.0
+bddl==1.0.1
+certifi==2026.7.22
+charset-normalizer==3.5.2
+click==8.5.0
+cloudpickle==3.1.2
+cmake==4.1.3
+contourpy==1.4.0
+cuda-bindings==12.9.10
+cuda-pathfinder==1.8.3
+cuda-toolkit==12.6.3
+cycler==0.12.1
+datasets==4.8.5
+dill==0.4.1
+docopt==0.6.2
+draccus==0.11.6
+easydict==1.13
+einops==0.8.2
+etils==1.14.0
+farama-notifications==0.0.6
+fastjsonschema==2.22.2
+filelock==4.2.0
+fonttools==4.67.0
+frozenlist==1.8.0
+fsspec==2026.2.0
+future==1.0.0
+glfw==2.11.0
+gymnasium==1.3.0
+h11==0.16.0
+hf-libero==0.1.4
+hf-xet==1.7.0
+httpcore==1.0.9
+httpx==0.28.1
+huggingface-hub==1.33.0
+hydra-core==1.3.7
+idna==3.20
+imageio==2.38.0
+iniconfig==2.3.1
+jinja2==3.1.6
+jsonlines==4.0.0
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+jupyter-core==5.9.1
+jupytext==1.19.6
+kiwisolver==1.5.1
+lazy-loader==0.6
+lerobot==0.6.1
+llvmlite==0.50.0
+markdown-it-py==4.2.0
+markupsafe==3.0.4
+matplotlib==3.11.2
+mdit-py-plugins==0.6.1
+mdurl==0.1.2
+mergedeep==1.3.4
+mpmath==1.3.0
+mujoco==3.3.2
+multidict==7.1.0
+multiprocess==0.70.19
+mypy-extensions==1.1.0
+nbformat==5.11.1
+networkx==3.7
+num2words==0.5.14
+numba==0.68.0
+numpy==2.2.6
+nvidia-cublas-cu12==12.6.4.1
+nvidia-cuda-cupti-cu12==12.6.80
+nvidia-cuda-nvrtc-cu12==12.6.85
+nvidia-cuda-runtime-cu12==12.6.77
+nvidia-cudnn-cu12==9.10.2.21
+nvidia-cufft-cu12==11.3.0.4
+nvidia-cufile-cu12==1.11.1.6
+nvidia-curand-cu12==10.3.7.77
+nvidia-cusolver-cu12==11.7.1.2
+nvidia-cusparse-cu12==12.5.4.2
+nvidia-cusparselt-cu12==0.7.1
+nvidia-nccl-cu12==2.28.9
+nvidia-nvjitlink-cu12==12.6.85
+nvidia-nvshmem-cu12==3.4.5
+nvidia-nvtx-cu12==12.6.77
+omegaconf==2.3.1
+opencv-python==5.0.0.93
+opencv-python-headless==4.13.0.92
+packaging==25.0
+pandas==2.3.3
+pillow==12.3.0
+platformdirs==4.13.3
+pluggy==1.7.0
+propcache==0.5.4
+psutil==7.2.2
+pyarrow==26.0.0
+pygments==2.21.0
+pyopengl==3.1.10
+pyparsing==3.3.3
+pytest==9.1.1
+python-dateutil==2.9.0.post0
+pytz==2026.5
+pyyaml==6.0.3
+referencing==0.37.0
+regex==2026.9.29
+requests==2.34.2
+rich==15.0.0
+robomimic==0.2.0
+robosuite==1.4.0
+rpds-py==2026.9.1
+safetensors==0.8.0
+scikit-image==0.26.0
+scipy==1.18.1
+setuptools==81.0.0
+shellingham==1.5.4
+six==1.17.0
+sympy==1.14.0
+termcolor==3.3.0
+thop==0.1.1.post2209072238
+tifffile==2026.9.20
+tokenizers==0.22.2
+toml==0.10.2
+torch @ https://download.pytorch.org/whl/cu126/torch-2.11.0%2Bcu126-cp312-cp312-manylinux_2_28_x86_64.whl
+torchcodec==0.11.1
+torchvision @ https://download.pytorch.org/whl/cu126/torchvision-0.26.0%2Bcu126-cp312-cp312-manylinux_2_28_x86_64.whl
+tqdm==4.70.1
+traitlets==5.16.1
+transformers==5.5.4
+triton==3.6.0
+typer==0.27.3
+typing-extensions==4.16.0
+typing-inspect==0.9.0
+tzdata==2026.5
+urllib3==2.8.0
+wand==0.6.13
+xxhash==4.0.1
+yarl==1.25.1
+zipp==4.1.1

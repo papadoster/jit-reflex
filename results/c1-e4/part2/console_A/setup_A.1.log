@@ -1,0 +1,39 @@
+HF user: papadoster
+paligemma: access ok
+Fetching 674 files:   0%|          | 0/674 [00:00<?, ?it/s]Fetching 674 files:   9%|▉         | 64/674 [00:00<00:00, 637.50it/s]Fetching 674 files:  21%|██        | 143/674 [00:00<00:00, 714.02it/s]Fetching 674 files:  33%|███▎      | 223/674 [00:00<00:00, 749.18it/s]Fetching 674 files:  45%|████▌     | 304/674 [00:00<00:00, 771.78it/s]Fetching 674 files:  58%|█████▊    | 390/674 [00:00<00:00, 796.55it/s]Fetching 674 files:  71%|███████   | 476/674 [00:00<00:00, 812.84it/s]Fetching 674 files:  83%|████████▎ | 561/674 [00:00<00:00, 822.71it/s]Fetching 674 files:  96%|█████████▌| 648/674 [00:00<00:00, 829.96it/s]Fetching 674 files: 100%|██████████| 674/674 [00:00<00:00, 804.26it/s]
+[32m✓ Downloaded[0m
+  path: /workspace/lmax-deps/libero-pro-data
+{
+  "config_dir": "/workspace/lmax-deps/libero-pro-config",
+  "dataset": "zhouxueyang/LIBERO-Pro",
+  "dataset_root": "/workspace/lmax-deps/libero-pro-data",
+  "libero_pro_root": "/workspace/lmax-deps/LIBERO-PRO",
+  "revision": "c86fc3b8293185a6f373677018ff3e37f8391602",
+  "runtime_revision": "2b910b5b5f53016bef9907632f6f840f1ce2229c"
+}
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+LIBERO assets: /root/.cache/libero/assets
+Wand: MagickWand loads
+torch 2.11.0+cu126 CUDA 12.6 NVIDIA GeForce RTX 4090
+EGL vendor: NVIDIA GL renderer: NVIDIA GeForce RTX 4090/PCIe/SSE2
+Exception ignored in: <function GLContext.__del__ at 0x74eda8fb6020>
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/__init__.py", line 138, in __del__
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/__init__.py", line 131, in free
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/OpenGL/error.py", line 230, in glCheckError
+OpenGL.raw.EGL._errors.EGLError: <exception str() failed>
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 1116.10it/s]
+The PI05 model is a direct port of the OpenPI implementation. 
+This implementation follows the original OpenPI structure for compatibility. 
+Original implementation: https://github.com/Physical-Intelligence/openpi
+Loading model from: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+✓ Loaded state dict from model.safetensors
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.bias
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.weight
+All keys loaded successfully!
+pi05 cached
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 973.66it/s]
+name, driver_version, memory.total [MiB]
+NVIDIA GeForce RTX 4090, 580.178.04, 24564 MiB
+[02:50:03] packed c1e4m_results_A.tgz (36K)

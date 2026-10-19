@@ -1,0 +1,21 @@
+{
+ "pi05": {
+  "dynamic": 160,
+  "invalid_by_arm": {
+   "G": [0, 20],
+   "G@glr": [0, 20],
+   "Gauto": [0, 20],
+   "Gcal": [0, 20],
+   "PPC": [0, 20],
+   "PPC@glr": [0, 20],
+   "T0": [0, 20],
+   "none": [0, 20]
+  },
+  "g_check_ok_of_with_event": [19, 19, 19],
+  "base": 20,
+  "no_event_share": 0.05,
+  "skipped": 0,
+  "warn_arms": []
+ }
+}
+C1-E4 part 2 smoke validity A: PASS
