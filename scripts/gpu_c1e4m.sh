@@ -420,13 +420,12 @@ cphase() {  # cphase <phase> <cc args..>: the summary's plan, run by run_phase. 
     return 1; }
   run_phase $ph "$p"
 }
-cfc() {  # cfc <tempo file>: the controls forecast (controls spec §12), with mode.json and k_select.json once written
-  local a=
-  dry && { echo "+ cc --forecast $1 [--mode $O/mode.json] [--k $O/k_select.json] --done <the pod's records>"; return; }
-  [ -f $O/mode.json ] && a+=" --mode $O/mode.json"
-  [ -f $O/k_select.json ] && a+=" --k $O/k_select.json"
-  # shellcheck disable=SC2046,SC2086
-  cc --forecast "$1" $a --done $(ls $O/*.jsonl 2>/dev/null | grep -v /grid_all_)
+cfc() {  # cfc <tempo file>: the controls forecast (controls spec §12), mode.json and k_select.json if there
+  local d  # the grid's records only: the probe's share keys with line 2's (Base, G-auto in mode S)
+  dry && { echo "+ cc --forecast $1 --done <the grid's records, $O/C[0-9]*.jsonl>"; return; }
+  d=$(ls $O/C[0-9]*.jsonl 2>/dev/null)
+  # shellcheck disable=SC2086
+  cc --forecast "$1" ${d:+--done $d}
 }
 oft_numpy() {  # spec §4: openvla-oft's import makes json.dumps pass numpy silently; the runner writes strict JSON
   dry || [ $POD = A ] && return 0
