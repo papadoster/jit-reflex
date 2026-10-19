@@ -497,6 +497,8 @@ def test_ppcl_sustained_irregularity_latches():
     assert on == [False] + [True] * 7  # tau = 1 from the second reset on, latched from the first trigger
     assert ag.latch_stats["trig"] == 7 and ag.latch_stats["chunks"] == 7
     assert ag.latch_next == ag.sched.t_obs + orx.PPCL_K_CAP
+    ag.sched.chunk, t0 = np.zeros((50, 7)), ag.sched.t_obs  # the latch calls at t_obs + 4 though ppc_next is later
+    assert ag.ppc_next == math.inf and not ag.trigger(t0 + 3) and ag.trigger(t0 + 4)
 
 
 def test_ppcl_isolated_turn_latches_four_chunks():
@@ -524,13 +526,15 @@ def test_ppcl_near_object_reset_clears_only_the_latch():
     vx, vy = [0.002, 0, 0], [0, 0.002, 0]
     a, _ = _latch_agent([vx, vy, vx, vy])
     b, _ = _latch_agent([vx, vy, vx, vy])
-    a.ppc_next, a.ppc_off = b.ppc_next, b.ppc_off = 99, {40: np.ones(3)}
+    a.ppc_next, b.ppc_next = 99, 99
+    a.ppc_off, b.ppc_off = {40: np.ones(3) * 1e-3}, {40: np.ones(3) * 1e-3}  # separate dicts: a reset can't hide
     t = 40
     a.observe(t, a.p_hist[31] + np.array([0.02, 0, 0]), a.p_hist[31])  # EEF 2 cm from the object
     b.observe(t, b.p_hist[31] + np.array([0.20, 0, 0]), b.p_hist[31])  # 20 cm: no reset
     assert a.latch_L == a.latch_C == 0.0 and a.latch_next == math.inf and a.latch_stats["resets"] == 1
     assert b.latch_next < math.inf
-    assert a.ppc_next == b.ppc_next == 99 and a.ppc_off.keys() == b.ppc_off.keys()
+    assert a.ppc_next == b.ppc_next == 99 and a.ppc_off.keys() == b.ppc_off.keys() == {40}
+    assert np.array_equal(a.act(40, np.zeros(7)), b.act(40, np.zeros(7)))  # the PPC part's next action
     assert np.array_equal(a.latch_v, b.latch_v)
     assert all(type(v) is int for v in a.latch_stats.values())
 
@@ -568,11 +572,28 @@ def test_ppcl_without_latch_is_ppc_bitwise():
         a0, c0, g0 = _ppc_run("PPC", path)
         a1, c1, g1 = _ppc_run("PPCL", path, th=math.inf)
         assert np.array_equal(a0, a1) and c0 == c1 and g0.sched.n_trig == g1.sched.n_trig
+    # the real threshold: the closed-loop latch bites on some seed (else the bitwise check above proves nothing)
+    assert any(_ppc_run("PPC", _wiggle(seed))[1] != _ppc_run("PPCL", _wiggle(seed))[1] for seed in range(5))
 
 
 def test_ppcl_on_a_jump_from_rest_is_ppc_bitwise():
     path = np.array([[0.30, 0.0, 0.0]] * 60)
-    path[17:] += np.array([0.0, 0.06, 0.0])  # LIBERO-MAX's 6 cm relocation
+    path[17:] += np.array([0.042, 0.042, 0.0])  # LIBERO-MAX's 6 cm relocation, half along the reach
     a0, c0, _ = _ppc_run("PPC", path)
+    assert 17 in c0  # PPC calls at the jump step, so the next plan's latch reading is the jump itself
     a1, c1, g1 = _ppc_run("PPCL", path)
     assert np.array_equal(a0, a1) and c0 == c1 and g1.latch_stats["trig"] == 0
+
+
+def test_ppcl_latch_stays_off_near_the_object_in_the_step_it_resets():
+    vx, vy = np.array([0.002, 0, 0]), np.array([0, 0.002, 0])
+    ag = orx.Agent("PPCL", 10, 20)
+    ag.latch_v, p = vx, np.array([0.5, 0.0, 0.0])  # the previous reset read vx
+    ag.p_hist[19], ag.p_hist[20] = p, p + vy  # a 90-degree turn read at t_obs = 20: L = 0.3 would latch
+    ag.sched.chunk, ag.sched.t_obs, ag.sched.in_flight = np.zeros((50, 7)), 0, (20, 40, np.zeros((50, 7)))
+    ag.observe(40, p + vy + np.array([0.01, 0, 0]), p + vy)  # EEF 1 cm from the object: the near-object reset
+    assert ag.sched.arrive(40)
+    ag.on_new_chunk()
+    assert ag.latch_next == math.inf and not ag.trigger(40)  # no extra call inside r_grip
+    assert np.array_equal(ag.latch_v, vy)  # the reading still advances
+    assert ag.latch_stats == {"trig": 1, "chunks": 0, "resets": 1}  # a trigger, cleared at once: no latched chunk

@@ -167,9 +167,11 @@ class Agent:
         # G engaged at least once (|U| > EPS), even if clipping sent nothing (report: false triggers in control)
         self.g_on = False
         self.ppc_next, self.ppc_off = math.inf, {}
-        # PPCL (controls spec §3.1): the latch's EMAs, its call deadline, the last reading (None: still) and counters
+        # PPCL (controls spec §3.1): the latch's EMAs, its call deadline, the last reading (None: still), the arm inside
+        # r_grip this step, and counters; "resets" counts clears of a non-zero latch state (about: entering r_grip after
+        # a trigger), not steps inside r_grip
         self.latch_C = self.latch_L = 0.0
-        self.latch_next, self.latch_v = math.inf, None
+        self.latch_next, self.latch_v, self.latch_near = math.inf, None, False
         self.latch_stats = {"trig": 0, "chunks": 0, "resets": 0}
         self.j_corr, self.o_raw = None, {}  # GJ: callable(t, k) -> J_k (o_t - o_hat_k); raw states by step
 
@@ -181,8 +183,9 @@ class Agent:
 
     def observe(self, t, eef, obj):
         self.p_hist[t], self.c_hist[t] = np.array(obj, float), self.c.copy()
-        if (self.method == "PPCL" and not self.grasp_started
-                and np.linalg.norm(np.asarray(eef, float) - self.p_hist[t]) < PPCL_R_GRIP):
+        self.latch_near = bool(self.method == "PPCL" and not self.grasp_started
+                               and np.linalg.norm(np.asarray(eef, float) - self.p_hist[t]) < PPCL_R_GRIP)
+        if self.latch_near:
             self._latch_reset()
 
     def unknown_shift(self, t):
@@ -191,7 +194,8 @@ class Agent:
         return self.p_hist[t] - self.p_hist[self.sched.t_obs]
 
     def trigger(self, t):
-        """An unscheduled brain call at step t (T0, the T switch of GT, PPC's shorter horizon).
+        """An unscheduled brain call at step t (T0, the T switch of GT, PPC's shorter horizon, PPCL's latch deadline
+        t_obs + 4).
         Call exactly once per step, after observe/arrive and before act: PPC measures velocity and plans its
         offsets here."""
         if self.grasp_started or self.sched.chunk is None:
@@ -276,8 +280,9 @@ class Agent:
         """PPCL at a chunk reset (controls spec §3.1, the paper's App. A.10): the reading v_N = p(t_obs) - p(t_obs - 1)
         of the plan now starting; tau = 1 when cos(v_N, v_N-1) < 1/2, both readings above ppc_v_min (a still reading
         never triggers: our convention, the paper's cosine is undefined there); the outer EMA C, the sticky factor on
-        the updated C, the inner EMA L; latched (L > L_th): the next call at t_obs + 4 at the latest. tau and the
-        latch flag are Python bools, so the counters stay JSON ints."""
+        the updated C, the inner EMA L; latched (L > L_th): the next call at t_obs + 4 at the latest. Inside r_grip
+        this step the near-object reset follows the update, so the latch stays off there. tau and the latch flag are
+        Python bools, so the counters stay JSON ints."""
         t = self.sched.t_obs
         v = self.p_hist[t] - self.p_hist[t - 1] if t - 1 in self.p_hist else None
         v = v if v is not None and np.linalg.norm(v) > self.ppc_v_min else None
@@ -288,6 +293,8 @@ class Agent:
         s = self.latch_C / (self.latch_C + PPCL_R_TH)
         self.latch_L = (PPCL_BETA_IN + (1 - PPCL_BETA_IN) * self.latch_L if tau
                         else (1 - PPCL_BETA_IN * (1 - s)) * self.latch_L)
+        if self.latch_near:  # observe() reset the latch this step; the reading above still advances
+            self._latch_reset()
         on = bool(self.latch_L > self.latch_th)
         self.latch_next = t + PPCL_K_CAP if on else math.inf
         self.latch_stats["trig"] += tau
