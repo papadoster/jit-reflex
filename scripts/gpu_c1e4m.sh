@@ -46,13 +46,13 @@
 #               the runner code is connect's ($O/CODE). ONLY=<id regex>: only those lines (bench lines alone need no
 #               line of the other pod). The reading: on the Mac with both pods' grid_all files
 # POD=C pi0.5 + OFT+ (OFT with TAIL=1), the controls (controls spec): setup | cprobe | csmoke | cgrid | ctail, each
-# after the previous one passed; every runner line at n-envs 6, part 2's batches (controls spec §7):
+# after the previous one passed; every runner line at n-envs 6 (pass 2 too), part 2's batches (§7):
 #   setup       A's and B's without SmolVLA: the token check and pi0.5's SHA-256, venv-oft and OFT+'s weights (OFT's
 #               with TAIL=1), pytest
 #   cprobe      §7.1: part 2's pieces repeated as they ran (scripts/c1e4c_summary.py --probe-plan), act_hash against the
 #               saved records -> mode.json (P or S per probe)
-#   csmoke      §12: tests/ on the pod; PPCL and VS0.3 on 6 pi0.5 cases (prefix_ok >= 5 of 6 each, else stop) and on the
-#               bench -> the GPU peak, tempo_smoke.txt, forecast.txt: the owner decides
+#   csmoke      §12: the C1-E4 tests on the pod; PPCL and VS0.3 on 6 pi0.5 cases (prefix_ok >= 5 of 6 each, else stop)
+#               and on the bench -> the GPU peak, tempo_smoke.txt, forecast.txt: the owner decides
 #   cgrid       lines 1-7 by priority (--plan --line N, from mode.json and k_select.json), the k selection after lines 1
 #               and 4, the forecast after each runner line; with a mode S, PPC on PPCL's latched cases; grid_all_C.jsonl
 #   ctail       TAIL=1, after cgrid and the owner's go: line 8 (OFT), grid_all_C.jsonl again
@@ -175,7 +175,7 @@ setup() {
       cloudpickle opencv-python future "lerobot[dataset,scipy-dep]==0.6.1" "${PIN[@]}" "${SCENE[@]}" || exit 1
     x touch venv/c1e4m-installed
   fi
-  [ $POD != C ] || x uv pip install --python $P pytest==9.1.1 || exit 1  # csmoke runs tests/ (controls spec §12)
+  [ $POD != C ] || x uv pip install --python $P pytest==9.1.1 || exit 1  # csmoke runs the C1-E4 tests (§12)
   # pods A, C: pi0.5's tokenizer is gated; a missing token or unaccepted terms stop here, before anything big is fetched
   has_pi && { x $P -c "from huggingface_hub import model_info, whoami
 print('HF user:', whoami()['name']); model_info('google/paligemma-3b-pt-224'); print('paligemma: access ok')" \
@@ -314,6 +314,8 @@ pack() {
 }
 
 CODE_PATHS="src scripts/c1e4m_run.py scripts/c1e4m_brains.py scripts/c1e4_run.py"
+# POD=C: the controls summary's plan, mode and k selection too (and part 2's summary, which it imports)
+[ $POD = C ] && CODE_PATHS+=" scripts/c1e4c_summary.py scripts/c1e4m_summary.py"
 code_hash() {
   local f
   for f in $CODE_PATHS; do git rev-parse -q --verify "HEAD:$f" || { echo "!!! $f is not in HEAD" >&2; return 1; }; done
@@ -368,6 +370,7 @@ run2() {  # run2 <log name> <runner command..>: pass 1, then pass 2 (resume retr
   # 2 envs only after a run that ended by itself with few failed groups (part 1: the bench, exit 0); otherwise the same
   # envs. The last --n-envs wins; fp32 and one-row chunks do not depend on the batch
   { [ -n "$k" ] && [ "$k" -le 3 ]; } || { [ $rc = 0 ] && [ "$f" -le 3 ]; } && small="--n-envs 2"
+  [ $POD = C ] && small=  # controls spec §7: part 2's batches of 6 (pi0.5's fp32 chunks depend on the batch)
   echo "[$(date +%T)] pass 2 ($f failed groups in pass 1, exit $rc): $* $small" | tee -a "$log"
   wd "$log" "$@" $small; rc=$?
   [ $rc = 0 ] || echo "!!! runner exited with an error (pass 2)" | tee -a "$log"
@@ -376,7 +379,7 @@ run2() {  # run2 <log name> <runner command..>: pass 1, then pass 2 (resume retr
 
 peak_run() {  # peak_run <peak file> <command..>: the command while nvidia-smi samples the GPU memory (MiB) every second
   local f=$1 s rc; shift
-  dry && { "$@"; echo 0 > "$f"; return; }
+  dry && { echo 0 > "$f"; "$@"; return; }  # the command's exit: a broken plan fails a dry run too
   nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -lms 1000 > "$f.samples" 2> "$f.err" & s=$!
   "$@"; rc=$?
   kill $s 2>/dev/null; wait $s 2>/dev/null
@@ -412,9 +415,10 @@ print(','.join([i for i in c if i.startswith('pro-') == ('$1' == 'pro')][:$2]))"
 summ() { $SP scripts/c1e4m_summary.py "$@"; }
 cc() { $SP scripts/c1e4c_summary.py "$@"; }  # POD=C: the controls summary (controls spec §5, §7, §12)
 cphase() {  # cphase <phase> <cc args..>: the summary's plan, run by run_phase. A dry run where the summary cannot plan
-  local ph=$1 p; shift  # (on the Mac: no mode.json or k_select.json yet) prints the call instead
-  if dry; then p=$(cc "$@" 2>/dev/null) || { echo "+ cc $*"; return 0; }
-  else p=$(cc "$@") || { echo "!!! cc $* failed (exit $?)"; return 1; }; fi
+  local ph=$1 p q; shift  # yet (exit 3, on the Mac: no mode.json or k_select.json) prints the call instead
+  if dry; then p=$(cc "$@" 2>$W/cc.err); q=$?; [ $q = 3 ] && { echo "+ cc $*"; return 0; }; cat $W/cc.err
+  else p=$(cc "$@"); q=$?; fi
+  [ $q = 0 ] || { echo "!!! cc $* failed (exit $q)"; return 1; }
   # run_phase skips other phases' lines silently: a line the summary names otherwise would never run
   [ -z "$p" ] || [ "$(cut -f1 <<< "$p" | sort -u)" = "$ph" ] || { echo "!!! cc $*: lines of a phase other than $ph"
     return 1; }
@@ -736,14 +740,18 @@ json.dump(more[:$K], open('$O/bench_more.json', 'w'))" || exit 1  # a list: the 
     dry || [ -f $O/mode.json ] || fail "no $O/mode.json: POD=C ./scripts/gpu_c1e4m.sh cprobe first"
     check_code require
     dry || rm -f $O/Csmoke_*.jsonl $LOG/Csmoke_*.log $LOG/csmoke*.log $W/tempo_run.txt $W/peak_csmoke*
-    # HF online for the tests only: SmolVLA's Jacobian test (C1-E2) reads SmolVLA's config, not cached on this pod
-    x env -u HF_HUB_OFFLINE $P -m pytest tests/ -q 2>&1 | tee $LOG/csmoke_tests.log
-    [ "${PIPESTATUS[0]}" = 0 ] || fail "tests/ fail on the pod (above): the owner decides"
+    # the C1-E4 tests only: other modules of tests/ import jax / flax, which the LeRobot venv has not; no Hub needed
+    x $P -m pytest -q tests/test_objreflex.py tests/test_gauto.py tests/test_handoff.py tests/test_lead.py \
+      tests/test_maxwrap.py tests/test_c1e4m_run.py tests/test_c1e4c_summary.py tests/test_c1e4m_brains.py 2>&1 \
+      | tee $LOG/csmoke_tests.log
+    [ "${PIPESTATUS[0]}" = 0 ] || fail "the C1-E4 tests fail on the pod (above): the owner decides"
     peak_run $W/peak_csmoke cphase csmoke --plan --line smoke || fail "csmoke: a runner line failed (above)"
+    dry || grep -qE '^[0-9]+$' $W/peak_csmoke || fail "no GPU memory samples ($W/peak_csmoke.err)"
     x cc --smoke-check $O/Csmoke_pi05*.jsonl \
       || fail "PPCL or VS0.3 has prefix_ok < 5 of 6 (above): stop, the owner decides (controls spec §12)"
-    # OFT+ and OFT: part 2's (results/c1-e4/part2/pod_B/tempo_grid.txt) until a grid line measures them
-    t=" lmax_pi05=$(gtempo $LOG/Csmoke_pi05*.log) lmax_oftplus=12.497 lmax_oft=15.917"
+    # until a grid line measures them, results/c1-e4/part2/pod_B/tempo_grid.txt: OFT+ part 2's last measured M1 OFT+
+    # tempo, OFT part 2's last measured M4 OFT tempo
+    t=" lmax_pi05=$(gtempo $LOG/Csmoke_pi05*.log) lmax_oftplus=12.497 lmax_oft=12.993"
     t+=" bench_pi05=$(full_rate $LOG/Csmoke_bench*.log)"
     dry || ! grep -qE '=( |$)' <<< "$t" || fail "a tempo is missing (no group / full batch in its log)"
     { echo "csmoke: GPU peak $(cat $W/peak_csmoke) MiB (max $PEAK_MAX)"; echo "tempo (s/episode):$t"; } \
