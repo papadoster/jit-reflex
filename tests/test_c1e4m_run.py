@@ -157,6 +157,71 @@ def test_done_mid_episode():
     assert all(r["prefix_ok"] is True for r in dyn.values())
 
 
+def test_base_prefix_stops_the_base_at_the_event():
+    """--base-prefix (controls spec §7): Base ends at its event, the Dynamic arms are those of the run without it."""
+    arms, key = ["none", "G", "Gauto", "PPC", "Gcal"], ("act_hash", "success", "steps")
+    full = run.run_cases([CASE], arms, conf(), [Toy(), Toy()], Brain())
+    brain = Brain()
+    recs = run.run_cases([CASE], arms, conf(), [Toy(), Toy()], brain, base_prefix=True)
+    (base, dyn), (base0, dyn0) = by_arm(recs), by_arm(full)
+    e = base["e"]
+    assert e == base0["e"] and e is not None and base0["base_cut"] is False
+    assert base["base_cut"] is True and base["success"] is None and base["grasp_ok"] is None and base["steps"] == e
+    # the Base's chunk keys are its calls' steps (seed 195 + t): all before e
+    assert all(sd < 195 + e for arm, sd in brain.log if arm == "control") and all(t < e for t, *_ in base["batch_rows"])
+    for arm, r in dyn.items():
+        assert r["prefix_ok"] is True and r["replay_miss"] is None, arm
+        assert [r[k] for k in key] == [dyn0[arm][k] for k in key], arm
+    assert [json.loads(x) for x in run.lines(recs).splitlines()] == json.loads(json.dumps(recs))
+
+
+def test_base_prefix_keeps_the_base_call_batches():
+    """A batch's Bases are cut together at its last event: until then every Base call has the rows of the run without
+    the flag (part 2's, spec §7), so a brain whose chunk depends on the batch size gives the same prefix."""
+
+    class Two(Toy):
+        def start(self, case, arm, s):
+            self.R_TRIG = 0.18 if case["case_id"] == "toy-c0" else 0.08  # two events far apart
+            return super().start(case, arm, s)
+
+    class Batchy(Brain):
+        def __call__(self, obs, *a):
+            out = super().__call__(obs, *a)
+            out[:, :, :3] += 1e-4 * len(obs)
+            return out
+
+    cases, key = [CASE, {**CASE, "case_id": "toy-c1"}], ("act_hash", "success", "steps", "e", "prefix_ok")
+    full, cut = (run.run_cases(cases, ["none", "G"], conf(), [Two(), Two()], Batchy(), base_prefix=f)
+                 for f in (False, True))
+    bases = [r for r in cut if r["kind"] == "base"]
+    e = [r["e"] for r in bases]
+    assert e[0] + 10 < e[1] and all(r["base_cut"] is True and r["steps"] == e[1] for r in bases)
+    for r, r0 in zip(cut, full):
+        assert (r["case_id"], r["kind"], r["arm"]) == (r0["case_id"], r0["kind"], r0["arm"])
+        if r["kind"] == "base":
+            assert r["batch_rows"] == [b for b in r0["batch_rows"] if b[0] < e[1]]
+        else:
+            assert [r[k] for k in key] == [r0[k] for k in key] and r["prefix_ok"] is True, r["arm"]
+
+
+def test_base_prefix_without_event_runs_the_full_base():
+    class Far(Toy):
+        R_TRIG = 0.0
+
+    base, dyn = by_arm(run.run_cases([CASE], ["none", "G"], conf(), [Far(), Far()], Brain(), base_prefix=True))
+    assert base["e"] is None and base["base_cut"] is False and base["steps"] == 60 and type(base["success"]) is bool
+    assert all(r["prefix_ok"] is True and r["act_hash"] == base["act_hash"] for r in dyn.values())
+
+
+def test_ppcl_record_has_latch_counters():
+    """Controls spec §11: a PPCL record carries its latch counters (JSON ints), no other arm has the key."""
+    base, dyn = by_arm(run.run_cases([CASE], ["none", "PPC", "PPCL"], conf(), [Toy(), Toy()], Brain()))
+    lat = dyn["PPCL"]["latch"]
+    assert sorted(lat) == ["chunks", "resets", "trig"] and all(type(v) is int for v in lat.values())
+    assert all("latch" not in r for r in (base, dyn["none"], dyn["PPC"]))
+    json.dumps(dyn["PPCL"], allow_nan=False)
+
+
 def test_validate_before_the_model():
     """main()'s checks before the brain loads: every arm builds, s + d <= the brain's chunk, arms on target relocation
     only; --set evalrest is eval[300:]."""

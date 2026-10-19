@@ -73,7 +73,9 @@ assert args.kbar is not None or not METHODS & {"Gauto", "GautoT", "GautoU", "Gle
 assert not args.shadow_pseudo or args.kinds == "control", "--shadow-pseudo runs on control episodes"
 assert set(args.cells.split(",")) <= set(gauto.CELLS), args.cells
 CONF = {"brain": args.brain, "revision": REV, "precision": args.precision, "t_ramp": args.t_ramp, "k_p": args.k_p,
-        "tau_k": args.tau_k, "kbar": args.kbar, "kappa0": KAPPA0, "shadow_pseudo": args.shadow_pseudo}
+        "tau_k": args.tau_k, "kbar": args.kbar, "kappa0": KAPPA0, "shadow_pseudo": args.shadow_pseudo,
+        "gpu": (torch.cuda.get_device_name(args.device) if args.device.startswith("cuda") and torch.cuda.is_available()
+                else args.device)}  # controls spec §7: the card (a resume on another GPU model is a mismatch)
 # part 2 block B (Task 5's offline numbers): tau_close of the fingers with the object; Glead's tau_lead and gate window,
 # oracle and noisy eyes; the CV eyes' q_acc and their dead bands (eps, ppc_v_min of every @cv arm). In CONF only when
 # used, so part-1 records and resumes stay as they were
@@ -392,6 +394,8 @@ def run_batch(vec, eps):
             rec["lead_on_window"] = round(float(g[tl:].mean()), 4) if leads[i] and tl is not None else None
         if method == "GautoU":
             rec |= {"unwind_steps": ag.unwind_steps, "unwind_plans": ag.unwind_plans, "unwind_stop": ag.unwind_stop}
+        if method == "PPCL":  # controls spec §11
+            rec["latch"] = dict(ag.latch_stats)
         if args.trace:
             rec["trace"] = {"p": np.round(o, 5).tolist(), "eef": np.round(x, 5).tolist(), "c": c.astype(int).tolist(),
                             "tobs": tobs[i], "plans": plans[i]}

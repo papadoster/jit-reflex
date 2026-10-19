@@ -13,6 +13,9 @@ per process. Per case:
   LIBERO-MAX's replay would: it goes live and is flagged (replay_miss = its step). prefix_ok: the executed actions
   equal Base's bitwise up to the event, at the same event step, with no replay miss. Spec §6 drops the pairs with
   prefix_ok false or a replay miss; the episode still runs to its end.
+- --base-prefix (controls spec §7): the Bases of a batch end together once each has seen its event (the replay needs
+  only the chunks before it); until then every Base call has the rows it has without the flag. A cut Base's success
+  and grasp_ok are None; with no event the Bases run to their ends.
 - Agent per step as scripts/c1e4_run.py: observe(t, eef, object) -> arrive -> Gcal's shadow pair -> wants_call /
   issue (brain or replay) -> arrive -> act -> step. eef = raw robot0_eef_pos; object = backend.entity_position of the
   trigger entity (the moved object). The event flag is not passed to the agent.
@@ -358,10 +361,12 @@ def ask(brain, pkgs, seeds, suites):
 
 class Episode:
     """One episode, Base (kind "base": arm none, live) or one Dynamic arm (kind "dynamic", base = Base's
-    {"chunks", "acts", "e"}), driven step by step from the main process."""
+    {"chunks", "acts", "e"}), driven step by step from the main process. base_prefix (Base only): run_batch may cut it
+    after its event (cut)."""
 
-    def __init__(self, case, arm, kind, conf, base=None, video=False):
+    def __init__(self, case, arm, kind, conf, base=None, video=False, base_prefix=False):
         self.case, self.arm, self.kind, self.conf, self.base = case, arm, kind, conf, base
+        self.base_prefix, self.cut = base_prefix and kind == "base", False
         self.seed0, self.suite = int(case["policy_seed"]), case["task_suite_name"]
         self.ag = make_agent(arm, conf, case_seed(case["case_id"]))
         # the event step is set when the event is seen (their replay: while not runtime.applied)
@@ -458,6 +463,12 @@ class Episode:
         k = self.e or 0
         rec["grasp_ok"] = (k < len(self.acts)
                            and orx.episode_metrics(self.xs[k:], self.acts[k:], self.objs[k:])["grasp_ok"])
+        if method == "PPCL":  # controls spec §11
+            rec["latch"] = dict(ag.latch_stats)
+        if self.kind == "base":  # cut by --base-prefix: its outcome is unknown
+            rec["base_cut"] = self.cut
+            if self.cut:
+                rec |= {"success": None, "grasp_ok": None}
         if self.kind == "dynamic":
             b = self.base
             n = len(self.acts) if self.e is None else self.e  # actions of steps 0 .. e - 1
@@ -483,7 +494,9 @@ def ident(case, kind, arm, conf):
 
 def run_batch(eps, envs, brain):
     """Run up to len(envs) episodes side by side to their ends (ponytail: a slot idles until the batch's longest
-    episode ends; refill slots one by one if pod time matters). Brain calls are batched over the episodes."""
+    episode ends; refill slots one by one if pod time matters). Brain calls are batched over the episodes, and a
+    chunk can depend on the batch (rows, padding): so --base-prefix cuts a batch's Bases together, at its last event,
+    not each at its own. A stopped episode's env idles until its next start (which closes the old env)."""
     t0 = time.time()
     pairs = list(zip(eps, envs))
     for ep, env in pairs:
@@ -513,6 +526,10 @@ def run_batch(eps, envs, brain):
             env.send("step", ep.act())
         for ep, env in live:
             ep.after(env.recv())
+        rest = [ep for ep, _ in live if not ep.over]
+        if rest and all(ep.base_prefix and ep.e is not None for ep in rest):
+            for ep in rest:  # --base-prefix: the batch's Bases end together at its last event (controls spec §7)
+                ep.cut = ep.over = True
         for ep, _ in live:
             if ep.over:
                 ep.wall = time.time() - t0
@@ -528,9 +545,9 @@ def write_video(path, frames):
     out.release()
 
 
-def run_cases(cases, arms, conf, envs, brain, wand=True, video_cases=(), video_dir=None):
+def run_cases(cases, arms, conf, envs, brain, wand=True, video_cases=(), video_dir=None, base_prefix=False):
     """Base of every case, then their Dynamic arms, n = len(envs) episodes at a time. The records, per case Dynamic
-    first and Base last."""
+    first and Base last. base_prefix: the Bases end at their batch's last event (controls spec §7, run_batch)."""
     n, out, ready = len(envs), {}, []
     for c in cases:
         why = skip_reason(c, wand)
@@ -545,7 +562,8 @@ def run_cases(cases, arms, conf, envs, brain, wand=True, video_cases=(), video_d
         for j in range(0, len(eps), n):
             run_batch(eps[j: j + n], envs, brain)
 
-    bases = [Episode(c, "none", "base", conf, video=c["case_id"] in video_cases) for c in ready]
+    bases = [Episode(c, "none", "base", conf, video=c["case_id"] in video_cases, base_prefix=base_prefix)
+             for c in ready]
     batches(bases)
     dyn = [Episode(b.case, a, "dynamic", conf, {"chunks": b.chunks, "acts": b.acts, "e": b.e}, b.frames is not None)
            for b in bases for a in arms]
@@ -564,7 +582,8 @@ def run_cases(cases, arms, conf, envs, brain, wand=True, video_cases=(), video_d
 
 def load_done(path, conf):
     """Resume: the case ids with a Base line in path. A case's lines are written together, Base last, so anything after
-    the last complete Base line is a cut write: it is dropped first."""
+    the last complete Base line is a cut write: it is dropped first. conf holds the GPU name: a resume on another GPU
+    model (or of a file written before conf had it) is a mismatch, i.e. a new --out file."""
     p = Path(path)
     if not p.exists():
         return set()
@@ -625,6 +644,8 @@ def main():
     p.add_argument("--out", help="JSON lines")
     p.add_argument("--repeat-check", action="store_true",
                    help="repeat the first brain call (same inputs and seeds) and print whether it matches bitwise")
+    p.add_argument("--base-prefix", action="store_true",
+                   help="controls spec §7: Base to the event only (a batch's Bases end together at its last event)")
     args = p.parse_args()
     wand = shim()
     if args.freeze_split:
@@ -633,6 +654,7 @@ def main():
     arms = [a for a in args.arms.split(",") if a]
     methods = {gauto.parse_arm(a)[0] for a in arms}
     assert args.kbar is not None or not methods & {"Gauto", "GautoT"}, "G-auto needs --kbar"
+    assert arms or not args.base_prefix, "--base-prefix cuts the Bases for Dynamic arms: a Base-only run keeps its ends"
     video = set(filter(None, args.video_cases.split(",")))
     assert not video or (args.video_dir and REPO not in Path(args.video_dir).resolve().parents
                          and Path(args.video_dir).resolve() != REPO), "videos need --video-dir outside the repository"
@@ -640,9 +662,12 @@ def main():
     ids = set_ids(split, args.set)
     rev = (gauto.BRAINS.get(args.brain) or cb.OFT[args.brain])[1]
     precision = args.precision or ("bf16" if args.brain in cb.OFT else "fp32")
+    import torch
+    gpu = (torch.cuda.get_device_name(args.device) if args.device.startswith("cuda") and torch.cuda.is_available()
+           else args.device)  # controls spec §7: the card in conf
     conf = {"brain": args.brain, "revision": rev, "precision": precision, "s": args.s or Q[args.brain], "d": args.d,
             "kbar": args.kbar, "t_ramp": T_RAMP, "k_p": K_P, "tau_k": TAU_K, "R": cb.RES[args.brain], "arms": arms,
-            "split": split["sha256"]}
+            "split": split["sha256"], "gpu": gpu}  # not --base-prefix: the summary compares conf with part 2's
     from libero_max.manifest import load_manifest
     by_id = {c["case_id"]: c for c in load_manifest(Path(args.manifest))["cases"]}
     cases = [by_id[i] for i in ids if source_of(by_id[i]) == args.source]
@@ -689,7 +714,7 @@ def main():
             group, tb, n_try = todo[g: g + args.n_envs], time.time(), n_try + 1
             timer.update(s=0.0, calls=0, rows=0)
             try:
-                recs = run_cases(group, arms, conf, envs, brain, wand, video, args.video_dir)
+                recs = run_cases(group, arms, conf, envs, brain, wand, video, args.video_dir, args.base_prefix)
                 text = lines(r | {"run": prov} for r in recs)
             except Exception as exc:  # a fallen group is skipped here; a rerun with resume retries it
                 n_fail, failed = n_fail + 1, failed + [c["case_id"] for c in group]
