@@ -259,12 +259,13 @@ class GAgent(hf.HAgent):
 
 def parse_arm(label):
     """A grid arm label -> (method, noise): "G@glr" -> ("G", "glr"), "Gauto" -> ("Gauto", ""). Noise: glr (default noisy
-    eyes, GLRKalman) on G and PPC (part 2: PPC on the same frames as G@glr); ema (the old pipeline, hf.Tracker with
-    EMA_BETA and EMA_EPS) on G only (spec §5.2); cv (lead.CVKalman, part 2 block B) on G, Gauto, PPC, Glead
-    (lead.LeadAgent, built by the runner, not by GAgent) and VS (controls spec §3.2)."""
+    eyes, GLRKalman) on G, PPC (part 2: PPC on the same frames as G@glr) and PPCL (controls spec journal "сводное
+    решение владельца": the noisy cell, PPCL@glr on PPC@glr's frames); ema (the old pipeline, hf.Tracker with EMA_BETA
+    and EMA_EPS) on G only (spec §5.2); cv (lead.CVKalman, part 2 block B) on G, Gauto, PPC, Glead (lead.LeadAgent,
+    built by the runner, not by GAgent) and VS (controls spec §3.2)."""
     method, _, noise = label.partition("@")
     assert method in (*GAgent.METHODS, "Glead") and noise in ("", "glr", "ema", "cv"), label
-    assert noise != "glr" or method in ("G", "PPC"), f"{label}: glr eyes run on G and PPC"
+    assert noise != "glr" or method in ("G", "PPC", "PPCL"), f"{label}: glr eyes run on G, PPC and PPCL"
     assert noise != "ema" or method == "G", f"{label}: ema eyes run on G only"
     assert noise != "cv" or method in ("G", "Gauto", "PPC", "Glead", *GAgent.VS), \
         f"{label}: cv eyes run on G, Gauto, PPC, Glead and VS"

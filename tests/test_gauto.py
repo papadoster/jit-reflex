@@ -356,6 +356,14 @@ def test_parse_arm_noisy_ppc():
         gauto.parse_arm("PPC@ema")
 
 
+def test_parse_arm_noisy_ppcl():
+    """controls spec journal "сводное решение владельца": glr eyes on PPCL too (the noisy cell); others unchanged."""
+    assert gauto.parse_arm("PPCL@glr") == ("PPCL", "glr") and gauto.parse_arm("PPCL") == ("PPCL", "")
+    for bad in ("PPCL@ema", "Gauto@glr", "VS1.0@glr", "PPCL@real"):
+        with pytest.raises(AssertionError):
+            gauto.parse_arm(bad)
+
+
 def test_gagent_ppcl_dispatches_like_ppc():
     import math
     a, b = gauto.GAgent("PPC", 10, 0), gauto.GAgent("PPCL", 10, 0)

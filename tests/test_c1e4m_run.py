@@ -289,6 +289,46 @@ def test_validate_pbvs_needs_the_band():
             run.validate([bad], {**conf(), "pbvs": BAND}, [CASE])
 
 
+def test_ppcl_glr_on_ppc_glrs_frames():
+    """controls spec journal "сводное решение владельца", the noisy cell: make_agent gives PPCL@glr the GLRKalman eyes
+    seeded by the case (case_seed), as PPC@glr. On one object path (a jump at 20) both see the same noise frames, and
+    the latch reads the tracked object (p_hist is the eyes' output, not the true object). With the latch off (L_th =
+    +inf) PPCL@glr is PPC@glr step for step; with it on the frames stay the same."""
+    import math
+
+    import gauto
+
+    def walk(arm, off=False):
+        ag = run.make_agent(arm, conf(), run.case_seed(CASE["case_id"]))
+        if off:
+            ag.latch_th = math.inf
+        x, p0, acts, seen, true = np.array([0.5, 0.35, 0.1]), np.array([0.5, 0.0, 0.0]), [], [], []
+        ch = np.zeros((orx.H, 7))
+        ch[:, 1], ch[:, 6] = -0.3, -1.0
+        for t in range(60):
+            p = p0 + (DELTA if t >= 20 else 0.0)
+            ag.observe(t, x, p)
+            seen.append(ag.p_hist[t].copy())
+            true.append(p)
+            if ag.sched.arrive(t):
+                ag.on_new_chunk()
+            if ag.sched.wants_call(t, ag.trigger(t)):
+                ag.sched.issue(t, ch)
+                if ag.sched.arrive(t):
+                    ag.on_new_chunk()
+            acts.append(ag.act(t, ag.sched.action(t)))
+            x = x + orx.G_POS * np.clip(acts[-1][:3], -1, 1)
+        assert isinstance(ag.tracker, gauto.GLRKalman) and ag.tracker.t_alarm is not None, arm
+        return np.array(ag.tracker.meas), np.array(seen), np.array(true), np.array(acts)
+
+    m0, s0, p, a0 = walk("PPC@glr")
+    m1, s1, _, a1 = walk("PPCL@glr", off=True)
+    assert np.array_equal(m0, m1) and np.array_equal(s0, s1) and np.array_equal(a0, a1)
+    assert not np.allclose(s1, p, atol=1e-4)  # the agent's object is the eyes' estimate
+    m2, s2, _, _ = walk("PPCL@glr")
+    assert np.array_equal(m0, m2)  # the latch on: the same frames (one per observed step)
+
+
 def test_shim_leaves_gym_without_gymnasium(monkeypatch):
     real = object()
     monkeypatch.setitem(sys.modules, "gym", real)
