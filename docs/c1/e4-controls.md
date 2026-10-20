@@ -14,7 +14,7 @@ VS(1.0) и G — один метод, в таблицах он называет�
 
 > G, VS(k) and G-auto are one geometric servo with three ways to set its gain: G fixes it at 1.0, VS(k) at k, and G-auto replaces the fixed gain with our self-tuning law (Z1). VS(1.0) is G. The only difference G-auto contributes is how the gain is obtained: VS(k) tunes it by grid search, spending episodes on every candidate; G-auto measures it with a shadow call on the same 60 calibration cases.
 
-## Два абзаца для статьи
+## Абзацы для статьи
 
 Оба решения приняты до данных и запушены вместе со спеком. Отказ от удобного порога и отказ от удобного конкурента делают предрегистрацию аргументом, а не формальностью.
 
