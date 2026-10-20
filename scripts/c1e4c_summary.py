@@ -40,7 +40,6 @@ import c1e4m_summary as cs  # noqa: E402  (key, mindex, bindex, invalid, mprs, b
 from c1e4m_summary import O, OP, P, TOL, e2, maxwrap, orx, run, s3  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
-SPEC = REPO / "docs/superpowers/specs/2026-10-20-c1-e4-controls-design.md"
 P2 = REPO / "results/c1-e4/part2"  # part 2's records, read only
 OUT = "results/c1-e4/controls/pod_C"
 VS = ("VS0.1", "VS0.3", "VS1.0")  # gauto.GAgent.VS, the candidates in the tie order of spec §5: 0.3, 0.1, 1.0
@@ -61,10 +60,7 @@ EPS = [(s, t, i) for s, t in orx.TASKS for i in range(10)]  # the bench grid: 26
 LINES = ("smoke", "1", "2", "3", "4", "5", "6", "7", "8", "c5")
 CORE = LINES[1:8]  # spec §12: lines 1-7; 8 is the tail
 TEMPO = ("lmax_pi05", "lmax_oftplus", "lmax_oft", "bench_pi05")
-PPCL_X = 1.25  # spec §12: PPCL calls more often, +25 % to the tempo
-# a LIBERO-MAX Base with --base-prefix, as a share of a full Base episode: cut / full Base batch duration, part 2
-# records, review of 184b7d5 (spec §12 says 0.3 flat)
-CUT = {(P, "plus"): 0.31, (P, "pro"): 0.44, (OP, "plus"): 0.5, (OP, "pro"): 0.5, (O, "plus"): 0.5, (O, "pro"): 0.5}
+EXCLUDES = "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93)"  # the forecast's lines 1-8 only
 OFT_SAVED = ["pod_B/M4oft_oft_eval300_plus_d0.jsonl", "pod_B/M4oft_oft_eval300_pro_d0.jsonl"]  # line 8's report only
 CONF_EQ = ("revision", "precision", "s", "d", "R", "t_ramp", "k_p", "tau_k", "split")  # spec §7.3: equal in a pair
 CLAIMS = {"G-AUTO НЕ ХУЖЕ РЕГУЛЯТОРА С ОБЩИМ k": ("C1a", "C1b"),  # spec §8: each alone, no multiplicity correction
@@ -119,9 +115,9 @@ def tsv(lns):
 
 
 def probe_lines(saved, split):
-    """spec §7.1: the probes repeat part 2's runs exactly: the first 12 Plus cases (two groups of 6) of its file with
-    its arms in their order and its kbar (the batches depend on them), and the bench's first task. saved: {probe:
-    the records of its SAVED file, the first}."""
+    """spec §7.1: the probes repeat part 2's runs exactly: the first 12 Plus cases (two groups of 6) of its file, and
+    the bench's first task; each with its file's arms in their order and its kbar (the batches depend on them).
+    saved: {probe: the records of its SAVED file, the first}."""
     out = []
     for i, name in enumerate(SAVED, 1):
         rs = [r for r in saved[name] if "kind" in r]
@@ -134,8 +130,8 @@ def probe_lines(saved, split):
             ln = mlines("cprobe", f"P{i}", rs[0]["brain"], PSET[name], conf["arms"], split, cases=ids,
                         kbar=conf["kbar"], prefix=False)
         else:
-            ln = blines("cprobe", f"P{i}_{P}", cs.B_ARMS, ("A", "A20"), f"--tasks {T0} --inits 0-9",
-                        [x for x in EPS if x[:2] == orx.TASKS[0]], conf["kbar"])
+            ln = blines("cprobe", f"P{i}_{P}", list(dict.fromkeys(r["arm"] for r in rs)), ("A", "A20"),
+                        f"--tasks {T0} --inits 0-9", [x for x in EPS if x[:2] == orx.TASKS[0]], conf["kbar"])
         assert len(ln) == 1, ln
         out.append(ln[0] | {"name": name})
     return out
@@ -273,29 +269,30 @@ def assume(mode, k):
     return mode, {P: {"k": kp}, OP: {"k": ko}}
 
 
-def forecast(tempo, mode=None, k=None, done=frozenset(), split=None, cut=CUT, rate=RATE):
-    """spec §12: per line 1-8 (one GPU, one runner at a time) the full episodes, the equivalent ones (PPCL x PPCL_X, a
-    cut Base CUT of its brain and source), hours, $ at rate and the hours left (the keys not in done); the core (1-7)
-    and core + tail (8). Setup, probe and smoke are not in it (done before it is read)."""
+def forecast(tempo, mode=None, k=None, done=frozenset(), split=None, rate=RATE):
+    """spec §12: per line 1-8 (one GPU, one runner at a time) the Dynamic episodes, the records (a LIBERO-MAX line's
+    cut Bases too), hours, $ at rate and the hours left (the keys not in done); the core (1-7) and core + tail (8).
+    Setup, probe and smoke are not in it (EXCLUDES)."""
     mode, k = assume(mode, k)
     rows = {}
     for L in LINES[1:9]:
-        n, eq, h, hl = 0, 0.0, 0.0, 0.0
+        n, nr, h, hl = 0, 0, 0.0, 0.0
         for ln in plan(L, mode, k, split):
-            t = tempo[f"{'lmax' if ln['runner'] == 'c1e4m' else 'bench'}_{ln['brain']}"]
+            # every planned record weighs 1: the tempo is seconds per record as the pod measures it (gtempo / full_rate,
+            # scripts/gpu_c1e4m.sh), PPCL's extra calls and cut Bases included. The seeded part 2 tempos (plain full
+            # episodes: lmax_oftplus 12.497, lmax_oft 12.993) lean high until a line of that brain measures its own (4,
+            # 8): conservative
+            t = tempo[f"{'lmax' if ln['runner'] == 'c1e4m' else 'bench'}_{ln['brain']}"] / 3600
             n += n_of(ln)
-            for x in ln["keys"]:
-                w = (cut[x[1], ln["source"]] if x[0] == "m" and x[3] == "base" and ln["prefix"]
-                     else PPCL_X if cs.method(x[4]) == "PPCL" else 1.0)
-                eq += w
-                h += w * t / 3600
-                hl += w * t / 3600 * (x not in done)
-        rows[L] = (n, eq, h, hl)
-    tot = lambda n, eq, h, hl: {"episodes": n, "eq": round(eq, 2), "hours": round(h, 2),  # noqa: E731
+            nr += len(ln["keys"])
+            h += t * len(ln["keys"])
+            hl += t * len(ln["keys"] - done)
+        rows[L] = (n, nr, h, hl)
+    tot = lambda n, nr, h, hl: {"episodes": n, "records": nr, "hours": round(h, 2),  # noqa: E731
                                 "usd": round(rate * h, 2), "left_hours": round(hl, 2)}
     add = lambda Ls: tot(*(sum(rows[L][j] for L in Ls) for j in range(4)))  # noqa: E731
-    return {"usd_per_h": rate, "tempo_s": tempo, "using": {"mode": {n: v["mode"] for n, v in mode.items()},
-                                                           "k": {b: v["k"] for b, v in k.items()}},
+    return {"usd_per_h": rate, "tempo_s": tempo, "excludes": EXCLUDES,
+            "using": {"mode": {n: v["mode"] for n, v in mode.items()}, "k": {b: v["k"] for b, v in k.items()}},
             "lines": {L: tot(*v) for L, v in rows.items()}, "core": add(CORE), "core_tail": add(LINES[1:9])}
 
 
@@ -610,7 +607,7 @@ def selftest():
     saved = {"pi05_lmax": case_recs(P, plus["eval300"][:13], A7, 0.306),
              "oftplus_lmax": case_recs(OP, plus["eval"][:13], cs.ARMS, 0.121),
              "pi05_bench": [brec(s, t, i, c, a) for s, t in orx.TASKS[:2] for c in ("A", "A20") for a in cs.B_ARMS
-                            for i in range(10)] + [brec(*orx.TASKS[0], i, "A20", "Gauto@cv") for i in range(10)]}
+                            for i in range(10)]}  # Boracle: its arms in part 2's order
     pl = probe_lines(saved, split)
     assert [(ln["name"], ln["phase"], ln["id"], n_of(ln)) for ln in pl] == [
         ("pi05_lmax", "cprobe", "P1_pi05_eval300_plus_d0", 96),
@@ -794,29 +791,27 @@ def selftest():
         except SystemExit:
             pass
 
-    # the forecast: 36 s per episode everywhere -> hours = equivalent episodes / 100
+    # the forecast: 36 s per record everywhere -> hours = records / 100; every record (PPCL, a cut Base) weighs 1
     t36 = dict.fromkeys(TEMPO, 36.0)
     f = forecast(t36, split=split)  # no mode, no k: the most expensive case
     assert f["using"] == {"mode": {"pi05_lmax": "S", "oftplus_lmax": "S", "pi05_bench": "S"},
                             "k": {P: "VS0.3", OP: "VS0.1"}}, f["using"]
-    eq1 = 180 + 42 * CUT[P, "plus"] + 18 * CUT[P, "pro"]  # line 1 by hand: 3 VS arms on 60 cases + 60 cut Bases
-    assert f["lines"]["1"] == {"episodes": 180, "eq": round(eq1, 2), "hours": round(eq1 / 100, 2),
-                               "usd": round(eq1 / 100 * RATE, 2), "left_hours": round(eq1 / 100, 2)}, f["lines"]["1"]
-    eq2 = 300 * (PPCL_X + 2) + 187 * CUT[P, "plus"] + 113 * CUT[P, "pro"]  # PPCL, VS0.3, Gauto
-    assert f["lines"]["2"]["eq"] == round(eq2, 2) and f["lines"]["3"]["eq"] == round(2 * eq2, 2)
+    assert f["excludes"] == EXCLUDES and "smoke" in f["excludes"]
+    # line 1 by hand: 3 VS arms on the 60 calibration cases + their 60 cut Bases = 240 records; x 36 s = 2.4 h
+    assert f["lines"]["1"] == {"episodes": 180, "records": 240, "hours": 2.4, "usd": 0.89, "left_hours": 2.4}, f["lines"]
+    # 2: PPCL, VS0.3, Gauto + Base on 300; 3: d 10, 20; 5: VS0.3, VS0.1, Gauto + Base; 6: 2 @cv arms on 260; 7: 3 arms
+    # x 2 cells x 260; 8: VS0.3, Gauto + Base
+    assert [f["lines"][L]["records"] for L in LINES[1:9]] == [240, 1200, 2400, 240, 1200, 520, 1560, 900]
     assert [f["lines"][L]["episodes"] for L in LINES[1:9]] == [180, 900, 1800, 180, 900, 520, 1560, 600]
-    assert f["lines"]["7"]["eq"] == 520 * (PPCL_X + 2) and f["core"]["episodes"] == 6040
-    assert f["core_tail"]["episodes"] == 6640 and f["core_tail"]["hours"] == round(
-        sum(f["lines"][L]["eq"] for L in LINES[1:9]) / 100, 2)
+    assert f["core"] == {"episodes": 6040, "records": 7360, "hours": 73.6, "usd": round(73.6 * RATE, 2),
+                         "left_hours": 73.6} and f["core_tail"]["hours"] == 82.6, f["core"]
     f = forecast(t36, *mk("VS1.0", "VS1.0", "P", "P", "P"), split=split)  # every coincidence
     assert [f["lines"][L]["episodes"] for L in LINES[1:9]] == [180, 300, 1200, 180, 0, 260, 1040, 600]
-    assert f["lines"]["5"] == {"episodes": 0, "eq": 0, "hours": 0, "usd": 0, "left_hours": 0}
+    assert f["lines"]["5"] == {"episodes": 0, "records": 0, "hours": 0, "usd": 0, "left_hours": 0}
     done = set().union(*(ln["keys"] for ln in plan("1", None, None, split)))
     f = forecast(t36, *full, done=done, split=split)
     assert f["lines"]["1"]["left_hours"] == 0 and f["lines"]["2"]["left_hours"] == f["lines"]["2"]["hours"]
-    assert f["core"]["left_hours"] == round(sum(f["lines"][L]["eq"] for L in CORE[1:]) / 100, 2)
-    flat = forecast(t36, split=split, cut=dict.fromkeys(CUT, 0.3))
-    assert flat["lines"]["1"]["eq"] == 198  # spec §12's 180 (+18)
+    assert f["core"]["left_hours"] == round(sum(f["lines"][L]["records"] for L in CORE[1:]) / 100, 2)
 
     # the smoke's gate (spec §12): prefix_ok in >= 5 of 6 cases for PPCL and VS0.3
     sm = [mrec(P, c, "dynamic", a, arms=("PPCL", "VS0.3")) for c in plus["eval300"][:6] for a in ("PPCL", "VS0.3")]
