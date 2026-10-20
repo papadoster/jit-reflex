@@ -38,6 +38,10 @@ VS(1.0) и G — один метод, в таблицах он называет�
 
 > For a moving target, classical visual servoing uses v = −λ L̂⁺ e − L̂⁺ ∂ê/∂t: a feedback term on the measured gripper-to-target error and a feedforward term that cancels the target's own motion. Our reflex is the second term in integrated form (the accumulated object displacement rather than its velocity), with the reference set by the policy's plan; it never measures the gripper. With the plan as the reference and exact execution, a position-based servo at unit gain reduces to our reflex; the two differ only where the arm deviates from the plan for reasons other than object motion. The run measures what the feedback term adds.
 
+**6. Ошибочно помеченная ветка и привилегированный вариант, который мы не гоняли** (владелец: «сказать прямым текстом»).
+
+> The 108 completed cases of the stopped branch, labelled VS(1.0), are in the code exactly our servo G at gain 1.0: the same dead band, step limit, clipping and stop at the close command, and no gain law; a bitwise test confirms it. We use them under their correct name, G(k = 1.0), as a paired reference for the position-based servo, and we recorded this decision before reading any of their outcomes. We did not run a teach-by-showing variant whose reference is the gripper-to-object offset at the grasp in the paired unperturbed episode. It is stronger by construction but privileged: it needs an episode that never happened, which a real robot cannot have, whereas an oracle object tracker stands in for a perfect camera.
+
 Источники: Chaumette & Hutchinson 2006 (Part I, ур. 1, 4) и 2007 (Part II, ур. 10–12); grasp-VS — GG-CNN (Morrison, Corke & Leitner, RSS 2018), Haviland, Dayoub & Corke 2020, Vahrenkamp et al. 2008; честный подбор усиления у регулятора-baseline — Lee, Levine & Abbeel, ICLR 2017 (§6.4, прил. C.5). В статье PPC (2605.11459v2) VS-baseline нет. Спек регулятора: [`2026-10-20-c1-e4-pbvs-design.md`](../superpowers/specs/2026-10-20-c1-e4-pbvs-design.md).
 
 ## Результаты
