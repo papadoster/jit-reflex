@@ -288,9 +288,7 @@ class HAgent(orx.Agent):
         if not self.grasp_started:
             if self.method in self.FAMILY:
                 a = self._g(t, a)
-            elif self.method == "PPC":
-                a = self._ppc(t, a)
-            elif self.method == "PPCL":
+            elif self.method in ("PPC", "PPCL"):
                 a = self._ppc(t, a)
             if a[6] > 0:
                 self.grasp_started, self.z_close = True, self.p_hist[t][2]

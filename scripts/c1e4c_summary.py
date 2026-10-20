@@ -36,7 +36,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import c1e4m_summary as cs  # noqa: E402  (key, mindex, bindex, invalid, mprs, bprs, sources; puts src/ on sys.path)
+import c1e4m_summary as cs  # noqa: E402  (key, mindex, bindex, invalid, bprs, sources; puts src/ on sys.path)
 from c1e4m_summary import O, OP, P, TOL, e2, maxwrap, orx, run, s3  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
@@ -281,9 +281,9 @@ def assume(mode, k):
     return mode, {P: {"k": kp}, OP: {"k": ko}}
 
 
-def forecast(tempo, mode=None, k=None, done=frozenset(), split=None, rate=RATE):
+def forecast(tempo, mode=None, k=None, done=frozenset(), split=None):
     """spec §12: per line 1-8 (one GPU, one runner at a time) the Dynamic episodes, the records (a LIBERO-MAX line's
-    cut Bases too), hours, $ at rate and the hours left (the keys not in done); the core (1-7) and core + tail (8).
+    cut Bases too), hours, $ at RATE and the hours left (the keys not in done); the core (1-7) and core + tail (8).
     Setup, probe and smoke are not in it (EXCLUDES)."""
     mode, k = assume(mode, k)
     rows = {}
@@ -301,9 +301,9 @@ def forecast(tempo, mode=None, k=None, done=frozenset(), split=None, rate=RATE):
             hl += t * len(ln["keys"] - done)
         rows[L] = (n, nr, h, hl)
     tot = lambda n, nr, h, hl: {"episodes": n, "records": nr, "hours": round(h, 2),  # noqa: E731
-                                "usd": round(rate * h, 2), "left_hours": round(hl, 2)}
+                                "usd": round(RATE * h, 2), "left_hours": round(hl, 2)}
     add = lambda Ls: tot(*(sum(rows[L][j] for L in Ls) for j in range(4)))  # noqa: E731
-    return {"usd_per_h": rate, "tempo_s": tempo, "excludes": EXCLUDES,
+    return {"usd_per_h": RATE, "tempo_s": tempo, "excludes": EXCLUDES,
             "using": {"mode": {n: v["mode"] for n, v in mode.items()}, "k": {b: v["k"] for b, v in k.items()}},
             "lines": {L: tot(*v) for L, v in rows.items()}, "core": add(CORE), "core_tail": add(LINES[1:9])}
 
@@ -467,9 +467,8 @@ def grid(new, saved, mode, k, names, split):
                   sum(bool(r.get("base_cut")) for r in used.values() if r["kind"] == "base"),
                   sum(r["kind"] == "base" for r in used.values())],
               "conf": {"except": CONF_SKIP, "mixed": mixed, "kbar_not_part2s": kbar, "pass": not mixed and not kbar}}
-    checks["pass"] = bool(all(v["pass"] for v in comp.values()) and all(v["pass"] for v in ksel.values())
-                          and not other and all(v["pass"] for v in e_match.values()) and checks["conf"]["pass"]
-                          and all(v["pass"] for d in (brows, on_probe) for v in d.values()))
+    checks["pass"] = bool(all(v["pass"] for d in (comp, ksel, e_match, brows, on_probe) for v in d.values())
+                          and not other and checks["conf"]["pass"])
     if not checks["pass"]:
         return {"checks": checks}
 
@@ -628,6 +627,15 @@ def first_rec(path):
         return next(json.loads(x) for x in f if '"kind"' in x)
 
 
+def exits(f, code):
+    try:
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            f()
+        raise AssertionError(f"no exit {code}")
+    except SystemExit as ex:
+        assert ex.code == code, (ex.code, code)
+
+
 def selftest():
     split = maxwrap.load_split(cs.SPLIT)
     A7 = ("none", "G", "Gauto", "PPC", "G@glr", "PPC@glr", "T0")
@@ -718,12 +726,7 @@ def selftest():
     assert r["k"] == "VS0.1", r  # the other brain's records do not count
     for rs in ([x for x in m0(clear) if not (x["kind"] == "base" and x["case_id"] == cal[0])],
                m0(clear, edit=lambda j, v: {"grasp_miss_m": None})):  # the line is incomplete / nothing valid
-        try:
-            with contextlib.redirect_stderr(io.StringIO()):
-                select(rs, P, split)
-            raise AssertionError("an incomplete selection line was accepted")
-        except SystemExit as ex:
-            assert ex.code == 2, ex.code
+        exits(lambda: select(rs, P, split), 2)
 
     # the plan per line
     def mk(kp=None, ko=None, sp=None, so=None, sb=None):
@@ -784,13 +787,8 @@ def selftest():
             assert all(x[2].startswith("pro-") == (ln["source"] == "pro") for x in ln["keys"])
         assert ("--kbar" in ln["args"]) == bool({"Gauto", "Glead"} & set(map(cs.method, ln["arms"])))
     for L, mo in (("2", mk("VS0.3")), ("2", mk(sp="S")), ("5", mk("VS0.3", so="S")), ("5", mk(ko="VS0.3", so="S")),
-                  ("6", mk("VS0.3")), ("7", mk(sb="P")), ("8", mk())):
-        try:
-            with contextlib.redirect_stderr(io.StringIO()):
-                plan(L, *mo, split)
-            raise AssertionError(f"line {L} without its mode or k: {mo}")
-        except SystemExit as ex:
-            assert ex.code == 3, (L, ex.code)
+                  ("6", mk("VS0.3")), ("7", mk(sb="P")), ("8", mk())):  # without its mode or k
+        exits(lambda: plan(L, *mo, split), 3)
 
     # the latched list and the PPC pass of mode С (spec §7.2)
     e10 = plus["eval300"][:10]
@@ -939,14 +937,6 @@ def selftest_grid(split, cal):
                  "pi05_bench": bold(("A", "A20"), cs.B_ARMS) + bold(("A20",), cs.NOISY),
                  "oft_lmax": old(O, e300, cs.ARMS)}
         return new, saved, mode, k
-
-    def exits(f, code):
-        try:
-            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
-                f()
-            raise AssertionError(f"no exit {code}")
-        except SystemExit as ex:
-            assert ex.code == code, (ex.code, code)
 
     # the preregistered thresholds (spec §8), directly: equality passes, "> 0" strict, one-sided = lo5
     x = lambda d=0.0, lo2=-9.0, lo5=-9.0, hi=9.0: {"diff_pp": d, "lo2.5": lo2, "lo5_one_sided": lo5,  # noqa: E731
