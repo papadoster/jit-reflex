@@ -57,7 +57,7 @@
 #               forecast.txt: the owner decides
 #   cgrid       [CLINES="1 2 3"] the lines CLINES (default 1-7) by priority (--plan --line N, from mode.json and
 #               k_select.json), the k selection after lines 1 and 4, the forecast after each runner line; with a mode S,
-#               PPC on PPCL's latched cases; grid_all_C.jsonl of the lines run so far. §12: above the $12 cap the lines
+#               PPC on PPCL's latched cases; grid_all_C.jsonl of the lines run so far. §12: above the $13 cap the lines
 #               that do not fit wait for the owner; CLINES in increasing order, 2, 3, 6, 7 with 1 (k_π), 5 with 1 and 4.
 #               A later cgrid with more lines resumes (the runners skip done cases)
 #   ctail       TAIL=1, after cgrid and the owner's go: line 8 (OFT), grid_all_C.jsonl again
@@ -785,7 +785,7 @@ json.dump(more[:$K], open('$O/bench_more.json', 'w'))" || exit 1  # a list: the 
     echo "[$(date +%T)] csmoke done. The forecast is above ($W/forecast.txt), the modes in mode.txt: the owner decides"
     ;;
   cgrid)  # controls spec §12: lines 1-7 strictly by priority, k after lines 1 and 4 (§5), PPC on the latched (§7.2)
-    CLINES=${CLINES:-1 2 3 4 5 6 7}  # §12: above the $12 cap the lines that do not fit wait for the owner
+    CLINES=${CLINES:-1 2 3 4 5 6 7}  # §12: above the $13 cap the lines that do not fit wait for the owner
     p=0
     for L in $CLINES; do  # by priority, each line with the selection lines its k needs
       [[ $L =~ ^[1-7]$ ]] && [ $L -gt $p ] || fail "CLINES='$CLINES': lines of 1-7 in increasing (priority) order"

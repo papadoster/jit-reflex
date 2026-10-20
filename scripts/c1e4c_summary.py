@@ -16,8 +16,9 @@ R = results/c1-e4/controls/pod_C (scripts/gpu_c1e4m.sh POD=C):
     python scripts/c1e4c_summary.py --smoke-check R/Csmoke_pi05*.jsonl   exit 0, or 3
     python scripts/c1e4c_summary.py [grid] R/grid_all_C.jsonl [--mode R/mode.json] [--k R/k_select.json]
             [--p2 results/c1-e4/part2] [--out R/summary.json]
-        on the Mac: the checks before reading (§7.3, §8), then the rules C1-C7, the claims and the report (§8, §11);
-        a failed check prints only the checks, exit 3. grid_all_C.jsonl (the pod's cat of C[1-8]*.jsonl) = lines 1-8
+        on the Mac: the checks before reading (§7.3, §8), then the rules C2, C3, C5, C6, the measurements И1-И4 (an
+        estimate and its 95% CI, no threshold), the claims and the report (§8, §11); a failed check prints only the
+        checks, exit 3. grid_all_C.jsonl (the pod's cat of C[1-8]*.jsonl) = lines 1-8
         and the c5 pass; records off the plan (a probe's) are counted, never read; one key twice with other content
         (grid_all_C.jsonl and its C*.jsonl both): exit 2. Needs hf-libero (the task clusters), the LeRobot env
     python scripts/c1e4c_summary.py --selftest
@@ -37,7 +38,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import c1e4m_summary as cs  # noqa: E402  (key, mindex, bindex, invalid, bprs, sources; puts src/ on sys.path)
-from c1e4m_summary import O, OP, P, TOL, e2, maxwrap, orx, run, s3  # noqa: E402
+from c1e4m_summary import O, OP, P, TOL, e2, maxwrap, orx, run  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
 P2 = REPO / "results/c1-e4/part2"  # part 2's records, read only
@@ -67,15 +68,19 @@ PROBE = {("m", P): "pi05_lmax", ("m", OP): "oftplus_lmax", ("b", P): "pi05_bench
 OFT_SAVED = ["pod_B/M4oft_oft_eval300_plus_d0.jsonl", "pod_B/M4oft_oft_eval300_pro_d0.jsonl"]  # line 8's report only
 CONF_SKIP = ("arms", "gpu", "kbar")  # spec §7.3: every other conf field equal in a pair; kbar: VS lines run without it,
 # a Gauto or Glead record's is checked against KBAR
-CLAIMS = {"G-AUTO НЕ ХУЖЕ РЕГУЛЯТОРА С ОБЩИМ k": ("C1a", "C1b"),  # spec §8: each alone, no multiplicity correction
-          "G-AUTO НЕ ХУЖЕ ПОДОГНАННОГО РЕГУЛЯТОРА": ("C1a", "C7"),
-          "ОБЩИЙ k НЕ ПЕРЕНОСИТСЯ": ("C6",),
-          "ЗАДЕРЖКА РАЗВОДИТ G-AUTO И РЕГУЛЯТОР": ("C2",),
-          "З1 НА ШУМНЫХ ГЛАЗАХ": ("C3",),  # its outcome, one of three
-          "G-AUTO НЕ ХУЖЕ ПОЛНОГО PPC НА ЕГО ПОЛЕ": ("C4",),
-          "ЛАТЧ МЕНЯЕТ PPC": ("C5",)}
-DEP = {"C1a": "2", "C1b": "5", "C2": "23", "C3": "6", "C4": "7", "C5": "237", "C6": "5", "C7": "5"}  # rule -> lines
-NI = {"pass": lambda d: bool(s3.ni(-2)(d)), "superior": lambda d: bool(d["lo2.5"] > 0)}  # spec §8; superior: report
+CLAIMS = {"ОБЩИЙ k НЕ ПЕРЕНОСИТСЯ": "C6",  # spec §8: each alone, no multiplicity correction
+          "ЗАДЕРЖКА РАЗВОДИТ G-AUTO И РЕГУЛЯТОР": "C2",
+          "З1 НА ШУМНЫХ ГЛАЗАХ": "C3",  # its outcome, one of three
+          "ЛАТЧ МЕНЯЕТ PPC": "C5"}
+MEAS = ("И1", "И2", "И3", "И4")  # spec §8: was C1a, C1b, C7, C4; an estimate and its 95% CI, no threshold
+EST = ("diff_pp", "lo2.5", "lo5_one_sided", "hi97.5", "pairs", "clusters")  # e2.diff_pp's: a measurement's estimate
+DEP = {"И1": "2", "И2": "5", "C2": "23", "C3": "6", "И4": "7", "C5": "237", "C6": "5", "И3": "5"}  # rule -> lines
+
+
+def show(a):
+    """spec "Сокращения": VS(1.0) is G, one name wherever a label is displayed ("VS1.0@cv" is "G@cv"); the records,
+    k_select.json and mode.json keep VS1.0."""
+    return a and a.replace("VS1.0", "G")
 
 
 def mlines(phase, tag, brain, sset, arms, split, d=0, cases=None, kbar=None, prefix=True):
@@ -361,10 +366,10 @@ def apart(d, thr, up, down, same):
 
 def grid(new, saved, mode, k, names, split):
     """spec §7.3, §8, §11 on the pod's records (grid_all_C.jsonl: lines 1-8 and the c5 pass) and part 2's (saved: {SAVED
-    name or "oft_lmax": records}). The checks before reading; when they pass, the rules C1-C7, the claims and the
-    report. Records off the plan (a probe's) are counted, not read. Exit 2 when one key comes twice with other
-    content (grid_all_C.jsonl and its C*.jsonl both). No kO (line 4 not run, spec §12): no line 5, C1b, C6, C7 not
-    read."""
+    name or "oft_lmax": records}). The checks before reading; when they pass, the rules C2, C3, C5, C6, the
+    measurements И1-И4, the claims and the report. Records off the plan (a probe's) are counted, not read. Exit 2 when
+    one key comes twice with other content (grid_all_C.jsonl and its C*.jsonl both). No kO (line 4 not run, spec
+    §12): no line 5, И2, И3, C6 not read."""
     kp = need(k, P, "k")
     ko = need(k, OP, "k") if k.get(OP) else None
     md = {n: need(mode, n, "mode") for n in SAVED}
@@ -441,8 +446,8 @@ def grid(new, saved, mode, k, names, split):
         for c, v in sorted(br.items())}
     c5_off = sum(lbase.get((r["brain"], r["case_id"], r["d"]), {}).get("e", "-") != r["e"] for r in of("c5")
                  if r.get("kind") == "base")  # its pairs drop out (mp)
-    # part 2's records read: mode П the rules' comparators, mode С "none" and G only (report, "через под"); in mode П a
-    # selected VS1.0 on M1 d 0 is part 2's G (spec §2, §5)
+    # part 2's records read: mode П the comparators of the rules and measurements, mode С "none" and G only (report,
+    # "через под"); in mode П a selected VS1.0 on M1 d 0 is part 2's G (spec §2, §5)
     keep = lambda r, m: r["kind"] != "base" and r["arm"] in (  # noqa: E731
         ("none", "G") if m == "S" else ("none", "G", "Gauto", "PPC", "Gauto@cv"))
     km = [r for r in sm if keep(r, mo[r["brain"]])]
@@ -491,17 +496,17 @@ def grid(new, saved, mode, k, names, split):
     B = lambda cells, x, y: cs.bprs(bi, (P,), cells, x, y)  # noqa: E731  (the bench has no invalid pair)
     R, inv = {}, {}
 
-    def put(name, test, prs, bad, total=None, **fs):
+    def put(name, test, prs, bad, total=None, **fs):  # a measurement (MEAS): no fs, no threshold
         d = e2.diff_pp(prs)
-        R[name] = {"test": test, **(e2.rnd(d) or {}), "invalid_pairs": bad} | {
+        R[name] = {"test": show(test), **(e2.rnd(d) or {}), "invalid_pairs": bad} | {
             f: None if d is None else g(d) for f, g in fs.items()}
         inv[name] = bad, len(prs) + bad if total is None else total
 
     vals = lambda pb: (list(pb[0].values()), pb[1])  # noqa: E731
-    put("C1a", f"pi05, M1, d = 0, the first 300: one-sided (Gauto - {kp}) >= -2", *vals(M(P, "Gauto", kp)), **NI)
+    put("И1", f"pi05, M1, d = 0, the first 300: Gauto - {kp}", *vals(M(P, "Gauto", kp)))
     if kp == "VS1.0":
-        R["C1a"]["note"] = "k_π = 1.0: VS1.0 is G (mode П: part 2's), C1a = Q4c on the first 300 (spec §2, §8)"
-    put("C1b", f"oftplus, M1, d = 0, the first 300: one-sided (Gauto - {kp}) >= -2", *vals(M(OP, "Gauto", kp)), **NI)
+        R["И1"]["note"] = "k_π = 1.0: the regulator is G (mode П: part 2's), И1 = Q4c on the first 300 (spec §2, §8)"
+    put("И2", f"oftplus, M1, d = 0, the first 300: Gauto - {kp}", *vals(M(OP, "Gauto", kp)))
     ps = {d: M(P, "Gauto", kp, d) for d in (0, 10, 20)}
     g = lambda d, c: float(ps[d][0][c][1]) - float(ps[d][0][c][2])  # noqa: E731
     put("C2", f"pi05, the first 300, d = 0, 10, 20: per case mean over d = 10, 20 of (Gauto - {kp}) minus d = 0's; "
@@ -514,41 +519,51 @@ def grid(new, saved, mode, k, names, split):
     put("C3", f"bench A20 @cv, inits 0-9: (Gauto@cv - {kp}@cv) >= +5 and lo2.5 > 0, or <= -5 and hi97.5 < 0",
         B(("A20",), "Gauto@cv", f"{kp}@cv"), 0, outcome=lambda d: apart(
             d, 5, "З1 лучше на шуме", "фиксированный κ лучше на шуме", "не различимы"))
-    put("C4", "bench oracle A + A20, inits 0-9: one-sided (Gauto - PPCL) >= -2", B(("A", "A20"), "Gauto", "PPCL"), 0,
-        **NI)
-    pm = [M(P, "PPCL", "PPC", d) for d in (0, 10, 20)]
-    put("C5", "pi05, M1 300 + D 600 + bench 520, pooled: (PPCL - PPC), the 95% CI without 0",
-        [(("m", *cl), a, b) for p, _ in pm for cl, a, b in p.values()]
-        + [(("b", *cl), a, b) for cl, a, b in B(("A", "A20"), "PPCL", "PPC")], sum(b for _, b in pm),
+    put("И4", "bench oracle A + A20, inits 0-9: Gauto - PPCL", B(("A", "A20"), "Gauto", "PPCL"), 0)
+    # C5 on the pairs where PPCL's latch held a chunk (latched()'s flag): elsewhere PPCL is PPC by construction (spec
+    # §7.2, §8); the pool of all pairs for reference, and for the invalid-pair limit. The bench by PPCL's record: bprs
+    # keeps on its second arm
+    pm, lat = [M(P, "PPCL", "PPC", d) for d in (0, 10, 20)], lambda r: r["latch"]["chunks"] > 0  # noqa: E731
+    pool = ([(("m", *cl), a, b) for p, _ in pm for cl, a, b in p.values()]
+            + [(("b", *cl), a, b) for cl, a, b in B(("A", "A20"), "PPCL", "PPC")])
+    on = ([(("m", *cl), a, b) for d, (p, _) in zip((0, 10, 20), pm) for c, (cl, a, b) in p.items()
+           if lat(mi[P, "dynamic", "PPCL", d][c])]
+          + [(("b", *cl), a, b) for cl, b, a in cs.bprs(bi, (P,), ("A", "A20"), "PPC", "PPCL", keep=lat)])
+    nc = len({cl for cl, _, _ in on})
+    few = len(on) < 20 or nc < 5  # spec §8: a degenerate interval, not read
+    put("C5", "pi05, the pairs of M1 300 + D 600 + bench 520 where PPCL's latch held a chunk: (PPCL - PPC), the 95% "
+              "CI without 0; fewer than 20 such pairs or 5 tasks: not read", [] if few else on, sum(b for _, b in pm),
+        len(pool) + sum(b for _, b in pm),
         outcome=lambda d: apart(d, 0, "меняет: PPCL лучше", "меняет: PPCL хуже", "не меняет различимо"))
+    R["C5"] |= {"latched_pairs": len(on), "latched_clusters": nc, "pool": e2.rnd(e2.diff_pp(pool))} | (
+        {"outcome": "не читается: латч почти не включался"} if few else {})
     c6 = f"oftplus, M1, d = 0, the first 300: |{ko} - {kp}| >= 5 and the 95% CI without 0"
     if ko == kp:
-        R["C6"], inv["C6"] = {"test": c6, "invalid_pairs": 0, "outcome": "не расходятся, тот же k"}, (0, 0)
+        R["C6"], inv["C6"] = {"test": show(c6), "invalid_pairs": 0, "outcome": "не расходятся, тот же k"}, (0, 0)
     else:
         put("C6", c6, *vals(M(OP, ko, kp)), outcome=lambda d: apart(
-            d, 5, f"расходятся: {ko} лучше", f"расходятся: {kp} лучше", "не расходятся"))
-    put("C7", f"oftplus, M1, d = 0, the first 300: one-sided (Gauto - {ko}) >= -2", *vals(M(OP, "Gauto", ko)), **NI)
-    reads = {"C1a": {"Gauto", kp}, "C1b": {"Gauto", kp}, "C2": {"Gauto", kp}, "C3": {"Gauto@cv", f"{kp}@cv"},
-             "C4": {"Gauto", "PPCL"}, "C5": {"PPCL"}, "C6": {ko, kp}, "C7": {"Gauto", ko}}  # a rule's arms
-    for n, Ls in DEP.items():  # a line not run at all (spec §12: waits for the owner) with an arm the rule reads: the
-        # rule is not read. Without one it reads part 2's records only (mode П, kπ = 1.0: C1a without line 2). No kO:
-        # line 4 not run, so no line 5
+            d, 5, f"расходятся: {show(ko)} лучше", f"расходятся: {show(kp)} лучше", "не расходятся"))
+    put("И3", f"oftplus, M1, d = 0, the first 300: Gauto - {ko}", *vals(M(OP, "Gauto", ko)))
+    reads = {"И1": {"Gauto", kp}, "И2": {"Gauto", kp}, "C2": {"Gauto", kp}, "C3": {"Gauto@cv", f"{kp}@cv"},
+             "И4": {"Gauto", "PPCL"}, "C5": {"PPCL"}, "C6": {ko, kp}, "И3": {"Gauto", ko}}  # its arms
+    for n, Ls in DEP.items():  # a line not run at all (spec §12: waits for the owner) with an arm the rule or
+        # measurement reads: not read (a measurement: no estimate). Without one it reads part 2's records only (mode П,
+        # kπ = 1.0: И1 without line 2). No kO: line 4 not run, so no line 5
         miss = ["4", "5"] if ko is None and "5" in Ls else [
             L for L in Ls if not comp[L]["run"] and reads[n] & {a for ln in lines[L] for a in ln["arms"]}]
         if miss and not (n == "C6" and ko == kp):
-            R[n] |= {f: None for f in ("pass", "superior", "outcome") if f in R[n]} | {"lines_not_run": miss}
+            R[n] |= dict.fromkeys(EST if n in MEAS else ("outcome",)) | {"lines_not_run": miss}
     checks["invalid_pairs"] = {n: {"pairs": t, "invalid": b, "pass": b <= 0.02 * t + TOL} for n, (b, t) in inv.items()}
     if not all(v["pass"] for v in checks["invalid_pairs"].values()):
         checks["pass"] = False
         return {"checks": checks}
-    yes = lambda r: r.get("pass", None if r.get("outcome") is None else r["outcome"].startswith(  # noqa: E731
-        ("расходятся", "меняет")))
+    meas = {n: R.pop(n) for n in MEAS}
     claims = {}
-    for c, need_ in CLAIMS.items():
-        x = [yes(R[n]) for n in need_]
-        claims[c] = (R["C3"]["outcome"] or "НЕ ЧИТАЛОСЬ" if need_ == ("C3",) else
-                     "НЕТ" if False in x else "НЕ ЧИТАЛОСЬ" if None in x else "ДА")
-    return {"checks": checks, "rules": R, "claims": claims,
+    for c, n in CLAIMS.items():
+        o = R[n]["outcome"]
+        claims[c] = ("НЕ ЧИТАЛОСЬ" if o is None else o if n == "C3" else o.upper() if o.startswith("не читается") else
+                     "ДА" if o.startswith(("расходятся", "меняет")) else "НЕТ")
+    return {"checks": checks, "rules": R, "measurements": meas, "claims": claims,
             "report": grid_report(mi, bi, M, B, one, e300, kp, ko, mo, md, used, k, mode, checks)}
 
 
@@ -558,33 +573,39 @@ def grid_report(mi, bi, M, B, one, e300, kp, ko, mo, md, used, k, mode, checks):
     dm = lambda b, x, y, d=0, cases=e300: e2.rnd(e2.diff_pp(list(M(b, x, y, d, cases)[0].values())))  # noqa: E731
     db = lambda cells, x, y: e2.rnd(e2.diff_pp(B(cells, x, y)))  # noqa: E731
     via = lambda m: {"через под": m == "S"}  # noqa: E731
+    # one name per method (show); on M1 d 0 in mode С part 2's G and the pod's VS1.0 are both G: G(часть 2), G(под C).
+    # In mode П that VS1.0 is part 2's G itself (spec §2)
+    lab = lambda b, a, d=0: {"G": "G(часть 2)", "VS1.0": "G(под C)"}[a] if (  # noqa: E731
+        d == 0 and a in ("G", "VS1.0") and mo[b] == "S" and (b, "dynamic", "VS1.0", 0) in mi) else show(a)
     rep = defaultdict(dict)
     m1 = [(P, "Gauto", kp), (OP, "Gauto", kp), (OP, ko, kp), (OP, "Gauto", ko)]  # every M1 difference, sliced below
     for b, d in ((P, 0), (P, 10), (P, 20), (OP, 0), (O, 0)):
         for a in sorted({a for b2, _, a, d2 in mi if (b2, d2) == (b, d) and (cs.method(a) in VS or a == "PPCL")}):
-            rep["vs_none"][f"{b}/d{d}/{a}-none"] = (dm(b, a, "none", d) or {}) | via(mo[b])
+            rep["vs_none"][f"{b}/d{d}/{lab(b, a, d)}-none"] = (dm(b, a, "none", d) or {}) | via(mo[b])
             m1 += [(b, a, "none")] * (d == 0)
     for c, a in (("A", "PPCL"), ("A", kp), ("A20", "PPCL"), ("A20", kp), ("A20", f"{kp}@cv")):
-        rep["vs_none"][f"bench/{c}/{a}-none"] = (db((c,), a, "none") or {}) | via(md["pi05_bench"])
+        rep["vs_none"][f"bench/{c}/{show(a)}-none"] = (db((c,), a, "none") or {}) | via(md["pi05_bench"])
     for d in (0, 10, 20):
         rep["ppcl_ppc"][f"{P}/d{d}"] = dm(P, "PPCL", "PPC", d)
     for c in ("A", "A20"):
         rep["ppcl_ppc"][f"bench/{c}"] = db((c,), "PPCL", "PPC")
-    for b, a in ((P, kp), (OP, kp), (OP, ko), (O, kp)):  # fixed κ next to G-auto on M1 d 0
-        if a:
-            rep["g_vs"][f"{b}/G-{a}"] = (dm(b, "G", a) or {}) | via(mo[b])
+    for b, a in ((P, kp), (OP, kp), (OP, ko), (O, kp)):  # fixed κ next to G-auto on M1 d 0; mode П G - G ≡ 0: out
+        if a and lab(b, "G") != lab(b, a):
+            rep["g_vs"][f"{b}/{lab(b, 'G')}-{lab(b, a)}"] = (dm(b, "G", a) or {}) | via(mo[b])
     rep["oft_gauto_vs"] = dm(O, "Gauto", kp)  # line 8, the tail: one pod
     m1 += [(P, "PPCL", "PPC"), (P, "G", kp), (OP, "G", kp), (OP, "G", ko), (O, "G", kp), (O, "Gauto", kp)]
-    rep["cv_cost"] = {f"A20/{kp}@cv-{kp}": db(("A20",), f"{kp}@cv", kp),  # part 2: Gauto@cv - Gauto -10.8
+    rep["cv_cost"] = {f"A20/{show(kp)}@cv-{show(kp)}": db(("A20",), f"{kp}@cv", kp),  # part 2: Gauto@cv - Gauto -10.8
                       "A20/Gauto@cv-Gauto": db(("A20",), "Gauto@cv", "Gauto")}
     dist = {c: one[c]["distance_m"] for c in e300 if c in one and one[c]["distance_m"] is not None}
     near, far = {c for c, v in dist.items() if v < 0.09}, {c for c, v in dist.items() if v >= 0.09}
     for b, x, y in dict.fromkeys(m1):
-        if x != y and None not in (x, y):
-            rep["slices_M1"][f"{b}/{x}-{y}"] = {"6cm": dm(b, x, y, 0, near), "12cm": dm(b, x, y, 0, far)}
+        if None not in (x, y) and lab(b, x) != lab(b, y):
+            rep["slices_M1"][f"{b}/{lab(b, x)}-{lab(b, y)}"] = {"6cm": dm(b, x, y, 0, near),
+                                                                "12cm": dm(b, x, y, 0, far)}
     for key, g in sorted(list(mi.items()) + list(bi.items()), key=lambda kv: str(kv[0])):  # per arm and cell
-        g, a = list(g.values()), key[2] if key[1] == "dynamic" else key[3]
-        name = "/".join(map(str, key))
+        i = 2 if key[1] == "dynamic" else 3
+        g, a = list(g.values()), key[i]
+        name = "/".join(map(str, key[:i] + (lab(key[0], a, key[3]) if i == 2 else show(a),) + key[i + 1:]))
         post = [sum(t >= r["e"] for t, _ in r["plans_in"]) for r in g if r.get("e") is not None]
         rep["calls"][name] = {"n": len(g), "sched": mean([r["calls_sched"] for r in g]),
                               "trig": mean([r["calls_trig"] for r in g]), "plans_after_event": mean(post)}
@@ -938,19 +959,18 @@ def selftest_grid(split, cal):
                  "oft_lmax": old(O, e300, cs.ARMS)}
         return new, saved, mode, k
 
-    # the preregistered thresholds (spec §8), directly: equality passes, "> 0" strict, one-sided = lo5
+    # the preregistered thresholds (spec §8), directly: equality passes, "> 0" strict
     x = lambda d=0.0, lo2=-9.0, lo5=-9.0, hi=9.0: {"diff_pp": d, "lo2.5": lo2, "lo5_one_sided": lo5,  # noqa: E731
                                                      "hi97.5": hi}
-    assert NI["pass"](x(lo5=-2.0)) and not NI["pass"](x(lo5=-2.01)) and not NI["pass"](x(lo2=-2.0, lo5=-2.01))
-    assert NI["superior"](x(lo2=1e-9)) and not NI["superior"](x(lo2=0.0, lo5=1.0))
     assert [apart(x(*v), 5, "up", "down", "same") for v in (
         (5.0, 1e-9), (5.0, 0.0), (4.99, 1.0), (-5.0, -9, -9, -1e-9), (-5.0, -9, -9, 0.0), (-4.99, -9, -9, -1.0))] == [
         "up", "same", "same", "down", "same", "same"]
 
-    # mode С, kπ = kO = VS0.3: C1a at +3 passes; C2 at +10 diverges (d 10: +11, d 20: +15); C3 at +5 exactly (184 -
-    # 171 of 260); C6 the same k; C5: PPCL latched on 15 cases at d 0 (in 6 runner groups, 36 cases) and 15 bench
-    # episodes (A20, 13 tasks), PPC of the c5 pass on those groups and tasks (both cells), PPCL itself elsewhere: PPC
-    # 40 % against PPCL's 50 % there, so + 1 on the pass's 24 cases and 2 x 24 bench episodes at 40-49 of 100
+    # mode С, kπ = kO = VS0.3: И1 at +3; C2 at +10 diverges (d 10: +11, d 20: +15); C3 at +5 exactly (184 - 171 of
+    # 260); C6 the same k; C5: PPCL latched on 15 cases at d 0 (in 6 runner groups, 36 cases) and 15 bench episodes
+    # (A20, 13 tasks), PPC of the c5 pass on those groups and tasks (both cells), PPCL itself elsewhere: PPC 40 %
+    # against PPCL's 50 % there, so + 1 on the 30 latched pairs (40-44 of 100) and, in the pool, on the pass's 24
+    # cases and 2 x 24 bench episodes at 40-49 of 100
     lat = lambda r: r["method"] == "PPCL" and (  # noqa: E731
         pos[r["case_id"]] % 100 in range(40, 45) and r["d"] == 0 if "case_id" in r
         else bpos[r["suite"], r["task"], r["init"]] % 100 in range(40, 45) and r["cell"] == "A20")
@@ -965,18 +985,26 @@ def selftest_grid(split, cal):
     assert ch["pass"] and ch["off_plan"] == {f"{P}/T0": 1}, ch
     assert ch["complete"]["c5"] == {"expected": 36 * 2 + 13 * 10 * 2, "missing": 0, "run": True, "pass": True}, ch
     assert ch["complete"]["5"]["expected"] == 300 * 3 and ch["e_match"][f"{P}/d0"]["mode"] == "S"
-    r = res["rules"]
-    assert r["C1a"]["diff_pp"] == 3 and r["C1a"]["pairs"] == 300 and r["C1a"]["pass"] and r["C1a"]["superior"], r
+    r, ms = res["rules"], res["measurements"]
+    assert list(r) == ["C2", "C3", "C5", "C6"] and sorted(ms) == list(MEAS), (list(r), list(ms))
+    # a measurement: the estimate and its 95% CI only, no verdict and no threshold (spec §8)
+    assert all(not {"pass", "superior", "outcome"} & set(v) and not re.search("[<>≤≥]", v["test"]) and {
+        "diff_pp", "lo2.5", "hi97.5", "pairs", "clusters", "invalid_pairs"} <= set(v) for v in ms.values()), ms
+    assert ms["И1"]["diff_pp"] == 3 and ms["И1"]["pairs"] == 300 and ms["И4"]["pairs"] == 520, ms
+    assert ms["И4"]["diff_pp"] == 0 and ms["И3"] | {"test": 0} == ms["И2"] | {"test": 0}, ms
     assert r["C2"]["diff_pp"] == 10 and r["C2"]["pairs"] == 300 and r["C2"]["outcome"].startswith("расходятся: G-auto")
     assert r["C3"]["outcome"] == "З1 лучше на шуме" and r["C3"]["pairs"] == 260 and r["C3"]["diff_pp"] == 5, r["C3"]
-    assert r["C4"]["pairs"] == 520 and r["C4"]["diff_pp"] == 0 and r["C4"]["pass"]
-    assert r["C5"]["pairs"] == 1420 and r["C5"]["diff_pp"] == round(100 * 72 / 1420, 3), r["C5"]
-    assert r["C5"]["clusters"] == r["C1a"]["clusters"] + 26 and r["C5"]["outcome"] == "меняет: PPCL лучше", r["C5"]
-    assert r["C6"]["outcome"] == "не расходятся, тот же k" and r["C7"] | {"test": 0} == r["C1b"] | {"test": 0}, r
+    # C5 on the 30 latched pairs (spec §8); the pool of 1420 for reference
+    assert r["C5"]["pairs"] == r["C5"]["latched_pairs"] == 30 and r["C5"]["diff_pp"] == 100, r["C5"]
+    assert r["C5"]["clusters"] == r["C5"]["latched_clusters"] > 13 and r["C5"]["outcome"] == "меняет: PPCL лучше"
+    assert r["C5"]["pool"]["pairs"] == 1420 and r["C5"]["pool"]["diff_pp"] == round(100 * 72 / 1420, 3), r["C5"]
+    assert r["C5"]["pool"]["clusters"] == ms["И1"]["clusters"] + 26, r["C5"]
+    assert r["C6"]["outcome"] == "не расходятся, тот же k", r
     cl = res["claims"]
-    assert cl["G-AUTO НЕ ХУЖЕ РЕГУЛЯТОРА С ОБЩИМ k"] == "ДА" and cl["ЛАТЧ МЕНЯЕТ PPC"] == "ДА", cl
-    assert cl["ЗАДЕРЖКА РАЗВОДИТ G-AUTO И РЕГУЛЯТОР"] == "ДА" and cl["ОБЩИЙ k НЕ ПЕРЕНОСИТСЯ"] == "НЕТ", cl
-    assert cl["З1 НА ШУМНЫХ ГЛАЗАХ"] == "З1 лучше на шуме", cl
+    assert list(cl) == ["ОБЩИЙ k НЕ ПЕРЕНОСИТСЯ", "ЗАДЕРЖКА РАЗВОДИТ G-AUTO И РЕГУЛЯТОР", "З1 НА ШУМНЫХ ГЛАЗАХ",
+                        "ЛАТЧ МЕНЯЕТ PPC"], cl
+    assert cl["ЛАТЧ МЕНЯЕТ PPC"] == "ДА" and cl["ЗАДЕРЖКА РАЗВОДИТ G-AUTO И РЕГУЛЯТОР"] == "ДА", cl
+    assert cl["ОБЩИЙ k НЕ ПЕРЕНОСИТСЯ"] == "НЕТ" and cl["З1 НА ШУМНЫХ ГЛАЗАХ"] == "З1 лучше на шуме", cl
     rep = res["report"]
     assert rep["latch"][f"{P}/dynamic/PPCL/0"]["latched_share"] == 0.05 and rep["latch"][f"{P}/move/A20/PPCL"][
         "latched_share"] == round(15 / 260, 4), rep["latch"]
@@ -1020,62 +1048,82 @@ def selftest_grid(split, cal):
     ch = grid([x | {"skipped_reason": "motion_blur"} if x is cb else x for x in new], saved, mode, k, names,
               split)["checks"]
     assert ch["pass"] and ch["skipped"] == 1 and ch["k_select"][P]["pass"], ch  # the pod's --select reads it too
-    # the invalid-pair limit (spec §8): 6 of C1a's 300 pairs (2 %) are read, 7 stop the reading
+    # the invalid-pair limit (spec §8), a measurement's too: 6 of И1's 300 pairs (2 %) are read, 7 stop the reading
     for n_bad, ok in ((6, True), (7, False)):
         off = set(e300[:n_bad])
         res = grid([x | {"prefix_ok": False} if x.get("case_id") in off and x["arm"] == "Gauto" and x["brain"] == P
                     and x["d"] == 0 else x for x in new], saved, mode, k, names, split)
-        assert res["checks"]["invalid_pairs"]["C1a"] == {"pairs": 300, "invalid": n_bad, "pass": ok} and (
+        assert res["checks"]["invalid_pairs"]["И1"] == {"pairs": 300, "invalid": n_bad, "pass": ok} and (
             "rules" in res) == ok == res["checks"]["pass"], res["checks"]["invalid_pairs"]
 
-    # mode С, kπ = VS0.3, kO = VS0.1: C1a at -6 fails; no divergence; C3 the other way; C6 diverges at +5 exactly
+    # mode С, kπ = VS0.3, kO = VS0.1: И1 at -6; no divergence; C3 the other way; C6 diverges at +5 exactly; the
+    # latch never held: C5 not read
     pct = {(P, "Gauto", 0): 44, (P, "Gauto", 10): 44, (P, "Gauto", 20): 44, ("A20", "Gauto@cv"): 40,
            (OP, "VS0.1", 0): 55}
     res = grid(*world("SSS", ("VS0.3", "VS0.1"), pct), names, split)
-    r, cl = res["rules"], res["claims"]
-    assert r["C1a"]["diff_pp"] == -6 and r["C1a"]["pass"] is False and r["C2"]["diff_pp"] == 0, r
+    r, ms, cl = res["rules"], res["measurements"], res["claims"]
+    assert ms["И1"]["diff_pp"] == -6 and r["C2"]["diff_pp"] == 0 and ms["И3"]["diff_pp"] == -5, (r, ms)
     assert r["C2"]["outcome"] == "не расходятся" and r["C3"]["outcome"] == "фиксированный κ лучше на шуме", r
-    assert r["C6"]["diff_pp"] == 5 and r["C6"]["outcome"] == "расходятся: VS0.1 лучше" and r["C7"]["diff_pp"] == -5
-    assert r["C5"]["diff_pp"] == 0 and r["C5"]["outcome"] == "не меняет различимо", r["C5"]  # PPCL itself everywhere
-    assert cl["G-AUTO НЕ ХУЖЕ РЕГУЛЯТОРА С ОБЩИМ k"] == "НЕТ" and cl["ОБЩИЙ k НЕ ПЕРЕНОСИТСЯ"] == "ДА", cl
+    assert r["C6"]["diff_pp"] == 5 and r["C6"]["outcome"] == "расходятся: VS0.1 лучше", r["C6"]
+    assert r["C5"]["outcome"] == "не читается: латч почти не включался" and "diff_pp" not in r["C5"], r["C5"]
+    assert r["C5"]["latched_pairs"] == r["C5"]["latched_clusters"] == 0 and r["C5"]["pool"]["pairs"] == 1420
+    assert r["C5"]["pool"]["diff_pp"] == 0 and cl["ЛАТЧ МЕНЯЕТ PPC"] == "НЕ ЧИТАЕТСЯ: ЛАТЧ ПОЧТИ НЕ ВКЛЮЧАЛСЯ", r
+    assert cl["ОБЩИЙ k НЕ ПЕРЕНОСИТСЯ"] == "ДА", cl
     assert res["checks"]["complete"]["c5"]["expected"] == 0
     new, saved, mode, k = world("SSS", ("VS0.3", "VS0.1"), pct)
     res = grid([x for x in new if x.get("cell") != "A" or x["arm"] == "PPCL"], saved, mode, k, names, split)
     assert res["checks"]["complete"]["7"] == {"expected": 1560, "missing": 520, "run": True, "pass": False}
     res = grid([x for x in new if "cell" not in x or x["arm"].endswith("@cv")], saved, mode, k, names, split)
-    r = res["rules"]  # line 7 not run at all: C4 and C5 (a part of its pool) are not read, the others are
-    assert res["checks"]["complete"]["7"]["run"] is False and r["C4"]["pass"] is None and r["C5"]["outcome"] is None
-    assert r["C5"]["lines_not_run"] == ["7"] and r["C3"]["outcome"] and r["C1a"]["pass"] is False, r
-    assert res["claims"]["G-AUTO НЕ ХУЖЕ ПОЛНОГО PPC НА ЕГО ПОЛЕ"] == "НЕ ЧИТАЛОСЬ" == res["claims"]["ЛАТЧ МЕНЯЕТ PPC"]
-    # k_select.json with π only (line 4 not run, spec §12): no line 5; C1a, C2-C5 are read, C1b, C6, C7 are not
+    r, ms = res["rules"], res["measurements"]  # line 7 not run at all: И4 and C5 (a part of its pool) are not read
+    assert res["checks"]["complete"]["7"]["run"] is False and r["C5"]["outcome"] is None and ms["И4"]["pairs"] is None
+    assert ms["И4"]["diff_pp"] is None and ms["И4"]["lines_not_run"] == ["7"] == r["C5"]["lines_not_run"], (r, ms)
+    assert r["C3"]["outcome"] and ms["И1"]["diff_pp"] == -6 and res["claims"]["ЛАТЧ МЕНЯЕТ PPC"] == "НЕ ЧИТАЛОСЬ", r
+    # k_select.json with π only (line 4 not run, spec §12): no line 5; И1, И4, C2, C3, C5 are read, И2, И3, C6 are not
     res = grid([x for x in new if x["brain"] != OP], saved, mode, {P: k[P]}, names, split)
-    r = res["rules"]
+    r, ms = res["rules"], res["measurements"]
     assert res["checks"]["pass"] and res["checks"]["complete"]["5"]["run"] is False and res["checks"]["k_select"][OP] \
         == {"file": None, "recomputed": None, "pass": True}, res["checks"]
-    assert all(r[n].get("pass", r[n].get("outcome")) is not None for n in ("C1a", "C2", "C3", "C4", "C5")), r
-    assert all(r[n].get("pass", r[n].get("outcome")) is None and r[n]["lines_not_run"] == ["4", "5"]
-               for n in ("C1b", "C6", "C7")), r
+    assert all(r[n]["outcome"] is not None for n in ("C2", "C3", "C5")) and ms["И1"]["diff_pp"] == -6, r
+    assert ms["И4"]["diff_pp"] == 0 and "lines_not_run" not in ms["И4"], ms
+    assert all(ms[n]["diff_pp"] is ms[n]["pairs"] is None and ms[n]["lines_not_run"] == ["4", "5"]
+               for n in ("И2", "И3")) and r["C6"]["outcome"] is None and r["C6"]["lines_not_run"] == ["4", "5"], ms
     assert res["claims"]["ОБЩИЙ k НЕ ПЕРЕНОСИТСЯ"] == "НЕ ЧИТАЛОСЬ" and not res["report"]["g_vs"].get(f"{OP}/G-None")
 
-    # mode П everywhere, kπ = kO = VS1.0: VS on M1 d 0 is part 2's G (C1a = Q4c on the first 300); C1b at -3 fails;
-    # C3 at 0
+    # mode П everywhere, kπ = kO = VS1.0: VS on M1 d 0 is part 2's G (И1 = Q4c on the first 300); И2 at -3; C3 at 0
     pct = {"G": 47, (O, "G", 0): 50, (OP, "Gauto", 0): 44}
     new, saved, mode, k = world("PPP", ("VS1.0", "VS1.0"), pct)
     assert not [x for x in new if x.get("case_id") in e300 and x["arm"] == "VS1.0" and x["d"] == 0
                 and x["brain"] != O]
     res = grid(new, saved, mode, k, names, split)
-    r = res["rules"]
-    assert r["C1a"]["diff_pp"] == 3 and r["C1a"]["pairs"] == 300 and "Q4c" in r["C1a"]["note"], r["C1a"]
-    assert r["C1b"]["diff_pp"] == -3 and r["C1b"]["pass"] is False and r["C3"]["outcome"] == "не различимы", r
-    assert r["C5"]["pairs"] == 1420 and r["C5"]["diff_pp"] == 0 and r["C2"]["diff_pp"] == -3, r  # d 0: G = 47
-    assert res["claims"]["G-AUTO НЕ ХУЖЕ РЕГУЛЯТОРА С ОБЩИМ k"] == "НЕТ", res["claims"]  # C1a alone passes
-    assert res["report"]["g_vs"][f"{P}/G-VS1.0"]["diff_pp"] == 0 and not res["report"]["vs_none"][
-        f"{P}/d0/PPCL-none"]["через под"]
-    # line 2 (PPCL only) not run: C1a and C2 read part 2's d 0 and are read; C5 (PPCL) is not
+    r, ms, rep = res["rules"], res["measurements"], res["report"]
+    assert ms["И1"]["diff_pp"] == 3 and ms["И1"]["pairs"] == 300 and "Q4c" in ms["И1"]["note"], ms["И1"]
+    assert ms["И2"]["diff_pp"] == -3 and r["C3"]["outcome"] == "не различимы", (r, ms)
+    assert r["C5"]["pool"]["pairs"] == 1420 and r["C5"]["pool"]["diff_pp"] == 0 and r["C2"]["diff_pp"] == -3, r  # G 47
+    assert not rep["vs_none"][f"{P}/d0/PPCL-none"]["через под"]
+    # one name (spec "Сокращения"): VS1.0 is shown as G; mode П drops G - G; OFT (line 8, mode С) has part 2's G and
+    # its own: two names
+    shown = [v.get(f) for v in list(r.values()) + list(ms.values()) for f in ("test", "outcome", "note")] + [
+        x for f in ("vs_none", "g_vs", "cv_cost", "slices_M1", "calls", "latch", "vs_metrics") for x in rep[f]]
+    assert not [x for x in shown if x and "VS1.0" in x] and ms["И1"]["test"].endswith("Gauto - G"), shown
+    assert {f"{P}/d0/G-none", f"{P}/d10/G-none", "bench/A20/G@cv-none"} <= set(rep["vs_none"]) and set(
+        rep["cv_cost"]) == {"A20/G@cv-G", "A20/Gauto@cv-Gauto"} and f"{P}/dynamic/G/0" in rep["vs_metrics"], rep
+    assert set(rep["g_vs"]) == {f"{O}/G(часть 2)-G(под C)"} and rep["g_vs"][f"{O}/G(часть 2)-G(под C)"]["через под"]
+    assert {f"{O}/dynamic/G(часть 2)/0", f"{O}/dynamic/G(под C)/0", f"{P}/dynamic/G/0"} <= set(rep["calls"]), rep
+    assert f"{P}/Gauto-G" in rep["slices_M1"] and not [x for x in rep["slices_M1"] if x.endswith("/G-G")], rep
+    # C5 on the latched pairs (spec §8): 20 over 5 tasks are read; 19, or 20 over 4 tasks, are not
+    e20 = {(*st, i) for st in orx.TASKS[:5] for i in range(4)}
+    for eps, ok in ((e20, True), (e20 - {(*orx.TASKS[0], 0)}, False), ({(*st, i) for st in orx.TASKS[:4]
+                                                                          for i in range(5)}, False)):
+        c5 = grid([x | {"latch": {"trig": 1, "chunks": 1, "resets": 0}} if x["arm"] == "PPCL" and x.get("cell") == "A20"
+                   and (x["suite"], x["task"], x["init"]) in eps else x for x in new], saved, mode, k, names, split)
+        assert c5["rules"]["C5"]["latched_pairs"] == len(eps) and c5["claims"]["ЛАТЧ МЕНЯЕТ PPC"] == (
+            "НЕТ" if ok else "НЕ ЧИТАЕТСЯ: ЛАТЧ ПОЧТИ НЕ ВКЛЮЧАЛСЯ"), (len(eps), c5["rules"]["C5"])
+        assert c5["rules"]["C5"]["outcome"] == ("не меняет различимо" if ok else "не читается: латч почти не включался")
+    # line 2 (PPCL only) not run: И1 and C2 read part 2's d 0 and are read; C5 (PPCL) is not
     res = grid([x for x in new if not (x.get("case_id") in e300 and x["brain"] == P and x["d"] == 0)], saved, mode, k,
                names, split)
-    r = res["rules"]
-    assert res["checks"]["complete"]["2"]["run"] is False and r["C1a"]["pass"] and r["C1a"]["pairs"] == 300, r["C1a"]
+    r, ms = res["rules"], res["measurements"]
+    assert res["checks"]["complete"]["2"]["run"] is False and ms["И1"]["diff_pp"] == 3 and ms["И1"]["pairs"] == 300, ms
     assert r["C2"]["outcome"] and r["C5"]["outcome"] is None and r["C5"]["lines_not_run"] == ["2"], r
     # the new Base's e is not part 2's on 6 of the 300 π cases at d 0: 98 % match, the 6 cross-pod pairs drop; 7 fail
     for n_off, ok in ((6, True), (7, False)):
@@ -1084,7 +1132,7 @@ def selftest_grid(split, cal):
                           and x["d"] == 0 and x["brain"] == P else x), names, split)
         assert res["checks"]["e_match"][f"{P}/d0"] == {"equal": 300 - n_off, "total": 300, "mode": "P", "pass": ok}
         if ok:
-            assert res["rules"]["C5"]["invalid_pairs"] == 6 and res["rules"]["C1a"]["invalid_pairs"] == 0
+            assert res["rules"]["C5"]["invalid_pairs"] == 6 and res["measurements"]["И1"]["invalid_pairs"] == 0
             assert res["report"]["vs_none"][f"{P}/d0/PPCL-none"]["pairs"] == 294
         else:
             assert "rules" not in res
