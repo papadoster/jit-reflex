@@ -253,6 +253,42 @@ def test_make_agent_builds_vs_without_kbar():
         assert run.make_agent(arm, conf, 0).method == arm
 
 
+BAND = {"model": "I", "G": [orx.G_POS, orx.G_POS], "B": [0.0, 0.0], "delta": 0.005}  # the Toy arm's own model
+
+
+def test_pbvs_arms_and_log_traj():
+    """PBVS spec §3, §9 item 8: --log-traj only adds the Base's x, p and executed xyz (act_hash unchanged, Dynamic
+    records without it); PBVS arms run off conf["pbvs"] on the replayed prefix and carry their counters; a Base-only
+    run (--arms '') works."""
+    c, arms = {**conf(), "pbvs": BAND}, ["none", "PBVS0.3", "PBVS1.0"]
+    (base0, _), (base, dyn) = (by_arm(run.run_cases([CASE], arms, c, [Toy(), Toy()], Brain(), log_traj=f))
+                               for f in (False, True))
+    assert "traj" not in base0 and all("traj" not in r for r in dyn.values())
+    assert base["act_hash"] == base0["act_hash"] and base["steps"] == base0["steps"] == 60
+    tr = base["traj"]
+    x, p, a = (np.array(tr[k]) for k in "xpa")
+    assert x.shape == p.shape == a.shape == (60, 3) and np.allclose(p, [0.5, 0.0, 0.0])
+    assert np.allclose(np.diff(x, axis=0), orx.G_POS * a[:-1], atol=2e-6)  # the Toy integrator, rounded to 1e-6
+    for arm in ("PBVS0.3", "PBVS1.0"):
+        r, st = dyn[arm], dyn[arm]["pbvs"]
+        assert r["method"] == arm and r["noise"] == "" and r["prefix_ok"] is True and r["t_engage"] == base["e"], arm
+        assert st["steps_acting"] >= 1 and all(type(st[k]) is int for k in ("steps_window", "steps_acting", "flips"))
+    assert "pbvs" not in dyn["none"] and dyn["PBVS0.3"]["act_hash"] != dyn["none"]["act_hash"]
+    only = run.run_cases([CASE], [], conf(), [Toy()], Brain(), log_traj=True)
+    assert [r["kind"] for r in only] == ["base"] and only[0]["act_hash"] == base0["act_hash"] and only[0]["traj"]
+    assert [json.loads(x) for x in run.lines(only).splitlines()] == json.loads(json.dumps(only))
+
+
+def test_validate_pbvs_needs_the_band():
+    run.validate(["PBVS0.1", "PBVS0.3", "PBVS1.0"], {**conf(), "pbvs": BAND}, [CASE])
+    assert run.make_agent("PBVS1.0", {**conf(), "pbvs": BAND}, 0).method == "PBVS1.0"
+    with pytest.raises(KeyError):
+        run.validate(["PBVS0.3"], conf(), [CASE])
+    for bad in ("PBVS0.3@glr", "PBVS0.5"):
+        with pytest.raises(AssertionError):
+            run.validate([bad], {**conf(), "pbvs": BAND}, [CASE])
+
+
 def test_shim_leaves_gym_without_gymnasium(monkeypatch):
     real = object()
     monkeypatch.setitem(sys.modules, "gym", real)

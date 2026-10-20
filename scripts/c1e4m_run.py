@@ -21,6 +21,9 @@ per process. Per case:
   trigger entity (the moved object). The event flag is not passed to the agent.
 - Gcal (M0): at the agent's engagement t_e, two brain calls with one noise, on the last pre-event observation (step
   e - 1, the one the previous step() returned) and on the current one; gauto.shadow_sample as part 1.
+- PBVS0.1 / 0.3 / 1.0 (PBVS spec §2, src/vservo.py): the band of --band (V0's band.json) in conf["pbvs"], only in a
+  run with a PBVS arm; their records carry "pbvs" (the regulator's counters). --log-traj (PBVS spec §3, V0): a Base
+  record carries "traj", per step x, p and the executed action's xyz (rounded to 1e-6); its actions are unchanged.
 - Time t: their policy step (total_env_steps - warmup_steps); e: their cosmos_query_boundary_step (Base: the would-be
   one), the first policy step whose observation is post-event. Brain noise seed: policy_seed + t (their runners);
   the shadow pair's: policy_seed + t_e.
@@ -60,6 +63,7 @@ import c1e4m_brains as cb  # noqa: E402
 import gauto  # noqa: E402
 import maxwrap  # noqa: E402
 import objreflex as orx  # noqa: E402
+import vservo  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
 LMAX = Path(os.environ.get("LIBERO_MAX_ROOT", "~/Desktop/M2R-libero-max")).expanduser()
@@ -140,9 +144,11 @@ def case_seed(case_id):
 
 def make_agent(arm, conf, seed):
     """scripts/c1e4_run.py make_agent (copied: Task 6 edits that file), oracle or GLR eyes."""
-    method, noise = gauto.parse_arm(arm)
+    method, noise = vservo.parse_arm(arm)
     assert noise in ("", "glr"), f"{arm}: part 2 on LIBERO-MAX runs the oracle and GLR eyes"
     kw = {"t_ramp": conf["t_ramp"], "k_p": conf["k_p"], "tau_k": conf["tau_k"], "K": gauto.K}
+    if method in vservo.LAMBDAS:  # PBVS spec §2: oracle eyes, the band of V0 (--band)
+        return vservo.PBVSAgent(method, conf["s"], conf["d"], conf["pbvs"], **kw)
     if noise == "glr":
         kw["tracker"] = gauto.GLRKalman(seed, *gauto.NOISE)
     kbar = (gauto.KAPPA0[conf["brain"]] if method in ("Gk0", "Gk0T")
@@ -465,6 +471,8 @@ class Episode:
                            and orx.episode_metrics(self.xs[k:], self.acts[k:], self.objs[k:])["grasp_ok"])
         if method == "PPCL":  # controls spec §11
             rec["latch"] = dict(ag.latch_stats)
+        if method in vservo.LAMBDAS:  # PBVS spec §6: the regulator's counters
+            rec["pbvs"] = {k: round(v, 6) for k, v in ag.pbvs_stats.items()}
         if self.kind == "base":  # cut by --base-prefix: its outcome is unknown
             rec["base_cut"] = self.cut
             if self.cut:
@@ -482,7 +490,7 @@ class Episode:
 
 def ident(case, kind, arm, conf):
     sc = case["scenario"]
-    method, noise = gauto.parse_arm(arm)
+    method, noise = vservo.parse_arm(arm)
     return {"case_id": case["case_id"], "brain": conf["brain"], "arm": arm, "method": method, "noise": noise,
             "kind": kind, "s": conf["s"], "d": conf["d"], "R": conf["R"], "source": source_of(case),
             "suite": case["task_suite_name"], "task_name": case.get("task_name"),
@@ -545,9 +553,11 @@ def write_video(path, frames):
     out.release()
 
 
-def run_cases(cases, arms, conf, envs, brain, wand=True, video_cases=(), video_dir=None, base_prefix=False):
+def run_cases(cases, arms, conf, envs, brain, wand=True, video_cases=(), video_dir=None, base_prefix=False,
+              log_traj=False):
     """Base of every case, then their Dynamic arms, n = len(envs) episodes at a time. The records, per case Dynamic
-    first and Base last. base_prefix: the Bases end at their batch's last event (controls spec §7, run_batch)."""
+    first and Base last. base_prefix: the Bases end at their batch's last event (controls spec §7, run_batch).
+    log_traj: Base records carry "traj" (PBVS spec §3)."""
     n, out, ready = len(envs), {}, []
     for c in cases:
         why = skip_reason(c, wand)
@@ -569,7 +579,11 @@ def run_cases(cases, arms, conf, envs, brain, wand=True, video_cases=(), video_d
            for b in bases for a in arms]
     batches(dyn)
     for ep in dyn + bases:
-        out.setdefault(ep.case["case_id"], []).append(ep.record())
+        rec = ep.record()
+        if log_traj and ep.kind == "base":  # read only: x, p and the executed xyz per step
+            rec["traj"] = {k: np.round(np.asarray(v, float), 6).tolist()
+                           for k, v in (("x", ep.xs), ("p", ep.objs), ("a", np.asarray(ep.acts)[:, :3]))}
+        out.setdefault(ep.case["case_id"], []).append(rec)
         if ep.frames is not None:
             path = (Path(video_dir) / f"{ep.case['case_id']}__{conf['brain']}__{ep.kind}_{ep.arm}__s{conf['s']}"
                                       f"d{conf['d']}.mp4")
@@ -646,13 +660,17 @@ def main():
                    help="repeat the first brain call (same inputs and seeds) and print whether it matches bitwise")
     p.add_argument("--base-prefix", action="store_true",
                    help="controls spec §7: Base to the event only (a batch's Bases end together at its last event)")
+    p.add_argument("--band", help="PBVS arms: the band json of V0 (model, G, B, delta), PBVS spec §3")
+    p.add_argument("--log-traj", action="store_true", help="PBVS spec §3: Base records carry x, p and the action xyz")
     args = p.parse_args()
     wand = shim()
     if args.freeze_split:
         return freeze(args.freeze_split, args.manifest)
     assert args.brain and args.source and args.set and args.out, "--brain, --source, --set and --out are required"
     arms = [a for a in args.arms.split(",") if a]
-    methods = {gauto.parse_arm(a)[0] for a in arms}
+    methods = {vservo.parse_arm(a)[0] for a in arms}
+    pbvs = methods & set(vservo.LAMBDAS)
+    assert args.band or not pbvs, f"{sorted(pbvs)} need --band"
     assert args.kbar is not None or not methods & {"Gauto", "GautoT"}, "G-auto needs --kbar"
     assert arms or not args.base_prefix, "--base-prefix cuts the Bases for Dynamic arms: a Base-only run keeps its ends"
     video = set(filter(None, args.video_cases.split(",")))
@@ -668,6 +686,8 @@ def main():
     conf = {"brain": args.brain, "revision": rev, "precision": precision, "s": args.s or Q[args.brain], "d": args.d,
             "kbar": args.kbar, "t_ramp": T_RAMP, "k_p": K_P, "tau_k": TAU_K, "R": cb.RES[args.brain], "arms": arms,
             "split": split["sha256"], "gpu": gpu}  # not --base-prefix: the summary compares conf with part 2's
+    if pbvs:  # only a PBVS run's conf (the resume key) holds the band
+        conf["pbvs"] = json.loads(Path(args.band).read_text())
     from libero_max.manifest import load_manifest
     by_id = {c["case_id"]: c for c in load_manifest(Path(args.manifest))["cases"]}
     cases = [by_id[i] for i in ids if source_of(by_id[i]) == args.source]
@@ -714,7 +734,8 @@ def main():
             group, tb, n_try = todo[g: g + args.n_envs], time.time(), n_try + 1
             timer.update(s=0.0, calls=0, rows=0)
             try:
-                recs = run_cases(group, arms, conf, envs, brain, wand, video, args.video_dir, args.base_prefix)
+                recs = run_cases(group, arms, conf, envs, brain, wand, video, args.video_dir, args.base_prefix,
+                                 args.log_traj)
                 text = lines(r | {"run": prov} for r in recs)
             except Exception as exc:  # a fallen group is skipped here; a rerun with resume retries it
                 n_fail, failed = n_fail + 1, failed + [c["case_id"] for c in group]
