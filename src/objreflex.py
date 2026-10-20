@@ -220,7 +220,9 @@ class Agent:
                 a = np.clip(a + np.clip(self.j_corr(t, t - self.sched.t_obs), -1, 1), -1, 1)
             if self.method in ("G", "GT", "Gpost", "GJ"):
                 a = self._g(t, a)
-            if self.method in ("PPC", "PPC9", "PPCL"):
+            if self.method in ("PPC", "PPC9"):
+                a = self._ppc(t, a)
+            if self.method == "PPCL":
                 a = self._ppc(t, a)
         if a[6] > 0:
             self.grasp_started = True
