@@ -9,7 +9,7 @@ R = results/c1-e4/controls/pod_C (scripts/gpu_c1e4m.sh POD=C):
     python scripts/c1e4c_summary.py --plan --line L [--mode R/mode.json] [--k R/k_select.json]   L: smoke 1-8 c5
         the line's runner lines "phase<TAB>runner<TAB>brain<TAB>source<TAB>id<TAB>n<TAB>args", phase c<L>, n = its
         Dynamic episodes; exit 3 when the line needs a mode or k not there yet. c5 (mode С): --records R/C2_*.jsonl
-        R/C3_*.jsonl R/C7_*.jsonl, PPC where PPCL latched; writes latched_bench.json next to mode.json
+        R/C3_*.jsonl R/C7_*.jsonl (those run), PPC on the runner groups where PPCL latched
     python scripts/c1e4c_summary.py --latched R/C2_*.jsonl ...
     python scripts/c1e4c_summary.py --forecast R/tempo.txt [--done R/C[0-9]*.jsonl] [--mode ..] [--k ..]
         hours and $ per line; without mode or k the most expensive case (mode С, kπ != 1.0, kO != kπ)
@@ -60,7 +60,10 @@ EPS = [(s, t, i) for s, t in orx.TASKS for i in range(10)]  # the bench grid: 26
 LINES = ("smoke", "1", "2", "3", "4", "5", "6", "7", "8", "c5")
 CORE = LINES[1:8]  # spec §12: lines 1-7; 8 is the tail
 TEMPO = ("lmax_pi05", "lmax_oftplus", "lmax_oft", "bench_pi05")
-EXCLUDES = "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93)"  # the forecast's lines 1-8 only
+EXCLUDES = ("setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is "
+            "known only after lines 2, 3, 7)")  # the forecast's lines 1-8 only
+NE = 6  # n-envs of every POD=C runner line (scripts/gpu_c1e4m.sh, spec §7: part 2's): the runner's groups of cases
+PROBE = {("m", P): "pi05_lmax", ("m", OP): "oftplus_lmax", ("b", P): "pi05_bench"}  # spec §7.1: whose lines
 OFT_SAVED = ["pod_B/M4oft_oft_eval300_plus_d0.jsonl", "pod_B/M4oft_oft_eval300_pro_d0.jsonl"]  # line 8's report only
 CONF_SKIP = ("arms", "gpu", "kbar")  # spec §7.3: every other conf field equal in a pair; kbar: VS lines run without it,
 # a Gauto or Glead record's is checked against KBAR
@@ -192,10 +195,10 @@ def need(d, name, field):
     return v
 
 
-def plan(line, mode=None, k=None, split=None, records=(), where=None):
+def plan(line, mode=None, k=None, split=None, records=()):
     """spec §6, §7.2, §12: the runner lines of one line (LINES), phase c<line>. kπ, kO: k_select's; a mode С probe
     adds G-auto to its lines; in mode П a VS1.0 on M1 d = 0 is part 2's G. c5 (mode С only): PPC where PPCL latched
-    (records: lines 2, 3, 7), the bench's pairs written to where/latched_bench.json."""
+    (records: lines 2, 3, 7), on whole runner groups."""
     split = split or maxwrap.load_split(cs.SPLIT)
     ph = f"c{line}"
     s = lambda name: need(mode, name, "mode") == "S"  # noqa: E731
@@ -225,13 +228,20 @@ def plan(line, mode=None, k=None, split=None, records=(), where=None):
         return mlines(ph, "C8", O, "eval300", [need(k, P, "k"), "Gauto"], split, kbar=KBAR["m", O])
     assert line == "c5", line
     lt, out = latched(records), []
-    if s("pi05_lmax"):
+    if s("pi05_lmax"):  # every runner group (NE consecutive cases of a source, the set's order) with a latched case:
+        # the pass's Base batches are the line's, so its Bases' pre-event chunks are too (spec §7)
+        grp = [ids[i:i + NE] for ids in cs.sources(run.set_ids(split, "eval300")).values()
+               for i in range(0, len(ids), NE)]
         for d, ids in lt["lmax"].items():
-            out += mlines(ph, "C5ppc", P, "eval300", ["PPC"], split, d, cases=set(ids))
-    if s("pi05_bench") and lt["bench"]:
-        f = Path(where) / "latched_bench.json"
-        f.write_text(json.dumps([{"suite": s_, "task": t, "init": i} for s_, t, i in lt["bench"]], indent=1) + "\n")
-        out += blines(ph, f"C5ppc_{P}", ["PPC"], ("A", "A20"), f"--pairs-file {f}", list(map(tuple, lt["bench"])))
+            out += mlines(ph, "C5ppc", P, "eval300", ["PPC"], split, d,
+                          cases={c for g in grp if set(g) & set(ids) for c in g})
+    if s("pi05_bench") and (ts := list(dict.fromkeys((s_, t) for s_, t, _ in lt["bench"]))):
+        # every init of a latched task, both cells: the bench runner batches per task and (cell, kind) in slices of
+        # n-envs over arms x inits, so this pass's first slice (inits 0-5) is line 7's PPCL slice. ponytail: inits 6-9
+        # rode with line 7's next arm there; rebuilding that slice would rerun that arm
+        out += blines(ph, f"C5ppc_{P}", ["PPC"], ("A", "A20"),
+                      f"--tasks {','.join(f'{s_}:{t}' for s_, t in ts)} --inits 0-9",
+                      [(s_, t, i) for s_, t in ts for i in range(10)])
     return out
 
 
@@ -353,11 +363,13 @@ def grid(new, saved, mode, k, names, split):
     """spec §7.3, §8, §11 on the pod's records (grid_all_C.jsonl: lines 1-8 and the c5 pass) and part 2's (saved: {SAVED
     name or "oft_lmax": records}). The checks before reading; when they pass, the rules C1-C7, the claims and the
     report. Records off the plan (a probe's) are counted, not read. Exit 2 when one key comes twice with other
-    content (grid_all_C.jsonl and its C*.jsonl both)."""
-    kp, ko = need(k, P, "k"), need(k, OP, "k")
+    content (grid_all_C.jsonl and its C*.jsonl both). No kO (line 4 not run, spec §12): no line 5, C1b, C6, C7 not
+    read."""
+    kp = need(k, P, "k")
+    ko = need(k, OP, "k") if k.get(OP) else None
     md = {n: need(mode, n, "mode") for n in SAVED}
     mo = {P: md["pi05_lmax"], OP: md["oftplus_lmax"], O: "S"}  # OFT: no probe, line 8 is self-contained
-    sel = {P: {kp}, O: {kp}, OP: {kp, ko}}  # spec §5: VS-общий everywhere, VS-подогнанный on OFT+
+    sel = {P: {kp}, O: {kp}, OP: {kp, ko} - {None}}  # spec §5: VS-общий everywhere, VS-подогнанный on OFT+
     by = {}
     for r in new:
         if by.setdefault(lk(r), r) != r:
@@ -365,14 +377,20 @@ def grid(new, saved, mode, k, names, split):
                   file=sys.stderr)
             raise SystemExit(2)
     ok = {x: r for x, r in by.items() if not r.get("skipped_reason")}  # a skipped episode counts as missing
-    lines = {L: plan(L, mode, k, split) for L in LINES[1:-1]}
+    lines = {L: plan(L, mode, k, split) if L != "5" or ko else [] for L in LINES[1:-1]}
     want = {x: L for L, lns in lines.items() for x in lkeys(lns)}
-    with tempfile.TemporaryDirectory() as tmp:  # c5: PPC where PPCL latched in lines 2, 3, 7
-        lines["c5"] = plan("c5", mode, k, split, [r for x, r in ok.items() if want.get(x) in ("2", "3", "7")], tmp)
+    # c5: PPC where PPCL latched in lines 2, 3, 7
+    lines["c5"] = plan("c5", mode, k, split, [r for x, r in ok.items() if want.get(x) in ("2", "3", "7")])
     want |= {x: "c5" for x in lkeys(lines["c5"])}
     used = {x: r for x, r in ok.items() if x in want}
     of = lambda *Ls: [r for x, r in used.items() if want[x] in Ls]  # noqa: E731
     extra = [r for x, r in by.items() if x not in want]
+    cards = defaultdict(Counter)  # spec §7.1: a mode П probe holds on its card only: its lines' records ran there
+    for x, r in by.items():
+        if x in want and (n := PROBE.get(("m" if "case_id" in r else "b", r["brain"]))):
+            cards[n][str(r["conf"].get("gpu"))] += 1
+    on_probe = {n: {"mode": md[n], "probe": mode[n].get("gpu", []), "records": dict(cards[n]),
+                    "pass": md[n] == "S" or set(cards[n]) <= set(mode[n].get("gpu", []))} for n in SAVED}
     comp = {}
     for L, lns in lines.items():  # spec §8: <= 1 % missing per line; c5 none (a latched PPCL is no PPC)
         exp = lkeys(lns)
@@ -382,11 +400,12 @@ def grid(new, saved, mode, k, names, split):
                    "pass": miss == 0 if L == "c5" else not ran or miss <= 0.01 * len(exp) + TOL}
     ksel = {}
     for b, L in ((P, "1"), (OP, "4")):  # spec §8: k_select.json is §5's rule on the M0 lines, on the records the
-        try:  # pod's --select read: a skipped Base too
-            got = select([r for x, r in by.items() if want.get(x) == L], b, split)
+        rs = [r for x, r in by.items() if want.get(x) == L]  # pod's --select read: a skipped Base too
+        try:
+            got = select(rs, b, split) if rs else None
         except SystemExit:
             got = None
-        ksel[b] = {"file": k[b], "recomputed": got, "pass": got == k[b]}
+        ksel[b] = {"file": k.get(b), "recomputed": got, "pass": got == k.get(b)}
     other = Counter(f"{r['brain']}/{r['arm']}" for r in extra
                     if cs.method(r["arm"]) in VS and cs.method(r["arm"]) not in sel.get(r["brain"], ()))
     e300 = set(run.set_ids(split, "eval300"))
@@ -399,6 +418,27 @@ def grid(new, saved, mode, k, names, split):
         em[f"{x[0]}/d{x[2]}"][1] += 1
     e_match = {c: {"equal": a, "total": n, "mode": mo[c.split("/")[0]],
                    "pass": mo[c.split("/")[0]] == "S" or a >= 0.98 * n - TOL} for c, (a, n) in sorted(em.items())}
+    # spec §7: in mode П the new Base's pre-event calls ran in part 2's batches (π's fp32 chunk depends on its batch):
+    # per case (e equal) its batch rows before e equal part 2's, >= 98 % per brain and cell; report only for a brain
+    # other than π whose calls are all one row (rows_max 1). OFT+'s last group of a source in the first 300 was full
+    # in part 2 (it ran the whole evaluation set): not compared
+    last = {c for ids in cs.sources(run.set_ids(split, "eval300")).values() for c in ids[len(ids) // NE * NE:]}
+    br = defaultdict(lambda: {"calls_equal": 0, "calls": 0, "cases_equal": 0, "cases": 0, "rows_max": 0})
+    for x, r in lbase.items():
+        s = sbase.get(x)
+        if s is None or s["e"] != r["e"] or x[0] == OP and x[1] in last:
+            continue
+        lim = float("inf") if r["e"] is None else r["e"]
+        a, b = ({t: row for t, *row in q.get("batch_rows") or [] if t < lim} for q in (r, s))
+        v = br[f"{x[0]}/d{x[2]}"]
+        v["calls_equal"] += sum(a.get(t) == row for t, row in b.items())
+        v["calls"] += len(b)
+        v["cases_equal"] += a == b
+        v["cases"] += 1
+        v["rows_max"] = max([v["rows_max"]] + [row[0] for q in (a, b) for row in q.values()])
+    brows = {c: v | {"mode": mo[c.split("/")[0]], "pass": mo[c.split("/")[0]] == "S" or (
+        c.split("/")[0] != P and v["rows_max"] <= 1) or v["cases_equal"] >= 0.98 * v["cases"] - TOL}
+        for c, v in sorted(br.items())}
     c5_off = sum(lbase.get((r["brain"], r["case_id"], r["d"]), {}).get("e", "-") != r["e"] for r in of("c5")
                  if r.get("kind") == "base")  # its pairs drop out (mp)
     # part 2's records read: mode П the rules' comparators, mode С "none" and G only (report, "через под"); in mode П a
@@ -422,12 +462,14 @@ def grid(new, saved, mode, k, names, split):
               "off_plan": dict(Counter(f"{r['brain']}/{r['arm']}" for r in extra)),
               "complete": comp, "k_select": ksel,
               "vs_label": {"selected": {b: sorted(v) for b, v in sel.items()}, "other": dict(other), "pass": not other},
-              "e_match": e_match, "c5_base_e_mismatch": c5_off, "bases_cut": [
+              "e_match": e_match, "batch_rows_pre_event": brows, "on_probe_gpu": on_probe,
+              "c5_base_e_mismatch": c5_off, "bases_cut": [
                   sum(bool(r.get("base_cut")) for r in used.values() if r["kind"] == "base"),
                   sum(r["kind"] == "base" for r in used.values())],
               "conf": {"except": CONF_SKIP, "mixed": mixed, "kbar_not_part2s": kbar, "pass": not mixed and not kbar}}
     checks["pass"] = bool(all(v["pass"] for v in comp.values()) and all(v["pass"] for v in ksel.values())
-                          and not other and all(v["pass"] for v in e_match.values()) and checks["conf"]["pass"])
+                          and not other and all(v["pass"] for v in e_match.values()) and checks["conf"]["pass"]
+                          and all(v["pass"] for d in (brows, on_probe) for v in d.values()))
     if not checks["pass"]:
         return {"checks": checks}
 
@@ -490,9 +532,11 @@ def grid(new, saved, mode, k, names, split):
     reads = {"C1a": {"Gauto", kp}, "C1b": {"Gauto", kp}, "C2": {"Gauto", kp}, "C3": {"Gauto@cv", f"{kp}@cv"},
              "C4": {"Gauto", "PPCL"}, "C5": {"PPCL"}, "C6": {ko, kp}, "C7": {"Gauto", ko}}  # a rule's arms
     for n, Ls in DEP.items():  # a line not run at all (spec §12: waits for the owner) with an arm the rule reads: the
-        # rule is not read. Without one it reads part 2's records only (mode П, kπ = 1.0: C1a without line 2)
-        if (miss := [L for L in Ls if not comp[L]["run"] and reads[n] & {a for ln in lines[L] for a in ln["arms"]}]) \
-                and not (n == "C6" and ko == kp):
+        # rule is not read. Without one it reads part 2's records only (mode П, kπ = 1.0: C1a without line 2). No kO:
+        # line 4 not run, so no line 5
+        miss = ["4", "5"] if ko is None and "5" in Ls else [
+            L for L in Ls if not comp[L]["run"] and reads[n] & {a for ln in lines[L] for a in ln["arms"]}]
+        if miss and not (n == "C6" and ko == kp):
             R[n] |= {f: None for f in ("pass", "superior", "outcome") if f in R[n]} | {"lines_not_run": miss}
     checks["invalid_pairs"] = {n: {"pairs": t, "invalid": b, "pass": b <= 0.02 * t + TOL} for n, (b, t) in inv.items()}
     if not all(v["pass"] for v in checks["invalid_pairs"].values()):
@@ -506,10 +550,10 @@ def grid(new, saved, mode, k, names, split):
         claims[c] = (R["C3"]["outcome"] or "НЕ ЧИТАЛОСЬ" if need_ == ("C3",) else
                      "НЕТ" if False in x else "НЕ ЧИТАЛОСЬ" if None in x else "ДА")
     return {"checks": checks, "rules": R, "claims": claims,
-            "report": grid_report(mi, bi, M, B, one, e300, kp, ko, mo, md, used, lbase, sbase, k, mode, checks)}
+            "report": grid_report(mi, bi, M, B, one, e300, kp, ko, mo, md, used, k, mode, checks)}
 
 
-def grid_report(mi, bi, M, B, one, e300, kp, ko, mo, md, used, lbase, sbase, k, mode, checks):
+def grid_report(mi, bi, M, B, one, e300, kp, ko, mo, md, used, k, mode, checks):
     """spec §8 "только отчёт" and §11; "через под": a comparison with part 2's records in mode С."""
     mean = lambda v: round(float(np.mean(v)), 4) if len(v) else None  # noqa: E731
     dm = lambda b, x, y, d=0, cases=e300: e2.rnd(e2.diff_pp(list(M(b, x, y, d, cases)[0].values())))  # noqa: E731
@@ -528,7 +572,8 @@ def grid_report(mi, bi, M, B, one, e300, kp, ko, mo, md, used, lbase, sbase, k, 
     for c in ("A", "A20"):
         rep["ppcl_ppc"][f"bench/{c}"] = db((c,), "PPCL", "PPC")
     for b, a in ((P, kp), (OP, kp), (OP, ko), (O, kp)):  # fixed κ next to G-auto on M1 d 0
-        rep["g_vs"][f"{b}/G-{a}"] = (dm(b, "G", a) or {}) | via(mo[b])
+        if a:
+            rep["g_vs"][f"{b}/G-{a}"] = (dm(b, "G", a) or {}) | via(mo[b])
     rep["oft_gauto_vs"] = dm(O, "Gauto", kp)  # line 8, the tail: one pod
     m1 += [(P, "PPCL", "PPC"), (P, "G", kp), (OP, "G", kp), (OP, "G", ko), (O, "G", kp), (O, "Gauto", kp)]
     rep["cv_cost"] = {f"A20/{kp}@cv-{kp}": db(("A20",), f"{kp}@cv", kp),  # part 2: Gauto@cv - Gauto -10.8
@@ -536,7 +581,7 @@ def grid_report(mi, bi, M, B, one, e300, kp, ko, mo, md, used, lbase, sbase, k, 
     dist = {c: one[c]["distance_m"] for c in e300 if c in one and one[c]["distance_m"] is not None}
     near, far = {c for c, v in dist.items() if v < 0.09}, {c for c, v in dist.items() if v >= 0.09}
     for b, x, y in dict.fromkeys(m1):
-        if x != y:
+        if x != y and None not in (x, y):
             rep["slices_M1"][f"{b}/{x}-{y}"] = {"6cm": dm(b, x, y, 0, near), "12cm": dm(b, x, y, 0, far)}
     for key, g in sorted(list(mi.items()) + list(bi.items()), key=lambda kv: str(kv[0])):  # per arm and cell
         g, a = list(g.values()), key[2] if key[1] == "dynamic" else key[3]
@@ -551,20 +596,10 @@ def grid_report(mi, bi, M, B, one, e300, kp, ko, mo, md, used, lbase, sbase, k, 
         if cs.method(a) in VS + ("Gauto",):
             rep["vs_metrics"][name] = {f: mean([r[f] for r in g if r.get(f) is not None])
                                        for f in ("jerk", "path_m", "grasp_miss_m")}
-    for x, r in lbase.items():  # bitwise batches: the pre-event Base calls' batch rows against part 2's, same case
-        s = sbase.get(x)
-        if s is not None and s["e"] == r["e"]:
-            lim = float("inf") if r["e"] is None else r["e"]
-            a, b = ({t: row for t, *row in q.get("batch_rows") or [] if t < lim} for q in (r, s))
-            v = rep["batch_rows_pre_event"].setdefault(f"{x[0]}/d{x[2]}", {"mode": mo[x[0]], "calls_equal": 0,
-                                                                           "calls": 0, "cases_equal": 0, "cases": 0})
-            v["calls_equal"] += sum(a.get(t) == row for t, row in b.items())
-            v["calls"] += len(b)
-            v["cases_equal"] += a == b
-            v["cases"] += 1
     rep["gpu"] = {b: sorted({str(r["conf"].get("gpu")) for r in used.values() if r["brain"] == b})
                   for b in sorted({r["brain"] for r in used.values()})}
     return dict(rep) | {"k_select": k, "mode": mode, "e_match": checks["e_match"],
+                        "batch_rows_pre_event": checks["batch_rows_pre_event"],
                         "c5_base_e_mismatch": checks["c5_base_e_mismatch"], "invalid_pairs": checks["invalid_pairs"]}
 
 
@@ -771,19 +806,24 @@ def selftest():
     lt = latched(recs)
     assert lt == {"lmax": {0: [e10[1]], 10: [pro], 20: []}, "bench": [[orx.TASKS[1][0], 1, 3]],
                   "share": {"lmax_d0": [1, 10], "lmax_d10": [1, 11], "lmax_d20": [0, 10], "bench": [1, 40]}}, lt
+    # the PPC pass on whole runner groups (spec §7: the line's Base batches): Plus 0-5 for e10[1], PRO 0-5 for pro;
+    # the bench: every init of the latched task in both cells
+    c5 = plan("c5", *mk(sp="S", sb="S"), split, recs)
+    assert [(ln["id"], ln["arms"], n_of(ln)) for ln in c5] == [
+        ("C5ppc_pi05_eval300_plus_d0", ["PPC"], 6), ("C5ppc_pi05_eval300_pro_d10", ["PPC"], 6),
+        ("C5ppc_pi05", ["PPC"], 20)], c5
+    assert c5[0]["args"].endswith(f"--d 0 --cases {','.join(plus['eval300'][:6])} --base-prefix") and c5[0][
+        "phase"] == "cc5", c5[0]["args"]
+    assert c5[1]["args"].endswith(f"--cases {','.join(cs.sources(run.set_ids(split, 'eval300'))['pro'][:6])} "
+                                  "--base-prefix"), c5[1]["args"]
+    assert c5[2]["args"] == f"--brain pi05 --kinds move --cells A,A20 --methods PPC --tasks {orx.TASKS[1][0]}:1 " \
+                            "--inits 0-9", c5[2]["args"]
+    g2 = plan("c5", *mk(sp="S", sb="P"), split, recs + [mrec(P, plus["eval300"][7], "dynamic", "PPCL", 0) | lat(1)])
+    assert len(g2[0]["keys"]) == 2 * 12, g2  # a latched case of the second group adds that group
+    assert [ln["id"] for ln in plan("c5", *mk(sp="P", sb="S"), split, recs)] == ["C5ppc_pi05"]
+    assert plan("c5", *mk(sp="P", sb="P"), split, recs) == []
+    assert plan("c5", *mk(sp="S", sb="S"), split, [x | lat(0) for x in recs]) == []
     with tempfile.TemporaryDirectory() as tmp:
-        c5 = plan("c5", *mk(sp="S", sb="S"), split, recs, Path(tmp))
-        assert [(ln["id"], ln["arms"], n_of(ln)) for ln in c5] == [
-            ("C5ppc_pi05_eval300_plus_d0", ["PPC"], 1), ("C5ppc_pi05_eval300_pro_d10", ["PPC"], 1),
-            ("C5ppc_pi05", ["PPC"], 2)], c5
-        assert c5[0]["args"].endswith(f"--d 0 --cases {e10[1]} --base-prefix") and c5[0]["phase"] == "cc5"
-        assert json.loads((Path(tmp) / "latched_bench.json").read_text()) == [
-            {"suite": orx.TASKS[1][0], "task": 1, "init": 3}]
-        assert f"--kinds move --cells A,A20 --methods PPC --pairs-file {Path(tmp) / 'latched_bench.json'}" in c5[2][
-            "args"], c5[2]["args"]
-        assert [ln["id"] for ln in plan("c5", *mk(sp="P", sb="S"), split, recs, Path(tmp))] == ["C5ppc_pi05"]
-        assert plan("c5", *mk(sp="P", sb="P"), split, recs, Path(tmp)) == []
-        assert plan("c5", *mk(sp="S", sb="S"), split, [x | lat(0) for x in recs], Path(tmp)) == []
         # k_select.json gathers both brains' selections
         merge(Path(tmp) / "k.json", {P: {"k": "VS0.3"}})
         merge(Path(tmp) / "k.json", {OP: {"k": "VS0.1"}})
@@ -884,13 +924,12 @@ def selftest_grid(split, cal):
         """mode.json, k_select.json (select on the generated M0 lines: kk wins), the pod's records of every planned
         line (edit: on each) and part 2's of SAVED and M4 OFT (300 + 5 OFT+ cases: only eval300 is read)."""
         pct, kk = pct or {}, {P: kk[0], OP: kk[1], O: kk[0]}
-        mode = {n: {"mode": m} for n, m in zip(SAVED, modes)}
+        mode = {n: {"mode": m, "gpu": [gpu["gpu"]]} for n, m in zip(SAVED, modes)}
         mk = lambda x: edit(rec(x, pct, True, kk))  # noqa: E731
         m0 = {b: [mk(x) for x in lkeys(plan(L, split=split))] for b, L in ((P, "1"), (OP, "4"))}
         k = {b: select(rs, b, split) for b, rs in m0.items()}
         new = m0[P] + m0[OP] + [mk(x) for L in "235678" for x in lkeys(plan(L, mode, k, split))]
-        with tempfile.TemporaryDirectory() as tmp:
-            new += [mk(x) for x in lkeys(plan("c5", mode, k, split, new, tmp))]
+        new += [mk(x) for x in lkeys(plan("c5", mode, k, split, new))]
         old = lambda b, ids, arms, d=0: [rec(("m", b, c, kd, a, d, False, tuple(arms)), pct, False, kk)  # noqa: E731
                                          for c in ids for kd, a in [("dynamic", a) for a in arms] + [("base", "none")]]
         bold = lambda cells, arms: [rec(("b", P, "move", c, a, *e), pct, False, kk)  # noqa: E731
@@ -919,8 +958,9 @@ def selftest_grid(split, cal):
         "up", "same", "same", "down", "same", "same"]
 
     # mode С, kπ = kO = VS0.3: C1a at +3 passes; C2 at +10 diverges (d 10: +11, d 20: +15); C3 at +5 exactly (184 -
-    # 171 of 260); C6 the same k; C5: PPCL latched on 15 cases at d 0 and 15 bench episodes (A20), PPC of the c5 pass
-    # there (both cells), PPCL itself elsewhere
+    # 171 of 260); C6 the same k; C5: PPCL latched on 15 cases at d 0 (in 6 runner groups, 36 cases) and 15 bench
+    # episodes (A20, 13 tasks), PPC of the c5 pass on those groups and tasks (both cells), PPCL itself elsewhere: PPC
+    # 40 % against PPCL's 50 % there, so + 1 on the pass's 24 cases and 2 x 24 bench episodes at 40-49 of 100
     lat = lambda r: r["method"] == "PPCL" and (  # noqa: E731
         pos[r["case_id"]] % 100 in range(40, 45) and r["d"] == 0 if "case_id" in r
         else bpos[r["suite"], r["task"], r["init"]] % 100 in range(40, 45) and r["cell"] == "A20")
@@ -933,14 +973,14 @@ def selftest_grid(split, cal):
     res = grid(new + [probe1] + new[:5], saved, mode, k, names, split)  # new[:5]: an identical copy is fine
     ch = res["checks"]
     assert ch["pass"] and ch["off_plan"] == {f"{P}/T0": 1}, ch
-    assert ch["complete"]["c5"] == {"expected": 15 * 2 + 15 * 2, "missing": 0, "run": True, "pass": True}, ch
+    assert ch["complete"]["c5"] == {"expected": 36 * 2 + 13 * 10 * 2, "missing": 0, "run": True, "pass": True}, ch
     assert ch["complete"]["5"]["expected"] == 300 * 3 and ch["e_match"][f"{P}/d0"]["mode"] == "S"
     r = res["rules"]
     assert r["C1a"]["diff_pp"] == 3 and r["C1a"]["pairs"] == 300 and r["C1a"]["pass"] and r["C1a"]["superior"], r
     assert r["C2"]["diff_pp"] == 10 and r["C2"]["pairs"] == 300 and r["C2"]["outcome"].startswith("расходятся: G-auto")
     assert r["C3"]["outcome"] == "З1 лучше на шуме" and r["C3"]["pairs"] == 260 and r["C3"]["diff_pp"] == 5, r["C3"]
     assert r["C4"]["pairs"] == 520 and r["C4"]["diff_pp"] == 0 and r["C4"]["pass"]
-    assert r["C5"]["pairs"] == 1420 and r["C5"]["diff_pp"] == round(100 * 45 / 1420, 3), r["C5"]
+    assert r["C5"]["pairs"] == 1420 and r["C5"]["diff_pp"] == round(100 * 72 / 1420, 3), r["C5"]
     assert r["C5"]["clusters"] == r["C1a"]["clusters"] + 26 and r["C5"]["outcome"] == "меняет: PPCL лучше", r["C5"]
     assert r["C6"]["outcome"] == "не расходятся, тот же k" and r["C7"] | {"test": 0} == r["C1b"] | {"test": 0}, r
     cl = res["claims"]
@@ -951,7 +991,7 @@ def selftest_grid(split, cal):
     assert rep["latch"][f"{P}/dynamic/PPCL/0"]["latched_share"] == 0.05 and rep["latch"][f"{P}/move/A20/PPCL"][
         "latched_share"] == round(15 / 260, 4), rep["latch"]
     assert rep["vs_none"][f"{P}/d0/VS0.3-none"]["через под"] and rep["vs_none"][f"{P}/d0/VS0.3-none"]["pairs"] == 300
-    assert rep["ppcl_ppc"][f"{P}/d0"]["diff_pp"] == 5 and rep["ppcl_ppc"][f"{P}/d10"]["diff_pp"] == 0, rep["ppcl_ppc"]
+    assert rep["ppcl_ppc"][f"{P}/d0"]["diff_pp"] == 8 and rep["ppcl_ppc"][f"{P}/d10"]["diff_pp"] == 0, rep["ppcl_ppc"]
     assert set(rep["slices_M1"][f"{P}/Gauto-VS0.3"]) == {"6cm", "12cm"} and sum(
         rep["slices_M1"][f"{P}/Gauto-VS0.3"][s]["pairs"] for s in ("6cm", "12cm")) == 300
     assert rep["calls"][f"{P}/dynamic/PPCL/10"]["plans_after_event"] == 1 and rep["gpu"][P] == [gpu["gpu"]]
@@ -1017,6 +1057,15 @@ def selftest_grid(split, cal):
     assert res["checks"]["complete"]["7"]["run"] is False and r["C4"]["pass"] is None and r["C5"]["outcome"] is None
     assert r["C5"]["lines_not_run"] == ["7"] and r["C3"]["outcome"] and r["C1a"]["pass"] is False, r
     assert res["claims"]["G-AUTO НЕ ХУЖЕ ПОЛНОГО PPC НА ЕГО ПОЛЕ"] == "НЕ ЧИТАЛОСЬ" == res["claims"]["ЛАТЧ МЕНЯЕТ PPC"]
+    # k_select.json with π only (line 4 not run, spec §12): no line 5; C1a, C2-C5 are read, C1b, C6, C7 are not
+    res = grid([x for x in new if x["brain"] != OP], saved, mode, {P: k[P]}, names, split)
+    r = res["rules"]
+    assert res["checks"]["pass"] and res["checks"]["complete"]["5"]["run"] is False and res["checks"]["k_select"][OP] \
+        == {"file": None, "recomputed": None, "pass": True}, res["checks"]
+    assert all(r[n].get("pass", r[n].get("outcome")) is not None for n in ("C1a", "C2", "C3", "C4", "C5")), r
+    assert all(r[n].get("pass", r[n].get("outcome")) is None and r[n]["lines_not_run"] == ["4", "5"]
+               for n in ("C1b", "C6", "C7")), r
+    assert res["claims"]["ОБЩИЙ k НЕ ПЕРЕНОСИТСЯ"] == "НЕ ЧИТАЛОСЬ" and not res["report"]["g_vs"].get(f"{OP}/G-None")
 
     # mode П everywhere, kπ = kO = VS1.0: VS on M1 d 0 is part 2's G (C1a = Q4c on the first 300); C1b at -3 fails;
     # C3 at 0
@@ -1049,6 +1098,29 @@ def selftest_grid(split, cal):
             assert res["report"]["vs_none"][f"{P}/d0/PPCL-none"]["pairs"] == 294
         else:
             assert "rules" not in res
+            exits(lambda: finish(res), 3)
+    # mode П holds on the probe's card (spec §7.1, mode.json's gpu): a record of its lines on another card stops the
+    # reading; in mode С it does not
+    for modes, name, ok in (("PPP", "pi05_lmax", False), ("SPP", "pi05_lmax", True), ("PPP", "pi05_bench", False)):
+        new, saved, mode, k = world(modes, ("VS1.0", "VS1.0"), pct)
+        x0 = next(x for x in new if PROBE.get(("m" if "case_id" in x else "b", x["brain"])) == name)
+        res = grid([x | {"conf": x["conf"] | {"gpu": "NVIDIA GeForce RTX 3090"}} if x is x0 else x for x in new],
+                   saved, mode, k, names, split)
+        assert res["checks"]["on_probe_gpu"][name]["pass"] == ok == ("rules" in res), res["checks"]["on_probe_gpu"]
+    # mode П: the new Base's pre-event calls in part 2's batches (spec §7), >= 98 % of the cases per brain and cell: π
+    # always; OFT+ unless its calls are all one row; OFT+'s last group of a source (full in part 2) not compared
+    for b, n, rows, one, ok in ((P, 6, 5, False, True), (P, 7, 5, False, False), (OP, 5, 5, False, True),
+                                (OP, 7, 5, False, False), (OP, 300, 1, True, True)):
+        off = set(e300[:n])
+        new, saved, mode, k = world("PPP", ("VS1.0", "VS0.3"), pct, lambda x: x | {"batch_rows": [[0, rows, 1]]} if (
+            x["kind"] == "base" and x["brain"] == b and x["d"] == 0 and x.get("case_id") in off) else x)
+        if one:  # part 2's OFT+ calls one row each too, at another step
+            saved["oftplus_lmax"] = [x | {"batch_rows": [[5, 1, 1]]} for x in saved["oftplus_lmax"]]
+        res = grid(new, saved, mode, k, names, split)
+        v = res["checks"]["batch_rows_pre_event"][f"{b}/d0"]
+        assert v["pass"] == ok == ("rules" in res) and v["cases"] == (300 if b == P else 294), (b, n, v)
+        assert v["cases_equal"] == (0 if one else v["cases"] - n), v
+        if not ok:
             exits(lambda: finish(res), 3)
 
 
@@ -1103,7 +1175,7 @@ if __name__ == "__main__":
         merge(a.out or a.k, res)
         print(e2.dump(res))
     elif a.plan:
-        if lns := plan(a.line, jload(a.mode), jload(a.k), split, load(a.records), Path(a.mode).parent):
+        if lns := plan(a.line, jload(a.mode), jload(a.k), split, load(a.records)):
             print(tsv(lns))
     elif a.latched:
         print(e2.dump(latched(load(a.latched))))
