@@ -26,6 +26,10 @@ VS(1.0) и G — один метод, в таблицах он называет�
 
 > **Why we did not weaken the baselines.** We strengthened both baselines rather than stripping them. To PPC we added the authors' own two-EMA latch stabiliser, which our earlier implementation lacked, as a separate arm with their constants. Where the paper's text (a single trigger holds the latch for two chunks) disagrees with its formulas (four chunks), we implemented the formulas, the reading that favours PPC: the execution horizon stays short for longer, and PPC replans more often. We list the deviations that remain. From our own servo we removed exactly one component, the self-tuning law, to obtain the classical controller VS(k). It keeps the dead band (set by the same rule as ours: at most 5% false engagements on a still object), the per-step limit, the clipping and the stop at the close command. Any servo has a dead band, and no controller keeps correcting towards the object after the gripper closes. We tuned its gain by grid search on the same 60 calibration cases from which our method measures its gain, over a grid {0.1, 0.3, 1.0} that contains values close to the gains our measurement arrived at (0.31 and 0.12). A deliberately weaker baseline would invite exactly the criticism that made us fix PPC. How our method differs from visual servoing is answered by whether a tuned gain transfers across policies and by noise, not by a handicapped competitor.
 
+**3. Правило «всё или ничего» в пробе побитности** (владелец: «пойдёт в статью отдельной строкой»).
+
+> Before the run we repeated pieces of the earlier run on the new machine and compared the hash of every episode's actions. For π0.5 on LIBERO-MAX, 88 of 96 episodes matched bit for bit, as did all 12 event times. The rule fixed in advance was all or nothing: we reused the earlier comparison arms only if every hash matched. We applied it, so for this cell every comparison arm was re-run on the new machine, at a cost of about $2.
+
 ## Результаты
 
 Будут после пода (`results/c1-e4/controls/pod_C/`). Правила C2, C3, C5, C6 и измерения И1–И4 — по спеку §8.
