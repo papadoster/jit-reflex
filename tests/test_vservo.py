@@ -160,3 +160,67 @@ def test_labels():
             vservo.parse_arm(bad)
     ag = vservo.PBVSAgent("PBVS0.1", 10, 20, EXACT)
     assert ag.method == "PBVS0.1" and ag.lam == 0.1 and ag.sched.d == 20 and not ag.trigger(0)
+
+
+# ------------------------------------------------------------------ spec journal: plan N does not know the regulator's
+# own corrections sent after its observation (the anchor x(t_a) - (z(t_a) - z(t_obs_N)), the step without Dz)
+
+
+class C61(vservo.PBVSAgent):
+    """c61c31f's anchor: x(t_a) and its raw last step, the regulator's own corrections included."""
+
+    def on_new_chunk(self):
+        super().on_new_chunk()
+        t = self.j
+        self.w = self.x_hist[t][:2]
+        self.dx = self.w - self.x_hist[t - 1][:2] if t - 1 in self.x_hist else np.zeros(2)
+
+
+def corr_disp(lam, s, d, band, shift_at, T):
+    """The arm's displacement from the corrections along DLT, in |DLT|: x with PBVS minus x of the same run with a
+    band that never acts (the toy plans see neither arm nor object: the same rows)."""
+    runs = [drive(vservo.PBVSAgent(lam, s, d, b), shift_at=shift_at, T=T, gain=band["G"], b=band["B"])
+            for b in (band, {**band, "delta": 1.0})]
+    D = np.array([(x - x0)[:2] for (_, x, _), (_, x0, _) in zip(runs[0][2], runs[1][2])])
+    return D @ DLT[:2] / (DLT[:2] @ DLT[:2])
+
+
+def test_d0_is_c61c31f_bitwise():
+    """At d = 0 t_a = t_obs, so the anchor is x(t_a); the integrator's initial step meets B = 0: c61c31f's actions
+    bitwise, also with an arm short of the model (corrections sent right before arrivals)."""
+    short = {"T": 50, "close_at": 28, "gain": (0.8 * G_POS, 0.8 * G_POS)}
+    fine = {**EXACT, "delta": 1e-4}
+    for lam, band, kw in [("PBVS1.0", EXACT, {}), ("PBVS0.3", fine, {}), ("PBVS0.3", fine, short),
+                          ("PBVS1.0", fine, short)]:
+        rows, acts, _ = drive(vservo.PBVSAgent(lam, 10, 0, band), **kw)
+        assert np.array_equal(acts, drive(C61(lam, 10, 0, band), **kw)[1]) and not np.array_equal(acts, rows), lam
+
+
+@pytest.mark.parametrize("d", [10, 20])
+def test_no_double_send_at_delay(d):
+    """Plan 10, observed before the jump at 12, starts at its arrival 10 + d without knowing the correction sent at 12:
+    PBVS1.0 sends DLT once (c61c31f: again at 10 + d, 2 DLT in all), and e stays ~0 after it (band 1e-9 m: a residual
+    would act), through the arrivals of the plans that saw the jump too."""
+    ag = vservo.PBVSAgent("PBVS1.0", 10, d, {**EXACT, "delta": 1e-9})
+    rows, acts, _ = drive(ag, T=60)
+    m = sent(rows, acts)
+    assert m[12] == pytest.approx(DLT[:2], abs=1e-12) and not m[13:].any() and ag.pbvs_stats["steps_acting"] == 1
+    assert m.sum(0) == pytest.approx(DLT[:2], abs=1e-12) and ag.z[60] == pytest.approx(DLT[:2], abs=1e-12)
+
+
+def test_lambda03_at_delay_converges_to_the_jump():
+    """PBVS0.3, s 20, d 10: the jump at 25 under plan 0; plan 20, observed before it, starts at 30. The total sent
+    converges to DLT (c61c31f: 1.83 DLT). The toy plans do not see the object, so plan 40, observed after the jump,
+    keeps the residual it saw: 0.7^15 = 0.5 %."""
+    rows, acts, _ = drive(vservo.PBVSAgent("PBVS0.3", 20, 10, {**EXACT, "delta": 1e-9}), shift_at=25, T=80)
+    assert sent(rows, acts).sum(0) == pytest.approx(DLT[:2], rel=0.01)
+
+
+@pytest.mark.parametrize("lam", ["PBVS1.0", "PBVS0.3"])
+def test_arx_no_double_send_and_decay(lam):
+    """An ARX arm on ARX's model, s 40, d 10: the jump at 45 under plan 0; plan 40, observed before it, starts at 50.
+    Until plan 80 (it saw the jump) starts at 90, e = D - DLT on the jump's line (D: the arm's displacement from the
+    corrections): it decays, D -> DLT (c61c31f: 2.8 / 2.1 DLT)."""
+    D = corr_disp(lam, 40, 10, {**ARX, "delta": 1e-9}, 45, 100)
+    assert abs(D[89] - 1) < 0.01 and np.abs(D[80:90] - 1).max() < 0.2 * np.abs(D[50:60] - 1).max()
+    assert abs(D[-1] - 1) < 0.02
