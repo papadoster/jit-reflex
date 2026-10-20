@@ -50,11 +50,16 @@
 #   setup       A's and B's without SmolVLA: the token check and pi0.5's SHA-256, venv-oft and OFT+'s weights (OFT's
 #               with TAIL=1), pytest
 #   cprobe      §7.1: part 2's pieces repeated as they ran (scripts/c1e4c_summary.py --probe-plan), act_hash against the
-#               saved records -> mode.json (P or S per probe)
+#               saved records -> mode.json (P or S per probe); the machine -> PLATFORM (card, driver, torch and CUDA of
+#               both venvs): csmoke, cgrid and ctail refuse another one (mode П holds where the probe ran)
 #   csmoke      §12: the C1-E4 tests on the pod; PPCL and VS0.3 on 6 pi0.5 cases (prefix_ok >= 5 of 6 each, else stop)
-#               and on the bench -> the GPU peak, tempo_smoke.txt, forecast.txt: the owner decides
-#   cgrid       lines 1-7 by priority (--plan --line N, from mode.json and k_select.json), the k selection after lines 1
-#               and 4, the forecast after each runner line; with a mode S, PPC on PPCL's latched cases; grid_all_C.jsonl
+#               and on the bench -> the GPU peak, tempo_smoke.txt (removed first: a failed rerun leaves none),
+#               forecast.txt: the owner decides
+#   cgrid       [CLINES="1 2 3"] the lines CLINES (default 1-7) by priority (--plan --line N, from mode.json and
+#               k_select.json), the k selection after lines 1 and 4, the forecast after each runner line; with a mode S,
+#               PPC on PPCL's latched cases; grid_all_C.jsonl of the lines run so far. §12: above the $12 cap the lines
+#               that do not fit wait for the owner; CLINES in increasing order, 2, 3, 6, 7 with 1 (k_π), 5 with 1 and 4.
+#               A later cgrid with more lines resumes (the runners skip done cases)
 #   ctail       TAIL=1, after cgrid and the owner's go: line 8 (OFT), grid_all_C.jsonl again
 # One stage at a time on a pod (flock). Each runner line has its own --out (block, brain, set, source, d), runs twice
 # (pass 2 resumes and retries failed groups, scripts/gpu_c1e3.sh's watchdog STALL, default 7200 s) and a stage fails if a
@@ -431,6 +436,20 @@ cfc() {  # cfc <tempo file>: the controls forecast (controls spec §12), mode.js
   # shellcheck disable=SC2086
   cc --forecast "$1" ${d:+--done $d}
 }
+TV='import torch; print("torch", torch.__version__, "CUDA", torch.version.cuda)'
+platform() {  # POD=C: the machine mode П is decided on (cprobe): the card and its driver, torch and its CUDA per venv
+  local py
+  if dry; then echo "+ nvidia-smi --query-gpu=name,driver_version --format=csv,noheader"
+    for py in $P $PO; do echo "+ $py -c '$TV'"; done; return; fi
+  nvidia-smi --query-gpu=name,driver_version --format=csv,noheader || return 1
+  for py in $P $PO; do $py -c "$TV" || return 1; done
+}
+check_platform() {  # csmoke, cgrid, ctail: cprobe's machine ($O/PLATFORM)
+  local p
+  dry && { echo "+ check_platform: the output of these against $O/PLATFORM"; platform; return; }
+  p=$(platform) && [ "$p" = "$(cat $O/PLATFORM 2>/dev/null)" ] || { echo "$p"; fail "this machine (above) is not \
+cprobe's ($O/PLATFORM): mode П was decided on another machine; rerun cprobe here, or ask the owner"; }
+}
 oft_numpy() {  # spec §4: openvla-oft's import makes json.dumps pass numpy silently; the runner writes strict JSON
   dry || [ $POD = A ] && return 0
   ! grep -l '"__numpy__"' $O/*oft*.jsonl $SM/*oft*.jsonl 2>/dev/null || fail "\"__numpy__\" in the OFT records above"
@@ -735,11 +754,16 @@ json.dump(more[:$K], open('$O/bench_more.json', 'w'))" || exit 1  # a list: the 
     oft_numpy
     x cc --probe $O/P1_*.jsonl $O/P2_*.jsonl $O/P3_*.jsonl | tee $W/mode.txt  # -> $O/mode.json
     [ "${PIPESTATUS[0]}" = 0 ] || fail "the probe summary failed (above): no mode"
+    if dry; then platform; echo "+ write $O/PLATFORM: the output of these"
+    else p=$(platform) || fail "nvidia-smi or torch failed: no $O/PLATFORM"; echo "$p" > $O/PLATFORM; fi
     ;;
   csmoke)  # controls spec §12 (outcomes never read): the tests, PPCL and VS0.3 with the Base prefix, tempo, forecast
     dry || [ -f $O/mode.json ] || fail "no $O/mode.json: POD=C ./scripts/gpu_c1e4m.sh cprobe first"
     check_code require
-    dry || rm -f $O/Csmoke_*.jsonl $LOG/Csmoke_*.log $LOG/csmoke*.log $W/tempo_run.txt $W/peak_csmoke*
+    check_platform
+    # tempo_smoke.txt too: a failed rerun must not leave an earlier pass's, which opens cgrid's gate
+    dry || rm -f $O/Csmoke_*.jsonl $LOG/Csmoke_*.log $LOG/csmoke*.log $W/tempo_run.txt $W/peak_csmoke* \
+      $W/tempo_smoke.txt
     # the C1-E4 tests only: other modules of tests/ import jax / flax, which the LeRobot venv has not; no Hub needed
     x $P -m pytest -q tests/test_objreflex.py tests/test_gauto.py tests/test_handoff.py tests/test_lead.py \
       tests/test_maxwrap.py tests/test_c1e4m_run.py tests/test_c1e4c_summary.py tests/test_c1e4m_brains.py 2>&1 \
@@ -761,22 +785,31 @@ json.dump(more[:$K], open('$O/bench_more.json', 'w'))" || exit 1  # a list: the 
     echo "[$(date +%T)] csmoke done. The forecast is above ($W/forecast.txt), the modes in mode.txt: the owner decides"
     ;;
   cgrid)  # controls spec §12: lines 1-7 strictly by priority, k after lines 1 and 4 (§5), PPC on the latched (§7.2)
+    CLINES=${CLINES:-1 2 3 4 5 6 7}  # §12: above the $12 cap the lines that do not fit wait for the owner
+    p=0
+    for L in $CLINES; do  # by priority, each line with the selection lines its k needs
+      [[ $L =~ ^[1-7]$ ]] && [ $L -gt $p ] || fail "CLINES='$CLINES': lines of 1-7 in increasing (priority) order"
+      [[ $L =~ ^[14]$ ]] || [[ " $CLINES " == *" 1 "* ]] || fail "CLINES='$CLINES': line $L needs line 1 (k_π)"
+      [ $L != 5 ] || [[ " $CLINES " == *" 4 "* ]] || fail "CLINES='$CLINES': line 5 needs line 4 (k_OFT+)"
+      p=$L
+    done
     dry || grep -q '^tempo (s/episode): ' $W/tempo_smoke.txt 2>/dev/null \
       || fail "no passed csmoke ($W/tempo_smoke.txt): POD=C ./scripts/gpu_c1e4m.sh csmoke first"
     check_code require
-    echo "[$(date +%T)] cgrid, pod C" | tee -a $W/forecast.txt
-    for L in 1 2 3 4 5 6 7; do
+    check_platform
+    echo "[$(date +%T)] cgrid, pod C, lines $CLINES" | tee -a $W/forecast.txt
+    for L in $CLINES; do
       cphase c$L --plan --line $L || fail "cgrid: line $L still fails after pass 2 (above)"
       b=; [ $L = 1 ] && b=pi05; [ $L = 4 ] && b=oftplus
       [ -z "$b" ] && continue
       x cc --select $b $O/C${L}_*.jsonl | tee -a $W/k_select.txt  # -> $O/k_select.json
       [ "${PIPESTATUS[0]}" = 0 ] || fail "the k selection of $b failed (above)"
     done
-    C5="--plan --line c5 --records $O/C2_*.jsonl $O/C3_*.jsonl $O/C7_*.jsonl"
-    if dry; then echo "+ cc $C5   # with a mode S; it writes latched_bench.json"
-    elif grep -qE '"mode": *"S"' $O/mode.json; then
+    C5="--plan --line c5 --records"  # the records of lines 2, 3, 7 run so far (this cgrid's or an earlier one's)
+    if dry; then echo "+ cc $C5 <those of $O/C2_*.jsonl $O/C3_*.jsonl $O/C7_*.jsonl there>   # with a mode S"
+    elif grep -qE '"mode": *"S"' $O/mode.json && rs=$(ls $O/C[237]_*.jsonl 2>/dev/null); then
       # shellcheck disable=SC2086
-      cphase cc5 $C5 || fail "cgrid: the PPC pass on the latched cases still fails after pass 2 (above)"
+      cphase cc5 $C5 $rs || fail "cgrid: the PPC pass on the latched cases still fails after pass 2 (above)"
     fi
     oft_numpy
     x sh -c "cat $O/C[1-8]*.jsonl > $O/grid_all_C.jsonl"  # the grid lines' records, not the probe's or the smoke's
@@ -787,6 +820,7 @@ json.dump(more[:$K], open('$O/bench_more.json', 'w'))" || exit 1  # a list: the 
     dry || [ -f $O/grid_all_C.jsonl ] || fail "no finished cgrid (no $O/grid_all_C.jsonl): cgrid first"
     dry || [ -f $C1E4_OFT_CKPT/oft-sha-ok ] || fail "no OFT weights: POD=C TAIL=1 ./scripts/gpu_c1e4m.sh setup first"
     check_code require
+    check_platform
     cphase c8 --plan --line 8 || fail "ctail: line 8 still fails after pass 2 (above)"
     oft_numpy
     x sh -c "cat $O/C[1-8]*.jsonl > $O/grid_all_C.jsonl"
