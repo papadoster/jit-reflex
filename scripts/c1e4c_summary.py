@@ -78,7 +78,7 @@ EST = ("diff_pp", "lo2.5", "lo5_one_sided", "hi97.5", "pairs", "clusters")  # e2
 DEP = {"И4": "7", "C5": "237"}  # rule -> lines
 # spec journal "ветки VS остановлены": per source, line 2's cases done with VS (the set's order) when the owner stopped
 # the VS branches; each a multiple of NE (the runner's groups and Base batches go on unchanged) or the whole source
-VS_STOP = {"plus": 90, "pro": 0}
+VS_STOP = {"plus": 108, "pro": 0}
 
 
 def mlines(phase, tag, brain, sset, arms, split, d=0, cases=None, kbar=None, prefix=True):
