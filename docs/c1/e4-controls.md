@@ -30,6 +30,16 @@ VS(1.0) и G — один метод, в таблицах он называет�
 
 > Before the run we repeated pieces of the earlier run on the new machine and compared the hash of every episode's actions. For π0.5 on LIBERO-MAX, 88 of 96 episodes matched bit for bit, as did all 12 event times. The rule fixed in advance was all or nothing: we reused the earlier comparison arms only if every hash matched. We applied it, so for this cell every comparison arm was re-run on the new machine, at a cost of about $2.
 
+**4. Ветка VS остановлена; настоящий регулятор с обратной связью** (владелец: «сильная строка, а не слабая»).
+
+> During the run we found that the branch we had declared as a visual-servoing baseline was, in the code, our own method with a fixed parameter: it fixed the share of the object's shift inherited by the next plan, and it never measured the gripper. We stopped it before reading any of its evaluation results and ran a real closed-loop regulator instead: position-based visual servoing with the reference trajectory given by the policy's own plan.
+
+**5. Место нашего метода в классической теории** (Chaumette & Hutchinson, Part II, IEEE RAM 2007, «Target tracking», ур. 10–12).
+
+> For a moving target, classical visual servoing uses v = −λ L̂⁺ e − L̂⁺ ∂ê/∂t: a feedback term on the measured gripper-to-target error and a feedforward term that cancels the target's own motion. Our reflex is the second term in integrated form (the accumulated object displacement rather than its velocity), with the reference set by the policy's plan; it never measures the gripper. With the plan as the reference and exact execution, a position-based servo at unit gain reduces to our reflex; the two differ only where the arm deviates from the plan for reasons other than object motion. The run measures what the feedback term adds.
+
+Источники: Chaumette & Hutchinson 2006 (Part I, ур. 1, 4) и 2007 (Part II, ур. 10–12); grasp-VS — GG-CNN (Morrison, Corke & Leitner, RSS 2018), Haviland, Dayoub & Corke 2020, Vahrenkamp et al. 2008; честный подбор усиления у регулятора-baseline — Lee, Levine & Abbeel, ICLR 2017 (§6.4, прил. C.5). В статье PPC (2605.11459v2) VS-baseline нет. Спек регулятора: [`2026-10-20-c1-e4-pbvs-design.md`](../superpowers/specs/2026-10-20-c1-e4-pbvs-design.md).
+
 ## Результаты
 
 Будут после пода (`results/c1-e4/controls/pod_C/`). Правила C2, C3, C5, C6 и измерения И1–И4 — по спеку §8.
