@@ -14,9 +14,11 @@ LeRobot env; run from the repository root. R = results/c1-e4/controls/pod_C:
     python scripts/c1e4v_summary.py --select R/V1_*.jsonl [--out R/pbvs_k.json]   exit 2: V1 incomplete
     python scripts/c1e4v_summary.py --forecast R/tempo_grid.txt [--done R/V*.jsonl R/Nglr*.jsonl]   per line hours,
         $ and what is left; exit 3 when V1 + V2 + V3 cost above $4 (V3, then Nglr and V2eps, wait for the owner)
-    python scripts/c1e4v_summary.py --smoke-check R/Vsmoke_pi05*.jsonl   exit 0, or 3
+    python scripts/c1e4v_summary.py --smoke-check R/Vsmoke_pi05*.jsonl --controls R/C2_pi05_eval300_plus_d0.jsonl
+        exit 0, or 3 (also when a smoke Base's e is not that file's)
     python scripts/c1e4v_summary.py --controls-check R/C2_*.jsonl R/C3_*.jsonl [--mode R/mode.json] [--k R/k_select.json]
-        controls lines 2 and 3 complete (c1e4c_summary's <= 1 % missing): exit 0, or 3
+        controls lines 2 and 3 complete (c1e4c_summary's <= 1 % missing) and FROZEN's Base cases V2's first 108 Plus,
+        in order: exit 0, or 3
     python scripts/c1e4v_summary.py [read] R/grid_all_V.jsonl [--controls R/grid_all_C.jsonl] [--p2 results/c1-e4/part2]
             [--out R/summary_V.json]
         the checks before reading (§5), then the measurements Н1-Н3, И5 (and at the 5 mm gate) with no threshold and the
@@ -61,6 +63,7 @@ WEIGHT = {"PPCL@glr": 2.5}
 STATS = ("steps_window", "steps_acting", "sum_e", "max_e", "flips")  # vservo.PBVSAgent.pbvs_stats, a record's "pbvs"
 CONF_SKIP = ("arms", "gpu", "kbar", "pbvs")  # spec §5: every other conf field equal across the read records of a d
 G1 = "G(k=1.0)"  # controls journal: line 2's frozen VS1.0 records under their right name (report only)
+FROZEN = f"C2_{P}_eval300_plus_d0.jsonl"  # line 2's file with them: its first VS_STOP Plus cases (controls journal)
 # the pod's controls mode and k (controls journal: pi0.5 LIBERO-MAX mode С, k_π = 1.0): only line 2's and 3's cases,
 # sources and groups are read off c1e4c_summary.plan here, which do not depend on them
 CMODE, CK = {"pi05_lmax": {"mode": "S"}}, {P: {"k": "VS1.0"}}
@@ -278,17 +281,32 @@ def forecast(tempo, pk=None, band=None, done=frozenset(), split=None):
             "gate": {"lines": GATE, "cap_usd": CAP, **gate, "v3_waits": cc.RATE * hs(GATE, 0) > CAP}}
 
 
-def smoke_check(recs):
+def smoke_check(recs, frozen):
     """The smoke's gate: PBVS0.3 with prefix_ok in >= 5 of the 6 cases, the 6 cases complete (a Base and a PBVS0.3
-    record each, none skipped), every PBVS0.3 record with its counters. (pass, details)."""
+    record each, none skipped), every PBVS0.3 record with its counters, and the pairing's precondition: each smoke Base's
+    e is the one of the same case's Base in the frozen file (FROZEN, line 2's first group: the same 6 cases in one
+    batch), before the V lines pay; their act_hash reported. (pass, details)."""
     rs = [r for r in recs if "kind" in r]
     dyn = [r for r in rs if r["kind"] == "dynamic" and r["arm"] == "PBVS0.3"]
+    fb = {r["case_id"]: r for r in frozen if r.get("kind") == "base" and r["d"] == 0}
+    bs = [r for r in rs if r["kind"] == "base"]
     n = {"prefix_ok": len({r["case_id"] for r in dyn if r.get("prefix_ok") is True}),
-         "cases": len({r["case_id"] for r in rs}), "pbvs": len(dyn), "base": sum(r["kind"] == "base" for r in rs),
+         "cases": len({r["case_id"] for r in rs}), "pbvs": len(dyn), "base": len(bs),
          "skipped": sum(bool(r.get("skipped_reason")) for r in rs),
-         "counters": all(set(STATS) <= set(r.get("pbvs") or {}) for r in dyn)}
-    return (n["prefix_ok"] >= 5 and n["cases"] == n["pbvs"] == n["base"] == 6 and not n["skipped"]
-            and n["counters"]), n
+         "counters": all(set(STATS) <= set(r.get("pbvs") or {}) for r in dyn),
+         "base_e_as_line_2": sum(r["e"] == fb.get(r["case_id"], {}).get("e", "-") for r in bs),
+         "base_act_hash_as_line_2": sum(r.get("act_hash") == fb.get(r["case_id"], {}).get("act_hash", "-") for r in bs)}
+    return (n["prefix_ok"] >= 5 and n["cases"] == n["pbvs"] == n["base"] == n["base_e_as_line_2"] == 6
+            and not n["skipped"] and n["counters"]), n
+
+
+def frozen_check(frozen, split):
+    """The G(k = 1.0) pair's precondition on disk: the frozen file's Base case ids in its order (a case's lines are
+    written together, Base last) are V2's planned first VS_STOP Plus cases, in order."""
+    got = [r["case_id"] for r in frozen if r.get("kind") == "base"]
+    want = ids(plan("V2", {"arm": LAMS[0]}, split=split)[0], split)[:cc.VS_STOP["plus"]]
+    return {"bases": len(got), "first_equal": sum(a == b for a, b in zip(got, want)), "want": len(want),
+            "pass": got[:len(want)] == want}
 
 
 def controls(recs, mode, k, split):
@@ -643,6 +661,8 @@ def selftest():
     assert l2[1]["args"] == ("--brain pi05 --source pro --set eval300 --arms=PBVS0.3 --d 0 --base-prefix "
                              f"--band {OUT}/band.json"), l2[1]["args"]
     assert [ln["id"] for ln in l3] == [f"V3_pi05_eval300_{s}_d{d}" for d in (10, 20) for s in ("plus", "pro")]
+    assert [ln["args"] for ln in l3] == [f"--brain pi05 --source {s} --set eval300 --arms=PBVS0.3 --d {d} --base-prefix "
+                                         f"--band {OUT}/band.json" for d in (10, 20) for s in ("plus", "pro")], l3
     assert [(ln["id"], cc.n_of(ln)) for ln in ng] == [("Nglr_pi05_eval300_plus_d0", 374),
                                                       ("Nglr_pi05_eval300_pro_d0", 226)], ng
     assert ng[0]["args"] == "--brain pi05 --source plus --set eval300 --arms=PPCL@glr,PPC@glr --d 0 --base-prefix"
@@ -694,14 +714,34 @@ def selftest():
     f = forecast(t36, pk, {"delta": 0.01}, done, split)
     assert f["lines"]["V1"]["left_hours"] == 0 and f["lines"]["V2"]["left_hours"] == 5.99 and f["gate"]["hours"] == 20.4
 
-    # the smoke's gate: PBVS0.3 prefix_ok in >= 5 of 6, the 6 cases complete, the counters there
+    # the smoke's gate: PBVS0.3 prefix_ok in >= 5 of 6, the 6 cases complete, the counters there, each Base's e the
+    # frozen file's (its act_hash reported, not a gate)
     sr = ([{"case_id": c, "kind": "dynamic", "arm": "PBVS0.3", "prefix_ok": True, "pbvs": dict.fromkeys(STATS, 0)}
-           for c in e3["plus"][:6]] + [{"case_id": c, "kind": "base", "arm": "none"} for c in e3["plus"][:6]])
-    one = lambda n, f: [r | f if r["kind"] == "dynamic" and r["case_id"] in e3["plus"][:n] else r for r in sr]  # noqa
-    assert smoke_check(sr)[0] and smoke_check(one(1, {"prefix_ok": False}))[0]
-    assert not smoke_check(one(2, {"prefix_ok": False}))[0] and not smoke_check(sr[1:])[0]
-    assert not smoke_check(one(1, {"pbvs": {"steps_window": 3}}))[0]
-    assert not smoke_check(one(1, {"skipped_reason": "x"}))[0]
+           for c in e3["plus"][:6]] + [{"case_id": c, "kind": "base", "arm": "none", "d": 0, "e": 30 + j,
+                                        "act_hash": c} for j, c in enumerate(e3["plus"][:6])])
+    fz = [r | {"kind": "dynamic", "arm": "VS1.0"} for r in sr[6:]] + sr[6:]
+    one = lambda n, f, k="dynamic": [r | f if r["kind"] == k and r["case_id"] in e3["plus"][:n] else r  # noqa: E731
+                                     for r in sr]
+    ok, n = smoke_check(sr, fz)
+    assert ok and n["base_e_as_line_2"] == n["base_act_hash_as_line_2"] == 6 and smoke_check(
+        one(1, {"prefix_ok": False}), fz)[0], n
+    assert not smoke_check(one(2, {"prefix_ok": False}), fz)[0] and not smoke_check(sr[1:], fz)[0]
+    assert not smoke_check(one(1, {"pbvs": {"steps_window": 3}}), fz)[0]
+    assert not smoke_check(one(1, {"skipped_reason": "x"}), fz)[0]
+    ok, n = smoke_check(one(1, {"e": 99}, "base"), fz)  # one Base's e not line 2's: stop before the V lines pay
+    assert not ok and n["base_e_as_line_2"] == 5, n
+    assert not smoke_check(sr, fz[:-1])[0]  # a case missing in the frozen file
+    ok, n = smoke_check(one(1, {"act_hash": "x"}, "base"), fz)
+    assert ok and n["base_act_hash_as_line_2"] == 5, n  # act_hash: reported only
+
+    # the frozen file on disk: its Base case ids, in its order, are V2's first 108 Plus cases
+    c2l = cc.plan("2", CMODE, CK, split)[0]
+    f108 = [{"case_id": c, "kind": kd, "arm": a} for c in ids(c2l, split)
+            for kd, a in [("dynamic", "PPCL"), ("dynamic", "VS1.0"), ("dynamic", "Gauto"), ("base", "none")]]
+    assert frozen_check(f108, split) == {"bases": 108, "first_equal": 108, "want": 108, "pass": True}
+    sw = f108[4:8] + f108[:4] + f108[8:]  # two cases swapped
+    for bad in (sw, f108[4:], f108[:-1], f108[:-4] + f108[-4:-1] + [f108[-1] | {"case_id": e3["pro"][0]}]):
+        assert not frozen_check(bad, split)["pass"]
     selftest_read(split)
     print("selftest ok")
 
@@ -956,16 +996,16 @@ if __name__ == "__main__":
         bd = jload(a.band_json)
         f = forecast(cc.read_tempo(a.forecast), jload(a.pbvs_k), bd, {vk(r, bd) for r in load(a.done)}, split)
         print(e2.dump(f))
-        if f["gate"]["v3_waits"]:
-            print(f"!!! V1 + V2 + V3 forecast ${f['gate']['usd']} > ${CAP}: V3 (then Nglr, V2eps) waits for the owner")
-            raise SystemExit(3)
+        raise SystemExit(3 if f["gate"]["v3_waits"] else 0)  # the stage says whether the hold is in force
     elif a.smoke_check:
-        ok, n = smoke_check(load(a.smoke_check))
+        ok, n = smoke_check(load(a.smoke_check), load(a.controls))
         print(e2.dump({"smoke": n, "pass": ok}))
         print(f"C1-E4 PBVS smoke: {'PASS' if ok else 'FAIL'}")
         raise SystemExit(0 if ok else 3)
     elif a.controls_check:
         _, _, comp = controls(load(a.controls_check), jload(a.mode), jload(a.k), split)
+        fz = [f for f in a.controls_check if Path(f).name == FROZEN]  # on disk, in its own order
+        comp["frozen"] = frozen_check(load(fz), split) | {"file": fz}
         print(e2.dump(comp))
         raise SystemExit(0 if all(v["pass"] for v in comp.values()) else 3)
     else:

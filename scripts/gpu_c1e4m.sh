@@ -61,17 +61,19 @@
 #               that do not fit wait for the owner; CLINES in increasing order, 2, 3, 6, 7 with 1 (k_π), 5 with 1 and 4.
 #               A later cgrid with more lines resumes (the runners skip done cases)
 #   ctail       TAIL=1, after cgrid and the owner's go: line 8 (OFT), grid_all_C.jsonl again
-#   vgrid       PBVS (docs/superpowers/specs/2026-10-20-c1-e4-pbvs-design.md) and the controls journal's noisy cell, after
-#               cgrid (refused while a cgrid / ctail or a runner is live, or before controls lines 2 and 3 are complete:
-#               V2 / V3 / Nglr / V2eps pair with them): its own code record $O/CODE.v (CODE_PATHS + the PBVS summary;
-#               $O/CODE stays the controls'), the platform, the C1-E4 tests with test_vservo and test_c1e4v_summary, both
-#               summaries' selftests; then V0 -> band.json -> vsmoke (PBVS0.3, 6 cases) -> the forecast -> V1 ->
-#               pbvs_k.json -> V2 -> V3 -> Nglr -> V2eps (only when band.json's delta > 15 mm), each by
-#               scripts/c1e4v_summary.py --plan --line L. A forecast of V1 + V2 + V3 above $4 holds V3, Nglr and V2eps
-#               for the owner (a clean exit; after the ok: V3_OK=1). band.json / pbvs_k.json are recomputed only when a
-#               V0 / V1 file is newer. Then grid_all_V.jsonl and the reading (summary_V.json). A rerun resumes. Note:
-#               CODE_PATHS holds src, so once the PBVS code is pulled ctail's check against $O/CODE refuses: intended,
-#               the owner decides on the tail
+#   vgrid       [VLINES="V3 Nglr V2eps"] PBVS (docs/superpowers/specs/2026-10-20-c1-e4-pbvs-design.md) and the controls
+#               journal's noisy cell, after a finished cgrid (grid_all_C.jsonl newer than every C*.jsonl; refused while a
+#               cgrid / ctail stage or a runner is live, or before controls lines 2 and 3 are complete and the frozen
+#               file's Base cases are V2's first 108 Plus: V2 / V3 / Nglr / V2eps pair with them). The platform, the C1-E4
+#               tests with test_vservo and test_c1e4v_summary, both summaries' selftests, then its own code record
+#               $O/CODE.v (CODE_PATHS + the PBVS summary; $O/CODE stays the controls'). Then V0 -> band.json -> vsmoke
+#               (PBVS0.3 on 6 cases; its Base e must be line 2's) -> the forecast at the controls' tempo -> V1 ->
+#               pbvs_k.json -> V2 -> VLINES (a subset of V3 Nglr V2eps in this order, default all; V2eps runs only when
+#               band.json's delta > 15 mm), each by scripts/c1e4v_summary.py --plan --line L. A forecast of V1 + V2 + V3
+#               above $4 holds VLINES and the reading for the owner (a clean exit; after the ok: V3_OK=1, each line alone
+#               with VLINES). band.json / pbvs_k.json are recomputed only when a V0 / V1 file is newer. Then
+#               grid_all_V.jsonl and the reading (summary_V.json). A rerun resumes. Note: CODE_PATHS holds src, so once
+#               the PBVS code is pulled ctail's check against $O/CODE refuses: intended, the owner decides on the tail
 # One stage at a time on a pod (flock). Each runner line has its own --out (block, brain, set, source, d), runs twice
 # (pass 2 resumes and retries failed groups, scripts/gpu_c1e3.sh's watchdog STALL, default 7200 s) and a stage fails if a
 # runner still exits non-zero after pass 2. Every exit appends the environment to $O/pod_env_<stage>.txt, refreshes
@@ -346,13 +348,13 @@ check_code() {  # check_code record|require: connect, calib, calib_more and grid
   [ "$(cat $O/CODE 2>/dev/null)" = "$h" ] || fail "the runner code is not connect's ($O/CODE): the owner decides (archive
     the results under $O and rerun from connect, or check out connect's commit)"
 }
-check_code_v() {  # vgrid (PBVS spec §5): its own record $O/CODE.v of CODE_PATHS (the PBVS summary added), the first
-  local h  # vgrid's; later vgrids require it. $O/CODE stays the controls'
-  dry && { echo "+ check_code_v ($CODE_PATHS at HEAD vs $O/CODE.v)"; return; }
+check_code_v() {  # check_code_v check|record, vgrid (PBVS spec §5): its own record $O/CODE.v of CODE_PATHS (the PBVS
+  local h  # summary added), written by record once the tests passed (V0 starts); then both require it. $O/CODE: the controls'
+  dry && { echo "+ check_code_v $1 ($CODE_PATHS at HEAD vs $O/CODE.v)"; return; }
   h=$(code_hash) || exit 1
   [ -z "$(git status --porcelain -- $CODE_PATHS)" ] || { git status --short -- $CODE_PATHS
     fail "uncommitted or untracked files in the code (above): commit them on the Mac and pull, or remove them"; }
-  [ -f $O/CODE.v ] || { echo "$h" > $O/CODE.v; return; }
+  if [ ! -f $O/CODE.v ]; then [ "$1" != record ] || echo "$h" > $O/CODE.v; return; fi
   [ "$(cat $O/CODE.v)" = "$h" ] || fail "the code is not the first vgrid's ($O/CODE.v): the owner decides"
 }
 
@@ -440,14 +442,14 @@ print(','.join([i for i in c if i.startswith('pro-') == ('$1' == 'pro')][:$2]))"
 summ() { $SP scripts/c1e4m_summary.py "$@"; }
 cc() { $SP scripts/c1e4c_summary.py "$@"; }  # POD=C: the controls summary (controls spec §5, §7, §12)
 cv() { $SP scripts/c1e4v_summary.py "$@"; }  # POD=C vgrid: the PBVS summary (PBVS spec §3-§8)
-CC=cc CFC=cfc  # the summary cphase plans with and fcast's forecast: vgrid sets cv and vfc
+SUMM=cc  # the summary cphase plans with (vgrid: cv); not CC, the C compiler's variable
 cphase() {  # cphase <phase> <cc args..>: the summary's plan, run by run_phase. A dry run where the summary cannot plan
   local ph=$1 p q; shift  # yet (exit 3, on the Mac: no mode.json or k_select.json) prints the call instead
-  if dry; then p=$($CC "$@" 2>$W/cc.err); q=$?; [ $q = 3 ] && { echo "+ $CC $*"; return 0; }; cat $W/cc.err
-  else p=$($CC "$@"); q=$?; fi
-  [ $q = 0 ] || { echo "!!! $CC $* failed (exit $q)"; return 1; }
+  if dry; then p=$($SUMM "$@" 2>$W/cc.err); q=$?; [ $q = 3 ] && { echo "+ $SUMM $*"; return 0; }; cat $W/cc.err
+  else p=$($SUMM "$@"); q=$?; fi
+  [ $q = 0 ] || { echo "!!! $SUMM $* failed (exit $q)"; return 1; }
   # run_phase skips other phases' lines silently: a line the summary names otherwise would never run
-  [ -z "$p" ] || [ "$(cut -f1 <<< "$p" | sort -u)" = "$ph" ] || { echo "!!! $CC $*: lines of a phase other than $ph"
+  [ -z "$p" ] || [ "$(cut -f1 <<< "$p" | sort -u)" = "$ph" ] || { echo "!!! $SUMM $*: lines of a phase other than $ph"
     return 1; }
   run_phase $ph "$p"
 }
@@ -501,14 +503,13 @@ run_phase() {  # run_phase <phase> <plan>: the phase's lines one after another (
       # shellcheck disable=SC2086
       run2 $id $BRUN $args --n-envs $(envs c1e4 $b) --out $out </dev/null || bad+=" $id"
     fi
-    case $1 in grid | c[1-8] | cc5 | vsmoke | v[0-3] | nglr | v2eps)
-      fcast $id $([ $rn = c1e4m ] && echo lmax || echo bench)_$b ;; esac
+    case $1 in grid | c[1-8] | cc5) fcast $id $([ $rn = c1e4m ] && echo lmax || echo bench)_$b ;; esac
   done <<< "$2"
   [ -z "$bad" ] || { echo "!!! still failing after pass 2:$bad" | tee -a $LOG/$1.log; return 1; }
 }
 fcast() {  # fcast <line id> <tempo key>: this line's tempo replaces the last one for that brain, then the forecast
   local r t
-  dry && { [ $POD = C ] && { $CFC $W/tempo_grid.txt; return; }
+  dry && { [ $POD = C ] && { cfc $W/tempo_grid.txt; return; }
     echo "+ summ <the pod's records> --forecast $W/tempo_grid.txt --pod $POD (after $1)"; return; }
   r=$([ "${2%%_*}" = lmax ] && gtempo $LOG/$1.log || full_rate $LOG/$1.log)
   t=$(cat $W/tempo_smoke.txt $W/tempo_grid.txt 2>/dev/null | grep -E '^tempo \(s/episode\): ' | tail -1)
@@ -516,7 +517,7 @@ fcast() {  # fcast <line id> <tempo key>: this line's tempo replaces the last on
   echo "$t" >> $W/tempo_grid.txt
   # shellcheck disable=SC2046
   { echo "[$(date +%T)] forecast after $1 ($2 ${r:-?} s/episode)"
-    if [ $POD = C ]; then $CFC $W/tempo_grid.txt
+    if [ $POD = C ]; then cfc $W/tempo_grid.txt
     else summ $(ls $O/*.jsonl 2>/dev/null | grep -v /grid_all_) --forecast $W/tempo_grid.txt --pod $POD; fi; } \
     | tee -a $W/forecast.txt | if [ $POD = C ]; then cat; else grep -E '"(total|left)"' -A3; fi
 }
@@ -856,39 +857,55 @@ json.dump(more[:$K], open('$O/bench_more.json', 'w'))" || exit 1  # a list: the 
     oft_numpy
     x sh -c "cat $O/C[1-8]*.jsonl > $O/grid_all_C.jsonl"
     ;;
-  vgrid)  # PBVS spec §3-§8 and the journals: V0, band, vsmoke, forecast, V1, select, V2, V3, Nglr, V2eps, the reading
-    if ! dry; then  # one runner on the GPU: the brackets keep pgrep from matching its own command line
-      live=$(pgrep -af 'gpu_c1e4[m]\.sh +(cgrid|ctail)|c1e4m_ru[n]\.py')
+  vgrid)  # PBVS spec §3-§8 and the journals: V0, band, vsmoke, forecast, V1, select, V2, VLINES, the reading
+    VLINES=${VLINES:-V3 Nglr V2eps}  # the lines after V2, in this order: a held line can be released alone
+    p=0
+    for L in $VLINES; do
+      case $L in V3) i=1 ;; Nglr) i=2 ;; V2eps) i=3 ;; *) i=0 ;; esac
+      [ $i -gt $p ] || fail "VLINES='$VLINES': a subset of V3 Nglr V2eps, in this order"
+      p=$i
+    done
+    # a finished cgrid (lines 2, 3, 7 and the C5 pass: grid_all_C.jsonl is written last) and no stage or runner live (one
+    # runner on the GPU; the brackets keep pgrep from matching its own command line)
+    dry || { [ -f $O/grid_all_C.jsonl ] && [ -z "$(find $O -maxdepth 1 -name 'C*.jsonl' -newer $O/grid_all_C.jsonl)" ]; } \
+      || fail "cgrid has not finished ($O/grid_all_C.jsonl missing or older than a C*.jsonl): vgrid starts after it"
+    if ! dry; then
+      live=$(pgrep -af 'gpu_c1e4[m]\.sh +(cgrid|ctail)|c1e4m_ru[n]\.py|c1e4_ru[n]\.py')
       [ -z "$live" ] || fail "a controls stage or a runner is live (below): vgrid starts after it ends
 $live"
     fi
-    # V2, Nglr, V2eps pair with controls line 2's records and Base batches, V3 with line 3's
-    x cv --controls-check $O/C2_*.jsonl $O/C3_*.jsonl \
-      || refuse "controls lines 2 and 3 are not complete (above): V2 and V3 pair with them; cgrid first"
+    # V2, Nglr, V2eps pair with controls line 2's records and Base batches (its frozen file's 108 Plus cases first, on
+    # disk), V3 with line 3's
+    x cv --controls-check $O/C2_*.jsonl $O/C3_*.jsonl || refuse "controls lines 2 and 3 are not complete, or the frozen \
+file's Base cases are not V2's first 108 Plus (above): V2 and V3 pair with them"
     CODE_PATHS+=" scripts/c1e4v_summary.py"
-    check_code_v
+    check_code_v check
     check_platform
     x $P -m pytest -q tests/test_objreflex.py tests/test_gauto.py tests/test_handoff.py tests/test_lead.py \
       tests/test_maxwrap.py tests/test_c1e4m_run.py tests/test_c1e4c_summary.py tests/test_c1e4m_brains.py \
       tests/test_vservo.py tests/test_c1e4v_summary.py 2>&1 | tee $LOG/vgrid_tests.log
     [ "${PIPESTATUS[0]}" = 0 ] || fail "the C1-E4 tests fail on the pod (above): the owner decides"
     x cc --selftest && x cv --selftest || fail "a summary's selftest fails (above): the owner decides"
-    CC=cv CFC=vfc  # cphase plans with the PBVS summary, fcast forecasts the V lines
-    echo "[$(date +%T)] vgrid, pod C" | tee -a $W/forecast.txt
+    check_code_v record  # the first vgrid's, once its tests passed: later vgrids require it
+    SUMM=cv  # cphase plans with the PBVS summary; its lines take no per-line forecast (tempo_grid.txt stays the controls')
+    echo "[$(date +%T)] vgrid, pod C, then $VLINES" | tee -a $W/forecast.txt
     cphase v0 --plan --line V0 || fail "vgrid: V0 still fails after pass 2 (above)"
     # spec §3: the arm model and its band from V0 (and band_eps.json above 15 mm), again only when a V0 file is newer
     if dry || [ ! -f $O/band.json ] || [ -n "$(find $O -maxdepth 1 -name 'V0_*.jsonl' -newer $O/band.json)" ]; then
       x cv --band $O/V0_*.jsonl | tee -a $W/band.txt
       [ "${PIPESTATUS[0]}" = 0 ] || fail "the band of V0 failed (above): V0 incomplete?"
     fi
+    # the smoke afresh until V1 starts (a stale smoke's records would pass its gate on resume)
+    dry || ls $O/V1_*.jsonl >/dev/null 2>&1 || rm -f $O/Vsmoke_*.jsonl $LOG/Vsmoke_*.log
     cphase vsmoke --plan --line vsmoke || fail "vgrid: the smoke still fails after pass 2 (above)"
-    x cv --smoke-check $O/Vsmoke_pi05*.jsonl \
-      || fail "PBVS0.3 has prefix_ok < 5 of 6, a case short or no counters (above): stop, the owner decides"
-    hold=  # spec §8: V1 + V2 + V3 above $4 -> V3 waits for the owner, Nglr and V2eps with it (the order is strict)
+    x cv --smoke-check $O/Vsmoke_pi05*.jsonl --controls $O/C2_pi05_eval300_plus_d0.jsonl || fail "PBVS0.3 has \
+prefix_ok < 5 of 6, a case short, no counters, or a Base e not line 2's (above): stop, the owner decides"
+    # spec §8 at the controls grid's tempo (its latest lmax_pi05, lines 2 / 3): V1 + V2 + V3 above $4 holds VLINES
+    hold=
     if dry; then vfc $W/tempo_grid.txt
     else vfc $W/tempo_grid.txt | tee -a $W/forecast.txt; q=${PIPESTATUS[0]}
       { [ $q = 0 ] || [ $q = 3 ]; } || fail "the PBVS forecast failed (exit $q, above)"
-      [ $q = 3 ] && [ "${V3_OK:-}" != 1 ] && hold=1
+      [ $q = 3 ] && { [ "${V3_OK:-}" = 1 ] && echo "V3_OK=1: the owner's ok, $VLINES run" || hold=1; }
     fi
     cphase v1 --plan --line V1 || fail "vgrid: V1 still fails after pass 2 (above)"
     if dry || [ ! -f $O/pbvs_k.json ] || [ -n "$(find $O -maxdepth 1 -name 'V1_*.jsonl' -newer $O/pbvs_k.json)" ]; then
@@ -896,15 +913,15 @@ $live"
       [ "${PIPESTATUS[0]}" = 0 ] || fail "the lambda selection failed (above): V1 incomplete?"
     fi
     cphase v2 --plan --line V2 || fail "vgrid: V2 still fails after pass 2 (above)"
-    if [ -n "$hold" ]; then
-      echo "!!! V3 waits for the owner's ok: the PBVS forecast of V1 + V2 + V3 is above \$4 (above, PBVS spec §8); Nglr" \
-        "and V2eps wait with it. After the ok: V3_OK=1 POD=C ./scripts/gpu_c1e4m.sh vgrid (done cases are skipped)" \
+    if [ -n "$hold" ]; then  # the owner's go / no-go stays blind: nothing is read
+      echo "!!! $VLINES and the reading wait for the owner's ok: the PBVS forecast of V1 + V2 + V3 is above \$4" \
+        "(above, PBVS spec §8). After the ok: V3_OK=1 [VLINES=...] POD=C ./scripts/gpu_c1e4m.sh vgrid" \
         | tee -a $W/forecast.txt
-    else
-      for L in V3 Nglr V2eps; do  # V2eps: an empty plan unless band.json's delta > 15 mm
-        cphase "$(tr A-Z a-z <<< $L)" --plan --line $L || fail "vgrid: $L still fails after pass 2 (above)"
-      done
+      exit 0
     fi
+    for L in $VLINES; do  # V2eps: an empty plan unless band.json's delta > 15 mm
+      cphase "$(tr A-Z a-z <<< $L)" --plan --line $L || fail "vgrid: $L still fails after pass 2 (above)"
+    done
     x sh -c "cat $O/V[0-3]_*.jsonl $O/Nglr_*.jsonl $O/V2eps_*.jsonl 2>/dev/null > $O/grid_all_V.jsonl"  # not the smoke
     x cv $O/grid_all_V.jsonl --controls $O/C2_*.jsonl $O/C3_*.jsonl --out $O/summary_V.json > $W/reading_V.txt; q=$?
     tail -1 $W/reading_V.txt
