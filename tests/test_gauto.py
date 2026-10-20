@@ -380,8 +380,9 @@ def test_gagent_ppcl_dispatches_like_ppc():
 # ------------------------------------------------------------------ controls: VS(k), the kappa family, kappa fixed
 
 
-def _walk(method, steps=80, s=10, d=0, jump_at=15, jump=(0.0, 0.06, 0.0)):
-    """One GAgent on a jump: the arm walks to the object it saw at each call (a chunk toward the seen object)."""
+def _walk(method, steps=80, s=10, d=0, jump_at=15, jump=(0.0, 0.06, 0.0), close_at=None):
+    """One GAgent on a jump: the arm walks to the object it saw at each call (a chunk toward the seen object); a chunk
+    observed at or after close_at commands "close" from its first row."""
     ag = gauto.GAgent(method, s, d)
     x, p, acts = np.zeros(3), np.array([0.30, 0.0, 0.0]), []
     for t in range(steps):
@@ -393,7 +394,7 @@ def _walk(method, steps=80, s=10, d=0, jump_at=15, jump=(0.0, 0.06, 0.0)):
         if ag.sched.wants_call(t, ag.trigger(t)):
             ch = np.zeros((orx.H, 7))
             ch[:, :3] = np.clip((p - x) / orx.G_POS / 25, -1, 1)  # a slow plan toward the seen object
-            ch[:, 6] = -1.0
+            ch[:, 6] = 1.0 if close_at is not None and t >= close_at else -1.0
             ag.sched.issue(t, ch)
             if ag.sched.arrive(t):
                 ag.on_new_chunk()
@@ -418,6 +419,41 @@ def test_vs1_is_g_bitwise():
         assert g0.t_e is not None and g0.kappa_log  # the reflex engaged and a plan ran under kappa
         assert np.array_equal(a0, a1) and np.array_equal(g0.c, g1.c)
         assert (g0.g_on, g0.t_e, g0.sched.n_trig) == (g1.g_on, g1.t_e, g1.sched.n_trig)
+
+
+def test_vs1_is_g_by_executed_code():
+    """Owner 2026-10-20, before reading the frozen 108 VS1.0 cases as G(k = 1.0): a diff of the code each arm runs, not
+    of its description. On jumps below the dead band (no engagement), above it, random ones, and with a close mid-way
+    (G's stop after the close), at d 0 and 10, the src lines G and VS1.0 execute are the same set, and actions, C,
+    kappa log, t_e, g_on and calls are equal bitwise."""
+    src = str(Path(gauto.__file__).resolve().parent)
+
+    def traced(method, **kw):
+        lines = set()
+
+        def tr(frame, event, arg):
+            if frame.f_code.co_filename.startswith(src):
+                lines.add((frame.f_code.co_filename, frame.f_lineno))
+            return tr
+
+        sys.settrace(tr)
+        try:
+            out = _walk(method, **kw)
+        finally:
+            sys.settrace(None)
+        return out, lines
+
+    jumps = [(0.0, 0.004, 0.0), (0.0, 0.06, 0.0), *np.random.default_rng(1).uniform(-0.08, 0.08, (3, 3))]
+    for d, jump, close_at in itertools.product((0, 10), jumps, (None, 40)):
+        (a0, g0), l0 = traced("G", d=d, jump=jump, close_at=close_at)
+        (a1, g1), l1 = traced("VS1.0", d=d, jump=jump, close_at=close_at)
+        assert l0 == l1, sorted(l0 ^ l1)
+        assert np.array_equal(a0, a1) and np.array_equal(g0.c, g1.c) and g0.kappa_log == g1.kappa_log
+        assert (g0.g_on, g0.t_e, g0.grasp_started, g0.sched.n_sched, g0.sched.n_trig) == \
+               (g1.g_on, g1.t_e, g1.grasp_started, g1.sched.n_sched, g1.sched.n_trig)
+        if np.linalg.norm(jump) < orx.EPS:
+            assert g0.t_e is None and not g0.g_on  # the dead band: no engagement
+        assert (close_at is not None) == g0.grasp_started  # the close was reached: the stop's code ran in both
 
 
 def test_vs03_fixed_kappa_after_engagement_and_g_before():
