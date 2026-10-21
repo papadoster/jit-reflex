@@ -517,11 +517,19 @@ def report(mi, m2, M, clu, one, e300, arm, ae, mode, band, pk, ep, gpu, checks, 
         st = [r["pbvs"] for r in g if r.get("pbvs") and r["pbvs"]["steps_window"]]
         if key[2] in (arm, ae):  # spec §6: the share of acting steps after t_e, mean |e| and its spread, flips
             me = [s["sum_e"] / s["steps_window"] for s in st]
+            # owner 2026-10-21: the window steps the dead band silenced (|e| <= delta), pooled over steps, all and
+            # by the 6 / 12 cm slices: the number behind the stated limitation "a 2.6 cm band against 6 and 12 cm"
+            sl = {"6cm": near, "12cm": far}
+            db = lambda ss: (round(sum(x["steps_window"] - x["steps_acting"] for x in ss)  # noqa: E731
+                                   / sum(x["steps_window"] for x in ss), 4) if ss else None)
             rep["pbvs_counters"][name] = {
                 "n": len(g), "window": len(st), "acting_share": mean([s["steps_acting"] / s["steps_window"] for s in st]),
                 "mean_e_m": mean(me), "mean_e_p5_p95": [round(float(v), 4) for v in np.percentile(me, [5, 95])]
                 if me else None, "max_e_m": mean([s["max_e"] for s in st]),
-                "flips_per_episode": mean([s["flips"] for s in st]), "flipped_share": mean([s["flips"] > 0 for s in st])}
+                "flips_per_episode": mean([s["flips"] for s in st]), "flipped_share": mean([s["flips"] > 0 for s in st]),
+                "deadband_step_share": db(st), "deadband_step_share_by_slice": {
+                    k: db([r["pbvs"] for r in g if r.get("pbvs") and r["pbvs"]["steps_window"] and r["case_id"] in c])
+                    for k, c in sl.items()}}
         if key[2].startswith("PPCL"):  # controls journal: the latch shares, held a chunk / triggered once
             lt = [r["latch"] for r in g]
             rep["latch"][name] = {"n": len(lt), "chunks_share": mean([x["chunks"] > 0 for x in lt]),
@@ -853,7 +861,8 @@ def selftest_read(split):
         if a.startswith("PPCL"):
             r["latch"] = {"trig": int(pos[c] % 4 == 0), "chunks": int(pos[c] % 10 == 0), "resets": 0}
         if a in LAMS:
-            r["pbvs"] = {"steps_window": 20, "steps_acting": 5, "sum_e": 0.2, "max_e": 0.03, "flips": int(pos[c] % 2)}
+            r["pbvs"] = {"steps_window": 20, "steps_acting": 5 + 5 * (h % 2), "sum_e": 0.2, "max_e": 0.03,  # 12 cm: 10
+                         "flips": int(pos[c] % 2)}
         return r
 
     def world(pct, bump=0.0):
@@ -898,8 +907,9 @@ def selftest_read(split):
     assert list(rep["pbvs_gates"]) == ["V2"] and rep["pbvs_gates"]["V2"]["gate_m"] == FLOOR, rep["pbvs_gates"]
     assert all(sum(v[s]["pairs"] for s in ("6cm", "12cm")) == 300 for v in rep["slices_M1"].values()), rep
     pc = rep["pbvs_counters"][f"{P}/dynamic/PBVS0.3/0"]
-    assert pc == {"n": 300, "window": 300, "acting_share": 0.25, "mean_e_m": 0.01, "mean_e_p5_p95": [0.01, 0.01],
-                  "max_e_m": 0.03, "flips_per_episode": 0.5, "flipped_share": 0.5}, pc
+    assert pc == {"n": 300, "window": 300, "acting_share": 0.3883, "mean_e_m": 0.01, "mean_e_p5_p95": [0.01, 0.01],
+                  "max_e_m": 0.03, "flips_per_episode": 0.5, "flipped_share": 0.5, "deadband_step_share": 0.6117,
+                  "deadband_step_share_by_slice": {"6cm": 0.75, "12cm": 0.5}}, pc
     assert rep["latch"][f"{P}/dynamic/PPCL@glr/0"] == {"n": 300, "chunks_share": 0.1, "trig_share": 0.25}, rep["latch"]
     assert rep["grasp_miss"]["d10"] == {"n": 300, "PBVS0.3": 0.01, "Gauto": 0.011, "PBVS0.3-Gauto": -0.001}, rep
     rt = rep["retention"]
