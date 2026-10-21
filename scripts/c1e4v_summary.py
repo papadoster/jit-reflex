@@ -7,8 +7,9 @@ pbvs_k.json), the forecast (§8), the smoke gate, the controls lines the V lines
 Reuses scripts/c1e4c_summary.py (mlines, lk, select, mp, read_tempo) and scripts/c1e4m_summary.py; pure numpy, the
 LeRobot env; run from the repository root. R = results/c1-e4/controls/pod_C:
     python scripts/c1e4v_summary.py --plan --line L [--band-json R/band.json] [--pbvs-k R/pbvs_k.json]
-        L: vsmoke V0 V1 V2 V3 Nglr V2eps, the runner lines as c1e4c_summary --plan (phase: L in lower case); exit 3 when
-        V2, V3, V2eps need pbvs_k.json, or V2eps band.json, not there yet; V2eps is empty unless band.json's delta > 15 mm
+        L: vsmoke V0 V1 V2 V3d10 V3d20 (V3: both) Nglr V2eps, the runner lines as c1e4c_summary --plan (phase: L in
+        lower case); exit 3 when V2, V3*, V2eps need pbvs_k.json, or V2eps band.json, not there yet; V2eps is empty
+        unless band.json's delta > 15 mm
     python scripts/c1e4v_summary.py --band R/V0_*.jsonl [--out R/band.json]   and band_eps.json beside it when delta >
         15 mm (delta orx.EPS, the rest band.json's); exit 2: V0 incomplete
     python scripts/c1e4v_summary.py --select R/V1_*.jsonl [--out R/pbvs_k.json]   exit 2: V1 incomplete
@@ -50,8 +51,11 @@ OUT = cc.OUT
 LAMS = tuple(vservo.LAMBDAS)  # spec §4: PBVS0.1, PBVS0.3, PBVS1.0
 TIE_L = ("PBVS0.3", "PBVS0.1", "PBVS1.0")  # spec §4: ties within 0.1 mm (c1e4c_summary.TIE_M) go in this order
 NGLR = ("PPCL@glr", "PPC@glr")  # controls journal "сводное решение владельца": the noisy cell, on the same frames
-LINES = ("vsmoke", "V0", "V1", "V2", "V3", "Nglr", "V2eps")  # the vgrid order (V0 and its band before the smoke)
-GATE, CAP = ("V1", "V2", "V3"), 4.0  # spec §8: V3 waits for the owner when these lines' forecast is above $4
+# the vgrid order (V0 and its band before the smoke); V3 runs as one line per d (V3d10, V3d20: owner 2026-10-21, the
+# last line a single cuttable delay); --plan --line V3 gives both
+LINES = ("vsmoke", "V0", "V1", "V2", "V3d10", "V3d20", "Nglr", "V2eps")
+V3D = {"V3d10": 10, "V3d20": 20}
+GATE, CAP = ("V1", "V2", "V3d10", "V3d20"), 4.0  # spec §8: V3 waits for the owner above $4 (the pod: V3_OK=1)
 # spec §3: the scouting models (docs/c1/scouting.md §3: the integrator per axis; ARX one G, B for x and y)
 SCOUT = {"I": {"G": [0.0105, 0.0121], "B": [0.0, 0.0]}, "A": {"G": [0.0025, 0.0025], "B": [0.79, 0.79]}}
 ORDER = ("I", "A", "I*", "A*")  # spec §3 rule 3: the tie order, fewer parameters and no fit on our own data first
@@ -69,12 +73,13 @@ FROZEN = f"C2_{P}_eval300_plus_d0.jsonl"  # line 2's file with them: its first V
 CMODE, CK = {"pi05_lmax": {"mode": "S"}}, {P: {"k": "VS1.0"}}
 # measurement -> (test, V lines it needs); spec §6, the journals' И5 and V2eps
 MEAS = {"Н1": ("pi05, M1, d = 0, 300 pairs: PBVS - Gauto", ("V2",)),
-        "Н2/d10": ("pi05, D, d = 10, 300 pairs: PBVS - Gauto", ("V3",)),
-        "Н2/d20": ("pi05, D, d = 20, 300 pairs: PBVS - Gauto", ("V3",)),
-        "Н2/pool": ("pi05, D, d = 10 and 20, 600 pairs (clusters: the task, both d in it): PBVS - Gauto", ("V3",)),
+        "Н2/d10": ("pi05, D, d = 10, 300 pairs: PBVS - Gauto", ("V3d10",)),
+        "Н2/d20": ("pi05, D, d = 20, 300 pairs: PBVS - Gauto", ("V3d20",)),
+        "Н2/pool": ("pi05, D, the d of pooled_d (10 and 20: 600 pairs; clusters: the task, its d in it): PBVS - Gauto",
+                    ("V3d10", "V3d20")),
         "Н3/d0": ("pi05, M1, d = 0: PBVS - PPCL", ("V2",)),
-        "Н3/d10": ("pi05, D, d = 10: PBVS - PPCL", ("V3",)),
-        "Н3/d20": ("pi05, D, d = 20: PBVS - PPCL", ("V3",)),
+        "Н3/d10": ("pi05, D, d = 10: PBVS - PPCL", ("V3d10",)),
+        "Н3/d20": ("pi05, D, d = 20: PBVS - PPCL", ("V3d20",)),
         "И5": ("pi05, M1, d = 0, glr eyes, 300 pairs: PPCL@glr - PPC@glr", ("Nglr",)),
         "Н1/eps": ("pi05, M1, d = 0, the servo at our 5 mm gate (V2eps): PBVS - Gauto", ("V2eps",)),
         "PBVSeps-PBVS": ("pi05, M1, d = 0: PBVS at the 5 mm gate - PBVS at band.json's gate", ("V2", "V2eps"))}
@@ -105,8 +110,9 @@ def plan(line, pk=None, band=None, split=None):
     format plus "eps" (V2eps's records differ from V2's only in conf["pbvs"]["delta"]: vk tells them apart). V0: Base
     only on the 60 calibration cases, full episodes (no --base-prefix: the Base never moved), --log-traj; V1: the three
     PBVS arms there; vsmoke: PBVS0.3 on the first 6 Plus cases of eval300; V2, Nglr, V2eps (only when band.json's delta
-    > 15 mm): M1, eval300, d 0; V3: d 10 and 20. V2, Nglr, V2eps run line 2's cases, sources, order and so its groups and
-    Base batches (line 2's first VS_STOP Plus cases, a multiple of cc.NE, then the rest of Plus and PRO); V3 line 3's.
+    > 15 mm): M1, eval300, d 0; V3d10, V3d20: d 10, d 20 (V3: both). V2, Nglr, V2eps run line 2's cases, sources,
+    order and so its groups and Base batches (line 2's first VS_STOP Plus cases, a multiple of cc.NE, then the rest of
+    Plus and PRO); V3d10, V3d20 line 3's of their d.
     V2's first VS_STOP Plus cases are the frozen VS1.0 file's (asserted): the G(k = 1.0) pair."""
     split = split or maxwrap.load_split(cs.SPLIT)
     ph, bj = line.lower(), f" --band {OUT}/band.json"
@@ -124,8 +130,9 @@ def plan(line, pk=None, band=None, split=None):
         return ext(cc.mlines(ph, "Nglr", P, "eval300", NGLR, split), "")
     arm = need(pk, "pbvs_k.json", "arm")
     assert arm in LAMS, arm
-    if line == "V3":
-        return ext([x for d in (10, 20) for x in cc.mlines(ph, "V3", P, "eval300", (arm,), split, d)], bj)
+    if line in ("V3", *V3D):  # V3d10 / V3d20: one d each (tag V3: the same --out files), V3 both
+        return ext([x for d in (10, 20) if line in ("V3", f"V3d{d}")
+                    for x in cc.mlines(ph, "V3", P, "eval300", (arm,), split, d)], bj)
     assert line in ("V2", "V2eps"), line
     if line == "V2eps" and not need(band, "band.json", "delta") > FLAG:
         return []
@@ -357,10 +364,10 @@ def read(new, ctrl, saved, mode, k, band, pk, names, split):
         recomputed = {"band": again(band_of, "V0", band), "pbvs_k": again(select, "V1", pk)}
     epsb = band | {"delta": EPS}  # band_eps.json
     off_band = Counter(want[x] for x, r in used.items() if r["conf"].get("pbvs") != (
-        epsb if want[x] == "V2eps" else band if want[x] in ("V1", "V2", "V3") else None))
+        epsb if want[x] == "V2eps" else band if want[x] in ("V1", "V2", *V3D) else None))
     cbase = {(r["case_id"], r["d"]): r for x, r in cused.items() if r["kind"] == "base"}
     em = defaultdict(lambda: [0, 0])
-    for r in of("V2", "V3", "Nglr", "V2eps"):  # spec §5: the new Base's e is line 2's / 3's, >= 98 % per cell
+    for r in of("V2", *V3D, "Nglr", "V2eps"):  # spec §5: the new Base's e is line 2's / 3's, >= 98 % per cell
         if r["kind"] == "base":
             c = f"{want[vk(r, band)]}/d{r['d']}"
             em[c][0] += cbase.get((r["case_id"], r["d"]), {}).get("e", "-") == r["e"]
@@ -387,7 +394,7 @@ def read(new, ctrl, saved, mode, k, band, pk, names, split):
     # the index: V2eps's arm as arm/eps; part 2's "none" beside the pod's arms, its other arms apart (part 2's PPC@glr
     # is not the pod's); line 2's VS1.0 = G(k = 1.0) only in its own report line (pairs), never in the index
     lab = lambda r: r | {"arm": f"{r['arm']}/eps"} if want[vk(r, band)] == "V2eps" else r  # noqa: E731
-    pod = ([lab(r) for r in of("V2", "V3", "Nglr", "V2eps") if r["kind"] == "dynamic"]
+    pod = ([lab(r) for r in of("V2", *V3D, "Nglr", "V2eps") if r["kind"] == "dynamic"]
            + [r for r in cused.values() if r["kind"] == "dynamic" and r["arm"] != "VS1.0"])
     mi, m2 = cs.mindex(pod + [r for r in p2 if r["arm"] == "none"]), cs.mindex(p2)
     one = {r["case_id"]: r for r in saved + list(cused.values()) if r["case_id"] in e300}
@@ -405,8 +412,11 @@ def read(new, ctrl, saved, mode, k, band, pk, names, split):
             continue  # the band is within 15 mm: no V2eps (journal)
         ps, bad = [v for p, _ in prs[n] for v in p.values()], sum(b for _, b in prs[n])
         meas[n] = {"test": test, **(e2.rnd(e2.diff_pp(ps)) or dict.fromkeys(cc.EST)), "invalid_pairs": bad}
-        if miss := [L for L in Ls if not comp[L]["run"]]:
-            meas[n] |= dict.fromkeys(cc.EST) | {"lines_not_run": miss}
+        miss = [L for L in Ls if not comp[L]["run"]]
+        if n == "Н2/pool":  # the d that ran, named; a d not run is listed, never pooled in silence
+            meas[n]["pooled_d"] = [V3D[L] for L in Ls if L not in miss]
+        if miss:
+            meas[n] |= {"lines_not_run": miss} | (dict.fromkeys(cc.EST) if n != "Н2/pool" or miss == list(Ls) else {})
         inv[n] = bad, len(ps) + bad
     checks["invalid_pairs"] = {n: {"pairs": t, "invalid": b, "pass": b <= 0.02 * t + TOL} for n, (b, t) in inv.items()}
     if not all(v["pass"] for v in checks["invalid_pairs"].values()):
@@ -672,6 +682,12 @@ def selftest():
     assert [len(ids(ln, split)) for ln in c2] == [cc.VS_STOP["plus"], 187 - cc.VS_STOP["plus"], 113], c2
     assert groups(l2, split) == groups(c2, split) == groups(ng, split) and len(groups(c2, split)) == 32 + 19
     assert groups(l3, split) == groups(c3, split) and len(groups(l3, split)) == 2 * 51
+    for L, d in V3D.items():  # one d each (owner 2026-10-21): line 3's cases, order and Base groups of that d
+        ld = plan(L, pk, split=split)
+        assert [(ln["id"], ln["args"], ln["keys"]) for ln in ld] == [
+            (ln["id"], ln["args"], ln["keys"]) for ln in l3 if f"--d {d} " in ln["args"]] and len(ld) == 2, ld
+        assert {ln["phase"] for ln in ld} == {L.lower()} and groups(ld, split) == {
+            g for g in groups(c3, split) if g[0] == d} and len(groups(ld, split)) == 51
     le = plan("V2eps", pk, bd, split)
     assert [ln["id"] for ln in le] == ["V2eps_pi05_eval300_plus_d0", "V2eps_pi05_eval300_pro_d0"] and all(
         ln["eps"] and ln["args"].endswith(f"--band {OUT}/band_eps.json") for ln in le) and groups(le, split) == groups(
@@ -685,12 +701,13 @@ def selftest():
             raise RuntimeError("V2 off the frozen file's cases was planned")
         except AssertionError:
             pass
-    for L, a in (("V2", (None, bd)), ("V3", (None, None)), ("V2eps", (None, bd)), ("V2eps", (pk, None))):
+    for L, a in (("V2", (None, bd)), ("V3", (None, None)), ("V3d10", (None, bd)),
+                 ("V3d20", (None, bd)), ("V2eps", (None, bd)), ("V2eps", (pk, None))):
         cc.exits(lambda: plan(L, *a, split), 3)
     every = [ln for L in LINES for ln in plan(L, pk, bd, split)]
     assert len({ln["id"] for ln in every}) == len(every) and all(
         ln["runner"] == "c1e4m" and f"--source {ln['source']} " in ln["args"] and ln["phase"] in (
-            "vsmoke", "v0", "v1", "v2", "v3", "nglr", "v2eps") for ln in every)
+            "vsmoke", "v0", "v1", "v2", "v3d10", "v3d20", "nglr", "v2eps") for ln in every)
     assert all(("--band" in ln["args"]) == any(a in LAMS for a in ln["arms"]) and "--kbar" not in ln["args"]
                for ln in every)
 
@@ -698,10 +715,11 @@ def selftest():
         tf = Path(tmp) / "tempo.txt"
         tf.write_text("tempo (s/episode): lmax_pi05=36 lmax_oftplus=1 lmax_oft=1 bench_pi05=1\n")
         t36 = cc.read_tempo(tf)
-    # 36 s per record: hours = records / 100. V1: 3 arms + Base on 60; V2: PBVS + Base on 300; V3 twice that; Nglr:
+    # 36 s per record: hours = records / 100. V1: 3 arms + Base on 60; V2, V3d10, V3d20: PBVS + Base on 300; Nglr:
     # its PPCL@glr records weigh 2.5 (300 x 2.5 + 600 = 1350 -> 13.5 h); V2eps: none (the band within 15 mm)
     f = forecast(t36, pk, {"delta": 0.01}, split=split)
-    assert [f["lines"][L]["records"] for L in LINES] == [12, 60, 240, 600, 1200, 900, 0], f["lines"]
+    assert [f["lines"][L]["records"] for L in LINES] == [12, 60, 240, 600, 600, 600, 900, 0], f["lines"]
+    assert [f["lines"][L]["hours"] for L in ("V3d10", "V3d20", "Nglr", "V2eps")] == [6.0, 6.0, 13.5, 0], f["lines"]
     assert f["gate"] == {"lines": GATE, "cap_usd": CAP, "hours": 20.4, "usd": round(20.4 * cc.RATE, 2),
                          "left_hours": 20.4, "left_usd": f["gate"]["usd"], "v3_waits": True}, f["gate"]
     assert f["lines"]["Nglr"]["hours"] == 13.5 and f["lines"]["Nglr"]["usd"] == round(13.5 * cc.RATE, 2), f["lines"]
@@ -837,13 +855,14 @@ def selftest_read(split):
     assert ch["complete"]["V2eps"] == {"expected": 0, "missing": 0, "run": False, "pass": True}, ch["complete"]
     assert ch["complete"]["Nglr"]["expected"] == 900 and ch["complete"]["V0"]["expected"] == 60, ch["complete"]
     assert ch["controls_complete"]["2"] == {"expected": 108 * 4 + 192 * 3, "missing": 0, "pass": True}, ch
-    assert set(ch["e_match"]) == {"V2/d0", "V3/d10", "V3/d20", "Nglr/d0"} and ch["e_match"]["V3/d20"] == {
+    assert set(ch["e_match"]) == {"V2/d0", "V3d10/d10", "V3d20/d20", "Nglr/d0"} and ch["e_match"]["V3d20/d20"] == {
         "equal": 300, "total": 300, "pass": True}, ch["e_match"]
     # the measurements: estimates and 95% CIs, no verdict, no threshold
     assert list(ms) == list(MEAS)[:8] and all(not {"pass", "outcome"} & set(v) and not re.search("[<>≤≥]", v["test"])
                                               for v in ms.values()), ms
     want = {"Н1": 5, "Н2/d10": 10, "Н2/d20": -10, "Н2/pool": 0, "Н3/d0": 10, "Н3/d10": 15, "Н3/d20": -5, "И5": 3}
     assert {n: ms[n]["diff_pp"] for n in want} == want and ms["Н2/pool"]["pairs"] == 600, ms
+    assert ms["Н2/pool"]["pooled_d"] == [10, 20] and not [n for n in ms if "lines_not_run" in ms[n]], ms
     assert all(ms[n]["pairs"] == 300 and ms[n]["invalid_pairs"] == 0 for n in want if n != "Н2/pool"), ms
     assert ms["Н2/pool"]["clusters"] == ms["Н2/d10"]["clusters"] and ms["Н1"]["lo2.5"] <= 5 <= ms["Н1"]["hi97.5"]
     # the report: PBVS - none through the pod, the gate, the slices, counters, grasp miss, retention
@@ -927,8 +946,19 @@ def selftest_read(split):
     # V3 held for the owner (spec §8), so Nglr too: their measurements are not read, the rest are
     r = rd([x for x in new if not (x["case_id"] in e300 and (x["d"] > 0 or "PPCL@glr" in x["conf"]["arms"]))])
     ms = r["measurements"]
-    assert r["checks"]["pass"] and not r["checks"]["complete"]["V3"]["run"] and ms["Н1"]["diff_pp"] == 5, r["checks"]
+    assert r["checks"]["pass"] and not r["checks"]["complete"]["V3d10"]["run"] and ms["Н1"]["diff_pp"] == 5, r["checks"]
     assert all(ms[n]["diff_pp"] is None and ms[n]["lines_not_run"] for n in ("Н2/pool", "Н3/d20", "И5")), ms
+    assert ms["Н2/pool"]["pooled_d"] == [] and ms["Н2/pool"]["lines_not_run"] == ["V3d10", "V3d20"], ms["Н2/pool"]
+    # one d of V3 not run (V3d20, the last line, cut): Н2 per d for the d that ran, the pool over it alone and named
+    # (pooled_d), the missing line listed; nothing pooled in silence, no crash
+    r = rd([x for x in new if not (x["case_id"] in e300 and x["d"] == 20)])
+    ms = r["measurements"]
+    assert r["checks"]["pass"] and r["checks"]["complete"]["V3d10"]["run"] and not r["checks"]["complete"]["V3d20"][
+        "run"] and set(r["checks"]["e_match"]) == {"V2/d0", "V3d10/d10", "Nglr/d0"}, r["checks"]
+    assert ms["Н2/d10"]["diff_pp"] == 10 and ms["Н3/d10"]["diff_pp"] == 15 and ms["Н2/pool"] == ms["Н2/d10"] | {
+        "test": MEAS["Н2/pool"][0], "pooled_d": [10], "lines_not_run": ["V3d20"]}, ms["Н2/pool"]
+    assert all(ms[n]["diff_pp"] is None and ms[n]["lines_not_run"] == ["V3d20"] for n in ("Н2/d20", "Н3/d20")), ms
+    assert r["report"]["grasp_miss"]["d20"]["n"] == 0 and r["report"]["grasp_miss"]["d10"]["n"] == 300, r["report"]
     # a band above 15 mm: V2eps (the servo at our 5 mm gate) runs, Н1 at that gate and PBVSeps - PBVS are measured,
     # both PBVS lines side by side with their gates; its records differ from V2's only in conf["pbvs"]["delta"]
     new, ctrl, saved, bd, pk = world(pct, bump=0.02)
@@ -958,7 +988,7 @@ if __name__ == "__main__":
     g.add_argument("--controls-check", nargs="+", metavar="JSONL", help="controls lines 2, 3 complete: exit 0, or 3")
     g.add_argument("--selftest", action="store_true")
     ap.add_argument("read", nargs="*", metavar="[read] JSONL", help="R/grid_all_V.jsonl: checks, measurements, report")
-    ap.add_argument("--line", choices=LINES)
+    ap.add_argument("--line", choices=LINES + ("V3",))
     ap.add_argument("--band-json", default=f"{OUT}/band.json", help="band.json (--plan, --forecast, the reading)")
     ap.add_argument("--pbvs-k", default=f"{OUT}/pbvs_k.json", help="pbvs_k.json (--plan, --forecast, the reading)")
     ap.add_argument("--mode", default=f"{OUT}/mode.json", help="the controls' mode.json")

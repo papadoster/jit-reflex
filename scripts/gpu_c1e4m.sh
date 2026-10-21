@@ -61,15 +61,16 @@
 #               that do not fit wait for the owner; CLINES in increasing order, 2, 3, 6, 7 with 1 (k_π), 5 with 1 and 4.
 #               A later cgrid with more lines resumes (the runners skip done cases)
 #   ctail       TAIL=1, after cgrid and the owner's go: line 8 (OFT), grid_all_C.jsonl again
-#   vgrid       [VLINES="V3 Nglr V2eps"] PBVS (docs/superpowers/specs/2026-10-20-c1-e4-pbvs-design.md) and the controls
+#   vgrid       [VLINES="V3d10 V3d20 Nglr V2eps"] PBVS (docs/superpowers/specs/2026-10-20-c1-e4-pbvs-design.md) and the controls
 #               journal's noisy cell, after a finished cgrid (grid_all_C.jsonl newer than every C*.jsonl; refused while a
 #               cgrid / ctail stage or a runner is live, or before controls lines 2 and 3 are complete and the frozen
 #               file's Base cases are V2's first 108 Plus: V2 / V3 / Nglr / V2eps pair with them). The platform, the C1-E4
 #               tests with test_vservo and test_c1e4v_summary, both summaries' selftests, then its own code record
 #               $O/CODE.v (CODE_PATHS + the PBVS summary; $O/CODE stays the controls'). Then V0 -> band.json -> vsmoke
 #               (PBVS0.3 on 6 cases; its Base e must be line 2's) -> the forecast at the controls' tempo -> V1 ->
-#               pbvs_k.json -> V2 -> VLINES (a subset of V3 Nglr V2eps in this order, default all; V2eps runs only when
-#               band.json's delta > 15 mm), each by scripts/c1e4v_summary.py --plan --line L. A forecast of V1 + V2 + V3
+#               pbvs_k.json -> V2 -> VLINES (any of V3d10 V3d20 Nglr V2eps, each once, in the order given; V3 = V3d10
+#               V3d20; default all, in this order; V2eps runs only when band.json's delta > 15 mm), each by
+#               scripts/c1e4v_summary.py --plan --line L (V3d10, V3d20: one d of V3 each). A forecast of V1 + V2 + V3
 #               above $4 holds VLINES and the reading for the owner (a clean exit; after the ok: V3_OK=1, each line alone
 #               with VLINES). band.json / pbvs_k.json are recomputed only when a V0 / V1 file is newer. Then
 #               grid_all_V.jsonl and the reading (summary_V.json). A rerun resumes. Note: CODE_PATHS holds src, so once
@@ -858,13 +859,15 @@ json.dump(more[:$K], open('$O/bench_more.json', 'w'))" || exit 1  # a list: the 
     x sh -c "cat $O/C[1-8]*.jsonl > $O/grid_all_C.jsonl"
     ;;
   vgrid)  # PBVS spec §3-§8 and the journals: V0, band, vsmoke, forecast, V1, select, V2, VLINES, the reading
-    VLINES=${VLINES:-V3 Nglr V2eps}  # the lines after V2, in this order: a held line can be released alone
-    p=0
-    for L in $VLINES; do
-      case $L in V3) i=1 ;; Nglr) i=2 ;; V2eps) i=3 ;; *) i=0 ;; esac
-      [ $i -gt $p ] || fail "VLINES='$VLINES': a subset of V3 Nglr V2eps, in this order"
-      p=$i
+    # the lines after V2, run in the order given (owner 2026-10-21: V3 one line per d, so the last line is one d and
+    # cuttable): known tokens only, V3 = V3d10 V3d20, none twice after that
+    VL=
+    for L in ${VLINES:-V3d10 V3d20 Nglr V2eps}; do
+      case $L in V3) VL+=" V3d10 V3d20" ;; V3d10 | V3d20 | Nglr | V2eps) VL+=" $L" ;;
+        *) fail "VLINES='$VLINES': $L is not a line (V3d10 V3d20 Nglr V2eps, V3 = V3d10 V3d20)" ;; esac
     done
+    [ -z "$(tr ' ' '\n' <<< "$VL" | sort | uniq -d)" ] || fail "VLINES='$VLINES': a line twice (V3 = V3d10 V3d20)"
+    VLINES=${VL# }
     # a finished cgrid (lines 2, 3, 7 and the C5 pass: grid_all_C.jsonl is written last) and no stage or runner live (one
     # runner on the GPU; the brackets keep pgrep from matching its own command line)
     dry || { [ -f $O/grid_all_C.jsonl ] && [ -z "$(find $O -maxdepth 1 -name 'C*.jsonl' -newer $O/grid_all_C.jsonl)" ]; } \
