@@ -7,6 +7,7 @@ pbvs_k.json), the forecast (§8), the smoke gate, the controls lines the V lines
 Reuses scripts/c1e4c_summary.py (mlines, lk, select, mp, read_tempo) and scripts/c1e4m_summary.py; pure numpy, the
 LeRobot env; run from the repository root. R = results/c1-e4/controls/pod_C:
     python scripts/c1e4v_summary.py --plan --line L [--band-json R/band.json] [--pbvs-k R/pbvs_k.json]
+            [--nglr-arms PPCL@glr,PPC@glr | PPCL@glr]   (Nglr's arms, here, in --forecast and the reading: NGLR_ARMS)
         L: vsmoke V0 V1 V2 V3d10 V3d20 (V3: both) Nglr V2eps, the runner lines as c1e4c_summary --plan (phase: L in
         lower case); exit 3 when V2, V3*, V2eps need pbvs_k.json, or V2eps band.json, not there yet; V2eps is empty
         unless band.json's delta > 15 mm
@@ -51,6 +52,10 @@ OUT = cc.OUT
 LAMS = tuple(vservo.LAMBDAS)  # spec §4: PBVS0.1, PBVS0.3, PBVS1.0
 TIE_L = ("PBVS0.3", "PBVS0.1", "PBVS1.0")  # spec §4: ties within 0.1 mm (c1e4c_summary.TIE_M) go in this order
 NGLR = ("PPCL@glr", "PPC@glr")  # controls journal "сводное решение владельца": the noisy cell, on the same frames
+# --nglr-arms (vgrid: NGLR_ARMS, owner 2026-10-21): the full cell (default) or the cheap one, PPCL@glr alone on the pod
+# and PPC@glr part 2's (pod_A M1M2_pi05_eval300_*_d0), paired one to one by case and seed through the pod (mode С)
+NGLR_ARMS = {",".join(NGLR): NGLR, NGLR[0]: NGLR[:1]}
+VIA_C = "через под (режим С)"
 # the vgrid order (V0 and its band before the smoke); V3 runs as one line per d (V3d10, V3d20: owner 2026-10-21, the
 # last line a single cuttable delay); --plan --line V3 gives both
 LINES = ("vsmoke", "V0", "V1", "V2", "V3d10", "V3d20", "Nglr", "V2eps")
@@ -105,7 +110,7 @@ def groups(lns, split):
             for ln in lns for c in [ids(ln, split)] for i in range(0, len(c), cc.NE)}
 
 
-def plan(line, pk=None, band=None, split=None):
+def plan(line, pk=None, band=None, split=None, nglr=NGLR):
     """spec §3-§5 and the journal: the runner lines of one line (LINES), phase line.lower(), in c1e4c_summary.mlines's
     format plus "eps" (V2eps's records differ from V2's only in conf["pbvs"]["delta"]: vk tells them apart). V0: Base
     only on the 60 calibration cases, full episodes (no --base-prefix: the Base never moved), --log-traj; V1: the three
@@ -113,7 +118,8 @@ def plan(line, pk=None, band=None, split=None):
     > 15 mm): M1, eval300, d 0; V3d10, V3d20: d 10, d 20 (V3: both). V2, Nglr, V2eps run line 2's cases, sources,
     order and so its groups and Base batches (line 2's first VS_STOP Plus cases, a multiple of cc.NE, then the rest of
     Plus and PRO); V3d10, V3d20 line 3's of their d.
-    V2's first VS_STOP Plus cases are the frozen VS1.0 file's (asserted): the G(k = 1.0) pair."""
+    V2's first VS_STOP Plus cases are the frozen VS1.0 file's (asserted): the G(k = 1.0) pair. nglr: Nglr's arms
+    (NGLR_ARMS; its cases, order and Base groups either way)."""
     split = split or maxwrap.load_split(cs.SPLIT)
     ph, bj = line.lower(), f" --band {OUT}/band.json"
     ext = lambda lns, s, eps=False: [ln | {"args": ln["args"] + s, "eps": eps} for ln in lns]  # noqa: E731
@@ -127,7 +133,7 @@ def plan(line, pk=None, band=None, split=None):
                        cases=cs.sources(run.set_ids(split, "eval300"))["plus"][:6])[0]
         return ext([ln | {"id": "Vsmoke_pi05"}], bj)
     if line == "Nglr":
-        return ext(cc.mlines(ph, "Nglr", P, "eval300", NGLR, split), "")
+        return ext(cc.mlines(ph, "Nglr", P, "eval300", nglr, split), "")
     arm = need(pk, "pbvs_k.json", "arm")
     assert arm in LAMS, arm
     if line in ("V3", *V3D):  # V3d10 / V3d20: one d each (tag V3: the same --out files), V3 both
@@ -261,18 +267,18 @@ def select(recs, split):
 
 # ------------------------------------------------------------------ the forecast, the smoke, the controls lines
 
-def forecast(tempo, pk=None, band=None, done=frozenset(), split=None):
+def forecast(tempo, pk=None, band=None, done=frozenset(), split=None, nglr=NGLR):
     """spec §8 and the journal: per line the episodes, records (cut Bases too), hours at the pod's seconds per record
     (lmax_pi05: c1e4c_summary.forecast's convention), $ at cc.RATE and what is left (vk keys not in done). Without
     pbvs_k.json a placeholder arm (the records do not depend on lambda); without band.json V2eps counts (the costlier
-    case). A PPCL@glr record weighs WEIGHT (the latch's worst-case call rate). The gate: GATE's cost above CAP -> V3,
-    then Nglr and V2eps, wait."""
+    case). A PPCL@glr record weighs WEIGHT (the latch's worst-case call rate); nglr: Nglr's arms (NGLR_ARMS). The
+    gate: GATE's cost above CAP -> V3, then Nglr and V2eps, wait."""
     split = split or maxwrap.load_split(cs.SPLIT)
     t, h = tempo["lmax_pi05"] / 3600, {}
     w = lambda ks: t * sum(WEIGHT.get(x[4], 1.0) for x in ks)  # noqa: E731  (x[4]: the arm)
     rows = {}
     for L in LINES:
-        lns = plan(L, pk or {"arm": "PBVS0.3"}, band or {"delta": 1.0}, split)
+        lns = plan(L, pk or {"arm": "PBVS0.3"}, band or {"delta": 1.0}, split, nglr)
         keys = lkeys(lns)
         h[L] = w(keys), w(keys - done)
         rows[L] = {"episodes": sum(map(cc.n_of, lns)), "records": len(keys)}
@@ -283,7 +289,8 @@ def forecast(tempo, pk=None, band=None, done=frozenset(), split=None):
     return {"usd_per_h": cc.RATE, "tempo_s": tempo["lmax_pi05"], "excludes": "the pod's tests and selftests",
             "weights": WEIGHT | {"why": "Nglr: PPCL@glr's worst case, a call at t_obs + 4 at the latest while latched "
                                         "(PPCL_K_CAP) against s = 10, about 2.5x PPC@glr's calls"},
-            "using": {"arm": (pk or {}).get("arm"), "band_delta": (band or {}).get("delta")},
+            "using": {"arm": (pk or {}).get("arm"), "band_delta": (band or {}).get("delta"),
+                      "nglr_arms": list(nglr)},
             "lines": {L: v | out((L,)) for L, v in rows.items()}, "total": out(LINES),
             "gate": {"lines": GATE, "cap_usd": CAP, **gate, "v3_waits": cc.RATE * hs(GATE, 0) > CAP}}
 
@@ -332,16 +339,17 @@ def controls(recs, mode, k, split):
 
 # ------------------------------------------------------------------ the reading (spec §5, §6)
 
-def read(new, ctrl, saved, mode, k, band, pk, names, split):
+def read(new, ctrl, saved, mode, k, band, pk, names, split, nglr=NGLR):
     """spec §5 checks before reading, then the §6 measurements (estimate and 95 % CI, no threshold) and the report.
     new: grid_all_V.jsonl (V0-V3, Nglr, V2eps); ctrl: controls lines 2 and 3 (Gauto, PPCL; line 2's frozen VS1.0 =
     G(k = 1.0), read for its one report line only); saved: part 2's π LIBERO-MAX records ("none", "через под", and
-    its G, PPC with glr for the retention). Records off the plan are counted, never read."""
+    its G, PPC with glr for the retention). Records off the plan are counted, never read. nglr: Nglr's arms on the
+    pod; without PPC@glr (the cheap cell) И5's PPC@glr is part 2's through the pod (VIA_C), never the pod's."""
     need(pk, "pbvs_k.json", "arm")
     need(band, "band.json", "delta")
     arm, e300 = pk["arm"], set(run.set_ids(split, "eval300"))
     by = unique(new, lambda r: vk(r, band))
-    lines = {L: plan(L, pk, band, split) for L in LINES[1:]}  # the smoke is never read
+    lines = {L: plan(L, pk, band, split, nglr) for L in LINES[1:]}  # the smoke is never read
     want = {x: L for L, lns in lines.items() for x in lkeys(lns)}
     used = {x: r for x, r in by.items() if x in want and not r.get("skipped_reason")}
     of = lambda *Ls: [r for x, r in used.items() if want[x] in Ls]  # noqa: E731
@@ -406,6 +414,19 @@ def read(new, ctrl, saved, mode, k, band, pk, names, split):
            "Н2/pool": [M(arm, "Gauto", 10), M(arm, "Gauto", 20)], "Н3/d0": [M(arm, "PPCL")],
            "Н3/d10": [M(arm, "PPCL", 10)], "Н3/d20": [M(arm, "PPCL", 20)], "И5": [M(*NGLR)],
            "Н1/eps": [M(ae, "Gauto")], "PBVSeps-PBVS": [M(ae, arm)]}
+    d0 = lambda rs, a=None: {r["case_id"]: r for r in rs if r["d"] == 0 and (  # noqa: E731
+        r["kind"] == "base" if a is None else r["kind"] == "dynamic" and r["arm"] == a)}
+    ep = {"V2": (d0(of("V2"), arm), d0(of("V2"))),
+          "frozen": (d0(cused.values(), "VS1.0"), d0(cused.values())),
+          "Nglr": ({a: d0(of("Nglr"), a) for a in NGLR}, d0(of("Nglr"))),
+          "p2": ({a: d0(p2, a) for a in ("none", "G@glr", "PPC@glr")},
+                 d0([r for r in saved if r["case_id"] in e300]))}
+    # the cheap cell: PPCL@glr - part 2's PPC@glr, one pair per case and seed as G@glr's; its drops count as invalid
+    # pairs, the missing ones aside (Nglr's completeness covers the pod's side)
+    if "PPC@glr" not in nglr:
+        x, drop = pairs(ep["Nglr"][0]["PPCL@glr"], ep["p2"][0]["PPC@glr"], ep["Nglr"][1], ep["p2"][1], clu,
+                        sorted(e300))
+        prs["И5"] = [({c: (cl, a, b) for c, cl, a, b in x}, sum(v for w, v in drop.items() if w != "missing"))]
     meas, inv = {}, {}
     for n, (test, Ls) in MEAS.items():
         if n in ("Н1/eps", "PBVSeps-PBVS") and not lines["V2eps"]:
@@ -417,21 +438,17 @@ def read(new, ctrl, saved, mode, k, band, pk, names, split):
             meas[n]["pooled_d"] = [V3D[L] for L in Ls if L not in miss]
         if miss:
             meas[n] |= {"lines_not_run": miss} | (dict.fromkeys(cc.EST) if n != "Н2/pool" or miss == list(Ls) else {})
+        if n == "И5" and "PPC@glr" not in nglr:  # the source named, the drops by reason
+            meas[n] |= {"test": test + " of part 2, one pair per case and seed", "drops": drop, VIA_C: True}
         inv[n] = bad, len(ps) + bad
     checks["invalid_pairs"] = {n: {"pairs": t, "invalid": b, "pass": b <= 0.02 * t + TOL} for n, (b, t) in inv.items()}
     if not all(v["pass"] for v in checks["invalid_pairs"].values()):
         checks["pass"] = False
         return {"checks": checks}
-    d0 = lambda rs, a=None: {r["case_id"]: r for r in rs if r["d"] == 0 and (  # noqa: E731
-        r["kind"] == "base" if a is None else r["kind"] == "dynamic" and r["arm"] == a)}
-    ep = {"V2": (d0(of("V2"), arm), d0(of("V2"))),
-          "frozen": (d0(cused.values(), "VS1.0"), d0(cused.values())),
-          "Nglr": ({a: d0(of("Nglr"), a) for a in NGLR}, d0(of("Nglr"))),
-          "p2": ({a: d0(p2, a) for a in ("none", "G@glr")}, d0([r for r in saved if r["case_id"] in e300]))}
     gpu = sorted({str(r["conf"].get("gpu")) for r in list(used.values()) + list(cused.values())})
     return {"checks": checks, "measurements": meas,
             "report": report(mi, m2, M, clu, one, e300, arm, ae if lines["V2eps"] else None, mode, band, pk, ep, gpu,
-                             checks)}
+                             checks, nglr)}
 
 
 def pairs(x, y, xb, yb, clu, cases):
@@ -462,12 +479,13 @@ def est(prs):
     return e2.rnd(e2.diff_pp([p[1:] for p in prs])) or dict.fromkeys(cc.EST)
 
 
-def report(mi, m2, M, clu, one, e300, arm, ae, mode, band, pk, ep, gpu, checks):
+def report(mi, m2, M, clu, one, e300, arm, ae, mode, band, pk, ep, gpu, checks, nglr=NGLR):
     """spec §6 "только отчёт" and the journals: PBVS - none per cell ("через под" in mode С); the two PBVS lines side
     by side with their gates (band.json's delta; V2eps at our 5 mm); the 6 / 12 cm slices on M1; PBVS - G(k = 1.0) on
     line 2's frozen Plus cases (pairs); brain calls, the PBVS counters, the latch shares; grasp miss PBVS against
     Gauto; the noisy cell's one table (success, calls per episode = calls_sched + calls_trig, latched share; G@glr and
-    "none" of part 2 through the pod) with PPCL@glr - G@glr and its calls difference under it, and the retention
+    "none" of part 2 through the pod; the cheap cell's PPC@glr part 2's too) with PPCL@glr - G@glr and its calls
+    difference under it, and the retention
     (PPCL@glr - none against PPCL - none; part 2's G and PPC beside it); band.json and pbvs_k.json."""
     mean = lambda v: round(float(np.mean(v)), 4) if len(v) else None  # noqa: E731
     med = lambda v: round(float(np.median(v)), 4) if len(v) else None  # noqa: E731
@@ -521,7 +539,8 @@ def report(mi, m2, M, clu, one, e300, arm, ae, mode, band, pk, ep, gpu, checks):
         {"latched_share": mean([r["latch"]["chunks"] > 0 for r in rs])} if latch else {})
     tag = " (part 2, через под)" if via["через под"] else " (part 2)"
     rep["nglr"]["table"] = {"PPCL@glr": row(list(nd["PPCL@glr"].values()), True),
-                            "PPC@glr (this pod)": row(list(nd["PPC@glr"].values())),
+                            **({"PPC@glr (this pod)": row(list(nd["PPC@glr"].values()))} if "PPC@glr" in nglr else
+                               {f"PPC@glr{tag}": row(list(pd["PPC@glr"].values()))}),
                             f"G@glr{tag}": row(list(pd["G@glr"].values())), f"none{tag}": row(list(pd["none"].values())),
                             "Base (this pod, cut at the event)": {
                                 k: v for k, v in row(list(nb.values())).items() if k != "success_pct"}}
@@ -676,6 +695,12 @@ def selftest():
     assert [(ln["id"], cc.n_of(ln)) for ln in ng] == [("Nglr_pi05_eval300_plus_d0", 374),
                                                       ("Nglr_pi05_eval300_pro_d0", 226)], ng
     assert ng[0]["args"] == "--brain pi05 --source plus --set eval300 --arms=PPCL@glr,PPC@glr --d 0 --base-prefix"
+    nc = plan("Nglr", split=split, nglr=NGLR_ARMS["PPCL@glr"])  # the cheap cell: PPCL@glr alone, the same cases
+    assert [(ln["id"], ln["args"], ln["keys"]) for ln in nc] == [
+        (ln["id"], ln["args"].replace("PPCL@glr,PPC@glr", "PPCL@glr"), {x for x in ln["keys"] if x[4] != "PPC@glr"})
+        for ln in ng] and [cc.n_of(ln) for ln in nc] == [187, 113] and groups(nc, split) == groups(ng, split), nc
+    assert plan("Nglr", split=split, nglr=NGLR_ARMS["PPCL@glr,PPC@glr"]) == ng and set(NGLR_ARMS) == {
+        "PPCL@glr,PPC@glr", "PPCL@glr"}
     # line 2's Base batches (its first 108 Plus cases with VS, then the rest, then PRO) are V2's, Nglr's and V2eps's;
     # line 3's are V3's
     c2, c3 = cc.plan("2", CMODE, CK, split), cc.plan("3", CMODE, CK, split)
@@ -724,6 +749,9 @@ def selftest():
                          "left_hours": 20.4, "left_usd": f["gate"]["usd"], "v3_waits": True}, f["gate"]
     assert f["lines"]["Nglr"]["hours"] == 13.5 and f["lines"]["Nglr"]["usd"] == round(13.5 * cc.RATE, 2), f["lines"]
     assert f["total"]["hours"] == 34.62 and f["weights"]["PPCL@glr"] == 2.5 and "PPCL_K_CAP" in f["weights"]["why"]
+    fc = forecast(t36, pk, {"delta": 0.01}, split=split, nglr=NGLR_ARMS["PPCL@glr"])  # Base + PPCL@glr at 2.5: 10.5 h
+    assert fc["lines"]["Nglr"]["records"] == 600 and fc["lines"]["Nglr"]["hours"] == 10.5 and fc["total"][
+        "hours"] == 31.62 and fc["gate"] == f["gate"] and fc["using"]["nglr_arms"] == ["PPCL@glr"], fc
     for usd, waits in ((3.99, False), (4.01, True)):  # the gate's $ on either side of the cap
         f = forecast(dict(t36, lmax_pi05=36 * usd / (20.4 * cc.RATE)), pk, {"delta": 0.01}, split=split)
         assert f["gate"]["v3_waits"] == waits and f["gate"]["usd"] == usd, (usd, f["gate"])
@@ -893,6 +921,38 @@ def selftest_read(split):
     assert nt["PPCL@glr-G@glr"]["diff_pp"] == 4 and nt["PPCL@glr-G@glr"]["pairs"] == 300 and nt["PPCL@glr-G@glr"][
         "drops"] == {} and nt["PPCL@glr-G@glr"]["через под"], nt
     assert nt["calls_PPCL@glr-G@glr"] == {"pairs": 300, "mean": 31.0, "median": 30.0, "через под": True}, nt
+    # the cheap cell (NGLR_ARMS=PPCL@glr): И5 against part 2's PPC@glr through the pod (VIA_C), one pair per case and
+    # seed. Part 2's PPC@glr here at 33 % and 7 triggered calls (the pod's at 38 % and 5): a mixed source shows. Both
+    # arms on the pod: И5 and the table as above, part 2's PPC@glr not read
+    s33 = [r | {"success": pos[r["case_id"]] % 100 < 33, "calls_trig": 7} if r["arm"] == "PPC@glr" else r
+           for r in saved]
+    full = read(new, ctrl, s33, mode, k, bd, pk, names, split)
+    assert full["measurements"] == ms and full["report"]["nglr"] == nt, full["measurements"]["И5"]
+    # cheap: the pod's Nglr with --arms=PPCL@glr; stray PPC@glr records of a full Nglr are off the plan, never read
+    glr = lambda r: "PPCL@glr" in r["conf"]["arms"]  # noqa: E731
+    nw = [r for r in new if not glr(r)] + [rec(x, pct) for x in lkeys(plan("Nglr", split=split, nglr=NGLR[:1]))]
+    cheap = read(nw + [r for r in new if glr(r) and r["arm"] == "PPC@glr"], ctrl, s33, mode, k, bd, pk, names, split,
+                 NGLR_ARMS["PPCL@glr"])
+    cm, ct = cheap["measurements"], cheap["report"]["nglr"]["table"]
+    assert cheap["checks"]["pass"] and cheap["checks"]["off_plan"] == {f"{P}/PPC@glr": 300} and cheap["checks"][
+        "complete"]["Nglr"]["expected"] == 600, cheap["checks"]
+    assert cm["И5"] == {**{kk: v for kk, v in cm["И5"].items() if kk in cc.EST}, "test": MEAS["И5"][0] + (
+        " of part 2, one pair per case and seed"), "diff_pp": 8, "pairs": 300, "invalid_pairs": 0, "drops": {},
+        "через под (режим С)": True} and {n: v for n, v in cm.items() if n != "И5"} == {
+        n: v for n, v in ms.items() if n != "И5"}, cm
+    assert "PPC@glr (this pod)" not in ct and ct["PPC@glr (part 2, через под)"] == {
+        "n": 300, "success_pct": 33.0, "calls_mean": 27.0, "calls_median": 27.0} and {
+        kk: v for kk, v in ct.items() if "PPC@glr" not in kk} == {kk: v for kk, v in nt["table"].items()
+                                                                 if "PPC@glr" not in kk}, ct
+    # a part 2 PPC@glr with another seed, one with prefix_ok false: both drop, as invalid pairs
+    s2 = [r | {"policy_seed": 1} if r["arm"] == "PPC@glr" and r["case_id"] == e300[3] else
+          r | {"prefix_ok": False} if r["arm"] == "PPC@glr" and r["case_id"] == e300[8] else r for r in s33]
+    c2 = read(nw, ctrl, s2, mode, k, bd, pk, names, split, NGLR_ARMS["PPCL@glr"])["measurements"]["И5"]
+    assert c2["pairs"] == 298 and c2["invalid_pairs"] == 2 and c2["drops"] == {"seed": 1, "invalid": 1}, c2
+    # the cheap Nglr not run yet: its 300 missing cases are no invalid pairs; И5 not read, the line listed
+    r = read([r for r in nw if not glr(r)], ctrl, s33, mode, k, bd, pk, names, split, NGLR_ARMS["PPCL@glr"])
+    assert r["checks"]["pass"] and r["measurements"]["И5"]["diff_pp"] is None and r["measurements"]["И5"][
+        "lines_not_run"] == ["Nglr"] and r["checks"]["invalid_pairs"]["И5"]["invalid"] == 0, r["measurements"]["И5"]
     # G(k = 1.0): line 2's frozen 108 Plus cases, one pair per case (the V2 PBVS episode, the frozen VS1.0 one), the
     # difference per pair in {-1, 0, 1}; a frozen case with another policy seed, one with another Base e: both drop
     g1 = lambda cs_: round(100 * (sum(pos[c] % 100 < 55 for c in cs_) - sum(pos[c] % 100 < 20 for c in cs_)) / len(  # noqa
@@ -989,6 +1049,8 @@ if __name__ == "__main__":
     g.add_argument("--selftest", action="store_true")
     ap.add_argument("read", nargs="*", metavar="[read] JSONL", help="R/grid_all_V.jsonl: checks, measurements, report")
     ap.add_argument("--line", choices=LINES + ("V3",))
+    ap.add_argument("--nglr-arms", default=",".join(NGLR), choices=NGLR_ARMS,
+                    help="Nglr's arms on the pod (--plan, --forecast, the reading): the default, or PPCL@glr alone")
     ap.add_argument("--band-json", default=f"{OUT}/band.json", help="band.json (--plan, --forecast, the reading)")
     ap.add_argument("--pbvs-k", default=f"{OUT}/pbvs_k.json", help="pbvs_k.json (--plan, --forecast, the reading)")
     ap.add_argument("--mode", default=f"{OUT}/mode.json", help="the controls' mode.json")
@@ -1011,7 +1073,7 @@ if __name__ == "__main__":
     if a.selftest:
         selftest()
     elif a.plan:
-        if lns := plan(a.line, jload(a.pbvs_k), jload(a.band_json), split):
+        if lns := plan(a.line, jload(a.pbvs_k), jload(a.band_json), split, NGLR_ARMS[a.nglr_arms]):
             print(cc.tsv(lns))
     elif a.band:
         b = band(load(a.band), split)
@@ -1024,7 +1086,8 @@ if __name__ == "__main__":
         print(e2.dump(s))
     elif a.forecast:
         bd = jload(a.band_json)
-        f = forecast(cc.read_tempo(a.forecast), jload(a.pbvs_k), bd, {vk(r, bd) for r in load(a.done)}, split)
+        f = forecast(cc.read_tempo(a.forecast), jload(a.pbvs_k), bd, {vk(r, bd) for r in load(a.done)}, split,
+                     NGLR_ARMS[a.nglr_arms])
         print(e2.dump(f))
         raise SystemExit(3 if f["gate"]["v3_waits"] else 0)  # the stage says whether the hold is in force
     elif a.smoke_check:
@@ -1041,4 +1104,4 @@ if __name__ == "__main__":
     else:
         saved = load([Path(a.p2) / f for f in cc.SAVED["pi05_lmax"]])
         finish(read(load(a.read), load(a.controls), saved, jload(a.mode), jload(a.k), jload(a.band_json),
-                    jload(a.pbvs_k), cs.libero_names(), split), a.out)
+                    jload(a.pbvs_k), cs.libero_names(), split, NGLR_ARMS[a.nglr_arms]), a.out)

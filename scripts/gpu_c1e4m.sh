@@ -61,7 +61,8 @@
 #               that do not fit wait for the owner; CLINES in increasing order, 2, 3, 6, 7 with 1 (k_π), 5 with 1 and 4.
 #               A later cgrid with more lines resumes (the runners skip done cases)
 #   ctail       TAIL=1, after cgrid and the owner's go: line 8 (OFT), grid_all_C.jsonl again
-#   vgrid       [VLINES="V3d10 V3d20 Nglr V2eps"] PBVS (docs/superpowers/specs/2026-10-20-c1-e4-pbvs-design.md) and the controls
+#   vgrid       [VLINES="V3d10 V3d20 Nglr V2eps"] [NGLR_ARMS=PPCL@glr,PPC@glr | PPCL@glr]
+#               PBVS (docs/superpowers/specs/2026-10-20-c1-e4-pbvs-design.md) and the controls
 #               journal's noisy cell, after a finished cgrid (grid_all_C.jsonl newer than every C*.jsonl; refused while a
 #               cgrid / ctail stage or a runner is live, or before controls lines 2 and 3 are complete and the frozen
 #               file's Base cases are V2's first 108 Plus: V2 / V3 / Nglr / V2eps pair with them). The platform, the C1-E4
@@ -70,7 +71,9 @@
 #               (PBVS0.3 on 6 cases; its Base e must be line 2's) -> the forecast at the controls' tempo -> V1 ->
 #               pbvs_k.json -> V2 -> VLINES (any of V3d10 V3d20 Nglr V2eps, each once, in the order given; V3 = V3d10
 #               V3d20; default all, in this order; V2eps runs only when band.json's delta > 15 mm), each by
-#               scripts/c1e4v_summary.py --plan --line L (V3d10, V3d20: one d of V3 each). A forecast of V1 + V2 + V3
+#               scripts/c1e4v_summary.py --plan --line L (V3d10, V3d20: one d of V3 each; Nglr with NGLR_ARMS, the
+#               cheap cell PPCL@glr alone and PPC@glr part 2's: unset, the pod's first ($O/NGLR_ARMS) or the full
+#               cell; another than the pod's first refused). A forecast of V1 + V2 + V3
 #               above $4 holds VLINES and the reading for the owner (a clean exit; after the ok: V3_OK=1, each line alone
 #               with VLINES). band.json / pbvs_k.json are recomputed only when a V0 / V1 file is newer. Then
 #               grid_all_V.jsonl and the reading (summary_V.json). A rerun resumes. Note: CODE_PATHS holds src, so once
@@ -463,11 +466,11 @@ cfc() {  # cfc <tempo file>: the controls forecast (controls spec §12), mode.js
 }
 vfc() {  # vfc <tempo file>: the PBVS forecast (spec §8, the journals: each line's cost, exit 3 when V1 + V2 + V3 > $4)
   local d  # the V lines' records only (the smoke's PBVS0.3 records share their keys with V2's first 6)
-  dry && { echo "+ cv --forecast $1 --done <the V lines' records, $O/V[0-3]_*.jsonl $O/Nglr_*.jsonl $O/V2eps_*.jsonl>"
-    return; }
+  dry && { echo "+ cv --forecast $1 --nglr-arms $NGLR_ARMS --done <the V lines' records, $O/V[0-3]_*.jsonl" \
+    "$O/Nglr_*.jsonl $O/V2eps_*.jsonl>"; return; }
   d=$(ls $O/V[0-3]_*.jsonl $O/Nglr_*.jsonl $O/V2eps_*.jsonl 2>/dev/null)
   # shellcheck disable=SC2086
-  cv --forecast "$1" ${d:+--done $d}
+  cv --forecast "$1" --nglr-arms $NGLR_ARMS ${d:+--done $d}
 }
 TV='import torch; print("torch", torch.__version__, "CUDA", torch.version.cuda)'
 platform() {  # POD=C: the machine mode П is decided on (cprobe): the card and its driver, torch and its CUDA per venv
@@ -868,6 +871,13 @@ json.dump(more[:$K], open('$O/bench_more.json', 'w'))" || exit 1  # a list: the 
     done
     [ -z "$(tr ' ' '\n' <<< "$VL" | sort | uniq -d)" ] || fail "VLINES='$VLINES': a line twice (V3 = V3d10 V3d20)"
     VLINES=${VL# }
+    # the noisy cell's arms (owner 2026-10-21): the full cell, or PPCL@glr alone (PPC@glr part 2's, through the pod);
+    # unset: the pod's first choice, once its Nglr ran ($O/NGLR_ARMS), else the full cell; never two on one pod
+    [ -n "${NGLR_ARMS:-}" ] || NGLR_ARMS=$(cat $O/NGLR_ARMS 2>/dev/null) || NGLR_ARMS=PPCL@glr,PPC@glr
+    case $NGLR_ARMS in PPCL@glr,PPC@glr | PPCL@glr) ;;
+      *) fail "NGLR_ARMS='$NGLR_ARMS': PPCL@glr,PPC@glr (the full cell, default) or PPCL@glr (the cheap one)" ;; esac
+    [ ! -f $O/NGLR_ARMS ] || [ "$(cat $O/NGLR_ARMS)" = "$NGLR_ARMS" ] \
+      || fail "NGLR_ARMS=$NGLR_ARMS: this pod's Nglr ran with $(cat $O/NGLR_ARMS) ($O/NGLR_ARMS): the owner decides"
     # a finished cgrid (lines 2, 3, 7 and the C5 pass: grid_all_C.jsonl is written last) and no stage or runner live (one
     # runner on the GPU; the brackets keep pgrep from matching its own command line)
     dry || { [ -f $O/grid_all_C.jsonl ] && [ -z "$(find $O -maxdepth 1 -name 'C*.jsonl' -newer $O/grid_all_C.jsonl)" ]; } \
@@ -891,7 +901,7 @@ file's Base cases are not V2's first 108 Plus (above): V2 and V3 pair with them"
     x cc --selftest && x cv --selftest || fail "a summary's selftest fails (above): the owner decides"
     check_code_v record  # the first vgrid's, once its tests passed: later vgrids require it
     SUMM=cv  # cphase plans with the PBVS summary; its lines take no per-line forecast (tempo_grid.txt stays the controls')
-    echo "[$(date +%T)] vgrid, pod C, then $VLINES" | tee -a $W/forecast.txt
+    echo "[$(date +%T)] vgrid, pod C, then $VLINES (Nglr: $NGLR_ARMS)" | tee -a $W/forecast.txt
     cphase v0 --plan --line V0 || fail "vgrid: V0 still fails after pass 2 (above)"
     # spec §3: the arm model and its band from V0 (and band_eps.json above 15 mm), again only when a V0 file is newer
     if dry || [ ! -f $O/band.json ] || [ -n "$(find $O -maxdepth 1 -name 'V0_*.jsonl' -newer $O/band.json)" ]; then
@@ -923,13 +933,18 @@ prefix_ok < 5 of 6, a case short, no counters, or a Base e not line 2's (above):
       exit 0
     fi
     for L in $VLINES; do  # V2eps: an empty plan unless band.json's delta > 15 mm
-      cphase "$(tr A-Z a-z <<< $L)" --plan --line $L || fail "vgrid: $L still fails after pass 2 (above)"
+      a=
+      [ $L = Nglr ] && { a="--nglr-arms $NGLR_ARMS"; wr $O/NGLR_ARMS $NGLR_ARMS; }
+      # shellcheck disable=SC2086
+      cphase "$(tr A-Z a-z <<< $L)" --plan --line $L $a || fail "vgrid: $L still fails after pass 2 (above)"
     done
     x sh -c "cat $O/V[0-3]_*.jsonl $O/Nglr_*.jsonl $O/V2eps_*.jsonl 2>/dev/null > $O/grid_all_V.jsonl"  # not the smoke
-    x cv $O/grid_all_V.jsonl --controls $O/C2_*.jsonl $O/C3_*.jsonl --out $O/summary_V.json > $W/reading_V.txt; q=$?
+    x cv $O/grid_all_V.jsonl --controls $O/C2_*.jsonl $O/C3_*.jsonl --nglr-arms $NGLR_ARMS --out $O/summary_V.json \
+      > $W/reading_V.txt; q=$?
     tail -1 $W/reading_V.txt
     [ $q = 0 ] || fail "the reading's checks before reading failed (exit $q, $W/reading_V.txt): the owner decides"
     echo "The reading: $O/summary_V.json; on the Mac: python scripts/c1e4v_summary.py $O/grid_all_V.jsonl" \
-      "--controls $O/C2_*.jsonl $O/C3_*.jsonl (band.json, pbvs_k.json, mode.json, k_select.json beside it)"
+      "--controls $O/C2_*.jsonl $O/C3_*.jsonl --nglr-arms $NGLR_ARMS (band.json, pbvs_k.json, mode.json," \
+      "k_select.json beside it)"
     ;;
 esac
