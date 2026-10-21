@@ -45,7 +45,8 @@
 #               evaluation cases), the split has calib's extra, HEAD is pushed, the tree is clean, connect passed and
 #               the runner code is connect's ($O/CODE). ONLY=<id regex>: only those lines (bench lines alone need no
 #               line of the other pod). The reading: on the Mac with both pods' grid_all files
-# POD=C pi0.5 + OFT+ (OFT with TAIL=1), the controls (controls spec): setup | cprobe | csmoke | cgrid | ctail | vgrid, each
+# POD=C pi0.5 + OFT+ (OFT with TAIL=1), the controls (controls spec): setup | cprobe | csmoke | cgrid | ctail | vgrid |
+# vtgrid, each
 # after the previous one passed; every runner line at n-envs 6 (pass 2 too), part 2's batches (§7):
 #   setup       A's and B's without SmolVLA: the token check and pi0.5's SHA-256, venv-oft and OFT+'s weights (OFT's
 #               with TAIL=1), pytest
@@ -78,6 +79,15 @@
 #               with VLINES). band.json / pbvs_k.json are recomputed only when a V0 / V1 file is newer. Then
 #               grid_all_V.jsonl and the reading (summary_V.json). A rerun resumes. Note: CODE_PATHS holds src, so once
 #               the PBVS code is pulled ctail's check against $O/CODE refuses: intended, the owner decides on the tail
+#   vtgrid      VS-T, the teach-by-showing servo (the PBVS spec's journal "2026-10-21, 11:00 UTC — ветка VS-T
+#               гоняется"), after vgrid's clean end (its reading PASS, the last line of reading_V.txt, newer than
+#               grid_all_V.jsonl, itself newer than every V line's file; refused while a cgrid / ctail / vgrid stage
+#               or a runner is live, or before controls lines 2 and 3 are complete). The platform, the C1-E4 tests with test_vservo,
+#               test_vst and both summaries' tests, the three summaries' selftests, then its own code record $O/CODE.t
+#               (CODE_PATHS + the PBVS and VS-T summaries). Then VT1 -> vst_k.json -> VT2 -> VT3d10 -> VT3d20, each by
+#               scripts/c1e4t_summary.py --plan --line L, every Base full (s* is its first close); vst_k.json is
+#               recomputed only when a VT1 file is newer. Then grid_all_T.jsonl and the reading (summary_T.json). A
+#               rerun resumes. Once the VS-T code is pulled, vgrid's check against $O/CODE.v refuses (src changed)
 # One stage at a time on a pod (flock). Each runner line has its own --out (block, brain, set, source, d), runs twice
 # (pass 2 resumes and retries failed groups, scripts/gpu_c1e3.sh's watchdog STALL, default 7200 s) and a stage fails if a
 # runner still exits non-zero after pass 2. Every exit appends the environment to $O/pod_env_<stage>.txt, refreshes
@@ -352,14 +362,15 @@ check_code() {  # check_code record|require: connect, calib, calib_more and grid
   [ "$(cat $O/CODE 2>/dev/null)" = "$h" ] || fail "the runner code is not connect's ($O/CODE): the owner decides (archive
     the results under $O and rerun from connect, or check out connect's commit)"
 }
-check_code_v() {  # check_code_v check|record, vgrid (PBVS spec §5): its own record $O/CODE.v of CODE_PATHS (the PBVS
-  local h  # summary added), written by record once the tests passed (V0 starts); then both require it. $O/CODE: the controls'
-  dry && { echo "+ check_code_v $1 ($CODE_PATHS at HEAD vs $O/CODE.v)"; return; }
+check_code_v() {  # check_code_v check|record [t], vgrid (PBVS spec §5) / vtgrid (t: the VS-T journal): the stage's own
+  local h f=$O/CODE.${2:-v}  # record $O/CODE.v / CODE.t of CODE_PATHS (its summaries added), written by record once its
+  # tests passed (its first line starts); then both require it. $O/CODE: the controls'
+  dry && { echo "+ check_code_${2:-v} $1 ($CODE_PATHS at HEAD vs $f)"; return; }
   h=$(code_hash) || exit 1
   [ -z "$(git status --porcelain -- $CODE_PATHS)" ] || { git status --short -- $CODE_PATHS
     fail "uncommitted or untracked files in the code (above): commit them on the Mac and pull, or remove them"; }
-  if [ ! -f $O/CODE.v ]; then [ "$1" != record ] || echo "$h" > $O/CODE.v; return; fi
-  [ "$(cat $O/CODE.v)" = "$h" ] || fail "the code is not the first vgrid's ($O/CODE.v): the owner decides"
+  if [ ! -f $f ]; then [ "$1" != record ] || echo "$h" > $f; return; fi
+  [ "$(cat $f)" = "$h" ] || fail "the code is not the first $STAGE's ($f): the owner decides"
 }
 
 wd() {  # as scripts/gpu_c1e3.sh: the command in its own process group, killed after $STALL s without log growth
@@ -446,7 +457,8 @@ print(','.join([i for i in c if i.startswith('pro-') == ('$1' == 'pro')][:$2]))"
 summ() { $SP scripts/c1e4m_summary.py "$@"; }
 cc() { $SP scripts/c1e4c_summary.py "$@"; }  # POD=C: the controls summary (controls spec §5, §7, §12)
 cv() { $SP scripts/c1e4v_summary.py "$@"; }  # POD=C vgrid: the PBVS summary (PBVS spec §3-§8)
-SUMM=cc  # the summary cphase plans with (vgrid: cv); not CC, the C compiler's variable
+ct() { $SP scripts/c1e4t_summary.py "$@"; }  # POD=C vtgrid: the VS-T summary (the PBVS spec's VS-T journal)
+SUMM=cc  # the summary cphase plans with (vgrid: cv, vtgrid: ct); not CC, the C compiler's variable
 cphase() {  # cphase <phase> <cc args..>: the summary's plan, run by run_phase. A dry run where the summary cannot plan
   local ph=$1 p q; shift  # yet (exit 3, on the Mac: no mode.json or k_select.json) prints the call instead
   if dry; then p=$($SUMM "$@" 2>$W/cc.err); q=$?; [ $q = 3 ] && { echo "+ $SUMM $*"; return 0; }; cat $W/cc.err
@@ -539,9 +551,9 @@ calib_line() {  # the pod's line from M0, B-cal and calib_more's records -> cali
 
 case "$POD:${1:-}" in
   [ABC]:setup | [AB]:smoke | [AB]:connect | [AB]:calib | [AB]:calib_more | [AB]:grid) ;;
-  C:cprobe | C:csmoke | C:cgrid | C:ctail | C:vgrid) ;;
+  C:cprobe | C:csmoke | C:cgrid | C:ctail | C:vgrid | C:vtgrid) ;;
   *) echo "usage: POD=A|B $0 setup | smoke | connect | calib | calib_more | grid"
-     echo "       POD=C [TAIL=1] $0 setup | cprobe | csmoke | cgrid | ctail | vgrid"; exit 1 ;;
+     echo "       POD=C [TAIL=1] $0 setup | cprobe | csmoke | cgrid | ctail | vgrid | vtgrid"; exit 1 ;;
 esac
 STAGE=$1
 # one stage at a time: a second instance would run the same episodes into the same files (the lock is outside results)
@@ -946,5 +958,53 @@ prefix_ok < 5 of 6, a case short, no counters, or a Base e not line 2's (above):
     echo "The reading: $O/summary_V.json; on the Mac: python scripts/c1e4v_summary.py $O/grid_all_V.jsonl" \
       "--controls $O/C2_*.jsonl $O/C3_*.jsonl --nglr-arms $NGLR_ARMS (band.json, pbvs_k.json, mode.json," \
       "k_select.json beside it)"
+    ;;
+  vtgrid)  # the VS-T journal: VT1, vst_k.json, VT2, VT3d10, VT3d20, the reading
+    # vgrid's clean end: its reading's last line PASS (reading_V.txt, written after grid_all_V.jsonl, which is newer
+    # than every V line's file) and no stage or runner live (the brackets keep pgrep from matching its own command line)
+    dry || { [ -f $O/grid_all_V.jsonl ] && [ $W/reading_V.txt -nt $O/grid_all_V.jsonl ] \
+      && [ -z "$(find $O -maxdepth 1 \( -name 'V[0-3]_*.jsonl' -o -name 'Nglr_*.jsonl' -o -name 'V2eps_*.jsonl' \) \
+        -newer $O/grid_all_V.jsonl)" ] \
+      && [ "$(tail -1 $W/reading_V.txt)" = "C1-E4 PBVS checks before reading: PASS" ]; } \
+      || fail "vgrid has not ended cleanly (grid_all_V.jsonl missing or older than a V line's file, or its reading \
+$W/reading_V.txt older or not PASS): vtgrid starts after it"
+    if ! dry; then
+      live=$(pgrep -af 'gpu_c1e4[m]\.sh +(cgrid|ctail|vgrid)|c1e4m_ru[n]\.py|c1e4_ru[n]\.py')
+      [ -z "$live" ] || fail "a stage or a runner is live (below): vtgrid starts after it ends
+$live"
+    fi
+    # VT2 and VT3 pair with controls lines 2 and 3 (their cases, order and Base groups; e as their Bases')
+    x cv --controls-check $O/C2_*.jsonl $O/C3_*.jsonl || refuse "controls lines 2 and 3 are not complete (above): VT2 \
+and VT3 pair with them"
+    CODE_PATHS+=" scripts/c1e4v_summary.py scripts/c1e4t_summary.py"
+    check_code_v check t
+    check_platform
+    x $P -m pytest -q tests/test_objreflex.py tests/test_gauto.py tests/test_handoff.py tests/test_lead.py \
+      tests/test_maxwrap.py tests/test_c1e4m_run.py tests/test_c1e4c_summary.py tests/test_c1e4m_brains.py \
+      tests/test_vservo.py tests/test_c1e4v_summary.py tests/test_vst.py tests/test_c1e4t_summary.py 2>&1 \
+      | tee $LOG/vtgrid_tests.log
+    [ "${PIPESTATUS[0]}" = 0 ] || fail "the C1-E4 tests fail on the pod (above): the owner decides"
+    x cc --selftest && x cv --selftest && x ct --selftest \
+      || fail "a summary's selftest fails (above): the owner decides"
+    check_code_v record t  # the first vtgrid's, once its tests passed: later vtgrids require it
+    SUMM=ct  # cphase plans with the VS-T summary
+    echo "[$(date +%T)] vtgrid, pod C: VT1, vst_k.json, VT2, VT3d10, VT3d20" | tee -a $W/forecast.txt
+    cphase vt1 --plan --line VT1 || fail "vtgrid: VT1 still fails after pass 2 (above)"
+    # the journal: lambda by §4's rule from VT1 (vst_k.json), again only when a VT1 file is newer
+    if dry || [ ! -f $O/vst_k.json ] || [ -n "$(find $O -maxdepth 1 -name 'VT1_*.jsonl' -newer $O/vst_k.json)" ]; then
+      x ct --select-vst $O/VT1_*.jsonl | tee -a $W/vst_k.txt
+      [ "${PIPESTATUS[0]}" = 0 ] || fail "the VS-T lambda selection failed (above): VT1 incomplete?"
+    fi
+    for L in VT2 VT3d10 VT3d20; do
+      cphase "$(tr A-Z a-z <<< $L)" --plan --line $L || fail "vtgrid: $L still fails after pass 2 (above)"
+    done
+    x sh -c "cat $O/VT[1-3]_*.jsonl > $O/grid_all_T.jsonl"
+    x ct $O/grid_all_T.jsonl --controls $O/C2_*.jsonl $O/C3_*.jsonl --v $O/grid_all_V.jsonl --out $O/summary_T.json \
+      > $W/reading_T.txt; q=$?
+    tail -1 $W/reading_T.txt
+    [ $q = 0 ] || fail "the VS-T reading's checks before reading failed (exit $q, $W/reading_T.txt): the owner decides"
+    echo "The reading: $O/summary_T.json; on the Mac: python scripts/c1e4t_summary.py $O/grid_all_T.jsonl" \
+      "--controls $O/C2_*.jsonl $O/C3_*.jsonl --v $O/grid_all_V.jsonl (vst_k.json, band.json, pbvs_k.json," \
+      "mode.json, k_select.json beside it)"
     ;;
 esac

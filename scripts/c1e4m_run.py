@@ -24,6 +24,10 @@ per process. Per case:
 - PBVS0.1 / 0.3 / 1.0 (PBVS spec §2, src/vservo.py): the band of --band (V0's band.json) in conf["pbvs"], only in a
   run with a PBVS arm; their records carry "pbvs" (the regulator's counters). --log-traj (PBVS spec §3, V0): a Base
   record carries "traj", per step x, p and the executed action's xyz (rounded to 1e-6); its actions are unchanged.
+- VST0.1 / 0.3 / 1.0 (PBVS spec journal "2026-10-21, 11:00 UTC — ветка VS-T гоняется", src/vservo.py VSTAgent): only
+  in a run without --base-prefix (the Bases run to their ends); each Dynamic episode's s_star is its case's Base's
+  gripper-to-object offset on xy at the Base's first executed close (orx.episode_metrics's t_close), None when the
+  Base never closed. Their records carry "vst": s_star (rounded to 1e-6) and the servo's counters.
 - Time t: their policy step (total_env_steps - warmup_steps); e: their cosmos_query_boundary_step (Base: the would-be
   one), the first policy step whose observation is post-event. Brain noise seed: policy_seed + t (their runners);
   the shadow pair's: policy_seed + t_e.
@@ -142,11 +146,14 @@ def case_seed(case_id):
     return int.from_bytes(hashlib.sha256(f"c1e4m/{case_id}".encode()).digest()[:4], "little")
 
 
-def make_agent(arm, conf, seed):
-    """scripts/c1e4_run.py make_agent (copied: Task 6 edits that file), oracle or GLR eyes."""
+def make_agent(arm, conf, seed, s_star=None):
+    """scripts/c1e4_run.py make_agent (copied: Task 6 edits that file), oracle or GLR eyes; s_star: VS-T's reference
+    (VST arms only)."""
     method, noise = vservo.parse_arm(arm)
     assert noise in ("", "glr"), f"{arm}: part 2 on LIBERO-MAX runs the oracle and GLR eyes"
     kw = {"t_ramp": conf["t_ramp"], "k_p": conf["k_p"], "tau_k": conf["tau_k"], "K": gauto.K}
+    if method in vservo.VST:  # VS-T: oracle eyes, the paired full Base's grasp offset (run_cases)
+        return vservo.VSTAgent(method, conf["s"], conf["d"], s_star, **kw)
     if method in vservo.LAMBDAS:  # PBVS spec §2: oracle eyes, the band of V0 (--band)
         return vservo.PBVSAgent(method, conf["s"], conf["d"], conf["pbvs"], **kw)
     if noise == "glr":
@@ -367,14 +374,14 @@ def ask(brain, pkgs, seeds, suites):
 
 class Episode:
     """One episode, Base (kind "base": arm none, live) or one Dynamic arm (kind "dynamic", base = Base's
-    {"chunks", "acts", "e"}), driven step by step from the main process. base_prefix (Base only): run_batch may cut it
-    after its event (cut)."""
+    {"chunks", "acts", "e", "s_star"}), driven step by step from the main process. base_prefix (Base only): run_batch
+    may cut it after its event (cut)."""
 
     def __init__(self, case, arm, kind, conf, base=None, video=False, base_prefix=False):
         self.case, self.arm, self.kind, self.conf, self.base = case, arm, kind, conf, base
         self.base_prefix, self.cut = base_prefix and kind == "base", False
         self.seed0, self.suite = int(case["policy_seed"]), case["task_suite_name"]
-        self.ag = make_agent(arm, conf, case_seed(case["case_id"]))
+        self.ag = make_agent(arm, conf, case_seed(case["case_id"]), (base or {}).get("s_star"))
         # the event step is set when the event is seen (their replay: while not runtime.applied)
         self.replay = maxwrap.ChunkReplay(base["chunks"], math.inf) if kind == "dynamic" else None
         self.t, self.t_max, self.cur, self.prev = 0, MAX_STEPS[self.suite], None, None
@@ -473,6 +480,9 @@ class Episode:
             rec["latch"] = dict(ag.latch_stats)
         if method in vservo.LAMBDAS:  # PBVS spec §6: the regulator's counters
             rec["pbvs"] = {k: round(v, 6) for k, v in ag.pbvs_stats.items()}
+        if method in vservo.VST:  # VS-T: its reference and counters
+            rec["vst"] = {"s_star": None if ag.s_star is None else np.round(ag.s_star, 6).tolist(),
+                          **{k: round(v, 6) for k, v in ag.vst_stats.items()}}
         if self.kind == "base":  # cut by --base-prefix: its outcome is unknown
             rec["base_cut"] = self.cut
             if self.cut:
@@ -553,11 +563,20 @@ def write_video(path, frames):
     out.release()
 
 
+def s_star(ep):
+    """VS-T's reference (PBVS spec journal 2026-10-21 11:00): a full Base's gripper-to-object offset on xy at its first
+    executed close (orx.episode_metrics's t_close), None when it never closed."""
+    t = orx.episode_metrics(ep.xs, ep.acts, ep.objs)["t_close"]
+    return None if t is None else (np.asarray(ep.xs[t], float) - np.asarray(ep.objs[t], float))[:2]
+
+
 def run_cases(cases, arms, conf, envs, brain, wand=True, video_cases=(), video_dir=None, base_prefix=False,
               log_traj=False):
     """Base of every case, then their Dynamic arms, n = len(envs) episodes at a time. The records, per case Dynamic
     first and Base last. base_prefix: the Bases end at their batch's last event (controls spec §7, run_batch).
-    log_traj: Base records carry "traj" (PBVS spec §3)."""
+    log_traj: Base records carry "traj" (PBVS spec §3). VST arms: s_star of each case's full Base."""
+    vst = bool({vservo.parse_arm(a)[0] for a in arms} & set(vservo.VST))
+    assert not (vst and base_prefix), "VS-T's s* is the full Base's first close: a run without --base-prefix"
     n, out, ready = len(envs), {}, []
     for c in cases:
         why = skip_reason(c, wand)
@@ -575,7 +594,8 @@ def run_cases(cases, arms, conf, envs, brain, wand=True, video_cases=(), video_d
     bases = [Episode(c, "none", "base", conf, video=c["case_id"] in video_cases, base_prefix=base_prefix)
              for c in ready]
     batches(bases)
-    dyn = [Episode(b.case, a, "dynamic", conf, {"chunks": b.chunks, "acts": b.acts, "e": b.e}, b.frames is not None)
+    dyn = [Episode(b.case, a, "dynamic", conf, {"chunks": b.chunks, "acts": b.acts, "e": b.e,
+                                                "s_star": s_star(b) if vst else None}, b.frames is not None)
            for b in bases for a in arms]
     batches(dyn)
     for ep in dyn + bases:
@@ -673,6 +693,7 @@ def main():
     assert args.band or not pbvs, f"{sorted(pbvs)} need --band"
     assert args.kbar is not None or not methods & {"Gauto", "GautoT"}, "G-auto needs --kbar"
     assert arms or not args.base_prefix, "--base-prefix cuts the Bases for Dynamic arms: a Base-only run keeps its ends"
+    assert not (methods & set(vservo.VST) and args.base_prefix), "VS-T arms need the full Base: no --base-prefix"
     video = set(filter(None, args.video_cases.split(",")))
     assert not video or (args.video_dir and REPO not in Path(args.video_dir).resolve().parents
                          and Path(args.video_dir).resolve() != REPO), "videos need --video-dir outside the repository"

@@ -289,6 +289,77 @@ def test_validate_pbvs_needs_the_band():
             run.validate([bad], {**conf(), "pbvs": BAND}, [CASE])
 
 
+class Closing(Brain):
+    """Brain's plan, its gripper closed when the observed EEF is within 8 cm of the point 2 cm above the object."""
+
+    def __call__(self, obs, *a):
+        out = super().__call__(obs, *a)
+        for o, ch in zip(obs, out):
+            ch[:, 6] = 1.0 if np.linalg.norm(o["obj"] + [0, 0, 0.02] - o["robot0_eef_pos"]) < 0.08 else -1.0
+        return out
+
+
+VST_ARMS = ["VST0.3", "VST1.0"]
+
+
+def test_vst_s_star_from_the_same_runs_base():
+    """PBVS spec journal (VS-T): each VST episode's s_star is its Base's xy offset gripper - object at the Base's first
+    executed close (the Base's t_close; with --log-traj its x, p), |s_star| its grasp miss; the servo acts after the
+    event on the replayed prefix; only VST records carry "vst"."""
+    recs = run.run_cases([CASE], ["none", *VST_ARMS], conf(), [Toy(), Toy()], Closing(), log_traj=True)
+    base, dyn = by_arm(recs)
+    tc = base["t_close"]
+    x, p = (np.array(base["traj"][k]) for k in "xp")
+    assert tc is not None and base["e"] < tc and base["grasp_miss_m"] > 0.01
+    for arm in VST_ARMS:
+        r, v = dyn[arm], dyn[arm]["vst"]
+        assert np.allclose(v["s_star"], (x[tc] - p[tc])[:2], atol=2e-6) and len(v["s_star"]) == 2, arm
+        assert all(round(s, 6) == s and type(s) is float for s in v["s_star"]), arm  # rounded to 1e-6 (JSON floats)
+        assert abs(np.linalg.norm(v["s_star"]) - base["grasp_miss_m"]) < 2e-6, arm
+        assert r["prefix_ok"] is True and r["t_engage"] == base["e"] and v["steps_acting"] >= 1 and v["no_target"] == 0
+        assert r["act_hash"] != dyn["none"]["act_hash"] and r["method"] == arm and r["noise"] == "", arm
+        assert all(type(v[k]) is int for k in ("steps_window", "steps_acting", "flips", "no_target")), arm
+    assert "vst" not in base and "vst" not in dyn["none"]
+    assert [json.loads(x) for x in run.lines(recs).splitlines()] == json.loads(json.dumps(recs))
+
+
+def test_vst_without_a_base_close_is_none():
+    """A Base that never closed (Brain keeps the gripper open): s_star None, the VST episode is "none"'s bitwise and its
+    window steps count as no_target."""
+    base, dyn = by_arm(run.run_cases([CASE], ["none", *VST_ARMS], conf(), [Toy(), Toy()], Brain()))
+    assert base["t_close"] is None
+    for arm in VST_ARMS:
+        v = dyn[arm]["vst"]
+        assert v["s_star"] is None and v["no_target"] == v["steps_window"] > 0 and v["steps_acting"] == 0, arm
+        assert dyn[arm]["act_hash"] == dyn["none"]["act_hash"], arm
+
+
+def test_vst_refuses_the_base_prefix(monkeypatch, tmp_path):
+    """s_star needs the full Base: VST arms with --base-prefix stop, in run_cases and in main() before the brain
+    loads."""
+    with pytest.raises(AssertionError, match="base-prefix"):
+        run.run_cases([CASE], ["none", "VST0.3"], conf(), [Toy(), Toy()], Closing(), base_prefix=True)
+    monkeypatch.setattr(sys, "argv", ["c1e4m_run.py", "--brain", "pi05", "--source", "plus", "--set", "calib", "--arms",
+                                      "none,VST1.0", "--base-prefix", "--out", str(tmp_path / "x.jsonl")])
+    with pytest.raises(AssertionError, match="VS-T"):
+        run.main()
+    run.validate(VST_ARMS + ["VST0.1"], conf(), [CASE])  # no --band, no kbar: VS-T builds without them
+
+
+def test_vst_arms_leave_the_other_arms_bitwise():
+    """VST arms added to a run change nothing of the Base or the other arms (PBVS among them)."""
+    c, old = {**conf(), "pbvs": BAND}, ["none", "G", "Gauto", "PPC", "PPCL", "PBVS0.3"]
+    keys = ("act_hash", "success", "steps", "e", "prefix_ok", "t_engage", "calls_sched", "calls_trig", "t_close",
+            "grasp_miss_m", "c_extra", "kappa_log", "plans_in")
+    (b0, d0), (b1, d1) = (by_arm(run.run_cases([CASE], arms, c, [Toy(), Toy()], Closing()))
+                          for arms in (old, old + VST_ARMS))
+    assert [b0[k] for k in keys] == [b1[k] for k in keys]
+    for a in old:
+        assert [d0[a][k] for k in keys] == [d1[a][k] for k in keys], a
+    assert d0["PBVS0.3"]["pbvs"] == d1["PBVS0.3"]["pbvs"] and d0["PPCL"]["latch"] == d1["PPCL"]["latch"]
+    assert d1["VST0.3"]["act_hash"] != d1["none"]["act_hash"]
+
+
 def test_ppcl_glr_on_ppc_glrs_frames():
     """controls spec journal "сводное решение владельца", the noisy cell: make_agent gives PPCL@glr the GLRKalman eyes
     seeded by the case (case_seed), as PPC@glr. On one object path (a jump at 20) both see the same noise frames, and

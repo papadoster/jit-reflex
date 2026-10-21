@@ -1,20 +1,23 @@
-"""C1-E4 PBVS: position-based visual servoing next to the reflex, the reference from the policy's plan (pure numpy).
+"""C1-E4 PBVS: position-based visual servoing next to the reflex, the reference from the policy's plan (pure numpy);
+and VS-T, the teach-by-showing servo, the reference from the paired full Base's grasp.
 
-Spec: docs/superpowers/specs/2026-10-20-c1-e4-pbvs-design.md. Builds on src/gauto.py (the call conveyor, HAgent's
-engagement t_e, x_hist / p_hist, the first-close stop) and G's action conversion (objreflex.G_POS, clip +-1).
+Spec: docs/superpowers/specs/2026-10-20-c1-e4-pbvs-design.md (VS-T: its journal "2026-10-21, 11:00 UTC — ветка VS-T
+гоняется"). Builds on src/gauto.py (the call conveyor, HAgent's engagement t_e, x_hist / p_hist, the first-close stop)
+and G's action conversion (objreflex.G_POS, clip +-1).
 """
 
 import numpy as np
 
 import gauto
-from objreflex import G_POS
+from objreflex import EPS, G_POS
 
 LAMBDAS = {f"PBVS{k}": k for k in (0.1, 0.3, 1.0)}  # spec §4: the gain grid, the share of e removed per step
+VST = {f"VST{k}": k for k in (0.1, 0.3, 1.0)}  # spec journal (VS-T): its own lambda selection by §4, the same grid
 
 
 def parse_arm(label):
-    """gauto.parse_arm plus the PBVS labels (oracle eyes only): "PBVS0.3" -> ("PBVS0.3", "")."""
-    return (label, "") if label in LAMBDAS else gauto.parse_arm(label)
+    """gauto.parse_arm plus the PBVS and VS-T labels (oracle eyes only): "PBVS0.3" -> ("PBVS0.3", "")."""
+    return (label, "") if label in LAMBDAS or label in VST else gauto.parse_arm(label)
 
 
 class PBVSAgent(gauto.GAgent):
@@ -72,6 +75,58 @@ class PBVSAgent(gauto.GAgent):
         st["sum_e"] += ne
         st["max_e"] = max(st["max_e"], ne)
         if ne <= self.delta:
+            return a
+        st["steps_acting"] += 1
+        sg = float(np.sign(e @ self.u_hat))
+        if sg:
+            st["flips"] += self.sgn == -sg
+            self.sgn = sg
+        a[:2] = np.clip(np.clip(a[:2], -1, 1) - self.lam * e / G_POS, -1, 1)
+        return a
+
+
+class VSTAgent(gauto.GAgent):
+    """spec journal "2026-10-21, 11:00 UTC — ветка VS-T гоняется" (§6 (а)), teach-by-showing. Built as GAgent "none"
+    and relabelled, as PBVSAgent: the conveyor, t_e, x_hist / p_hist and the first-close stop, no extra brain calls.
+    s_star: the gripper-to-object offset on xy at the first close of the paired full Base (the runner's); None (that
+    Base never closed): it never acts, its window steps count as no_target. From t_e up to the first close (G's and
+    PBVS's window): e = (x(t) - p(t))_xy - s_star, x the measured arm, p the oracle object; |e| <= DELTA (orx.EPS,
+    5 mm): the plan's action, else a_xy = clip(clip(a_xy) - lambda e / G_POS, +-1). z, rotation and gripper untouched;
+    no ramp, kappa, E, arm model or plan path. Counters as PBVS's (flips: the sign of e . u_hat, the engaged shift's
+    direction, over acting steps) plus no_target."""
+
+    DELTA = EPS
+
+    def __init__(self, method, s, d, s_star=None, **kw):
+        super().__init__("none", s, d, **kw)
+        self.method, self.lam = method, VST[method]
+        self.s_star = None if s_star is None else np.array(s_star, float)[:2]
+        self.u_hat, self.sgn = np.zeros(2), 0.0
+        self.vst_stats = {"steps_window": 0, "steps_acting": 0, "sum_e": 0.0, "max_e": 0.0, "flips": 0, "no_target": 0}
+
+    def observe(self, t, eef, obj, contact=False):
+        super().observe(t, eef, obj, contact)
+        if self.t_e == t:  # the shift the engagement saw, against the plan executing at observe time
+            u = (self.p_hist[t] - self.p_hist[self.sched.t_obs])[:2]
+            self.u_hat = u / max(float(np.linalg.norm(u)), 1e-12)
+
+    def act(self, t, a):
+        a = np.array(a, dtype=float)
+        if self.t_e is not None and not self.grasp_started:  # t >= t_e: observe(t_e) set it
+            a = self._vst(t, a)
+        return super().act(t, a)  # the first-close bookkeeping (HAgent.act; no VST label matches its methods)
+
+    def _vst(self, t, a):
+        st = self.vst_stats
+        st["steps_window"] += 1
+        if self.s_star is None:
+            st["no_target"] += 1
+            return a
+        e = (self.x_hist[t] - self.p_hist[t])[:2] - self.s_star
+        ne = float(np.linalg.norm(e))
+        st["sum_e"] += ne
+        st["max_e"] = max(st["max_e"], ne)
+        if ne <= self.DELTA:
             return a
         st["steps_acting"] += 1
         sg = float(np.sign(e @ self.u_hat))
