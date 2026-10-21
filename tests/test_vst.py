@@ -83,6 +83,20 @@ def test_moving_plans_land_on_the_reference(arm):
     assert np.linalg.norm((xs[30] - ps[30])[:2] - s) <= EPS < np.linalg.norm((xs[12] - ps[12])[:2] - s)
 
 
+def test_the_correction_starts_from_the_clipped_plan():
+    """Plan rows beyond +-1 on xy (1.5, -1.5): the correction starts from the clipped plan action, as G's and PBVS's,
+    a_xy = clip(clip(row) - lambda e / G_POS, +-1), not clip(row - lambda e / G_POS). s_star set so that e(12) = (8, -8)
+    mm."""
+    kw = {"v": (1.5, -1.5), "T": 14}
+    _, _, xs, ps = drive(vservo.VSTAgent("VST1.0", 10, 0, None), **kw)
+    e12 = np.array([0.008, -0.008])
+    ag = vservo.VSTAgent("VST1.0", 10, 0, (xs[12] - ps[12])[:2] - e12)
+    rows, acts, _, _ = drive(ag, **kw)
+    want = np.clip(np.clip(rows[12, :2], -1, 1) - e12 / G_POS, -1, 1)
+    assert ag.t_e == 12 and acts[12, :2] == pytest.approx(want, abs=1e-12) and np.array_equal(acts[:12], rows[:12])
+    assert np.abs(want - np.clip(rows[12, :2] - e12 / G_POS, -1, 1)).min() > 0.4
+
+
 def test_dead_band():
     """|e| <= 5 mm (orx.EPS): the plan's action. The 10 mm jump engages, s_star 4.9 mm from the jumped target: no
     correction; 5.1 mm: one (lambda = 1)."""

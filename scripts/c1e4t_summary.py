@@ -9,6 +9,8 @@ R = results/c1-e4/controls/pod_C:
         L: VT1 VT2 VT3d10 VT3d20, the runner lines as c1e4c_summary --plan (phase: L in lower case); exit 3 when VT2,
         VT3d10, VT3d20 need vst_k.json, not there yet
     python scripts/c1e4t_summary.py --select-vst R/VT1_*.jsonl [--out R/vst_k.json]   exit 2: VT1 incomplete
+    python scripts/c1e4t_summary.py --base-gate R/V0_*.jsonl R/VT1_*.jsonl   VT1's full Bases against V0's: exit 0, or 3
+        when a Base's e differs or a case has its Base in one line only (act_hash: counted)
     python scripts/c1e4t_summary.py [read] R/grid_all_T.jsonl [--controls R/C2_*.jsonl R/C3_*.jsonl]
             [--v R/grid_all_V.jsonl] [--p2 results/c1-e4/part2] [--out R/summary_T.json]
         the checks before reading, then Т1 with no threshold and the report; a failed check prints only the checks,
@@ -72,6 +74,22 @@ def select_vst(recs, split):
         s = cc.select(recs, P, split)
     arm = s.pop("k")
     return {"arm": arm, "lambda": vservo.VST[arm]} | s
+
+
+def base_gate(recs, split):
+    """Before VT2 and VT3 (the review of 2d962f9):VT1's full Bases are V0's, the same calibration cases in the same
+    groups of 6, both full: e bitwise equal on every case, the same cases in both; act_hash counted (reported, not a
+    gate). V0: the Base-only line (conf arms empty); VT1: arms VSTS. (pass, details)."""
+    cal = run.set_ids(split, "calib")
+    b = lambda arms: {r["case_id"]: r for r in recs if r.get("kind") == "base" and r["d"] == 0  # noqa: E731
+                      and tuple(r["conf"]["arms"]) == arms and r["case_id"] in cal and not r.get("skipped_reason")}
+    v0, t1 = b(()), b(VSTS)
+    both = sorted(v0.keys() & t1.keys(), key=cal.index)
+    diff = [c for c in both if v0[c]["e"] != t1[c]["e"]]
+    n = {"cases": len(cal), "v0": len(v0), "vt1": len(t1), "both": len(both), "e_equal": len(both) - len(diff),
+         "e_differ": diff[:10], "one_line_only": sorted(v0.keys() ^ t1.keys(), key=cal.index)[:10],
+         "act_hash_equal": sum(v0[c]["act_hash"] == t1[c]["act_hash"] for c in both)}
+    return bool(both) and not diff and v0.keys() == t1.keys(), n
 
 
 def ref_ok(r, b):
@@ -175,7 +193,8 @@ def report(mi, M, cells, arm, parm, md, vk):
     """The journal's report only, per cell (d): VS-T - PBVS (V2 / V3), VS-T - PPCL, VS-T - none (part 2, через под in
     mode С); VS-T's counters (acting share and mean |e| over the episodes with a reference; the episodes and window
     steps without one); grasp miss VS-T against Gauto on the cases with both; the reference's quality: the share of
-    the cell's full Bases whose first close led to grasp_ok (and how many closed at all); vst_k.json."""
+    the cell's full Bases whose first close led to grasp_ok (and how many closed at all), and the same over the Bases
+    whose first close is at or after their e (where VS-T could act); vst_k.json."""
     mean = lambda v: round(float(np.mean(v)), 4) if len(v) else None  # noqa: E731
     dm = lambda a, b, d: e2.rnd(e2.diff_pp(list(M(a, b, d)[0].values())))  # noqa: E731
     via = {"через под": md == "S"}
@@ -206,6 +225,12 @@ def report(mi, M, cells, arm, parm, md, vk):
         ok = sum(b.get("grasp_ok") is True for b in closed)
         rep["reference"][c] = {"bases": len(bs), "closed": len(closed), "closed_grasp_ok": ok,
                                "share": round(ok / len(closed), 4) if closed else None}
+        # the review of 2d962f9, report only: the Bases whose first close is at or after their event step e (where
+        # VS-T could act)
+        late = [b for b in closed if b.get("e") is not None and b["t_close"] >= b["e"]]
+        ok = sum(b.get("grasp_ok") is True for b in late)
+        rep["reference_close_after_e"][c] = {"bases": len(late), "closed_grasp_ok": ok,
+                                             "share": round(ok / len(late), 4) if late else None}
     return dict(rep) | {"vst_k": vk}
 
 
@@ -257,6 +282,7 @@ def selftest():
     assert all("--base-prefix" not in ln["args"] and "--band" not in ln["args"] and "--kbar" not in ln["args"]
                for ln in ours)
     selftest_select(split)
+    selftest_gate(split)
     selftest_read(split)
     print("selftest ok")
 
@@ -284,6 +310,28 @@ def selftest_select(split):
     s = select_vst(recs({"VST0.1": 0.012, "VST0.3": 0.011, "VST1.0": 0.0095}), split)
     assert s["arm"] == "VST1.0", s
     cc.exits(lambda: select_vst(recs({a: 0.01 for a in VSTS})[1:], split), 2)
+
+
+def selftest_gate(split):
+    """VT1's full Bases against V0's: equal e on every case passes (act_hash counted: 3 differ here); one e off, or a
+    case in one line only, stops; Dynamic records and other lines' Bases are not read."""
+    cal = run.set_ids(split, "calib")
+    base = lambda c, arms, j, **kw: {"case_id": c, "brain": P, "kind": "base", "arm": "none", "d": 0,  # noqa: E731
+                                     "e": 20 + j % 9, "act_hash": f"h{j}", "conf": {"arms": list(arms)},
+                                     "skipped_reason": None} | kw
+    v0 = [base(c, (), j) for j, c in enumerate(cal)]
+    t1 = [base(c, VSTS, j, act_hash=f"h{j}" if j % 20 else "x") for j, c in enumerate(cal)]
+    dyn = [{"case_id": c, "brain": P, "kind": "dynamic", "arm": "VST0.3", "d": 0, "e": 99, "act_hash": "y",
+            "conf": {"arms": list(VSTS)}} for c in cal]
+    other = [base(c, ("PBVS0.3",), j, e=99) for j, c in enumerate(cal)]  # V1's Bases (cut, other e): not read
+    ok, n = base_gate(v0 + t1 + dyn + other, split)
+    assert ok and n == {"cases": 60, "v0": 60, "vt1": 60, "both": 60, "e_equal": 60, "e_differ": [],
+                        "one_line_only": [], "act_hash_equal": 57}, n
+    ok, n = base_gate(v0 + [r | {"e": r["e"] + 1} if r["case_id"] == cal[7] else r for r in t1], split)
+    assert not ok and n["e_differ"] == [cal[7]] and n["e_equal"] == 59, n
+    ok, n = base_gate(v0 + t1[1:], split)
+    assert not ok and n["one_line_only"] == [cal[0]] and n["e_equal"] == 59, n
+    assert not base_gate(t1, split)[0] and not base_gate([], split)[0]
 
 
 def selftest_read(split):
@@ -314,7 +362,9 @@ def selftest_read(split):
              "distance_m": (0.06, 0.12)[h % 2], "e": 30, "prefix_ok": None if kind == "base" else True,
              "replay_miss": None, "skipped_reason": None, "calls_sched": 20, "calls_trig": 0,
              "success": None if kind == "base" else pos[c] % 100 < pct.get((a, d), pct.get(a, 50)),
-             "t_close": 40 if kind == "dynamic" or closed else None, "grasp_ok": pos[c] % 4 != 0,
+             "t_close": ({0: 25, 1: 30}.get(pos[c] % 7, 40) if kind == "base" else 40) if kind == "dynamic" or closed
+             else None,
+             "grasp_ok": pos[c] % 4 != 0,
              "grasp_miss_m": miss.get(a, 0.015) if kind == "dynamic" or closed else None}
         if kind == "base" and set(arms) & set(VSTS):  # VS-T's full Base: s* its offset at the close
             r["grasp_miss_m"] = 0.008 if closed else None
@@ -326,13 +376,14 @@ def selftest_read(split):
         return r
 
     def world(pct):
-        ctrl = [rec(x, pct) for L in "23" for x in cc.lkeys(cc.plan(L, mode, k, split))]
-        vt1 = [rec(x, pct) for x in cc.lkeys(plan("VT1", split=split))]
+        ctrl = [rec(x, pct) for L in "23" for x in sorted(cc.lkeys(cc.plan(L, mode, k, split)))]
+        vt1 = [rec(x, pct) for x in sorted(cc.lkeys(plan("VT1", split=split)))]
         vk = json.loads(json.dumps(select_vst(vt1, split)))
-        new = vt1 + [rec(x, pct) for L in CELL for x in cc.lkeys(plan(L, vk, split))]
-        vrecs = [rec(x[:8], pct, band) for L in ("V2", "V3") for x in cv.lkeys(cv.plan(L, pk, band, split))]
+        new = vt1 + [rec(x, pct) for L in CELL for x in sorted(cc.lkeys(plan(L, vk, split)))]
+        vrecs = [rec(x[:8], pct, band) for L in ("V2", "V3")
+                 for x in sorted(cv.lkeys(cv.plan(L, pk, band, split)))]
         vrecs += [r | {"success": r["success"] if r["kind"] == "base" else pos[r["case_id"]] % 100 < 70}
-                  for x in cv.lkeys(cv.plan("V2eps", pk, band, split)) for r in [rec(x[:8], pct, band | {
+                  for x in sorted(cv.lkeys(cv.plan("V2eps", pk, band, split))) for r in [rec(x[:8], pct, band | {
                       "delta": cv.EPS})]]  # V2eps (band > 15 mm): its PBVS at 70 %, never read as V2's
         saved = [rec(("m", P, c, kd, "none", d, False, ()), pct, gpu=False) for c in e300 for d in (0, 10, 20)
                  for kd in ("base", "dynamic")]
@@ -371,6 +422,10 @@ def selftest_read(split):
     ok = sum(j % 4 != 0 for j in closed)
     assert rep["reference"]["d20"] == {"bases": 300, "closed": 294, "closed_grasp_ok": ok,
                                        "share": round(ok / 294, 4)} and ok == 222, rep["reference"]
+    late = [j for j in closed if j % 7]  # a Base on a place 0 mod 7 closed at 25, before its e = 30; 1 mod 7 at 30
+    ok = sum(j % 4 != 0 for j in late)
+    assert rep["reference_close_after_e"]["d0"] == {"bases": len(late), "closed_grasp_ok": ok,
+                                                    "share": round(ok / len(late), 4)} and len(late) == 252, rep
     assert rep["vst_k"] == vk
     # line 2's frozen VS1.0 is never read here: its success leaves everything as it was
     r2 = rd(c=[r | {"success": not r["success"]} if r["arm"] == "VS1.0" else r for r in ctrl])
@@ -382,10 +437,12 @@ def selftest_read(split):
         kk: v for kk, v in rep.items() if kk != "vst-pbvs"}
 
     # the checks before reading, each alone
-    v2 = [r for r in new if r["d"] == 0 and r["arm"] == "VST0.3" and r["case_id"] in set(e300)]
+    v2 = sorted((r for r in new if r["d"] == 0 and r["arm"] == "VST0.3" and r["case_id"] in set(e300)),
+                key=lambda r: pos[r["case_id"]])  # VT2's VS-T episodes in the set's order
+    cl = next(r for r in v2 if r["vst"]["s_star"] is not None)  # a case whose Base closed
     for why, kw in {"complete": dict(n=[r for r in new if r not in v2[:7]]),  # 7 of VT2's 600 records (> 1 %)
                     "vst_k": dict(kk=vk | {"arm": "VST0.1"}),
-                    "s_star": dict(n=[r | {"vst": r["vst"] | {"s_star": [0.005, 0.0]}} if r is v2[3] else r
+                    "s_star": dict(n=[r | {"vst": r["vst"] | {"s_star": [0.005, 0.0]}} if r is cl else r
                                       for r in new]),
                     "conf": dict(n=[r | {"conf": r["conf"] | {"t_ramp": 4}} if r["d"] == 20 else r for r in new]),
                     "gauto_on_pod": dict(m=mode | {"pi05_lmax": {"mode": "P"}}),
@@ -397,7 +454,7 @@ def selftest_read(split):
         assert not ch["pass"] and (not c["pass"] if "pass" in c else not all(v["pass"] for v in c.values())), (why, c)
     # a reference without its Base's close, and one where the Base closed but s* is None: both off
     nb = next(r for r in v2 if r["vst"]["s_star"] is None)
-    for old, bad in ((nb, [0.0, 0.0]), (v2[3], None)):
+    for old, bad in ((nb, [0.0, 0.0]), (cl, None)):
         ch = rd([r | {"vst": r["vst"] | {"s_star": bad}} if r is old else r for r in new])["checks"]
         assert ch["s_star"] == {"off": {"VT2": 1}, "pass": False} and not ch["pass"], ch["s_star"]
     # 6 of VT2's 300 cases with another Base e: 98 % pass and the pairs drop (2 % of Т1/d0); 7 fail. 6 VS-T episodes
@@ -429,6 +486,7 @@ if __name__ == "__main__":
     g = ap.add_mutually_exclusive_group()
     g.add_argument("--plan", action="store_true", help="--line's runner lines")
     g.add_argument("--select-vst", nargs="+", metavar="JSONL", help="VT1's records -> vst_k.json")
+    g.add_argument("--base-gate", nargs="+", metavar="JSONL", help="V0's and VT1's records: exit 0, or 3")
     g.add_argument("--selftest", action="store_true")
     ap.add_argument("read", nargs="*", metavar="[read] JSONL", help="R/grid_all_T.jsonl: checks, measurements, report")
     ap.add_argument("--line", choices=LINES)
@@ -447,7 +505,7 @@ if __name__ == "__main__":
     load = lambda fs: [x for f in fs if Path(f).exists() for x in e2.load(f) if "kind" in x]  # noqa: E731
     jload = lambda f: json.loads(Path(f).read_text()) if Path(f).exists() else None  # noqa: E731
     a.read = a.read[a.read[:1] == ["read"]:]  # "read" before the files is optional
-    if bool(a.read) + sum(map(bool, (a.plan, a.select_vst, a.selftest))) != 1:
+    if bool(a.read) + sum(map(bool, (a.plan, a.select_vst, a.base_gate, a.selftest))) != 1:
         ap.error("one mode: an option of the group, or [read] JSONL...")
     if a.plan and not a.line:
         ap.error("--plan needs --line")
@@ -461,6 +519,11 @@ if __name__ == "__main__":
         Path(a.out or a.vst_k).parent.mkdir(parents=True, exist_ok=True)
         Path(a.out or a.vst_k).write_text(json.dumps(s, indent=1) + "\n")
         print(e2.dump(s))
+    elif a.base_gate:
+        ok, n = base_gate(load(a.base_gate), split)
+        print(e2.dump({"vt1_bases_as_v0": n, "pass": ok}))
+        print(f"C1-E4 VS-T base gate: {'PASS' if ok else 'FAIL'}")
+        raise SystemExit(0 if ok else 3)
     else:
         saved = load([Path(a.p2) / f for f in cc.SAVED["pi05_lmax"]])
         finish(read(load(a.read), load(a.controls), load(a.v), saved, jload(a.mode), jload(a.k), jload(a.band_json),

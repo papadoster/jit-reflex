@@ -323,6 +323,29 @@ def test_vst_s_star_from_the_same_runs_base():
     assert [json.loads(x) for x in run.lines(recs).splitlines()] == json.loads(json.dumps(recs))
 
 
+def test_vst_each_case_takes_its_own_bases_s_star():
+    """Two cases in one batch whose Bases close at different offsets (the second arm starts 6 cm off in x): each VST
+    episode takes its own case's s*."""
+
+    class Apart(Toy):
+        def start(self, case, arm, s):
+            pkg = super().start(case, arm, s)
+            if case["case_id"] == "toy-c1":
+                self.x = self.x + [0.06, 0.0, 0.0]
+                pkg = self._pkg()
+            return pkg
+
+    cases, got = [CASE, {**CASE, "case_id": "toy-c1"}], {}
+    recs = run.run_cases(cases, ["none", *VST_ARMS], conf(), [Apart(), Apart()], Closing(), log_traj=True)
+    for c in ("toy-c0", "toy-c1"):
+        base, dyn = by_arm([r for r in recs if r["case_id"] == c])
+        x, p, tc = np.array(base["traj"]["x"]), np.array(base["traj"]["p"]), base["t_close"]
+        for arm in VST_ARMS:
+            assert np.allclose(dyn[arm]["vst"]["s_star"], (x[tc] - p[tc])[:2], atol=2e-6), (c, arm)
+        got[c] = dyn["VST1.0"]["vst"]["s_star"]
+    assert np.linalg.norm(np.subtract(got["toy-c0"], got["toy-c1"])) > 0.01, got
+
+
 def test_vst_without_a_base_close_is_none():
     """A Base that never closed (Brain keeps the gripper open): s_star None, the VST episode is "none"'s bitwise and its
     window steps count as no_target."""

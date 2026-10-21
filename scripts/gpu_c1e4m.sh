@@ -84,9 +84,10 @@
 #               grid_all_V.jsonl, itself newer than every V line's file; refused while a cgrid / ctail / vgrid stage
 #               or a runner is live, or before controls lines 2 and 3 are complete). The platform, the C1-E4 tests with test_vservo,
 #               test_vst and both summaries' tests, the three summaries' selftests, then its own code record $O/CODE.t
-#               (CODE_PATHS + the PBVS and VS-T summaries). Then VT1 -> vst_k.json -> VT2 -> VT3d10 -> VT3d20, each by
-#               scripts/c1e4t_summary.py --plan --line L, every Base full (s* is its first close); vst_k.json is
-#               recomputed only when a VT1 file is newer. Then grid_all_T.jsonl and the reading (summary_T.json). A
+#               (CODE_PATHS + the PBVS and VS-T summaries). Then VT1 -> vst_k.json -> the base gate (VT1's 60 full
+#               Bases have V0's e, case by case; act_hash counted; else VT2 and VT3 wait) -> VT2 -> VT3d10 -> VT3d20,
+#               each by scripts/c1e4t_summary.py --plan --line L, every Base full (s* is its first close); vst_k.json
+#               is recomputed only when a VT1 file is newer. Then grid_all_T.jsonl and the reading (summary_T.json). A
 #               rerun resumes. Once the VS-T code is pulled, vgrid's check against $O/CODE.v refuses (src changed)
 # One stage at a time on a pod (flock). Each runner line has its own --out (block, brain, set, source, d), runs twice
 # (pass 2 resumes and retries failed groups, scripts/gpu_c1e3.sh's watchdog STALL, default 7200 s) and a stage fails if a
@@ -995,6 +996,11 @@ and VT3 pair with them"
       x ct --select-vst $O/VT1_*.jsonl | tee -a $W/vst_k.txt
       [ "${PIPESTATUS[0]}" = 0 ] || fail "the VS-T lambda selection failed (above): VT1 incomplete?"
     fi
+    # review of 2d962f9: VT1's full Bases are V0's (the same calibration cases in groups of 6, both full), so the
+    # Bases VS-T takes s* from replay as the pod ran them: every e equal, else VT2 and VT3 (~$3.9) wait; act_hash counted
+    x ct --base-gate $O/V0_*.jsonl $O/VT1_*.jsonl | tee -a $W/vst_k.txt
+    [ "${PIPESTATUS[0]}" = 0 ] || fail "VT1's Bases are not V0's (above: an e differs, or a case is in one line \
+only): VT2 and VT3 wait, the owner decides"
     for L in VT2 VT3d10 VT3d20; do
       cphase "$(tr A-Z a-z <<< $L)" --plan --line $L || fail "vtgrid: $L still fails after pass 2 (above)"
     done
