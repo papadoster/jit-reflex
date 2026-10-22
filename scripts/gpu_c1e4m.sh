@@ -1081,6 +1081,10 @@ $live"
     fi
     # the journal: VT-m on band_eps.json (band.json's model A, delta 5 mm: V2eps's)
     dry || [ -f $O/band_eps.json ] || fail "no $O/band_eps.json (vgrid's): VT-m runs on its model and 5 mm"
+    # the review of abc8041: its content too, band.json's model at 5 mm (a stale or wrong file would run silently)
+    x $SP -c "import json; e, b = (json.load(open(f'$O/{n}.json')) for n in ('band_eps', 'band'))
+assert e['delta'] == 0.005 and all(e[k] == b[k] for k in ('model', 'G', 'B')), (e, b)" \
+      || fail "$O/band_eps.json is not band.json's model at 5 mm (above): the owner decides"
     # Md0 and Md10 pair with controls lines 2 (PRO, d 0) and 3 (Plus, d 10): their cases, order and Base groups
     x cv --controls-check $O/C2_*.jsonl $O/C3_*.jsonl || refuse "controls lines 2 and 3 are not complete (above): Md0 \
 and Md10 pair with them"
