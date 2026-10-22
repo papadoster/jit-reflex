@@ -181,7 +181,9 @@ def read(new, ctrl, trecs, vrecs, vk, pk, band, names, split):
         raw[m, c] = est(p)
         meas[f"{m}/{c}"] = {"test": f"pi05, {ln['source']}, d = {c[1:]}: {ARM} - {a} ({ln['id']}), pp",
                             **e2.rnd(raw[m, c]), "invalid_pairs": bad(dr), "drops": dr}
-    vtm = {c: [r["vtm"] for r in of(("VTm", c), "dynamic").values()] for c in CELLS}
+    # the floor on valid episodes only (prefix_ok, no replay_miss: the pairs' validity; journal, after 14e048b's review)
+    vtm = {c: [r["vtm"] for r in of(("VTm", c), "dynamic").values()
+               if r.get("prefix_ok") is True and r.get("replay_miss") is None] for c in CELLS}
     fl = floor(vtm["d0"] + vtm["d10"])
     for c in CELLS:  # В2: d 0 measured only on an informative floor; d 10 never (target and gate mixed)
         meas[f"B2/{c}"] |= {"measured": c == "d0" and fl["informative"], "note": B2[c]}
@@ -413,6 +415,11 @@ def selftest_read(split):
         assert ("measurements" in r) == ok == r["checks"]["pass"], r["checks"]
         if ok:
             ms = r["measurements"]
+            # the floor counts valid episodes only: the invalid ones at d 0 (aims defined) and the missing one out
+            both = lambda x: x["vtm"]["a_floor"] is not None and x["vtm"]["a_first"] is not None  # noqa: E731
+            lost = [sum(both(x) for x in new if x["kind"] == "dynamic" and w(x)) for w in (
+                lambda x: x in d0[:n], lambda x: x["case_id"] == c2)]
+            assert lost[0] >= 1 and r["noise_floor"]["n"] == 37 + 61 - sum(lost), (lost, r["noise_floor"])
             assert (ms["main/d0"]["drops"], ms["main/d0"]["pairs"], ms["B1/d10"]["drops"], ms["main/d10"]["drops"]) \
                 == ({"invalid": 2}, 111, {"seed": 1, "missing": 1}, {"missing": 1}), ms
             assert ms["main/d0"]["diff_pp"] == want("d0", "VTm", "Gauto", win, cut) and ms["B1/d10"]["diff_pp"] == \
