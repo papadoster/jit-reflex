@@ -1,9 +1,10 @@
 """C1-E4 PBVS: position-based visual servoing next to the reflex, the reference from the policy's plan (pure numpy);
-and VS-T, the teach-by-showing servo, the reference from the paired full Base's grasp.
+VS-T, the teach-by-showing servo, the reference from the paired full Base's grasp; and VT-m, PBVS's machinery with
+VS-T's target.
 
 Spec: docs/superpowers/specs/2026-10-20-c1-e4-pbvs-design.md (VS-T: its journal "2026-10-21, 11:00 UTC — ветка VS-T
-гоняется"). Builds on src/gauto.py (the call conveyor, HAgent's engagement t_e, x_hist / p_hist, the first-close stop)
-and G's action conversion (objreflex.G_POS, clip +-1).
+гоняется"; VT-m: "2026-10-22 — ветка VT-m: формула и правила"). Builds on src/gauto.py (the call conveyor, HAgent's
+engagement t_e, x_hist / p_hist, the first-close stop) and G's action conversion (objreflex.G_POS, clip +-1).
 """
 
 import numpy as np
@@ -13,11 +14,12 @@ from objreflex import EPS, G_POS
 
 LAMBDAS = {f"PBVS{k}": k for k in (0.1, 0.3, 1.0)}  # spec §4: the gain grid, the share of e removed per step
 VST = {f"VST{k}": k for k in (0.1, 0.3, 1.0)}  # spec journal (VS-T): its own lambda selection by §4, the same grid
+VTM = {"VTm": 0.3}  # spec journal (VT-m): PBVS's and VS-T's lambda, inherited without a selection (disclosed)
 
 
 def parse_arm(label):
-    """gauto.parse_arm plus the PBVS and VS-T labels (oracle eyes only): "PBVS0.3" -> ("PBVS0.3", "")."""
-    return (label, "") if label in LAMBDAS or label in VST else gauto.parse_arm(label)
+    """gauto.parse_arm plus the PBVS, VS-T and VT-m labels (oracle eyes only): "PBVS0.3" -> ("PBVS0.3", "")."""
+    return (label, "") if label in LAMBDAS or label in VST or label in VTM else gauto.parse_arm(label)
 
 
 class PBVSAgent(gauto.GAgent):
@@ -69,7 +71,7 @@ class PBVSAgent(gauto.GAgent):
         while self.j < t:  # the path up to t: one increment per step (a catch-up once, at the first window step)
             self.dx = self.G * np.clip(self.sched.action(self.j)[:2], -1, 1) + self.B * self.dx
             self.w, self.j = self.w + self.dx, self.j + 1
-        e = (self.x_hist[t][:2] - self.w) - (self.p_hist[t] - self.p_hist[self.sched.t_obs])[:2]
+        e = self._e(t)
         ne, st = float(np.linalg.norm(e)), self.pbvs_stats
         st["steps_window"] += 1
         st["sum_e"] += ne
@@ -83,6 +85,10 @@ class PBVSAgent(gauto.GAgent):
             self.sgn = sg
         a[:2] = np.clip(np.clip(a[:2], -1, 1) - self.lam * e / G_POS, -1, 1)
         return a
+
+    def _e(self, t):
+        """e(t) on xy, the path w already at t (VT-m adds its aim here)."""
+        return (self.x_hist[t][:2] - self.w) - (self.p_hist[t] - self.p_hist[self.sched.t_obs])[:2]
 
 
 class VSTAgent(gauto.GAgent):
@@ -135,3 +141,58 @@ class VSTAgent(gauto.GAgent):
             self.sgn = sg
         a[:2] = np.clip(np.clip(a[:2], -1, 1) - self.lam * e / G_POS, -1, 1)
         return a
+
+
+class VTMAgent(PBVSAgent):
+    """spec journal "2026-10-22 — ветка VT-m: формула и правила (до кода и до данных B)": PBVS-B (anchor (b), the path w
+    by the arm model, z, G's window, the dead band, the command form) with VS-T's target. Built as PBVSAgent "PBVS0.3"
+    and relabelled VTm, lambda 0.3 inherited; band: band_eps.json (model A, delta 5 mm). Only e changes, on xy:
+    e(t) = (x(t) - w(t)) - (p(t) - p(t_obs_N)) + a_N. At each arrival t_a of a plan N (once, constant while N executes):
+    k_c = its first close row (last column > 0) among the rows it will still execute, k >= k0 = t_a - t_obs_N (the rows
+    the delay ate do not count), t_c = t_obs_N + k_c; w_hat(t_c) = x_N + sum_{j=t_a}^{t_c-1} D_j, PBVS's recursion from
+    the arrival state (anchor, D_{t_a-1}) on the same rows, the live path untouched; a_N = (w_hat(t_c) - p(t_obs_N))_xy
+    - s_star, s_star as VS-T's (the paired full Base's grasp offset; None: that Base never closed). a_N is None with no
+    close row ahead (no clamp, no skip) or no s_star. a_N is applied only when N was observed at or after t_e; a plan
+    observed before t_e (it did not see the shift) runs with a = 0, its a the noise floor, recorded only. With a = 0
+    VT-m is PBVS on the band. vtm_stats: PBVS's five counters plus steps_aim (window steps with a applied) and no_aim
+    (window steps under a plan observed at or after t_e whose a is None); a_floor: the a of the plan executing at
+    observe(t_e) (None: undefined), a_first: the a of the first plan observed at or after t_e with a defined."""
+
+    def __init__(self, method, s, d, band, s_star=None, **kw):
+        super().__init__("PBVS0.3", s, d, band, **kw)
+        self.method, self.lam = method, VTM[method]
+        self.s_star = None if s_star is None else np.array(s_star, float)[:2]
+        self.a = self.a_floor = self.a_first = None  # the executing plan's a; the record's two
+        self.aim = False  # the executing plan was observed at or after t_e: its a applies
+        self.vtm_stats = self.pbvs_stats = {**self.pbvs_stats, "steps_aim": 0, "no_aim": 0}
+
+    def observe(self, t, eef, obj, contact=False):
+        super().observe(t, eef, obj, contact)
+        if self.t_e == t:  # the plan executing at the engagement: before any arrival of step t_e
+            self.a_floor = self.a
+
+    def on_new_chunk(self):
+        super().on_new_chunk()
+        sc, ta = self.sched, self.j  # PBVSAgent's anchor: the path at t_a
+        k0 = ta - sc.t_obs
+        close = np.flatnonzero(np.asarray(sc.chunk, float)[k0:, -1] > 0)  # the rows N will still execute
+        self.a = None
+        if len(close) and self.s_star is not None:
+            w, dx, kc = self.w, self.dx, k0 + int(close[0])
+            for j in range(ta, sc.t_obs + kc):  # PBVSAgent._pbvs's recursion up to t_c = t_obs + k_c
+                dx = self.G * np.clip(sc.action(j)[:2], -1, 1) + self.B * dx
+                w = w + dx
+            self.a = (w - self.p_hist[sc.t_obs][:2]) - self.s_star
+        self.aim = self.t_e is not None and sc.t_obs >= self.t_e
+        if self.aim and self.a is not None and self.a_first is None:
+            self.a_first = self.a
+
+    def _e(self, t):
+        e = super()._e(t)
+        if not self.aim:  # observed before t_e: a = 0
+            return e
+        if self.a is None:
+            self.vtm_stats["no_aim"] += 1
+            return e
+        self.vtm_stats["steps_aim"] += 1
+        return e + self.a

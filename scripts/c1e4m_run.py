@@ -28,6 +28,9 @@ per process. Per case:
   in a run without --base-prefix (the Bases run to their ends); each Dynamic episode's s_star is its case's Base's
   gripper-to-object offset on xy at the Base's first executed close (orx.episode_metrics's t_close), None when the
   Base never closed. Their records carry "vst": s_star (rounded to 1e-6) and the servo's counters.
+- VTm (PBVS spec journal "2026-10-22 — ветка VT-m: формула и правила", src/vservo.py VTMAgent): PBVS's band of --band
+  (band_eps.json) in conf["pbvs"] and VS-T's s_star of the same run's full Base (no --base-prefix). Its records carry
+  "vtm": s_star, the servo's counters, a_floor and a_first (vectors rounded to 1e-6, None when undefined).
 - Time t: their policy step (total_env_steps - warmup_steps); e: their cosmos_query_boundary_step (Base: the would-be
   one), the first policy step whose observation is post-event. Brain noise seed: policy_seed + t (their runners);
   the shadow pair's: policy_seed + t_e.
@@ -148,7 +151,7 @@ def case_seed(case_id):
 
 def make_agent(arm, conf, seed, s_star=None):
     """scripts/c1e4_run.py make_agent (copied: Task 6 edits that file), oracle or GLR eyes; s_star: VS-T's reference
-    (VST arms only)."""
+    (VST and VTm arms only)."""
     method, noise = vservo.parse_arm(arm)
     assert noise in ("", "glr"), f"{arm}: part 2 on LIBERO-MAX runs the oracle and GLR eyes"
     kw = {"t_ramp": conf["t_ramp"], "k_p": conf["k_p"], "tau_k": conf["tau_k"], "K": gauto.K}
@@ -156,6 +159,8 @@ def make_agent(arm, conf, seed, s_star=None):
         return vservo.VSTAgent(method, conf["s"], conf["d"], s_star, **kw)
     if method in vservo.LAMBDAS:  # PBVS spec §2: oracle eyes, the band of V0 (--band)
         return vservo.PBVSAgent(method, conf["s"], conf["d"], conf["pbvs"], **kw)
+    if method in vservo.VTM:  # VT-m: oracle eyes, the band of --band and VS-T's s*
+        return vservo.VTMAgent(method, conf["s"], conf["d"], conf["pbvs"], s_star, **kw)
     if noise == "glr":
         kw["tracker"] = gauto.GLRKalman(seed, *gauto.NOISE)
     kbar = (gauto.KAPPA0[conf["brain"]] if method in ("Gk0", "Gk0T")
@@ -483,6 +488,10 @@ class Episode:
         if method in vservo.VST:  # VS-T: its reference and counters
             rec["vst"] = {"s_star": None if ag.s_star is None else np.round(ag.s_star, 6).tolist(),
                           **{k: round(v, 6) for k, v in ag.vst_stats.items()}}
+        if method in vservo.VTM:  # VT-m: its reference, counters and the noise floor's two aims
+            r6 = lambda v: None if v is None else np.round(v, 6).tolist()  # noqa: E731
+            rec["vtm"] = {"s_star": r6(ag.s_star), **{k: round(v, 6) for k, v in ag.vtm_stats.items()},
+                          "a_floor": r6(ag.a_floor), "a_first": r6(ag.a_first)}
         if self.kind == "base":  # cut by --base-prefix: its outcome is unknown
             rec["base_cut"] = self.cut
             if self.cut:
@@ -574,9 +583,9 @@ def run_cases(cases, arms, conf, envs, brain, wand=True, video_cases=(), video_d
               log_traj=False):
     """Base of every case, then their Dynamic arms, n = len(envs) episodes at a time. The records, per case Dynamic
     first and Base last. base_prefix: the Bases end at their batch's last event (controls spec §7, run_batch).
-    log_traj: Base records carry "traj" (PBVS spec §3). VST arms: s_star of each case's full Base."""
-    vst = bool({vservo.parse_arm(a)[0] for a in arms} & set(vservo.VST))
-    assert not (vst and base_prefix), "VS-T's s* is the full Base's first close: a run without --base-prefix"
+    log_traj: Base records carry "traj" (PBVS spec §3). VST and VTm arms: s_star of each case's full Base."""
+    vst = bool({vservo.parse_arm(a)[0] for a in arms} & {*vservo.VST, *vservo.VTM})
+    assert not (vst and base_prefix), "VS-T's and VT-m's s* is the full Base's first close: a run without --base-prefix"
     n, out, ready = len(envs), {}, []
     for c in cases:
         why = skip_reason(c, wand)
@@ -680,7 +689,7 @@ def main():
                    help="repeat the first brain call (same inputs and seeds) and print whether it matches bitwise")
     p.add_argument("--base-prefix", action="store_true",
                    help="controls spec §7: Base to the event only (a batch's Bases end together at its last event)")
-    p.add_argument("--band", help="PBVS arms: the band json of V0 (model, G, B, delta), PBVS spec §3")
+    p.add_argument("--band", help="PBVS and VTm arms: the band json of V0 (model, G, B, delta), PBVS spec §3")
     p.add_argument("--log-traj", action="store_true", help="PBVS spec §3: Base records carry x, p and the action xyz")
     args = p.parse_args()
     wand = shim()
@@ -689,11 +698,12 @@ def main():
     assert args.brain and args.source and args.set and args.out, "--brain, --source, --set and --out are required"
     arms = [a for a in args.arms.split(",") if a]
     methods = {vservo.parse_arm(a)[0] for a in arms}
-    pbvs = methods & set(vservo.LAMBDAS)
+    pbvs = methods & {*vservo.LAMBDAS, *vservo.VTM}
     assert args.band or not pbvs, f"{sorted(pbvs)} need --band"
     assert args.kbar is not None or not methods & {"Gauto", "GautoT"}, "G-auto needs --kbar"
     assert arms or not args.base_prefix, "--base-prefix cuts the Bases for Dynamic arms: a Base-only run keeps its ends"
-    assert not (methods & set(vservo.VST) and args.base_prefix), "VS-T arms need the full Base: no --base-prefix"
+    assert not (methods & {*vservo.VST, *vservo.VTM} and args.base_prefix), \
+        "VS-T and VT-m arms need the full Base: no --base-prefix"
     video = set(filter(None, args.video_cases.split(",")))
     assert not video or (args.video_dir and REPO not in Path(args.video_dir).resolve().parents
                          and Path(args.video_dir).resolve() != REPO), "videos need --video-dir outside the repository"
@@ -707,7 +717,7 @@ def main():
     conf = {"brain": args.brain, "revision": rev, "precision": precision, "s": args.s or Q[args.brain], "d": args.d,
             "kbar": args.kbar, "t_ramp": T_RAMP, "k_p": K_P, "tau_k": TAU_K, "R": cb.RES[args.brain], "arms": arms,
             "split": split["sha256"], "gpu": gpu}  # not --base-prefix: the summary compares conf with part 2's
-    if pbvs:  # only a PBVS run's conf (the resume key) holds the band
+    if pbvs:  # only a PBVS or VT-m run's conf (the resume key) holds the band
         conf["pbvs"] = json.loads(Path(args.band).read_text())
     from libero_max.manifest import load_manifest
     by_id = {c["case_id"]: c for c in load_manifest(Path(args.manifest))["cases"]}
