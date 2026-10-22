@@ -52,6 +52,10 @@ VS(1.0) и G — один метод, в таблицах он называет�
 
 > All four perturbation classes we test are translations of a single object under different dynamics: a jump, smooth motion, noisy eyes and inference delay. We did not test rotation of the object, a change of the grasp point, contact events or several moving objects, and our correction is blind to them by construction: it adds a translation to the plan, not a rotation.
 
+**9. Наследованный λ у ветки VT-m — смещение в нашу пользу, раскрыто** (владелец, 2026-10-22; спек PBVS, журнал «ветка VT-m»).
+
+> The teach-by-showing servo with memory (VT-m) inherits its gain λ = 0.3 and its 5 mm dead band from the plan-referenced and the teach-by-showing servos, without a selection of its own. Its error has a term the other two lack, the plan's predicted aim relative to the demonstration, so a gain chosen for their errors may be suboptimal for it. We did not tune it on purpose: by then we had seen the summaries, and any selection would have been post hoc. A suboptimal gain weakens exactly the branch whose win would overturn our claim, so this bias favours our conclusion. If VT-m still beats our reflex, the conclusion against us is the stronger for it; if it does not, part of the gap may be the price of the inherited gain.
+
 Источники: Chaumette & Hutchinson 2006 (Part I, ур. 1, 4) и 2007 (Part II, ур. 10–12); grasp-VS — GG-CNN (Morrison, Corke & Leitner, RSS 2018), Haviland, Dayoub & Corke 2020, Vahrenkamp et al. 2008; честный подбор усиления у регулятора-baseline — Lee, Levine & Abbeel, ICLR 2017 (§6.4, прил. C.5). В статье PPC (2605.11459v2) VS-baseline нет. Спек регулятора: [`2026-10-20-c1-e4-pbvs-design.md`](../superpowers/specs/2026-10-20-c1-e4-pbvs-design.md).
 
 ## Результаты
