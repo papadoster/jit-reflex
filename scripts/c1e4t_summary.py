@@ -31,6 +31,7 @@ from unittest import mock
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import c1e4k_summary as ck  # noqa: E402  (the journal's D: the C reading's bootstrap at 8000 resamples)
 import c1e4v_summary as cv  # noqa: E402
 from c1e4v_summary import OUT, P, TOL, cc, cs, e2, maxwrap, run, vservo  # noqa: E402
 
@@ -41,6 +42,8 @@ CELL = {"VT2": 0, "VT3d10": 10, "VT3d20": 20}  # the pair lines and their d: lin
 # conf equal across the read records except these (cv's): VS-T adds nothing to conf (its band is orx.EPS, s* per record)
 CONF_SKIP = cv.CONF_SKIP
 REF_TOL = 1e-5  # m: |s*| (rounded to 1e-6 per axis) against its Base's grasp_miss_m
+# the journal's D (2026-10-22, before computing): the groups the context chat set in writing
+DGROUPS = {"d0": (0,), "delay": (10, 20)}
 # measurement -> (test, VT lines it needs); the journal's Т1
 MEAS = {"Т1/d0": ("pi05, M1, d = 0, 300 pairs: VS-T - Gauto", ("VT2",)),
         "Т1/d10": ("pi05, D, d = 10, 300 pairs: VS-T - Gauto", ("VT3d10",)),
@@ -185,8 +188,35 @@ def read(new, ctrl, vrecs, saved, mode, k, band, pk, vk, names, split):
     if not all(v["pass"] for v in checks["invalid_pairs"].values()):
         checks["pass"] = False
         return {"checks": checks}
-    return {"checks": checks, "measurements": meas,
+    return {"checks": checks, "measurements": meas, "pooled_bound": pooled_bound(mi, clu, arm, e300),
             "report": report(mi, M, {L: of(L) for L in CELL}, arm, (pk or {}).get("arm") if vused else None, md, vk)}
+
+
+def pooled_bound(mi, clu, arm, cases):
+    """The journal's D (2026-10-22, written before computing): VS-T - Gauto per group of DGROUPS, Т1's pairs (cc.mp's
+    rule: both valid, e equal; a case whose Base never closed stays, VS-T idle there), A's procedure (ck.boot: every
+    pair weighs one, the task clusters with every d of a task in one, 8000 resamples, seed 0) with always both the
+    two-sided 95 % interval and the one-sided upper 95 % bound (cv.upper95, the same resamples); the valid pairs, the
+    drops by reason, the clusters; a secondary line without the pairs whose VS-T had no s*. A d not run: no pairs."""
+    out = {}
+    for g, ds in DGROUPS.items():
+        prs, flags, drops = [], [], Counter()
+        for d in ds:
+            x, y = mi.get((P, "dynamic", arm, d), {}), mi.get((P, "dynamic", "Gauto", d), {})
+            for c in sorted(cases):
+                why = ("missing" if c not in x or c not in y else "invalid_vst" if cs.invalid(x[c])
+                       else "invalid_gauto" if cs.invalid(y[c]) else "e" if x[c]["e"] != y[c]["e"] else None)
+                if why:
+                    drops[why] += 1
+                    continue
+                prs.append((c, clu[c], x[c]["success"], y[c]["success"]))
+                flags.append((x[c].get("vst") or {}).get("s_star") is None)
+        est = lambda ps: (e2.rnd(ck.boot((1, ps)) | {"hi95_one_sided": cv.upper95([q[1:] for q in ps])}) if ps  # noqa: E731
+                          else dict.fromkeys(("diff_pp", "lo2.5", "lo5_one_sided", "hi97.5", "hi95_one_sided",
+                                              "pairs", "clusters")))
+        out[g] = {"d": list(ds), **est(prs), "drops": dict(drops), "pairs_without_s_star": sum(flags),
+                  "without_s_star_pairs_out": est([q for q, f in zip(prs, flags) if not f])}
+    return out
 
 
 def report(mi, M, cells, arm, parm, md, vk):
@@ -408,6 +438,14 @@ def selftest_read(split):
     assert {n: ms[n]["diff_pp"] for n in want} == want and ms["Т1/pool"]["pairs"] == 600, ms
     assert all(ms[n]["pairs"] == 300 and ms[n]["invalid_pairs"] == 0 for n in want if n != "Т1/pool"), ms
     assert ms["Т1/pool"]["pooled_d"] == [10, 20] and ms["Т1/d0"]["lo2.5"] <= 8 <= ms["Т1/d0"]["hi97.5"], ms
+    # D: Т1/d0's and Т1/pool's pairs, 8000 resamples, both bounds always, the drops, the cases without s* (6 per d)
+    pb = res["pooled_bound"]
+    assert {g: (v["d"], v["diff_pp"], v["pairs"], v["clusters"], v["drops"], v["pairs_without_s_star"])
+            for g, v in pb.items()} == {"d0": ([0], 8, 300, ms["Т1/d0"]["clusters"], {}, 6),
+                                        "delay": ([10, 20], -1.5, 600, ms["Т1/pool"]["clusters"], {}, 12)}, pb
+    assert all(v["lo2.5"] <= v["diff_pp"] <= v["hi95_one_sided"] <= v["hi97.5"] and v["lo5_one_sided"] >= v["lo2.5"]
+               and v["without_s_star_pairs_out"]["pairs"] == v["pairs"] - v["pairs_without_s_star"]
+               for v in pb.values()), pb
     # the report: VS-T - PBVS, - PPCL, - none (через под), counters, grasp miss, the reference's quality
     assert {c: v["diff_pp"] for c, v in rep["vst-pbvs"].items()} == {"d0": 3, "d10": -8, "d20": 5}, rep["vst-pbvs"]
     assert {c: v["diff_pp"] for c, v in rep["vst-ppcl"].items()} == {"d0": 13, "d10": 7, "d20": 0}, rep["vst-ppcl"]
@@ -467,11 +505,18 @@ def selftest_read(split):
             "measurements" in r) == ok, r["checks"]["e_match"]
         if ok:
             assert r["measurements"]["Т1/d0"]["invalid_pairs"] == 6 and r["measurements"]["Т1/d0"]["pairs"] == 294
+            assert (r["pooled_bound"]["d0"]["pairs"], r["pooled_bound"]["d0"]["drops"]) == (294, {"e": 6}), r
         r = rd([x | {"prefix_ok": False} if x in v2 and x["case_id"] in cut else x for x in new])
+        assert not ok or r["pooled_bound"]["d0"]["drops"] == {"invalid_vst": n}, r.get("pooled_bound")
         assert r["checks"]["invalid_pairs"]["Т1/d0"] == {"pairs": 300, "invalid": n, "pass": ok} and (
             "measurements" in r) == ok == r["checks"]["pass"], r["checks"].get("invalid_pairs")
         if not ok:
             cc.exits(lambda: finish(r), 3)
+    # D: an invalid G-auto episode drops its pair for that reason
+    g0 = next(x for x in ctrl if x["kind"] == "dynamic" and x["arm"] == "Gauto" and x["d"] == 0
+              and x["case_id"] == e300[1])
+    pb = rd(c=[x | {"prefix_ok": False} if x is g0 else x for x in ctrl])["pooled_bound"]["d0"]
+    assert (pb["pairs"], pb["drops"]) == (299, {"invalid_gauto": 1}), pb
     # VT3d20 not run (the last line, cut): Т1 per d for the d that ran, the pool over it alone and named
     r = rd([x for x in new if not (x["d"] == 20)])
     ms2 = r["measurements"]
