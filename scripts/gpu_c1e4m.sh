@@ -46,7 +46,7 @@
 #               the runner code is connect's ($O/CODE). ONLY=<id regex>: only those lines (bench lines alone need no
 #               line of the other pod). The reading: on the Mac with both pods' grid_all files
 # POD=C pi0.5 + OFT+ (OFT with TAIL=1), the controls (controls spec): setup | cprobe | csmoke | cgrid | ctail | vgrid |
-# vtgrid | kgrid, each
+# vtgrid | kgrid | mgrid, each
 # after the previous one passed; every runner line at n-envs 6 (pass 2 too), part 2's batches (§7):
 #   setup       A's and B's without SmolVLA: the token check and pi0.5's SHA-256, venv-oft and OFT+'s weights (OFT's
 #               with TAIL=1), pytest
@@ -97,6 +97,14 @@
 #               --line L: G(k = 1.0), i.e. VS1.0, alone on line 3's Plus cases and Base groups of that d, --base-prefix)
 #               and grid_all_K.jsonl; the reading is on the Mac. A rerun resumes. Once its code is pulled, vtgrid's
 #               check against $O/CODE.t refuses (src changed)
+#   mgrid       VT-m, B (the PBVS spec's journal "2026-10-22 — ветка VT-m: формула и правила"), after kgrid's clean
+#               end (grid_all_K.jsonl newer than every K line's file; refused while another stage or a runner is live,
+#               without band_eps.json, or before controls lines 2 and 3 are complete). The platform, the C1-E4 tests
+#               with test_vtm and the five summaries' tests, their selftests, then its own code record $O/CODE.m. Then
+#               Md0 -> Md10 (scripts/c1e4b_summary.py --plan --line L: VTm alone, band_eps.json, every Base full (s* is
+#               its first close), on line 2's PRO cases at d 0 and line 3's Plus cases at d 10 in their Base groups)
+#               and grid_all_M.jsonl; the reading is on the Mac. A rerun resumes. Once its code is pulled, kgrid's
+#               check against $O/CODE.k refuses (src changed)
 # One stage at a time on a pod (flock). Each runner line has its own --out (block, brain, set, source, d), runs twice
 # (pass 2 resumes and retries failed groups, scripts/gpu_c1e3.sh's watchdog STALL, default 7200 s) and a stage fails if a
 # runner still exits non-zero after pass 2. Every exit appends the environment to $O/pod_env_<stage>.txt, refreshes
@@ -371,9 +379,10 @@ check_code() {  # check_code record|require: connect, calib, calib_more and grid
   [ "$(cat $O/CODE 2>/dev/null)" = "$h" ] || fail "the runner code is not connect's ($O/CODE): the owner decides (archive
     the results under $O and rerun from connect, or check out connect's commit)"
 }
-check_code_v() {  # check_code_v check|record [t|k], vgrid (PBVS spec §5) / vtgrid (t: the VS-T journal) / kgrid (k: the
-  local h f=$O/CODE.${2:-v}  # journal's C): the stage's own record $O/CODE.v / .t / .k of CODE_PATHS (its summaries added), written by record once its
-  # tests passed (its first line starts); then both require it. $O/CODE: the controls'
+check_code_v() {  # check_code_v check|record [t|k|m], vgrid (PBVS spec §5) / vtgrid (t: the VS-T journal) / kgrid
+  local h f=$O/CODE.${2:-v}  # (k: the journal's C) / mgrid (m: VT-m): the stage's own record $O/CODE.v / .t / .k / .m
+  # of CODE_PATHS (its summaries added), written by record once its tests passed (its first line starts); then both
+  # require it. $O/CODE: the controls'
   dry && { echo "+ check_code_${2:-v} $1 ($CODE_PATHS at HEAD vs $f)"; return; }
   h=$(code_hash) || exit 1
   [ -z "$(git status --porcelain -- $CODE_PATHS)" ] || { git status --short -- $CODE_PATHS
@@ -468,7 +477,8 @@ cc() { $SP scripts/c1e4c_summary.py "$@"; }  # POD=C: the controls summary (cont
 cv() { $SP scripts/c1e4v_summary.py "$@"; }  # POD=C vgrid: the PBVS summary (PBVS spec §3-§8)
 ct() { $SP scripts/c1e4t_summary.py "$@"; }  # POD=C vtgrid: the VS-T summary (the PBVS spec's VS-T journal)
 ck() { $SP scripts/c1e4k_summary.py "$@"; }  # POD=C kgrid: the kappa ablation's plan (the PBVS spec's journal, C)
-SUMM=cc  # the summary cphase plans with (vgrid: cv, vtgrid: ct, kgrid: ck); not CC, the C compiler's variable
+cb() { $SP scripts/c1e4b_summary.py "$@"; }  # POD=C mgrid: VT-m's plan (the PBVS spec's journal, B)
+SUMM=cc  # the summary cphase plans with (vgrid: cv, vtgrid: ct, kgrid: ck, mgrid: cb); not CC, the C compiler's variable
 cphase() {  # cphase <phase> <cc args..>: the summary's plan, run by run_phase. A dry run where the summary cannot plan
   local ph=$1 p q; shift  # yet (exit 3, on the Mac: no mode.json or k_select.json) prints the call instead
   if dry; then p=$($SUMM "$@" 2>$W/cc.err); q=$?; [ $q = 3 ] && { echo "+ $SUMM $*"; return 0; }; cat $W/cc.err
@@ -561,9 +571,9 @@ calib_line() {  # the pod's line from M0, B-cal and calib_more's records -> cali
 
 case "$POD:${1:-}" in
   [ABC]:setup | [AB]:smoke | [AB]:connect | [AB]:calib | [AB]:calib_more | [AB]:grid) ;;
-  C:cprobe | C:csmoke | C:cgrid | C:ctail | C:vgrid | C:vtgrid | C:kgrid) ;;
+  C:cprobe | C:csmoke | C:cgrid | C:ctail | C:vgrid | C:vtgrid | C:kgrid | C:mgrid) ;;
   *) echo "usage: POD=A|B $0 setup | smoke | connect | calib | calib_more | grid"
-     echo "       POD=C [TAIL=1] $0 setup | cprobe | csmoke | cgrid | ctail | vgrid | vtgrid | kgrid"; exit 1 ;;
+     echo "       POD=C [TAIL=1] $0 setup | cprobe | csmoke | cgrid | ctail | vgrid | vtgrid | kgrid | mgrid"; exit 1 ;;
 esac
 STAGE=$1
 # one stage at a time: a second instance would run the same episodes into the same files (the lock is outside results)
@@ -1056,5 +1066,41 @@ and Kd20 pair with line 3"
     done
     x sh -c "cat $O/K_*.jsonl > $O/grid_all_K.jsonl"
     echo "kgrid done: $O/grid_all_K.jsonl; the reading on the Mac (the journal's rule, before it is read)"
+    ;;
+  mgrid)  # the PBVS spec's journal "2026-10-22 — ветка VT-m: формула и правила", B: Md0, Md10, grid_all_M.jsonl
+    # kgrid's clean end: grid_all_K.jsonl newer than every K line's file, and no stage or runner live (the brackets keep
+    # pgrep from matching its own command line)
+    dry || { [ -f $O/grid_all_K.jsonl ] \
+      && [ -z "$(find $O -maxdepth 1 -name 'K_*.jsonl' -newer $O/grid_all_K.jsonl)" ]; } \
+      || fail "kgrid has not ended cleanly (grid_all_K.jsonl missing or older than a K line's file): mgrid starts \
+after it"
+    if ! dry; then
+      live=$(pgrep -af 'gpu_c1e4[m]\.sh +(cgrid|ctail|vgrid|vtgrid|kgrid)|c1e4m_ru[n]\.py|c1e4_ru[n]\.py')
+      [ -z "$live" ] || fail "a stage or a runner is live (below): mgrid starts after it ends
+$live"
+    fi
+    # the journal: VT-m on band_eps.json (band.json's model A, delta 5 mm: V2eps's)
+    dry || [ -f $O/band_eps.json ] || fail "no $O/band_eps.json (vgrid's): VT-m runs on its model and 5 mm"
+    # Md0 and Md10 pair with controls lines 2 (PRO, d 0) and 3 (Plus, d 10): their cases, order and Base groups
+    x cv --controls-check $O/C2_*.jsonl $O/C3_*.jsonl || refuse "controls lines 2 and 3 are not complete (above): Md0 \
+and Md10 pair with them"
+    CODE_PATHS+=" scripts/c1e4v_summary.py scripts/c1e4t_summary.py scripts/c1e4k_summary.py scripts/c1e4b_summary.py"
+    check_code_v check m
+    check_platform
+    x $P -m pytest -q tests/test_objreflex.py tests/test_gauto.py tests/test_handoff.py tests/test_lead.py \
+      tests/test_maxwrap.py tests/test_c1e4m_run.py tests/test_c1e4c_summary.py tests/test_c1e4m_brains.py \
+      tests/test_vservo.py tests/test_c1e4v_summary.py tests/test_vst.py tests/test_c1e4t_summary.py \
+      tests/test_c1e4k_summary.py tests/test_vtm.py tests/test_c1e4b_summary.py 2>&1 | tee $LOG/mgrid_tests.log
+    [ "${PIPESTATUS[0]}" = 0 ] || fail "the C1-E4 tests fail on the pod (above): the owner decides"
+    x cc --selftest && x cv --selftest && x ct --selftest && x ck --selftest && x cb --selftest \
+      || fail "a summary's selftest fails (above): the owner decides"
+    check_code_v record m  # the first mgrid's, once its tests passed: later mgrids require it
+    SUMM=cb  # cphase plans with VT-m's summary
+    echo "[$(date +%T)] mgrid, pod C: Md0, Md10" | tee -a $W/forecast.txt
+    for L in Md0 Md10; do
+      cphase "$(tr A-Z a-z <<< $L)" --plan --line $L || fail "mgrid: $L still fails after pass 2 (above)"
+    done
+    x sh -c "cat $O/M_*.jsonl > $O/grid_all_M.jsonl"
+    echo "mgrid done: $O/grid_all_M.jsonl; the reading on the Mac (the journal's rules, added before it is read)"
     ;;
 esac
