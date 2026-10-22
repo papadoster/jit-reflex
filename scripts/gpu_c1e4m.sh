@@ -99,12 +99,14 @@
 #               check against $O/CODE.t refuses (src changed)
 #   mgrid       VT-m, B (the PBVS spec's journal "2026-10-22 — ветка VT-m: формула и правила"), after kgrid's clean
 #               end (grid_all_K.jsonl newer than every K line's file; refused while another stage or a runner is live,
-#               without band_eps.json, or before controls lines 2 and 3 are complete). The platform, the C1-E4 tests
-#               with test_vtm and the five summaries' tests, their selftests, then its own code record $O/CODE.m. Then
-#               Md0 -> Md10 (scripts/c1e4b_summary.py --plan --line L: VTm alone, band_eps.json, every Base full (s* is
-#               its first close), on line 2's PRO cases at d 0 and line 3's Plus cases at d 10 in their Base groups)
-#               and grid_all_M.jsonl; the reading is on the Mac. A rerun resumes. Once its code is pulled, kgrid's
-#               check against $O/CODE.k refuses (src changed)
+#               without band_eps.json or pbvs_k.json, or before controls lines 2 and 3 are complete). The platform, the
+#               C1-E4 tests with test_vtm and the five summaries' tests, their selftests, then its own code record
+#               $O/CODE.m. Then Md0 -> Md10 -> Ed10 (scripts/c1e4b_summary.py --plan --line L: Md0, Md10 VTm alone,
+#               band_eps.json, every Base full (s* is its first close), on line 2's PRO cases at d 0 and line 3's Plus
+#               cases at d 10 in their Base groups; Ed10, the journal's "В2 под задержкой: PBVS на 5 мм при d = 10",
+#               pbvs_k.json's PBVS alone on band_eps.json, --base-prefix, on line 3's Plus cases and Base groups at
+#               d 10, as V3d10 Plus) and grid_all_M.jsonl (M_* and E_*); the reading is on the Mac. A rerun resumes.
+#               Once its code is pulled, kgrid's check against $O/CODE.k refuses (src changed)
 # One stage at a time on a pod (flock). Each runner line has its own --out (block, brain, set, source, d), runs twice
 # (pass 2 resumes and retries failed groups, scripts/gpu_c1e3.sh's watchdog STALL, default 7200 s) and a stage fails if a
 # runner still exits non-zero after pass 2. Every exit appends the environment to $O/pod_env_<stage>.txt, refreshes
@@ -1067,7 +1069,7 @@ and Kd20 pair with line 3"
     x sh -c "cat $O/K_*.jsonl > $O/grid_all_K.jsonl"
     echo "kgrid done: $O/grid_all_K.jsonl; the reading on the Mac (the journal's rule, before it is read)"
     ;;
-  mgrid)  # the PBVS spec's journal "2026-10-22 — ветка VT-m: формула и правила", B: Md0, Md10, grid_all_M.jsonl
+  mgrid)  # the PBVS spec's journal "2026-10-22 — ветка VT-m: формула и правила", B: Md0, Md10, Ed10, grid_all_M.jsonl
     # kgrid's clean end: grid_all_K.jsonl newer than every K line's file, and no stage or runner live (the brackets keep
     # pgrep from matching its own command line)
     dry || { [ -f $O/grid_all_K.jsonl ] \
@@ -1085,9 +1087,11 @@ $live"
     x $SP -c "import json; e, b = (json.load(open(f'$O/{n}.json')) for n in ('band_eps', 'band'))
 assert e['delta'] == 0.005 and all(e[k] == b[k] for k in ('model', 'G', 'B')), (e, b)" \
       || fail "$O/band_eps.json is not band.json's model at 5 mm (above): the owner decides"
-    # Md0 and Md10 pair with controls lines 2 (PRO, d 0) and 3 (Plus, d 10): their cases, order and Base groups
-    x cv --controls-check $O/C2_*.jsonl $O/C3_*.jsonl || refuse "controls lines 2 and 3 are not complete (above): Md0 \
-and Md10 pair with them"
+    # the journal "В2 под задержкой": Ed10 runs pbvs_k.json's arm (checked here, not after Md0 and Md10)
+    dry || [ -f $O/pbvs_k.json ] || fail "no $O/pbvs_k.json (vgrid's): Ed10 runs its arm"
+    # Md0, Md10 and Ed10 pair with controls lines 2 (PRO, d 0) and 3 (Plus, d 10): their cases, order and Base groups
+    x cv --controls-check $O/C2_*.jsonl $O/C3_*.jsonl || refuse "controls lines 2 and 3 are not complete (above): Md0, \
+Md10 and Ed10 pair with them"
     CODE_PATHS+=" scripts/c1e4v_summary.py scripts/c1e4t_summary.py scripts/c1e4k_summary.py scripts/c1e4b_summary.py"
     check_code_v check m
     check_platform
@@ -1100,11 +1104,11 @@ and Md10 pair with them"
       || fail "a summary's selftest fails (above): the owner decides"
     check_code_v record m  # the first mgrid's, once its tests passed: later mgrids require it
     SUMM=cb  # cphase plans with VT-m's summary
-    echo "[$(date +%T)] mgrid, pod C: Md0, Md10" | tee -a $W/forecast.txt
-    for L in Md0 Md10; do
+    echo "[$(date +%T)] mgrid, pod C: Md0, Md10, Ed10" | tee -a $W/forecast.txt
+    for L in Md0 Md10 Ed10; do
       cphase "$(tr A-Z a-z <<< $L)" --plan --line $L || fail "mgrid: $L still fails after pass 2 (above)"
     done
-    x sh -c "cat $O/M_*.jsonl > $O/grid_all_M.jsonl"
+    x sh -c "cat $O/M_*.jsonl $O/E_*.jsonl > $O/grid_all_M.jsonl"
     echo "mgrid done: $O/grid_all_M.jsonl; the reading on the Mac (the journal's rules, added before it is read)"
     ;;
 esac

@@ -1,12 +1,14 @@
 """C1-E4 VT-m (B): PBVS's machinery with VS-T's target (docs/superpowers/specs/2026-10-20-c1-e4-pbvs-design.md, its
 journal "2026-10-22 — ветка VT-m: формула и правила (до кода и до данных B)", "VT-m: уточнения по ходу реализации" and
 "VT-m: по ревью кода"), on pod C after a clean kgrid (scripts/gpu_c1e4m.sh POD=C mgrid): the runner plan per line and
-the reading (the checks, VT-m - G-auto with its outcome, В1 VT-m - VS-T, В2 VT-m - PBVS, the noise floor's rule, the
-counters). Reuses scripts/c1e4v_summary.py (the controls mode and k, groups, ids, unique, pairs, V2eps's key),
-scripts/c1e4t_summary.py (the VT lines, the s* check) and through them scripts/c1e4c_summary.py; run from the
-repository root. R = results/c1-e4/controls/pod_C:
-    python scripts/c1e4b_summary.py --plan --line L
-        L: Md0 Md10, the runner lines as c1e4c_summary --plan (phase: L in lower case)
+the reading (the checks, VT-m - G-auto with its outcome, В1 VT-m - VS-T, В2 VT-m - PBVS at 5 mm, the noise floor's rule,
+the counters); the journal's "В2 под задержкой: PBVS на 5 мм при d = 10" adds line Ed10, the PBVS of В2 at d 10. Reuses
+scripts/c1e4v_summary.py (the controls mode and k, groups, ids, unique, pairs, V2eps's key), scripts/c1e4t_summary.py
+(the VT lines, the s* check) and through them scripts/c1e4c_summary.py; run from the repository root.
+R = results/c1-e4/controls/pod_C:
+    python scripts/c1e4b_summary.py --plan --line L [--pbvs-k R/pbvs_k.json]
+        L: Md0 Md10 Ed10, the runner lines as c1e4c_summary --plan (phase: L in lower case); exit 3 when Ed10 needs
+        pbvs_k.json, not there yet
     python scripts/c1e4b_summary.py [read] R/grid_all_M.jsonl [--controls R/C2_*.jsonl R/C3_*.jsonl]
             [--t R/grid_all_T.jsonl] [--v R/grid_all_V.jsonl] [--vst-k R/vst_k.json] [--pbvs-k R/pbvs_k.json]
             [--band-json R/band.json] [--out R/summary_M.json]
@@ -32,12 +34,14 @@ from c1e4m_summary import P, TOL, e2, maxwrap, run  # noqa: E402
 
 ARM = "VTm"  # vservo.VTM: lambda 0.3 inherited
 BAND = f" --band {cc.OUT}/band_eps.json"  # the journal: model A of band.json, delta 5 mm
-# the journal's cells -> (source, d, the controls line it pairs with): d 0 PRO (VT2's, line 2's), d 10 Plus (VT3d10's,
-# line 3's)
-LINES = {"Md0": ("pro", 0, "2"), "Md10": ("plus", 10, "3")}
-CELLS = tuple(f"d{d}" for _, d, _ in LINES.values())
-# comparison -> the other side: main VT-m - G-auto, В1 VT-m - VS-T, В2 VT-m - PBVS (V2eps at d 0, V3d10 at d 10)
-COMP = {"main": "Gauto", "B1": "VST", "B2": "PBVS"}
+# the journal's lines -> (source, d, the controls line whose cases and groups they run): the cells' M lines, d 0 PRO
+# (VT2's, line 2's) and d 10 Plus (VT3d10's, line 3's), and Ed10 (PBVS at 5 mm, d 10 Plus: V3d10's, line 3's)
+LINES = {"Md0": ("pro", 0, "2"), "Md10": ("plus", 10, "3"), "Ed10": ("plus", 10, "3")}
+CELL = {"d0": "Md0", "d10": "Md10"}
+CELLS = tuple(CELL)
+# comparison -> the other side: main VT-m - G-auto, В1 VT-m - VS-T, В2 VT-m - PBVS at 5 mm (V2eps at d 0, Ed10 at d
+# 10), and at d 10 VT-m - V3d10 (band.json's gate, report only)
+COMP = {"main": "Gauto", "B1": "VST", "B2": "PBVS", "B2gate26": "PBVS26"}
 FLOOR_N, FLOOR_X = 30, 2  # the journal: >= 30 episodes with both aims (pooled), median signal >= 2 x median floor
 # the journal's reading of the main comparison, word for word
 MAIN = {"(i)": "«плоская кривая» снимается. Вывод: «информация полезна, беспамятная реализация неудачна». Пишем так, "
@@ -48,42 +52,53 @@ MAIN = {"(i)": "«плоская кривая» снимается. Вывод: 
                  "правило пола шума даёт «непоказательно», тезис этим исходом не усиливается."}
 B1 = {True: "провал VS-T под задержкой характеризует конструкцию (беспамятность), а не информацию — как и сказал "
             "рецензент", False: "не показано"}
-B2 = {"d0": "сравнение чистое: тот же порог 5 мм и та же модель (V2eps); измерено, только если пол шума показателен",
-      "d10": "только отчёт: против V3d10, где порог band.json — смешаны цель и порог; В2 при d = 10 остаётся "
-             "неизмеренным"}
+B2 = {"B2/d0": "сравнение чистое: тот же порог 5 мм и та же модель (V2eps); измерено, только если пол шума "
+               "показателен",
+      "B2/d10": "сравнение чистое: тот же порог 5 мм, та же модель и λ (Ed10); измерено, только если пол шума "
+                "показателен",
+      "B2gate26/d10": "только отчёт: против V3d10, где порог band.json — смешаны цель и порог; В2 при d = 10 остаётся "
+                      "неизмеренным"}
 
 
-def plan(line, split=None):
-    """The journal's lines, phase line.lower(), in c1e4c_summary.mlines's format: VTm alone on eval300's cases of one
-    source and d, the Base full (no --base-prefix: s* is its first close) in the same process, --band band_eps.json;
-    the controls line's cases, order and Base groups of that source and d (asserted), as VT2 PRO and VT3d10 Plus."""
+def plan(line, split=None, pk=None):
+    """The journal's lines, phase line.lower(), in c1e4c_summary.mlines's format, --band band_eps.json, the controls
+    line's cases, order and Base groups of that source and d (asserted). Md0, Md10: VTm alone on eval300's cases of one
+    source and d, the Base full (no --base-prefix: s* is its first close) in the same process, as VT2 PRO and VT3d10
+    Plus. Ed10: pbvs_k.json's arm (pk) on the Plus cases at d 10 with --base-prefix, as V3d10 Plus at 5 mm."""
     split = split or maxwrap.load_split(cs.SPLIT)
     src, d, cl = LINES[line]
+    arm = cv.need(pk, "pbvs_k.json", "arm") if line == "Ed10" else ARM
+    assert arm in (ARM, *cv.LAMS), arm
     one = lambda lns: [ln for ln in lns if ln["source"] == src and f"--d {d} " in ln["args"] + " "]  # noqa: E731
-    lns = [ln | {"args": ln["args"] + BAND} for ln in one(cc.mlines(line.lower(), "M", P, "eval300", (ARM,), split, d,
-                                                                       prefix=False))]
+    lns = [ln | {"args": ln["args"] + BAND} for ln in one(cc.mlines(line.lower(), line[0], P, "eval300", (arm,), split,
+                                                                       d, prefix=arm != ARM))]
     ctl = one(cc.plan(cl, cv.CMODE, cv.CK, split))
     assert len(lns) == 1 and cv.groups(lns, split) == cv.groups(ctl, split), \
         f"{line}: not controls line {cl}'s {src} cases, order and groups at d {d}"
     return lns
 
 
+def pick(lns, src, d):
+    """The one runner line of a scene source and d."""
+    (ln,) = [ln for ln in lns if ln["source"] == src and f"--d {d} " in ln["args"] + " "]
+    return ln
+
+
 def sides(vk, pk, band, split):
     """The runner lines the reading reads, {(side, cell): (records, arm, line)}: per cell (d0: PRO, d10: Plus) the M
-    line's VTm, the controls line's Gauto (line 2 / 3), the VT line's VS-T (VT2 / VT3d10: vst_k.json's arm) and the V
-    line's PBVS (V2eps / V3d10: pbvs_k.json's arm). records: M, C, T, V (grid_all_M, the controls, grid_all_T,
-    grid_all_V)."""
-    out = {}
-    for L, (src, d, cl) in LINES.items():
-        def one(lns, src=src, d=d):
-            (ln,) = [ln for ln in lns if ln["source"] == src and f"--d {d} " in ln["args"] + " "]
-            return ln
-        c = f"d{d}"
+    line's VTm, the controls line's Gauto (line 2 / 3), the VT line's VS-T (VT2 / VT3d10: vst_k.json's arm) and
+    pbvs_k.json's PBVS at 5 mm (V2eps / Ed10), and at d 10 PBVS26, V3d10's at band.json's gate. records: M, C, T, V
+    (grid_all_M with Ed10's, the controls, grid_all_T, grid_all_V)."""
+    out, arm = {}, cv.need(pk, "pbvs_k.json", "arm")
+    for c, L in CELL.items():
+        src, d, cl = LINES[L]
         out["VTm", c] = ("M", ARM, plan(L, split)[0])
-        out["Gauto", c] = ("C", "Gauto", one(cc.plan(cl, cv.CMODE, cv.CK, split)))
-        out["VST", c] = ("T", cv.need(vk, "vst_k.json", "arm"), one(ct.plan("VT2" if d == 0 else "VT3d10", vk, split)))
-        out["PBVS", c] = ("V", cv.need(pk, "pbvs_k.json", "arm"),
-                          one(cv.plan("V2eps" if d == 0 else "V3d10", pk, band, split)))
+        out["Gauto", c] = ("C", "Gauto", pick(cc.plan(cl, cv.CMODE, cv.CK, split), src, d))
+        out["VST", c] = ("T", cv.need(vk, "vst_k.json", "arm"),
+                         pick(ct.plan("VT2" if d == 0 else "VT3d10", vk, split), src, d))
+    out["PBVS", "d0"] = ("V", arm, pick(cv.plan("V2eps", pk, band, split), "pro", 0))
+    out["PBVS", "d10"] = ("M", arm, plan("Ed10", split, pk)[0])
+    out["PBVS26", "d10"] = ("V", arm, pick(cv.plan("V3d10", pk, band, split), "plus", 10))
     return out
 
 
@@ -123,11 +138,12 @@ def read(new, ctrl, trecs, vrecs, vk, pk, band, names, split):
     lines' VTm and full Bases among them; invalid pairs <= 2 % per comparison, a missing record not one; conf equal per
     d but cv.CONF_SKIP (arms, gpu, kbar, pbvs) across the read records; the M Bases' e equal to the VT Bases' on >= 98 %
     per cell; every VTm record's s* its own Base's first-close offset (ct.ref_ok); the M records on band_eps.json,
-    band.json's model at 5 mm), then the measurements, the noise floor, the reading and the counters. new:
-    grid_all_M.jsonl; ctrl: controls lines 2 and 3; trecs: grid_all_T.jsonl; vrecs: grid_all_V.jsonl (V2eps told from V2
-    by cv.vk). Pairs: the journal's (by case_id and policy_seed, the Bases' e equal), cv.pairs as the K reading's: one
-    Dynamic episode per side and case, the same seed, both valid, the two Bases' e equal. The noise floor over every
-    read VTm record (an invalid one too: its aims are its own plans'). Records off the plan are counted, never read."""
+    band.json's model at 5 mm, Ed10's too), then the measurements, the noise floor, the reading and the counters. new:
+    grid_all_M.jsonl (the M lines and Ed10); ctrl: controls lines 2 and 3; trecs: grid_all_T.jsonl; vrecs:
+    grid_all_V.jsonl (V2eps told from V2 by cv.vk). Pairs: the journal's (by case_id and policy_seed, the Bases' e
+    equal), cv.pairs as the K reading's: one Dynamic episode per side and case, the same seed, both valid, the two
+    Bases' e equal. The noise floor over the valid VTm records (prefix_ok, no replay_miss: the pairs' validity). Records
+    off the plan are counted, never read."""
     sd = sides(vk, pk, band, split)
     keyf = {"M": cc.lk, "C": cc.lk, "T": cc.lk, "V": lambda r: cv.vk(r, band)}
     kset = {"M": cc.lkeys, "C": cc.lkeys, "T": cc.lkeys, "V": cv.lkeys}
@@ -145,7 +161,7 @@ def read(new, ctrl, trecs, vrecs, vk, pk, band, names, split):
                                  "substrate_variant": r["substrate_variant"]}, names) for c, r in one.items()}
     pr = {(m, c): cv.pairs(of(("VTm", c), "dynamic"), of((o, c), "dynamic"), of(("VTm", c), "base"),
                            of((o, c), "base"), clu, cv.ids(sd["VTm", c][2], split))
-          for m, o in COMP.items() for c in CELLS}
+          for m, o in COMP.items() for c in CELLS if (o, c) in sd}
     bad = lambda drop: sum(v for w, v in drop.items() if w != "missing")  # noqa: E731  (missing: the completeness's)
     em, off = {}, {}
     for c in CELLS:  # the M Bases are the VT Bases (one deterministic Base); s* each record's own Base's
@@ -159,7 +175,7 @@ def read(new, ctrl, trecs, vrecs, vk, pk, band, names, split):
                                           sort_keys=True))
     mixed = {g: sorted(v) for g, v in conf.items() if len(v) > 1}
     epsb = band | {"delta": cv.EPS}  # band_eps.json
-    off_band = Counter(want[k][1] for k, r in used.items() if k[0] == "M" and r["conf"].get("pbvs") != epsb)
+    off_band = Counter("/".join(want[k]) for k, r in used.items() if k[0] == "M" and r["conf"].get("pbvs") != epsb)
     checks = {"records": len(new), "read": len(used),
               "skipped": sum(bool(r.get("skipped_reason")) for s, b in by.items() for x, r in b.items()
                              if (s, x) in want),
@@ -185,8 +201,8 @@ def read(new, ctrl, trecs, vrecs, vk, pk, band, names, split):
     vtm = {c: [r["vtm"] for r in of(("VTm", c), "dynamic").values()
                if r.get("prefix_ok") is True and r.get("replay_miss") is None] for c in CELLS}
     fl = floor(vtm["d0"] + vtm["d10"])
-    for c in CELLS:  # В2: d 0 measured only on an informative floor; d 10 never (target and gate mixed)
-        meas[f"B2/{c}"] |= {"measured": c == "d0" and fl["informative"], "note": B2[c]}
+    for n, note in B2.items():  # В2 at 5 mm measured only on an informative floor; at band.json's gate never
+        meas[n] |= {"measured": n.startswith("B2/") and fl["informative"], "note": note}
     mn = [raw["main", c] for c in CELLS]
     out = ("(i)" if any(v["lo5_one_sided"] > 0 for v in mn) else "(ii)" if all(v["diff_pp"] > 0 for v in mn)
            else "(iii)")
@@ -222,8 +238,9 @@ def finish(res, out=None):
 
 def selftest():
     """The plan on the real split: one line per cell, VTm alone, no --base-prefix, no kbar, --band band_eps.json, the
-    controls line's cases in its groups (every Base full: 113 PRO / 187 Plus cases, two episodes each); the
-    bootstrap; the floor's rule; the reading on a synthetic pod."""
+    controls line's cases in its groups (every Base full: 113 PRO / 187 Plus cases, two episodes each); Ed10,
+    pbvs_k.json's arm alone on V3d10's Plus cases and groups with --base-prefix at 5 mm (exit 3 without pbvs_k.json);
+    the bootstrap; the floor's rule; the reading on a synthetic pod."""
     split = maxwrap.load_split(cs.SPLIT)
     for line, ident, src, d, n in (("Md0", "M_pi05_eval300_pro_d0", "pro", 0, 226),
                                    ("Md10", "M_pi05_eval300_plus_d10", "plus", 10, 374)):
@@ -232,6 +249,16 @@ def selftest():
         assert ln["args"] == (f"--brain pi05 --source {src} --set eval300 --arms=VTm --d {d} "
                               "--band results/c1-e4/controls/pod_C/band_eps.json"), ln
         assert not ln["prefix"] and cc.n_of(ln) == n, ln
+    pk = {"arm": "PBVS0.3"}
+    (ln,) = plan("Ed10", split, pk)
+    v3 = pick(cv.plan("V3d10", pk, split=split), "plus", 10)
+    assert ln["id"] == "E_pi05_eval300_plus_d10" and ln["phase"] == "ed10" and ln["arms"] == ["PBVS0.3"], ln
+    assert ln["args"] == ("--brain pi05 --source plus --set eval300 --arms=PBVS0.3 --d 10 --base-prefix "
+                          "--band results/c1-e4/controls/pod_C/band_eps.json") == v3["args"].replace("band.json",
+                                                                                                  "band_eps.json"), ln
+    assert ln["prefix"] and cc.n_of(ln) == 187 and cv.ids(ln, split) == cv.ids(v3, split), ln
+    assert cv.groups([ln], split) == cv.groups([v3], split) and len(cv.groups([ln], split)) == 32, ln
+    cc.exits(lambda: plan("Ed10", split), 3)
     # the estimate is the VS-T reading's (e2.diff_pp, 2000 resamples), hi95 of the same resamples
     rng = np.random.default_rng(5)
     prs = [(j, f"t{j % 13}", rng.random() < 0.6, rng.random() < 0.4) for j in range(150)]
@@ -263,22 +290,32 @@ def selftest_floor():
 
 
 def selftest_read(split):
-    """The reading on a synthetic pod: the M lines, controls lines 2 and 3, VT2 and VT3d10, V2eps, V3d10 and V2
-    (band.json's PBVS at d 0, never В2's). Success by the case's place i in its cell in cycles of 4 (q: the places of
-    the 4 that succeed, by side and d), so the differences are exact; task clusters from fake LIBERO names; one policy
-    seed per case. A Base on a place 0 mod 50 never closed (its VT-m has no s*); both aims on places 0 mod 3 whose Base
-    closed."""
+    """The reading on a synthetic pod: the M lines and Ed10, controls lines 2 and 3, VT2 and VT3d10, V2eps, V3d10 (В2's
+    gate 26 entry, never В2/d10) and V2 (band.json's PBVS at d 0, never В2's). Success by the case's place i in its cell
+    in cycles of 4 (q: the places of the 4 that succeed, by side and d), so the differences are exact; task clusters
+    from fake LIBERO names; one policy seed per case. A Base on a place 0 mod 50 never closed (its VT-m has no s*); both
+    aims on places 0 mod 3 whose Base closed."""
     names = {s: [f"{s}_t{j}" for j in range(10)] for s in run.MAX_STEPS}
     vk, pk = {"arm": "VST0.3"}, {"arm": "PBVS0.3"}
     band = {"model": "A", "G": [0.0025, 0.0025], "B": [0.79, 0.79], "delta": 0.0262}
-    sd = sides(vk, pk, band, split)
-    cases = {c: cv.ids(sd["VTm", c][2], split) for c in CELLS}
+    epsb = band | {"delta": cv.EPS}
+    c2, c3 = (cc.plan(L, cv.CMODE, cv.CK, split) for L in "23")
+    # the pod's lines, built apart from sides(): (records, label of their PBVS0.3 arm, line, conf["pbvs"])
+    pod = [("M", None, plan("Md0", split)[0], epsb), ("M", None, plan("Md10", split)[0], epsb),
+           ("M", "PBVS", plan("Ed10", split, pk)[0], epsb), ("C", None, pick(c2, "pro", 0), None),
+           ("C", None, pick(c3, "plus", 10), None), ("T", None, pick(ct.plan("VT2", vk, split), "pro", 0), None),
+           ("T", None, pick(ct.plan("VT3d10", vk, split), "plus", 10), None),
+           ("V", "PBVS", pick(cv.plan("V2eps", pk, band, split), "pro", 0), epsb),
+           ("V", "PBVS26", pick(cv.plan("V3d10", pk, band, split), "plus", 10), band),
+           ("V", "V2", pick(cv.plan("V2", pk, band, split), "pro", 0), band)]
+    cases = {c: cv.ids(plan(L, split)[0], split) for c, L in CELL.items()}
     pos = {x: j for c in CELLS for j, x in enumerate(cases[c])}
-    v2 = next(ln for ln in cv.plan("V2", pk, band, split) if ln["source"] == "pro")
+    lab = {ARM: "VTm", "Gauto": "Gauto", "VST0.3": "VST"}
+    mns = [f"{m}/{c}" for m in ("main", "B1", "B2") for c in CELLS] + ["B2gate26/d10"]  # the measurements
     cf = {"brain": P, "revision": "r", "precision": "fp32", "s": 10, "t_ramp": 5, "k_p": 1.0, "tau_k": 0.01, "R": 360,
           "split": split["sha256"]}
     q = {("VTm", 0): 2, ("Gauto", 0): 2, ("VST", 0): 1, ("PBVS", 0): 3, ("V2", 0): 0,
-         ("VTm", 10): 3, ("Gauto", 10): 1, ("VST", 10): 2, ("PBVS", 10): 2}
+         ("VTm", 10): 3, ("Gauto", 10): 1, ("VST", 10): 2, ("PBVS", 10): 2, ("PBVS26", 10): 0}
     cyc = lambda q: lambda lab, d, i: i % 4 < q.get((lab, d), 0)  # noqa: E731
     aims = lambda i, d: (F, S) if i % 3 == 0 else None  # noqa: E731
 
@@ -302,12 +339,9 @@ def selftest_read(split):
 
     def world(win, fl=aims):
         out = defaultdict(list)
-        epsb = band | {"delta": cv.EPS}
-        for (lab, c), (s, a, ln) in sd.items():
-            pb = {"M": epsb, "V": epsb if c == "d0" else band}.get(s)
-            out[s] += [rec(x, lab if x[4] == a else x[4], win, fl, pb)
+        for s, pl, ln, pb in pod:
+            out[s] += [rec(x, pl if x[4] == "PBVS0.3" else lab.get(x[4], x[4]), win, fl, pb)
                        for x in sorted((cv.lkeys if s == "V" else cc.lkeys)([ln]))]
-        out["V"] += [rec(x, "V2", win, fl, band) for x in sorted(cv.lkeys([v2]))]
         return out["M"], out["C"], out["T"], out["V"]
 
     def want(c, a, b, win, out=()):  # a difference by hand: the mean paired difference over the cell's cases
@@ -322,15 +356,19 @@ def selftest_read(split):
     ch, ms, rg = res["checks"], res["measurements"], res["reading"]
     assert ch["pass"] and ch["off_plan"] == {f"{P}/VTm": 1} and ch["records"] == len(new) + 6, ch
     assert {n: (v["expected"], v["missing"]) for n, v in ch["complete"].items()} == {
-        f"{s}/{c}": (226 if c == "d0" else 374, 0) for c in CELLS for s in ("VTm", "Gauto", "VST", "PBVS")}, ch
+        f"{s}/{c}": (226 if c == "d0" else 374, 0) for c in CELLS for s in ("VTm", "Gauto", "VST", "PBVS")} | {
+        "PBVS26/d10": (374, 0)}, ch
+    assert list(ch["complete"])[-2:] == ["PBVS/d10", "PBVS26/d10"] and ch["band_in_conf"]["pass"], ch
     assert ch["e_match"] == {"d0": {"equal": 113, "total": 113, "pass": True},
                              "d10": {"equal": 187, "total": 187, "pass": True}} and ch["s_star"]["pass"], ch
     assert ch["invalid_pairs"] == {f"{m}/{c}": {"pairs": len(cases[c]), "invalid": 0, "pass": True}
-                                   for m in COMP for c in CELLS}, ch["invalid_pairs"]
-    # exact differences; В2 at d 0 against V2eps (75 %), never V2 (0 %)
+                                   for n in mns for m, c in [n.split("/")]}, ch["invalid_pairs"]
+    # exact differences; В2 at d 0 against V2eps (75 %), never V2 (0 %); at d 10 against Ed10 (50 %), never V3d10
+    # (0 %, its own entry)
     got = {n: v["diff_pp"] for n, v in ms.items()}
-    assert got == {f"{m}/{c}": want(c, "VTm", o, win) for m, o in COMP.items() for c in CELLS} and got["main/d0"] == 0 \
-        and got["B2/d0"] == want("d0", "VTm", "PBVS", win) != want("d0", "VTm", "V2", win), got
+    assert got == {n: want(c, "VTm", COMP[m], win) for n in mns for m, c in [n.split("/")]}, got
+    assert got["main/d0"] == 0 and got["B2/d0"] == want("d0", "VTm", "PBVS", win) != want("d0", "VTm", "V2", win) and \
+        got["B2/d10"] == want("d10", "VTm", "PBVS", win) != got["B2gate26/d10"] == want("d10", "VTm", "PBVS26", win)
     assert all(v["pairs"] == len(cases[n.split("/")[1]]) for n, v in ms.items()), ms
     assert all(v["lo2.5"] <= v["lo5_one_sided"] <= v["diff_pp"] <= v["hi95_one_sided"] <= v["hi97.5"]
                for v in ms.values()), ms
@@ -338,8 +376,9 @@ def selftest_read(split):
     assert {n: v["test"] for n, v in ms.items()} == {
         f"{m_}/{c}": f"pi05, {'pro' if c == 'd0' else 'plus'}, d = {c[1:]}: VTm - {a} ({i}), pp"
         for m_, a, i0, i10 in (("main", "Gauto", "C2_nv", "C3"), ("B1", "VST0.3", "VT2", "VT3"),
-                               ("B2", "PBVS0.3", "V2eps", "V3"))
-        for c, i in (("d0", f"{i0}_pi05_eval300_pro_d0"), ("d10", f"{i10}_pi05_eval300_plus_d10"))}, ms
+                               ("B2", "PBVS0.3", "V2eps", "E"), ("B2gate26", "PBVS0.3", None, "V3"))
+        for c, i in (("d0", f"{i0}_pi05_eval300_pro_d0"), ("d10", f"{i10}_pi05_eval300_plus_d10"))
+        if i0 or c != "d0"}, ms
     # the reading: (i) on d 10's one-sided lower bound; В1 at d 10 shown; the floor informative (98 episodes)
     assert m["lo5_one_sided"] > 0 and rg["main"] == {"outcome": "(i)", "sentence": MAIN["(i)"],
                                                      "noise_floor": "показательно", "label": None}, rg
@@ -347,8 +386,9 @@ def selftest_read(split):
     assert res["noise_floor"] == {"n": 37 + 61, "median_floor_m": 0.001, "median_signal_m": 0.003, "ratio": 3.0,
                                   "rule": "n >= 30, ratio >= 2", "informative": True, "verdict": "показательно",
                                   "why": None}, res["noise_floor"]
-    assert {c: (ms[f"B2/{c}"]["measured"], ms[f"B2/{c}"]["note"]) for c in CELLS} == {
-        "d0": (True, B2["d0"]), "d10": (False, B2["d10"])} and "смешаны цель и порог" in B2["d10"], ms
+    assert {n: (ms[n]["measured"], ms[n]["note"]) for n in B2} == {
+        "B2/d0": (True, B2["B2/d0"]), "B2/d10": (True, B2["B2/d10"]), "B2gate26/d10": (False, B2["B2gate26/d10"])} \
+        and "смешаны цель и порог" in B2["B2gate26/d10"] and "Ed10" in B2["B2/d10"], ms
     assert res["counters"] == {c: {"n": len(cases[c]), "s_star_none": k, "window": len(cases[c]), "acting_share": 0.25,
                                    "steps_aim_share": round(0.6 * (len(cases[c]) - k) / len(cases[c]), 4),
                                    "no_aim_share": round(0.6 * k / len(cases[c]), 4), "mean_e_m": 0.01}
@@ -383,14 +423,14 @@ def selftest_read(split):
     assert b["diff_pp"] == 0 < a["diff_pp"] and r == {"outcome": "(iii)", "sentence": MAIN["(iii)"],
                                                      "X_pp": {"d0": a["hi95_one_sided"], "d10": 0.0},
                                                      "noise_floor": "показательно", "label": None}, r
-    assert rr["iii"]["measurements"]["B2/d0"]["measured"]
+    assert rr["iii"]["measurements"]["B2/d0"]["measured"] and rr["iii"]["measurements"]["B2/d10"]["measured"]
     # (iii) on a floor that fails (1.5 mm against 1 mm) or is not computable (29 episodes): "непоказательно", В2 not
     # measured at d 0
     for n, why in (("iii_floor", "знание утонуло в невязке модели"), ("iii_n29", "не вычислимо: эпизодов с a_floor и "
                                                                                  "a_first 29 < 30")):
         r = rr[n]
         assert r["reading"]["main"]["outcome"] == "(iii)" and r["reading"]["main"]["label"] == "непоказательно" and \
-            r["noise_floor"]["why"] == why and not r["measurements"]["B2/d0"]["measured"], (n, r)
+            r["noise_floor"]["why"] == why and not any(r["measurements"][x]["measured"] for x in B2), (n, r)
     # (i) on d 0's one-sided bound alone: three flipped tasks, no flipped task in 2.5-5 % of the resamples (lo2.5 = 0
     # < lo5); d 10 one case. With no floor at all (n = 0) still (i), no label: a positive outcome withdraws the claim
     a, b = mn("i_one_sided")
@@ -417,7 +457,7 @@ def selftest_read(split):
             ms = r["measurements"]
             # the floor counts valid episodes only: the invalid ones at d 0 (aims defined) and the missing one out
             both = lambda x: x["vtm"]["a_floor"] is not None and x["vtm"]["a_first"] is not None  # noqa: E731
-            lost = [sum(both(x) for x in new if x["kind"] == "dynamic" and w(x)) for w in (
+            lost = [sum(both(x) for x in new if x["kind"] == "dynamic" and x["arm"] == ARM and w(x)) for w in (
                 lambda x: x in d0[:n], lambda x: x["case_id"] == c2)]
             assert lost[0] >= 1 and r["noise_floor"]["n"] == 37 + 61 - sum(lost), (lost, r["noise_floor"])
             assert (ms["main/d0"]["drops"], ms["main/d0"]["pairs"], ms["B1/d10"]["drops"], ms["main/d10"]["drops"]) \
@@ -432,11 +472,13 @@ def selftest_read(split):
     cl = next(x for x in d0 if x["vtm"]["s_star"] is not None)
     nb = next(x for x in d0 if x["vtm"]["s_star"] is None)
     veps = [x for x in vrecs if x["d"] == 0 and x["conf"]["pbvs"]["delta"] == cv.EPS]  # V2eps's
+    ed = [x for x in new if x["conf"]["arms"] == ["PBVS0.3"]]  # Ed10's
     for why, kw, ok in (("complete", dict(n=[x for x in new if x not in d0[:3]]), False),  # 3 of Md0's 226
                         ("complete", dict(n=[x for x in new if x not in d0[:2]]), True),
                         ("complete", dict(c=[x for x in ctrl if not (x["d"] == 10 and x["arm"] == "Gauto"
                                                                      and pos[x["case_id"]] < 4)]), False),  # 4 of 374
                         ("complete", dict(v=[x for x in vrecs if x not in veps[:3]]), False),  # V2's never fill in
+                        ("complete", dict(n=[x for x in new if x not in ed[:4]]), False),  # 4 of 374: V3d10's never
                         ("e_match", dict(n=[x | {"e": 31} if x in mb0[:3] else x for x in new]), False),  # 110 < 98 %
                         ("e_match", dict(n=[x | {"e": 31} if x in mb0[:2] else x for x in new]), True),
                         ("s_star", dict(n=[x | {"vtm": x["vtm"] | {"s_star": [0.005, 0.0]}} if x is cl else x
@@ -447,6 +489,8 @@ def selftest_read(split):
                                            for x in new]), False),
                         ("band_in_conf", dict(n=[x | {"conf": x["conf"] | {"pbvs": band}} if x is cl else x
                                                  for x in new]), False),
+                        ("band_in_conf", dict(n=[x | {"conf": x["conf"] | {"pbvs": band}} if x is ed[5] else x
+                                                 for x in new]), False),
                         ("conf", dict(n=[x | {"conf": x["conf"] | {"t_ramp": 4}} if x["d"] == 10 else x
                                          for x in new]), False)):
         r = rd(**kw)
@@ -456,7 +500,10 @@ def selftest_read(split):
         if not ok:
             cc.exits(lambda: finish(r), 3)
     r = rd([x | {"e": 31} if x in mb0[:2] else x for x in new])  # 2 Bases off: their pairs drop on all three sides
-    assert all(r["measurements"][f"{m}/d0"]["drops"] == {"e": 2} for m in COMP), r["measurements"]
+    assert all(r["measurements"][f"{m}/d0"]["drops"] == {"e": 2} for m in ("main", "B1", "B2")), r["measurements"]
+    eb = next(x for x in new if x["arm"] == "none" and x["conf"]["arms"] == ["PBVS0.3"])  # an Ed10 Base, another e
+    r = rd([x | {"e": 31} if x is eb else x for x in new])
+    assert {n: v["drops"] for n, v in r["measurements"].items() if v["drops"]} == {"B2/d10": {"e": 1}}, r
 
 
 if __name__ == "__main__":
@@ -473,7 +520,7 @@ if __name__ == "__main__":
     ap.add_argument("--v", nargs="+", default=[f"{cc.OUT}/grid_all_V.jsonl"], metavar="JSONL",
                     help="the reading: the V lines (PBVS, В2)")
     ap.add_argument("--vst-k", default=f"{cc.OUT}/vst_k.json", help="the reading: VS-T's arm")
-    ap.add_argument("--pbvs-k", default=f"{cc.OUT}/pbvs_k.json", help="the reading: PBVS's arm")
+    ap.add_argument("--pbvs-k", default=f"{cc.OUT}/pbvs_k.json", help="PBVS's arm (--plan --line Ed10, the reading)")
     ap.add_argument("--band-json", default=f"{cc.OUT}/band.json", help="the reading: V2eps apart from V2, band_eps")
     ap.add_argument("--out", help="the reading: JSON too")
     a = ap.parse_args()
@@ -487,7 +534,7 @@ if __name__ == "__main__":
     if a.selftest:
         selftest()
     elif a.plan:
-        print(cc.tsv(plan(a.line)))
+        print(cc.tsv(plan(a.line, pk=jload(a.pbvs_k))))
     else:
         band = jload(a.band_json)
         cv.need(band, "band.json", "delta")

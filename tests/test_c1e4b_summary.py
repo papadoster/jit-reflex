@@ -17,10 +17,11 @@ def test_selftest():
 
 
 def test_plan_asserts_the_controls_groups(monkeypatch):
-    for cell in (("pro", 0, "3"), ("plus", 10, "2")):  # no d 0 line in line 3, no d 10 one in line 2
-        monkeypatch.setitem(cb.LINES, "Md0", cell)
-        with pytest.raises(AssertionError, match="not controls line"):
-            cb.plan("Md0")
+    for line in ("Md0", "Ed10"):
+        for cell in (("pro", 0, "3"), ("plus", 10, "2")):  # no d 0 line in line 3, no d 10 one in line 2
+            monkeypatch.setitem(cb.LINES, line, cell)
+            with pytest.raises(AssertionError, match="not controls line"):
+                cb.plan(line, pk={"arm": "PBVS0.3"})
 
 
 def test_s_star_and_floor_on_the_runners_records(monkeypatch):
