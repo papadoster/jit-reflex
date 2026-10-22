@@ -1,0 +1,4 @@
+[12:05:59] chainM: waiting for chainK and kgrid to end
+[15:26:01] chainM: kgrid ended cleanly; waiting for mgrid on origin c1-e4
+[15:26:02] chainM: pulled 4469517 literature memo: two neighbours checked against arXiv on 2026-10-22, VLA
+[20:03:47] chainM: mgrid exit 0
