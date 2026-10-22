@@ -82,6 +82,10 @@ MEAS = {"Н1": ("pi05, M1, d = 0, 300 pairs: PBVS - Gauto", ("V2",)),
         "Н2/d20": ("pi05, D, d = 20, 300 pairs: PBVS - Gauto", ("V3d20",)),
         "Н2/pool": ("pi05, D, the d of pooled_d (10 and 20: 600 pairs; clusters: the task, its d in it): PBVS - Gauto",
                     ("V3d10", "V3d20")),
+        # journal 2026-10-22, A: applied before it was written, recorded post hoc; an estimate with a bound, no verdict
+        "Н/pool3": ("pi05, d = 0, 10, 20 pooled (the six delay cells, 900 pairs, equal episode weights; clusters: the "
+                    "task, its three d in it): PBVS - Gauto, with a one-sided upper 95 % bound of 8000 resamples",
+                    ("V2", "V3d10", "V3d20")),
         "Н3/d0": ("pi05, M1, d = 0: PBVS - PPCL", ("V2",)),
         "Н3/d10": ("pi05, D, d = 10: PBVS - PPCL", ("V3d10",)),
         "Н3/d20": ("pi05, D, d = 20: PBVS - PPCL", ("V3d20",)),
@@ -411,7 +415,8 @@ def read(new, ctrl, saved, mode, k, band, pk, names, split, nglr=NGLR):
     M = lambda a, b, d=0, cases=e300, idx=mi: cc.mp(idx, clu, P, a, b, d, cases)  # noqa: E731
     ae = f"{arm}/eps"
     prs = {"Н1": [M(arm, "Gauto")], "Н2/d10": [M(arm, "Gauto", 10)], "Н2/d20": [M(arm, "Gauto", 20)],
-           "Н2/pool": [M(arm, "Gauto", 10), M(arm, "Gauto", 20)], "Н3/d0": [M(arm, "PPCL")],
+           "Н2/pool": [M(arm, "Gauto", 10), M(arm, "Gauto", 20)],
+           "Н/pool3": [M(arm, "Gauto"), M(arm, "Gauto", 10), M(arm, "Gauto", 20)], "Н3/d0": [M(arm, "PPCL")],
            "Н3/d10": [M(arm, "PPCL", 10)], "Н3/d20": [M(arm, "PPCL", 20)], "И5": [M(*NGLR)],
            "Н1/eps": [M(ae, "Gauto")], "PBVSeps-PBVS": [M(ae, arm)]}
     d0 = lambda rs, a=None: {r["case_id"]: r for r in rs if r["d"] == 0 and (  # noqa: E731
@@ -436,6 +441,8 @@ def read(new, ctrl, saved, mode, k, band, pk, names, split, nglr=NGLR):
         miss = [L for L in Ls if not comp[L]["run"]]
         if n == "Н2/pool":  # the d that ran, named; a d not run is listed, never pooled in silence
             meas[n]["pooled_d"] = [V3D[L] for L in Ls if L not in miss]
+        if n == "Н/pool3" and ps and not miss:  # a d not run: no bound over a partial pool
+            meas[n]["hi95_one_sided_8000"] = upper95(ps)
         if miss:
             meas[n] |= {"lines_not_run": miss} | (dict.fromkeys(cc.EST) if n != "Н2/pool" or miss == list(Ls) else {})
         if n == "И5" and "PPC@glr" not in nglr:  # the source named, the drops by reason
@@ -477,6 +484,19 @@ def est(prs):
     """pairs' estimate: the mean of success x - success y in {-1, 0, 1} x 100 over the pairs (never a per-case mean),
     the cluster bootstrap by source task (e2.diff_pp: 2000 reps, percentile 95 %)."""
     return e2.rnd(e2.diff_pp([p[1:] for p in prs])) or dict.fromkeys(cc.EST)
+
+
+def upper95(prs, reps=8000):
+    """The journal's A (2026-10-22, the method recorded post hoc): the pooled paired difference's one-sided upper 95 %
+    bound, the 95th percentile of reps cluster resamples. prs: (cluster, success x, success y); e2.diff_pp's scheme
+    (pp, every pair weighs one, clusters resampled whole, generator seed 0) at 8000 reps instead of 2000."""
+    cl = defaultdict(list)
+    for c, a, b in prs:
+        cl[c].append(float(a) - float(b))
+    keys = sorted(cl)
+    s, n = np.array([sum(cl[k]) for k in keys]), np.array([len(cl[k]) for k in keys])
+    pick = np.random.default_rng(0).integers(len(keys), size=(reps, len(keys)))
+    return round(float(np.percentile(100 * s[pick].sum(1) / n[pick].sum(1), 95)), 3)
 
 
 def report(mi, m2, M, clu, one, e300, arm, ae, mode, band, pk, ep, gpu, checks, nglr=NGLR):
@@ -895,13 +915,17 @@ def selftest_read(split):
     assert set(ch["e_match"]) == {"V2/d0", "V3d10/d10", "V3d20/d20", "Nglr/d0"} and ch["e_match"]["V3d20/d20"] == {
         "equal": 300, "total": 300, "pass": True}, ch["e_match"]
     # the measurements: estimates and 95% CIs, no verdict, no threshold
-    assert list(ms) == list(MEAS)[:8] and all(not {"pass", "outcome"} & set(v) and not re.search("[<>≤≥]", v["test"])
+    assert list(ms) == list(MEAS)[:9] and all(not {"pass", "outcome"} & set(v) and not re.search("[<>≤≥]", v["test"])
                                               for v in ms.values()), ms
     want = {"Н1": 5, "Н2/d10": 10, "Н2/d20": -10, "Н2/pool": 0, "Н3/d0": 10, "Н3/d10": 15, "Н3/d20": -5, "И5": 3}
     assert {n: ms[n]["diff_pp"] for n in want} == want and ms["Н2/pool"]["pairs"] == 600, ms
     assert ms["Н2/pool"]["pooled_d"] == [10, 20] and not [n for n in ms if "lines_not_run" in ms[n]], ms
     assert all(ms[n]["pairs"] == 300 and ms[n]["invalid_pairs"] == 0 for n in want if n != "Н2/pool"), ms
     assert ms["Н2/pool"]["clusters"] == ms["Н2/d10"]["clusters"] and ms["Н1"]["lo2.5"] <= 5 <= ms["Н1"]["hi97.5"]
+    # A: the six cells pooled, 900 pairs, one weight per pair (5 + 10 - 10 over three equal d), the task clusters
+    p3 = ms["Н/pool3"]
+    assert p3["pairs"] == 900 and p3["diff_pp"] == round(5 / 3, 3) and p3["clusters"] == ms["Н1"]["clusters"], p3
+    assert p3["diff_pp"] < p3["hi95_one_sided_8000"] < p3["hi97.5"] + 0.5, p3
     # the report: PBVS - none through the pod, the gate, the slices, counters, grasp miss, retention
     assert rep["pbvs_none"]["PBVS0.3/d0"]["diff_pp"] == 25 and rep["pbvs_none"]["PBVS0.3/d0"]["через под"], rep
     assert list(rep["pbvs_gates"]) == ["V2"] and rep["pbvs_gates"]["V2"]["gate_m"] == FLOOR, rep["pbvs_gates"]
@@ -1028,6 +1052,7 @@ def selftest_read(split):
     assert ms["Н2/d10"]["diff_pp"] == 10 and ms["Н3/d10"]["diff_pp"] == 15 and ms["Н2/pool"] == ms["Н2/d10"] | {
         "test": MEAS["Н2/pool"][0], "pooled_d": [10], "lines_not_run": ["V3d20"]}, ms["Н2/pool"]
     assert all(ms[n]["diff_pp"] is None and ms[n]["lines_not_run"] == ["V3d20"] for n in ("Н2/d20", "Н3/d20")), ms
+    assert ms["Н/pool3"]["diff_pp"] is None and "hi95_one_sided_8000" not in ms["Н/pool3"], ms["Н/pool3"]
     assert r["report"]["grasp_miss"]["d20"]["n"] == 0 and r["report"]["grasp_miss"]["d10"]["n"] == 300, r["report"]
     # a band above 15 mm: V2eps (the servo at our 5 mm gate) runs, Н1 at that gate and PBVSeps - PBVS are measured,
     # both PBVS lines side by side with their gates; its records differ from V2's only in conf["pbvs"]["delta"]
