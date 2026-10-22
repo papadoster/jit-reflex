@@ -1,0 +1,1886 @@
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 23.589,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 11.95
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS0.3",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 1.57,
+   "usd": 0.58,
+   "left_hours": 1.57
+  },
+  "2": {
+   "episodes": 900,
+   "records": 1200,
+   "hours": 7.86,
+   "usd": 2.91,
+   "left_hours": 7.86
+  },
+  "3": {
+   "episodes": 1800,
+   "records": 2400,
+   "hours": 15.73,
+   "usd": 5.82,
+   "left_hours": 15.73
+  },
+  "4": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 0.83,
+   "usd": 0.31,
+   "left_hours": 0.83
+  },
+  "5": {
+   "episodes": 900,
+   "records": 1200,
+   "hours": 4.17,
+   "usd": 1.54,
+   "left_hours": 4.17
+  },
+  "6": {
+   "episodes": 260,
+   "records": 260,
+   "hours": 0.86,
+   "usd": 0.32,
+   "left_hours": 0.86
+  },
+  "7": {
+   "episodes": 1040,
+   "records": 1040,
+   "hours": 3.45,
+   "usd": 1.28,
+   "left_hours": 3.45
+  },
+  "8": {
+   "episodes": 600,
+   "records": 900,
+   "hours": 3.25,
+   "usd": 1.2,
+   "left_hours": 3.25
+  }
+ },
+ "core": {
+  "episodes": 5260,
+  "records": 6580,
+  "hours": 34.48,
+  "usd": 12.76,
+  "left_hours": 34.48
+ },
+ "core_tail": {
+  "episodes": 5860,
+  "records": 7480,
+  "hours": 37.72,
+  "usd": 13.96,
+  "left_hours": 37.72
+ }
+}
+[12:33:45] cgrid, pod C, lines 1 2 3 4 5 6
+[13:33:04] forecast after C1_pi05_calib_plus_d0 (lmax_pi05 20.367 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 20.367,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 11.95
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS0.3",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 1.36,
+   "usd": 0.5,
+   "left_hours": 0.41
+  },
+  "2": {
+   "episodes": 900,
+   "records": 1200,
+   "hours": 6.79,
+   "usd": 2.51,
+   "left_hours": 6.79
+  },
+  "3": {
+   "episodes": 1800,
+   "records": 2400,
+   "hours": 13.58,
+   "usd": 5.02,
+   "left_hours": 13.58
+  },
+  "4": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 0.83,
+   "usd": 0.31,
+   "left_hours": 0.83
+  },
+  "5": {
+   "episodes": 900,
+   "records": 1200,
+   "hours": 4.17,
+   "usd": 1.54,
+   "left_hours": 4.17
+  },
+  "6": {
+   "episodes": 260,
+   "records": 260,
+   "hours": 0.86,
+   "usd": 0.32,
+   "left_hours": 0.86
+  },
+  "7": {
+   "episodes": 1040,
+   "records": 1040,
+   "hours": 3.45,
+   "usd": 1.28,
+   "left_hours": 3.45
+  },
+  "8": {
+   "episodes": 600,
+   "records": 900,
+   "hours": 3.25,
+   "usd": 1.2,
+   "left_hours": 3.25
+  }
+ },
+ "core": {
+  "episodes": 5260,
+  "records": 6580,
+  "hours": 31.04,
+  "usd": 11.48,
+  "left_hours": 30.09
+ },
+ "core_tail": {
+  "episodes": 5860,
+  "records": 7480,
+  "hours": 34.29,
+  "usd": 12.69,
+  "left_hours": 33.34
+ }
+}
+[13:51:56] forecast after C1_pi05_calib_pro_d0 (lmax_pi05 13.743 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 13.743,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 11.95
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS0.3",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 0.92,
+   "usd": 0.34,
+   "left_hours": 0.0
+  },
+  "2": {
+   "episodes": 900,
+   "records": 1200,
+   "hours": 4.58,
+   "usd": 1.69,
+   "left_hours": 4.58
+  },
+  "3": {
+   "episodes": 1800,
+   "records": 2400,
+   "hours": 9.16,
+   "usd": 3.39,
+   "left_hours": 9.16
+  },
+  "4": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 0.83,
+   "usd": 0.31,
+   "left_hours": 0.83
+  },
+  "5": {
+   "episodes": 900,
+   "records": 1200,
+   "hours": 4.17,
+   "usd": 1.54,
+   "left_hours": 4.17
+  },
+  "6": {
+   "episodes": 260,
+   "records": 260,
+   "hours": 0.86,
+   "usd": 0.32,
+   "left_hours": 0.86
+  },
+  "7": {
+   "episodes": 1040,
+   "records": 1040,
+   "hours": 3.45,
+   "usd": 1.28,
+   "left_hours": 3.45
+  },
+  "8": {
+   "episodes": 600,
+   "records": 900,
+   "hours": 3.25,
+   "usd": 1.2,
+   "left_hours": 3.25
+  }
+ },
+ "core": {
+  "episodes": 5260,
+  "records": 6580,
+  "hours": 23.97,
+  "usd": 8.87,
+  "left_hours": 23.06
+ },
+ "core_tail": {
+  "episodes": 5860,
+  "records": 7480,
+  "hours": 27.22,
+  "usd": 10.07,
+  "left_hours": 26.31
+ }
+}
+[16:07:59] cgrid, pod C, lines 1 2 3 7
+[16:08:05] forecast after C1_pi05_calib_plus_d0 (lmax_pi05 20.367 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 20.367,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 11.95
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS1.0",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 1.36,
+   "usd": 0.5,
+   "left_hours": 0.0
+  },
+  "2": {
+   "episodes": 708,
+   "records": 1008,
+   "hours": 5.7,
+   "usd": 2.11,
+   "left_hours": 3.26
+  },
+  "3": {
+   "episodes": 1200,
+   "records": 1800,
+   "hours": 10.18,
+   "usd": 3.77,
+   "left_hours": 10.18
+  },
+  "4": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "5": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "6": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "7": {
+   "episodes": 520,
+   "records": 520,
+   "hours": 1.73,
+   "usd": 0.64,
+   "left_hours": 1.73
+  },
+  "8": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  }
+ },
+ "core": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 18.97,
+  "usd": 7.02,
+  "left_hours": 15.17
+ },
+ "core_tail": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 18.97,
+  "usd": 7.02,
+  "left_hours": 15.17
+ }
+}
+[16:08:10] forecast after C1_pi05_calib_pro_d0 (lmax_pi05 13.743 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 13.743,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 11.95
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS1.0",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 0.92,
+   "usd": 0.34,
+   "left_hours": 0.0
+  },
+  "2": {
+   "episodes": 708,
+   "records": 1008,
+   "hours": 3.85,
+   "usd": 1.42,
+   "left_hours": 2.2
+  },
+  "3": {
+   "episodes": 1200,
+   "records": 1800,
+   "hours": 6.87,
+   "usd": 2.54,
+   "left_hours": 6.87
+  },
+  "4": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "5": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "6": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "7": {
+   "episodes": 520,
+   "records": 520,
+   "hours": 1.73,
+   "usd": 0.64,
+   "left_hours": 1.73
+  },
+  "8": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  }
+ },
+ "core": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 13.36,
+  "usd": 4.94,
+  "left_hours": 10.8
+ },
+ "core_tail": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 13.36,
+  "usd": 4.94,
+  "left_hours": 10.8
+ }
+}
+[16:08:17] forecast after C2_pi05_eval300_plus_d0 (lmax_pi05 17.880 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 17.88,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 11.95
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS1.0",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 1.19,
+   "usd": 0.44,
+   "left_hours": 0.0
+  },
+  "2": {
+   "episodes": 708,
+   "records": 1008,
+   "hours": 5.01,
+   "usd": 1.85,
+   "left_hours": 2.86
+  },
+  "3": {
+   "episodes": 1200,
+   "records": 1800,
+   "hours": 8.94,
+   "usd": 3.31,
+   "left_hours": 8.94
+  },
+  "4": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "5": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "6": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "7": {
+   "episodes": 520,
+   "records": 520,
+   "hours": 1.73,
+   "usd": 0.64,
+   "left_hours": 1.73
+  },
+  "8": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  }
+ },
+ "core": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 16.86,
+  "usd": 6.24,
+  "left_hours": 13.53
+ },
+ "core_tail": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 16.86,
+  "usd": 6.24,
+  "left_hours": 13.53
+ }
+}
+[17:23:47] forecast after C2_nv_pi05_eval300_plus_d0 (lmax_pi05 18.508 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 18.508,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 11.95
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS1.0",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 1.23,
+   "usd": 0.46,
+   "left_hours": 0.0
+  },
+  "2": {
+   "episodes": 708,
+   "records": 1008,
+   "hours": 5.18,
+   "usd": 1.92,
+   "left_hours": 1.74
+  },
+  "3": {
+   "episodes": 1200,
+   "records": 1800,
+   "hours": 9.25,
+   "usd": 3.42,
+   "left_hours": 9.25
+  },
+  "4": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "5": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "6": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "7": {
+   "episodes": 520,
+   "records": 520,
+   "hours": 1.73,
+   "usd": 0.64,
+   "left_hours": 1.73
+  },
+  "8": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  }
+ },
+ "core": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 17.4,
+  "usd": 6.44,
+  "left_hours": 12.72
+ },
+ "core_tail": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 17.4,
+  "usd": 6.44,
+  "left_hours": 12.72
+ }
+}
+[19:04:28] forecast after C2_nv_pi05_eval300_pro_d0 (lmax_pi05 17.403 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 17.403,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 11.95
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS1.0",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 1.16,
+   "usd": 0.43,
+   "left_hours": 0.0
+  },
+  "2": {
+   "episodes": 708,
+   "records": 1008,
+   "hours": 4.87,
+   "usd": 1.8,
+   "left_hours": 0.0
+  },
+  "3": {
+   "episodes": 1200,
+   "records": 1800,
+   "hours": 8.7,
+   "usd": 3.22,
+   "left_hours": 8.7
+  },
+  "4": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "5": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "6": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "7": {
+   "episodes": 520,
+   "records": 520,
+   "hours": 1.73,
+   "usd": 0.64,
+   "left_hours": 1.73
+  },
+  "8": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  }
+ },
+ "core": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 16.46,
+  "usd": 6.09,
+  "left_hours": 10.43
+ },
+ "core_tail": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 16.46,
+  "usd": 6.09,
+  "left_hours": 10.43
+ }
+}
+[22:27:27] forecast after C3_pi05_eval300_plus_d10 (lmax_pi05 21.460 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 21.46,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 11.95
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS1.0",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 1.43,
+   "usd": 0.53,
+   "left_hours": 0.0
+  },
+  "2": {
+   "episodes": 708,
+   "records": 1008,
+   "hours": 6.01,
+   "usd": 2.22,
+   "left_hours": 0.0
+  },
+  "3": {
+   "episodes": 1200,
+   "records": 1800,
+   "hours": 10.73,
+   "usd": 3.97,
+   "left_hours": 7.39
+  },
+  "4": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "5": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "6": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "7": {
+   "episodes": 520,
+   "records": 520,
+   "hours": 1.73,
+   "usd": 0.64,
+   "left_hours": 1.73
+  },
+  "8": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  }
+ },
+ "core": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 19.9,
+  "usd": 7.36,
+  "left_hours": 9.11
+ },
+ "core_tail": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 19.9,
+  "usd": 7.36,
+  "left_hours": 9.11
+ }
+}
+[00:09:34] forecast after C3_pi05_eval300_pro_d10 (lmax_pi05 17.637 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 17.637,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 11.95
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS1.0",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 1.18,
+   "usd": 0.44,
+   "left_hours": 0.0
+  },
+  "2": {
+   "episodes": 708,
+   "records": 1008,
+   "hours": 4.94,
+   "usd": 1.83,
+   "left_hours": 0.0
+  },
+  "3": {
+   "episodes": 1200,
+   "records": 1800,
+   "hours": 8.82,
+   "usd": 3.26,
+   "left_hours": 4.41
+  },
+  "4": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "5": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "6": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "7": {
+   "episodes": 520,
+   "records": 520,
+   "hours": 1.73,
+   "usd": 0.64,
+   "left_hours": 1.73
+  },
+  "8": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  }
+ },
+ "core": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 16.66,
+  "usd": 6.16,
+  "left_hours": 6.14
+ },
+ "core_tail": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 16.66,
+  "usd": 6.16,
+  "left_hours": 6.14
+ }
+}
+[03:19:06] forecast after C3_pi05_eval300_plus_d20 (lmax_pi05 20.032 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 20.032,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 11.95
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS1.0",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 1.34,
+   "usd": 0.49,
+   "left_hours": 0.0
+  },
+  "2": {
+   "episodes": 708,
+   "records": 1008,
+   "hours": 5.61,
+   "usd": 2.08,
+   "left_hours": 0.0
+  },
+  "3": {
+   "episodes": 1200,
+   "records": 1800,
+   "hours": 10.02,
+   "usd": 3.71,
+   "left_hours": 1.89
+  },
+  "4": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "5": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "6": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "7": {
+   "episodes": 520,
+   "records": 520,
+   "hours": 1.73,
+   "usd": 0.64,
+   "left_hours": 1.73
+  },
+  "8": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  }
+ },
+ "core": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 18.69,
+  "usd": 6.91,
+  "left_hours": 3.61
+ },
+ "core_tail": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 18.69,
+  "usd": 6.91,
+  "left_hours": 3.61
+ }
+}
+[04:57:12] forecast after C3_pi05_eval300_pro_d20 (lmax_pi05 16.983 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 16.983,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 11.95
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS1.0",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 1.13,
+   "usd": 0.42,
+   "left_hours": 0.0
+  },
+  "2": {
+   "episodes": 708,
+   "records": 1008,
+   "hours": 4.76,
+   "usd": 1.76,
+   "left_hours": 0.0
+  },
+  "3": {
+   "episodes": 1200,
+   "records": 1800,
+   "hours": 8.49,
+   "usd": 3.14,
+   "left_hours": 0.0
+  },
+  "4": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "5": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "6": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "7": {
+   "episodes": 520,
+   "records": 520,
+   "hours": 1.73,
+   "usd": 0.64,
+   "left_hours": 1.73
+  },
+  "8": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  }
+ },
+ "core": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 16.11,
+  "usd": 5.96,
+  "left_hours": 1.73
+ },
+ "core_tail": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 16.11,
+  "usd": 5.96,
+  "left_hours": 1.73
+ }
+}
+[07:40:18] forecast after C7_pi05 (bench_pi05 18.258 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 16.983,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 18.258
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS1.0",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 1.13,
+   "usd": 0.42,
+   "left_hours": 0.0
+  },
+  "2": {
+   "episodes": 708,
+   "records": 1008,
+   "hours": 4.76,
+   "usd": 1.76,
+   "left_hours": 0.0
+  },
+  "3": {
+   "episodes": 1200,
+   "records": 1800,
+   "hours": 8.49,
+   "usd": 3.14,
+   "left_hours": 0.0
+  },
+  "4": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "5": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "6": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "7": {
+   "episodes": 520,
+   "records": 520,
+   "hours": 2.64,
+   "usd": 0.98,
+   "left_hours": 0.0
+  },
+  "8": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  }
+ },
+ "core": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 17.02,
+  "usd": 6.3,
+  "left_hours": 0.0
+ },
+ "core_tail": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 17.02,
+  "usd": 6.3,
+  "left_hours": 0.0
+ }
+}
+[08:17:16] forecast after C5ppc_pi05_eval300_plus_d0 (lmax_pi05 15.755 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 15.755,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 18.258
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS1.0",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 1.05,
+   "usd": 0.39,
+   "left_hours": 0.0
+  },
+  "2": {
+   "episodes": 708,
+   "records": 1008,
+   "hours": 4.41,
+   "usd": 1.63,
+   "left_hours": 0.0
+  },
+  "3": {
+   "episodes": 1200,
+   "records": 1800,
+   "hours": 7.88,
+   "usd": 2.91,
+   "left_hours": 0.0
+  },
+  "4": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "5": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "6": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "7": {
+   "episodes": 520,
+   "records": 520,
+   "hours": 2.64,
+   "usd": 0.98,
+   "left_hours": 0.0
+  },
+  "8": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  }
+ },
+ "core": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 15.98,
+  "usd": 5.91,
+  "left_hours": 0.0
+ },
+ "core_tail": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 15.98,
+  "usd": 5.91,
+  "left_hours": 0.0
+ }
+}
+[08:46:49] forecast after C5ppc_pi05_eval300_pro_d0 (lmax_pi05 13.913 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 13.913,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 18.258
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS1.0",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 0.93,
+   "usd": 0.34,
+   "left_hours": 0.0
+  },
+  "2": {
+   "episodes": 708,
+   "records": 1008,
+   "hours": 3.9,
+   "usd": 1.44,
+   "left_hours": 0.0
+  },
+  "3": {
+   "episodes": 1200,
+   "records": 1800,
+   "hours": 6.96,
+   "usd": 2.57,
+   "left_hours": 0.0
+  },
+  "4": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "5": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "6": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "7": {
+   "episodes": 520,
+   "records": 520,
+   "hours": 2.64,
+   "usd": 0.98,
+   "left_hours": 0.0
+  },
+  "8": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  }
+ },
+ "core": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 14.42,
+  "usd": 5.33,
+  "left_hours": 0.0
+ },
+ "core_tail": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 14.42,
+  "usd": 5.33,
+  "left_hours": 0.0
+ }
+}
+[09:27:52] forecast after C5ppc_pi05_eval300_plus_d10 (lmax_pi05 19.434 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 19.434,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 18.258
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS1.0",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 1.3,
+   "usd": 0.48,
+   "left_hours": 0.0
+  },
+  "2": {
+   "episodes": 708,
+   "records": 1008,
+   "hours": 5.44,
+   "usd": 2.01,
+   "left_hours": 0.0
+  },
+  "3": {
+   "episodes": 1200,
+   "records": 1800,
+   "hours": 9.72,
+   "usd": 3.6,
+   "left_hours": 0.0
+  },
+  "4": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "5": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "6": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "7": {
+   "episodes": 520,
+   "records": 520,
+   "hours": 2.64,
+   "usd": 0.98,
+   "left_hours": 0.0
+  },
+  "8": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  }
+ },
+ "core": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 19.09,
+  "usd": 7.06,
+  "left_hours": 0.0
+ },
+ "core_tail": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 19.09,
+  "usd": 7.06,
+  "left_hours": 0.0
+ }
+}
+[09:52:49] forecast after C5ppc_pi05_eval300_pro_d10 (lmax_pi05 16.637 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 16.637,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 18.258
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS1.0",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 1.11,
+   "usd": 0.41,
+   "left_hours": 0.0
+  },
+  "2": {
+   "episodes": 708,
+   "records": 1008,
+   "hours": 4.66,
+   "usd": 1.72,
+   "left_hours": 0.0
+  },
+  "3": {
+   "episodes": 1200,
+   "records": 1800,
+   "hours": 8.32,
+   "usd": 3.08,
+   "left_hours": 0.0
+  },
+  "4": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "5": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "6": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "7": {
+   "episodes": 520,
+   "records": 520,
+   "hours": 2.64,
+   "usd": 0.98,
+   "left_hours": 0.0
+  },
+  "8": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  }
+ },
+ "core": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 16.72,
+  "usd": 6.19,
+  "left_hours": 0.0
+ },
+ "core_tail": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 16.72,
+  "usd": 6.19,
+  "left_hours": 0.0
+ }
+}
+[10:07:36] forecast after C5ppc_pi05_eval300_plus_d20 (lmax_pi05 21.014 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 21.014,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 18.258
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS1.0",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 1.4,
+   "usd": 0.52,
+   "left_hours": 0.0
+  },
+  "2": {
+   "episodes": 708,
+   "records": 1008,
+   "hours": 5.88,
+   "usd": 2.18,
+   "left_hours": 0.0
+  },
+  "3": {
+   "episodes": 1200,
+   "records": 1800,
+   "hours": 10.51,
+   "usd": 3.89,
+   "left_hours": 0.0
+  },
+  "4": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "5": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "6": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "7": {
+   "episodes": 520,
+   "records": 520,
+   "hours": 2.64,
+   "usd": 0.98,
+   "left_hours": 0.0
+  },
+  "8": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  }
+ },
+ "core": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 20.43,
+  "usd": 7.56,
+  "left_hours": 0.0
+ },
+ "core_tail": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 20.43,
+  "usd": 7.56,
+  "left_hours": 0.0
+ }
+}
+[10:19:12] forecast after C5ppc_pi05_eval300_pro_d20 (lmax_pi05 15.619 s/episode)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": {
+  "lmax_pi05": 15.619,
+  "lmax_oftplus": 12.497,
+  "lmax_oft": 12.993,
+  "bench_pi05": 18.258
+ },
+ "excludes": "setup, probe and smoke (spec §12: ≈ 2.5 h, ≈ $0.93) and the mode-С PPC pass on latched cases (its size is known only after lines 2, 3, 7)",
+ "using": {
+  "mode": {
+   "pi05_lmax": "S",
+   "oftplus_lmax": "S",
+   "pi05_bench": "P"
+  },
+  "k": {
+   "pi05": "VS1.0",
+   "oftplus": "VS0.1"
+  }
+ },
+ "lines": {
+  "1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 1.04,
+   "usd": 0.39,
+   "left_hours": 0.0
+  },
+  "2": {
+   "episodes": 708,
+   "records": 1008,
+   "hours": 4.37,
+   "usd": 1.62,
+   "left_hours": 0.0
+  },
+  "3": {
+   "episodes": 1200,
+   "records": 1800,
+   "hours": 7.81,
+   "usd": 2.89,
+   "left_hours": 0.0
+  },
+  "4": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "5": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "6": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  },
+  "7": {
+   "episodes": 520,
+   "records": 520,
+   "hours": 2.64,
+   "usd": 0.98,
+   "left_hours": 0.0
+  },
+  "8": {
+   "episodes": 0,
+   "records": 0,
+   "hours": 0.0,
+   "usd": 0.0,
+   "left_hours": 0.0
+  }
+ },
+ "core": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 15.86,
+  "usd": 5.87,
+  "left_hours": 0.0
+ },
+ "core_tail": {
+  "episodes": 2608,
+  "records": 3568,
+  "hours": 15.86,
+  "usd": 5.87,
+  "left_hours": 0.0
+ }
+}
+[10:20:31] vgrid, pod C, then V3d10 V3d20 Nglr V2eps (Nglr: PPCL@glr,PPC@glr)
+{
+ "usd_per_h": 0.37,
+ "tempo_s": 15.619,
+ "excludes": "the pod's tests and selftests",
+ "weights": {
+  "PPCL@glr": 2.5,
+  "why": "Nglr: PPCL@glr's worst case, a call at t_obs + 4 at the latest while latched (PPCL_K_CAP) against s = 10, about 2.5x PPC@glr's calls"
+ },
+ "using": {
+  "arm": null,
+  "band_delta": 0.026169416,
+  "nglr_arms": ["PPCL@glr", "PPC@glr"]
+ },
+ "lines": {
+  "vsmoke": {
+   "episodes": 6,
+   "records": 12,
+   "hours": 0.05,
+   "usd": 0.02,
+   "left_hours": 0.05,
+   "left_usd": 0.02
+  },
+  "V0": {
+   "episodes": 60,
+   "records": 60,
+   "hours": 0.26,
+   "usd": 0.1,
+   "left_hours": 0.0,
+   "left_usd": 0.0
+  },
+  "V1": {
+   "episodes": 180,
+   "records": 240,
+   "hours": 1.04,
+   "usd": 0.39,
+   "left_hours": 1.04,
+   "left_usd": 0.39
+  },
+  "V2": {
+   "episodes": 300,
+   "records": 600,
+   "hours": 2.6,
+   "usd": 0.96,
+   "left_hours": 2.6,
+   "left_usd": 0.96
+  },
+  "V3d10": {
+   "episodes": 300,
+   "records": 600,
+   "hours": 2.6,
+   "usd": 0.96,
+   "left_hours": 2.6,
+   "left_usd": 0.96
+  },
+  "V3d20": {
+   "episodes": 300,
+   "records": 600,
+   "hours": 2.6,
+   "usd": 0.96,
+   "left_hours": 2.6,
+   "left_usd": 0.96
+  },
+  "Nglr": {
+   "episodes": 600,
+   "records": 900,
+   "hours": 5.86,
+   "usd": 2.17,
+   "left_hours": 5.86,
+   "left_usd": 2.17
+  },
+  "V2eps": {
+   "episodes": 300,
+   "records": 600,
+   "hours": 2.6,
+   "usd": 0.96,
+   "left_hours": 2.6,
+   "left_usd": 0.96
+  }
+ },
+ "total": {
+  "hours": 17.62,
+  "usd": 6.52,
+  "left_hours": 17.36,
+  "left_usd": 6.42
+ },
+ "gate": {
+  "lines": ["V1", "V2", "V3d10", "V3d20"],
+  "cap_usd": 4.0,
+  "hours": 8.85,
+  "usd": 3.27,
+  "left_hours": 8.85,
+  "left_usd": 3.27,
+  "v3_waits": false
+ }
+}
+[01:52:27] vtgrid, pod C: VT1, vst_k.json, VT2, VT3d10, VT3d20
+[12:01:25] kgrid, pod C: Kd10, Kd20
+[15:26:56] mgrid, pod C: Md0, Md10, Ed10

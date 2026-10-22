@@ -1,0 +1,1 @@
+[04:57:13] phase c7, C7_pi05 (520 episodes): --brain pi05 --kinds move --cells A,A20 --methods PPCL --inits 0-9

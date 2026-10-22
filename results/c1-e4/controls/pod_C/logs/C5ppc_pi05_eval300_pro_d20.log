@@ -1,0 +1,40 @@
+[10:07:37] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PRO/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX venv/bin/python scripts/c1e4m_run.py --device cuda --brain pi05 --source pro --set eval300 --arms=PPC --d 20 --cases pro-view-occlusion-goal-t05-i06-target_relocation-d0-p195,pro-task-goal-t08-i08-target_relocation-d0-p195,pro-semantic-10-t07-i02-target_relocation-d0-p195,pro-view-occlusion-object-t04-i09-target_relocation-d0-p195,pro-object-shape-object-t07-i07-target_relocation-d1-p195,pro-object-spatial-t06-i07-target_relocation-d0-p195,pro-object-texture-object-t03-i04-target_relocation-d0-p195,pro-task-spatial-t01-i04-target_relocation-d1-p195,pro-object-object-t06-i07-target_relocation-d1-p195,pro-initial-pose-position-angle-10-t06-i09-target_relocation-d1-p195,pro-initial-pose-position-angle-goal-t08-i05-target_relocation-d0-p195,pro-visual-noise-glare-10-t07-i06-target_relocation-d0-p195,pro-initial-pose-position-angle-object-t02-i05-target_relocation-d1-p195,pro-object-spatial-t01-i09-target_relocation-d0-p195,pro-initial-pose-position-angle-goal-t06-i09-target_relocation-d1-p195,pro-visual-noise-glare-goal-t05-i02-target_relocation-d1-p195,pro-semantic-object-t04-i09-target_relocation-d1-p195,pro-position-10-t01-i07-target_relocation-d1-p195 --base-prefix --n-envs 6 --out results/c1-e4/controls/pod_C/C5ppc_pi05_eval300_pro_d20.jsonl
+18 of 18 pro cases of eval300 to run, 2 episodes each; split 4beda8e750b4, Wand real
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 915.68it/s]
+The PI05 model is a direct port of the OpenPI implementation. 
+This implementation follows the original OpenPI structure for compatibility. 
+Original implementation: https://github.com/Physical-Intelligence/openpi
+Loading model from: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+✓ Loaded state dict from model.safetensors
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.bias
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.weight
+All keys loaded successfully!
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+group 0: 6 cases 12 episodes 172.9 s, brain 139.8 s 162 calls 189 rows; 6/18 cases, 28.8 s/case, eta 0.10 h
+group 1: 6 cases 12 episodes 180.2 s, brain 153.7 s 177 calls 222 rows; 12/18 cases, 29.4 s/case, eta 0.05 h
+group 2: 6 cases 12 episodes 209.2 s, brain 173.9 s 149 calls 277 rows; 18/18 cases, 31.2 s/case, eta 0.00 h
+done 18 of 18 cases, failed 0:
+[10:19:12] pass 2 skipped: pass 1 exited cleanly, no failed group

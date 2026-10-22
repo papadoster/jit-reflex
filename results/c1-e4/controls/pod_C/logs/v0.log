@@ -1,0 +1,2 @@
+[10:20:31] phase v0, V0_pi05_calib_plus_d0 (42 episodes): --brain pi05 --source plus --set calib --arms= --d 0 --log-traj
+[10:35:37] phase v0, V0_pi05_calib_pro_d0 (18 episodes): --brain pi05 --source pro --set calib --arms= --d 0 --log-traj

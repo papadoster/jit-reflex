@@ -1,0 +1,2 @@
+[10:47:16] phase v1, V1_pi05_calib_plus_d0 (126 episodes): --brain pi05 --source plus --set calib --arms=PBVS0.1,PBVS0.3,PBVS1.0 --d 0 --base-prefix --band results/c1-e4/controls/pod_C/band.json
+[11:38:14] phase v1, V1_pi05_calib_pro_d0 (54 episodes): --brain pi05 --source pro --set calib --arms=PBVS0.1,PBVS0.3,PBVS1.0 --d 0 --base-prefix --band results/c1-e4/controls/pod_C/band.json

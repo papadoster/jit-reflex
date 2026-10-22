@@ -1,0 +1,2 @@
+[01:52:27] phase vt1, VT1_pi05_calib_plus_d0 (168 episodes): --brain pi05 --source plus --set calib --arms=VST0.1,VST0.3,VST1.0 --d 0
+[02:40:20] phase vt1, VT1_pi05_calib_pro_d0 (72 episodes): --brain pi05 --source pro --set calib --arms=VST0.1,VST0.3,VST1.0 --d 0

@@ -1,0 +1,4 @@
+[19:04:30] phase c3, C3_pi05_eval300_plus_d10 (374 episodes): --brain pi05 --source plus --set eval300 --arms=PPCL,Gauto --d 10 --kbar 0.306 --base-prefix
+[22:27:27] phase c3, C3_pi05_eval300_pro_d10 (226 episodes): --brain pi05 --source pro --set eval300 --arms=PPCL,Gauto --d 10 --kbar 0.306 --base-prefix
+[00:09:34] phase c3, C3_pi05_eval300_plus_d20 (374 episodes): --brain pi05 --source plus --set eval300 --arms=PPCL,Gauto --d 20 --kbar 0.306 --base-prefix
+[03:19:06] phase c3, C3_pi05_eval300_pro_d20 (226 episodes): --brain pi05 --source pro --set eval300 --arms=PPCL,Gauto --d 20 --kbar 0.306 --base-prefix

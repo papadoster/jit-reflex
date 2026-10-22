@@ -1,0 +1,2 @@
+[19:35:00] phase nglr, Nglr_pi05_eval300_plus_d0 (374 episodes): --brain pi05 --source plus --set eval300 --arms=PPCL@glr,PPC@glr --d 0 --base-prefix
+[22:14:15] phase nglr, Nglr_pi05_eval300_pro_d0 (226 episodes): --brain pi05 --source pro --set eval300 --arms=PPCL@glr,PPC@glr --d 0 --base-prefix

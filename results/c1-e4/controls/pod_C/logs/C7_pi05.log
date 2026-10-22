@@ -1,0 +1,722 @@
+[04:57:13] pass 1: venv/bin/python scripts/c1e4_run.py --vector async --device cuda --brain pi05 --kinds move --cells A,A20 --methods PPCL --inits 0-9 --n-envs 6 --out results/c1-e4/controls/pod_C/C7_pi05.jsonl
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+520 episodes to run
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 965.61it/s]
+The PI05 model is a direct port of the OpenPI implementation. 
+This implementation follows the original OpenPI structure for compatibility. 
+Original implementation: https://github.com/Physical-Intelligence/openpi
+Loading model from: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+✓ Loaded state dict from model.safetensors
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.bias
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.weight
+All keys loaded successfully!
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=62789) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  self.pid = os.fork()
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+
+
+
+
+batch libero_spatial:0 A,move real=6/6 78.8 s brain 62.8 s 72 calls 97 rows
+6/520 episodes, 13.25 s/episode, eta 1.89 h
+batch libero_spatial:0 A,move real=4/6 66.6 s brain 56.2 s 68 calls 82 rows
+10/520 episodes, 14.62 s/episode, eta 2.07 h
+batch libero_spatial:0 A20,move real=6/6 96.7 s brain 85.9 s 103 calls 119 rows
+16/520 episodes, 15.18 s/episode, eta 2.12 h
+batch libero_spatial:0 A20,move real=4/6 76.3 s brain 66.2 s 30 calls 120 rows
+20/520 episodes, 15.96 s/episode, eta 2.22 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+Assets already downloaded at /root/.cache/libero/assets
+
+
+batch libero_spatial:1 A,move real=6/6 64.3 s brain 51.1 s 36 calls 86 rows
+26/520 episodes, 14.82 s/episode, eta 2.03 h
+batch libero_spatial:1 A,move real=4/6 53.1 s brain 42.3 s 39 calls 63 rows
+30/520 episodes, 14.61 s/episode, eta 1.99 h
+batch libero_spatial:1 A20,move real=6/6 128.1 s brain 116.9 s 114 calls 183 rows
+36/520 episodes, 15.73 s/episode, eta 2.12 h
+batch libero_spatial:1 A20,move real=4/6 81.4 s brain 69.3 s 81 calls 104 rows
+40/520 episodes, 16.20 s/episode, eta 2.16 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_spatial:2 A,move real=6/6 102.4 s brain 86.0 s 55 calls 141 rows
+46/520 episodes, 16.35 s/episode, eta 2.15 h
+batch libero_spatial:2 A,move real=4/6 34.8 s brain 29.0 s 21 calls 43 rows
+50/520 episodes, 15.74 s/episode, eta 2.05 h
+batch libero_spatial:2 A20,move real=6/6 91.0 s brain 80.5 s 57 calls 123 rows
+56/520 episodes, 15.67 s/episode, eta 2.02 h
+batch libero_spatial:2 A20,move real=4/6 89.7 s brain 78.9 s 96 calls 102 rows
+60/520 episodes, 16.12 s/episode, eta 2.06 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_spatial:3 A,move real=6/6 122.6 s brain 106.5 s 100 calls 151 rows
+66/520 episodes, 16.54 s/episode, eta 2.09 h
+batch libero_spatial:3 A,move real=4/6 56.2 s brain 45.2 s 44 calls 62 rows
+70/520 episodes, 16.40 s/episode, eta 2.05 h
+batch libero_spatial:3 A20,move real=6/6 130.5 s brain 118.5 s 113 calls 179 rows
+76/520 episodes, 16.82 s/episode, eta 2.07 h
+batch libero_spatial:3 A20,move real=4/6 73.9 s brain 63.5 s 65 calls 101 rows
+80/520 episodes, 16.91 s/episode, eta 2.07 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Assets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_spatial:4 A,move real=6/6 154.1 s brain 135.2 s 150 calls 202 rows
+86/520 episodes, 17.54 s/episode, eta 2.11 h
+batch libero_spatial:4 A,move real=4/6 101.5 s brain 89.7 s 113 calls 129 rows
+90/520 episodes, 17.89 s/episode, eta 2.14 h
+batch libero_spatial:4 A20,move real=6/6 139.4 s brain 125.7 s 137 calls 179 rows
+96/520 episodes, 18.22 s/episode, eta 2.15 h
+batch libero_spatial:4 A20,move real=4/6 94.0 s brain 81.0 s 109 calls 121 rows
+100/520 episodes, 18.43 s/episode, eta 2.15 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+
+
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_spatial:5 A,move real=6/6 128.1 s brain 109.8 s 125 calls 169 rows
+106/520 episodes, 18.61 s/episode, eta 2.14 h
+batch libero_spatial:5 A,move real=4/6 84.6 s brain 72.3 s 68 calls 107 rows
+110/520 episodes, 18.71 s/episode, eta 2.13 h
+batch libero_spatial:5 A20,move real=6/6 133.1 s brain 120.6 s 139 calls 175 rows
+116/520 episodes, 18.89 s/episode, eta 2.12 h
+batch libero_spatial:5 A20,move real=4/6 85.7 s brain 74.0 s 57 calls 119 rows
+120/520 episodes, 18.97 s/episode, eta 2.11 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_spatial:6 A,move real=6/6 90.9 s brain 73.5 s 51 calls 122 rows
+126/520 episodes, 18.80 s/episode, eta 2.06 h
+batch libero_spatial:6 A,move real=4/6 55.1 s brain 44.5 s 35 calls 67 rows
+130/520 episodes, 18.65 s/episode, eta 2.02 h
+batch libero_spatial:6 A20,move real=6/6 121.9 s brain 109.2 s 87 calls 180 rows
+136/520 episodes, 18.72 s/episode, eta 2.00 h
+batch libero_spatial:6 A20,move real=4/6 86.4 s brain 75.8 s 81 calls 121 rows
+140/520 episodes, 18.81 s/episode, eta 1.98 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+
+
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_spatial:7 A,move real=6/6 86.0 s brain 69.2 s 56 calls 112 rows
+146/520 episodes, 18.63 s/episode, eta 1.94 h
+batch libero_spatial:7 A,move real=4/6 52.8 s brain 41.2 s 28 calls 80 rows
+150/520 episodes, 18.49 s/episode, eta 1.90 h
+batch libero_spatial:7 A20,move real=6/6 108.7 s brain 93.7 s 108 calls 142 rows
+156/520 episodes, 18.47 s/episode, eta 1.87 h
+batch libero_spatial:7 A20,move real=4/6 69.5 s brain 58.3 s 65 calls 86 rows
+160/520 episodes, 18.45 s/episode, eta 1.84 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_spatial:8 A,move real=6/6 62.8 s brain 48.9 s 42 calls 80 rows
+166/520 episodes, 18.17 s/episode, eta 1.79 h
+batch libero_spatial:8 A,move real=4/6 56.0 s brain 45.5 s 41 calls 74 rows
+170/520 episodes, 18.07 s/episode, eta 1.76 h
+batch libero_spatial:8 A20,move real=6/6 100.7 s brain 89.6 s 64 calls 145 rows
+176/520 episodes, 18.03 s/episode, eta 1.72 h
+batch libero_spatial:8 A20,move real=4/6 90.9 s brain 80.7 s 86 calls 121 rows
+180/520 episodes, 18.13 s/episode, eta 1.71 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+Local assets not found. Downloading from HuggingFace Hub...
+
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+
+
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_spatial:9 A,move real=6/6 107.2 s brain 91.0 s 90 calls 136 rows
+186/520 episodes, 18.13 s/episode, eta 1.68 h
+batch libero_spatial:9 A,move real=4/6 57.3 s brain 46.5 s 47 calls 69 rows
+190/520 episodes, 18.05 s/episode, eta 1.65 h
+batch libero_spatial:9 A20,move real=6/6 131.9 s brain 120.1 s 114 calls 178 rows
+196/520 episodes, 18.17 s/episode, eta 1.64 h
+batch libero_spatial:9 A20,move real=4/6 83.8 s brain 72.7 s 30 calls 120 rows
+200/520 episodes, 18.23 s/episode, eta 1.62 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_object:0 A,move real=6/6 108.9 s brain 93.7 s 111 calls 139 rows
+206/520 episodes, 18.23 s/episode, eta 1.59 h
+batch libero_object:0 A,move real=4/6 69.3 s brain 60.1 s 52 calls 97 rows
+210/520 episodes, 18.22 s/episode, eta 1.57 h
+batch libero_object:0 A20,move real=6/6 119.7 s brain 110.8 s 88 calls 180 rows
+216/520 episodes, 18.26 s/episode, eta 1.54 h
+batch libero_object:0 A20,move real=4/6 95.7 s brain 87.1 s 79 calls 121 rows
+220/520 episodes, 18.37 s/episode, eta 1.53 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_object:1 A,move real=6/6 90.1 s brain 75.6 s 63 calls 114 rows
+226/520 episodes, 18.29 s/episode, eta 1.49 h
+batch libero_object:1 A,move real=4/6 56.9 s brain 50.1 s 52 calls 73 rows
+230/520 episodes, 18.22 s/episode, eta 1.47 h
+batch libero_object:1 A20,move real=6/6 136.2 s brain 127.3 s 144 calls 180 rows
+236/520 episodes, 18.33 s/episode, eta 1.45 h
+batch libero_object:1 A20,move real=4/6 78.5 s brain 70.2 s 75 calls 105 rows
+240/520 episodes, 18.35 s/episode, eta 1.43 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Local assets not found. Downloading from HuggingFace Hub...
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_object:2 A,move real=6/6 108.1 s brain 93.5 s 105 calls 143 rows
+246/520 episodes, 18.35 s/episode, eta 1.40 h
+batch libero_object:2 A,move real=4/6 67.5 s brain 58.8 s 59 calls 93 rows
+250/520 episodes, 18.33 s/episode, eta 1.37 h
+batch libero_object:2 A20,move real=6/6 123.1 s brain 114.2 s 112 calls 179 rows
+256/520 episodes, 18.38 s/episode, eta 1.35 h
+batch libero_object:2 A20,move real=4/6 93.4 s brain 84.6 s 112 calls 120 rows
+260/520 episodes, 18.45 s/episode, eta 1.33 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_object:3 A,move real=6/6 96.7 s brain 82.8 s 75 calls 131 rows
+266/520 episodes, 18.41 s/episode, eta 1.30 h
+batch libero_object:3 A,move real=4/6 64.4 s brain 55.9 s 65 calls 86 rows
+270/520 episodes, 18.38 s/episode, eta 1.28 h
+batch libero_object:3 A20,move real=6/6 124.2 s brain 115.7 s 137 calls 181 rows
+276/520 episodes, 18.43 s/episode, eta 1.25 h
+batch libero_object:3 A20,move real=4/6 94.0 s brain 85.6 s 104 calls 122 rows
+280/520 episodes, 18.50 s/episode, eta 1.23 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+
+
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+
+
+
+batch libero_object:4 A,move real=6/6 114.1 s brain 99.7 s 92 calls 153 rows
+286/520 episodes, 18.52 s/episode, eta 1.20 h
+batch libero_object:4 A,move real=4/6 78.8 s brain 70.4 s 63 calls 114 rows
+290/520 episodes, 18.53 s/episode, eta 1.18 h
+batch libero_object:4 A20,move real=6/6 120.1 s brain 110.9 s 139 calls 168 rows
+296/520 episodes, 18.56 s/episode, eta 1.15 h
+batch libero_object:4 A20,move real=4/6 87.2 s brain 78.8 s 86 calls 121 rows
+300/520 episodes, 18.60 s/episode, eta 1.14 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_object:5 A,move real=6/6 103.2 s brain 88.4 s 85 calls 155 rows
+306/520 episodes, 18.58 s/episode, eta 1.10 h
+batch libero_object:5 A,move real=4/6 67.9 s brain 59.2 s 83 calls 94 rows
+310/520 episodes, 18.56 s/episode, eta 1.08 h
+batch libero_object:5 A20,move real=6/6 126.9 s brain 117.3 s 141 calls 181 rows
+316/520 episodes, 18.61 s/episode, eta 1.05 h
+batch libero_object:5 A20,move real=4/6 78.7 s brain 69.7 s 55 calls 123 rows
+320/520 episodes, 18.62 s/episode, eta 1.03 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+
+
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_object:6 A,move real=6/6 100.3 s brain 86.3 s 100 calls 137 rows
+326/520 episodes, 18.60 s/episode, eta 1.00 h
+batch libero_object:6 A,move real=4/6 61.4 s brain 52.9 s 46 calls 88 rows
+330/520 episodes, 18.56 s/episode, eta 0.98 h
+batch libero_object:6 A20,move real=6/6 115.3 s brain 107.0 s 106 calls 183 rows
+336/520 episodes, 18.57 s/episode, eta 0.95 h
+batch libero_object:6 A20,move real=4/6 82.5 s brain 74.2 s 81 calls 122 rows
+340/520 episodes, 18.59 s/episode, eta 0.93 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_object:7 A,move real=6/6 100.1 s brain 85.6 s 62 calls 147 rows
+346/520 episodes, 18.56 s/episode, eta 0.90 h
+batch libero_object:7 A,move real=4/6 76.8 s brain 68.1 s 82 calls 101 rows
+350/520 episodes, 18.57 s/episode, eta 0.88 h
+batch libero_object:7 A20,move real=6/6 125.7 s brain 116.8 s 135 calls 181 rows
+356/520 episodes, 18.61 s/episode, eta 0.85 h
+batch libero_object:7 A20,move real=4/6 79.4 s brain 70.8 s 58 calls 120 rows
+360/520 episodes, 18.63 s/episode, eta 0.83 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+
+
+
+batch libero_object:8 A,move real=6/6 108.0 s brain 94.1 s 102 calls 136 rows
+366/520 episodes, 18.62 s/episode, eta 0.80 h
+batch libero_object:8 A,move real=4/6 59.1 s brain 51.7 s 40 calls 78 rows
+370/520 episodes, 18.58 s/episode, eta 0.77 h
+batch libero_object:8 A20,move real=6/6 121.2 s brain 112.5 s 93 calls 178 rows
+376/520 episodes, 18.60 s/episode, eta 0.74 h
+batch libero_object:8 A20,move real=4/6 86.2 s brain 77.9 s 86 calls 108 rows
+380/520 episodes, 18.64 s/episode, eta 0.72 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_object:9 A,move real=6/6 105.8 s brain 92.0 s 107 calls 137 rows
+386/520 episodes, 18.62 s/episode, eta 0.69 h
+batch libero_object:9 A,move real=4/6 88.7 s brain 80.2 s 81 calls 114 rows
+390/520 episodes, 18.66 s/episode, eta 0.67 h
+batch libero_object:9 A20,move real=6/6 121.7 s brain 113.2 s 85 calls 177 rows
+396/520 episodes, 18.69 s/episode, eta 0.64 h
+batch libero_object:9 A20,move real=4/6 74.9 s brain 67.0 s 58 calls 104 rows
+400/520 episodes, 18.69 s/episode, eta 0.62 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_goal:1 A,move real=6/6 61.9 s brain 49.4 s 29 calls 82 rows
+406/520 episodes, 18.57 s/episode, eta 0.59 h
+batch libero_goal:1 A,move real=4/6 81.9 s brain 72.5 s 90 calls 99 rows
+410/520 episodes, 18.59 s/episode, eta 0.57 h
+batch libero_goal:1 A20,move real=6/6 128.0 s brain 119.0 s 120 calls 171 rows
+416/520 episodes, 18.63 s/episode, eta 0.54 h
+batch libero_goal:1 A20,move real=4/6 88.7 s brain 79.8 s 89 calls 107 rows
+420/520 episodes, 18.66 s/episode, eta 0.52 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+batch libero_goal:2 A,move real=6/6 91.6 s brain 77.3 s 71 calls 118 rows
+426/520 episodes, 18.62 s/episode, eta 0.49 h
+batch libero_goal:2 A,move real=4/6 69.6 s brain 60.0 s 76 calls 85 rows
+430/520 episodes, 18.60 s/episode, eta 0.47 h
+batch libero_goal:2 A20,move real=6/6 85.5 s brain 76.1 s 74 calls 107 rows
+436/520 episodes, 18.54 s/episode, eta 0.43 h
+batch libero_goal:2 A20,move real=4/6 66.7 s brain 57.3 s 62 calls 86 rows
+440/520 episodes, 18.53 s/episode, eta 0.41 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_goal:4 A,move real=6/6 65.6 s brain 51.2 s 40 calls 80 rows
+446/520 episodes, 18.43 s/episode, eta 0.38 h
+batch libero_goal:4 A,move real=4/6 58.3 s brain 49.6 s 59 calls 70 rows
+450/520 episodes, 18.39 s/episode, eta 0.36 h
+batch libero_goal:4 A20,move real=6/6 92.5 s brain 82.8 s 74 calls 120 rows
+456/520 episodes, 18.36 s/episode, eta 0.33 h
+batch libero_goal:4 A20,move real=4/6 82.4 s brain 72.8 s 90 calls 102 rows
+460/520 episodes, 18.38 s/episode, eta 0.31 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_goal:6 A,move real=6/6 133.4 s brain 118.6 s 85 calls 182 rows
+466/520 episodes, 18.43 s/episode, eta 0.28 h
+batch libero_goal:6 A,move real=4/6 100.1 s brain 90.5 s 115 calls 123 rows
+470/520 episodes, 18.48 s/episode, eta 0.26 h
+batch libero_goal:6 A20,move real=6/6 130.5 s brain 119.9 s 91 calls 192 rows
+476/520 episodes, 18.53 s/episode, eta 0.23 h
+batch libero_goal:6 A20,move real=4/6 85.8 s brain 76.1 s 102 calls 108 rows
+480/520 episodes, 18.55 s/episode, eta 0.21 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_goal:8 A,move real=6/6 73.3 s brain 58.3 s 62 calls 89 rows
+486/520 episodes, 18.48 s/episode, eta 0.17 h
+batch libero_goal:8 A,move real=4/6 47.8 s brain 38.0 s 43 calls 56 rows
+490/520 episodes, 18.42 s/episode, eta 0.15 h
+batch libero_goal:8 A20,move real=6/6 117.9 s brain 108.7 s 94 calls 167 rows
+496/520 episodes, 18.44 s/episode, eta 0.12 h
+batch libero_goal:8 A20,move real=4/6 75.7 s brain 66.1 s 61 calls 104 rows
+500/520 episodes, 18.44 s/episode, eta 0.10 h
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+
+
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+
+
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_goal:9 A,move real=6/6 127.6 s brain 112.7 s 145 calls 165 rows
+506/520 episodes, 18.48 s/episode, eta 0.07 h
+batch libero_goal:9 A,move real=4/6 75.8 s brain 66.1 s 85 calls 99 rows
+510/520 episodes, 18.48 s/episode, eta 0.05 h
+batch libero_goal:9 A20,move real=6/6 140.2 s brain 130.0 s 160 calls 198 rows
+516/520 episodes, 18.54 s/episode, eta 0.02 h
+batch libero_goal:9 A20,move real=4/6 91.9 s brain 82.4 s 95 calls 131 rows
+520/520 episodes, 18.57 s/episode, eta 0.00 h
+[07:40:18] pass 2 skipped: pass 1 exited cleanly, no failed group

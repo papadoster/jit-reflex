@@ -1,0 +1,1 @@
+[13:39:11] phase kd20, K_pi05_eval300_plus_d20 (187 episodes): --brain pi05 --source plus --set eval300 --arms=VS1.0 --d 20 --base-prefix

@@ -1,0 +1,2 @@
+csmoke: GPU peak 22549 MiB (max 23552)
+tempo (s/episode): lmax_pi05=23.589 lmax_oftplus=12.497 lmax_oft=12.993 bench_pi05=11.950

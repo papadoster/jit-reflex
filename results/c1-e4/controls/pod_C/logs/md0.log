@@ -1,0 +1,1 @@
+[15:26:57] phase md0, M_pi05_eval300_pro_d0 (226 episodes): --brain pi05 --source pro --set eval300 --arms=VTm --d 0 --band results/c1-e4/controls/pod_C/band_eps.json

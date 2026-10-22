@@ -1,0 +1,12 @@
+{
+ "arm": "VST0.3",
+ "lambda": 0.3,
+ "scores": {
+  "VST0.1": 0.139191,
+  "VST0.3": 0.134504,
+  "VST1.0": 0.135226
+ },
+ "n_valid": 57,
+ "n_cases": 60,
+ "flag_lt40": false
+}

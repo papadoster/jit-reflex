@@ -1,0 +1,4 @@
+[12:33:46] phase c1, C1_pi05_calib_plus_d0 (126 episodes): --brain pi05 --source plus --set calib --arms=VS0.1,VS0.3,VS1.0 --d 0 --base-prefix
+[13:33:04] phase c1, C1_pi05_calib_pro_d0 (54 episodes): --brain pi05 --source pro --set calib --arms=VS0.1,VS0.3,VS1.0 --d 0 --base-prefix
+[16:08:00] phase c1, C1_pi05_calib_plus_d0 (126 episodes): --brain pi05 --source plus --set calib --arms=VS0.1,VS0.3,VS1.0 --d 0 --base-prefix
+[16:08:05] phase c1, C1_pi05_calib_pro_d0 (54 episodes): --brain pi05 --source pro --set calib --arms=VS0.1,VS0.3,VS1.0 --d 0 --base-prefix

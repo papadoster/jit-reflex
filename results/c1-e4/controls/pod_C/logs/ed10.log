@@ -1,0 +1,1 @@
+[18:25:08] phase ed10, E_pi05_eval300_plus_d10 (187 episodes): --brain pi05 --source plus --set eval300 --arms=PBVS0.3 --d 10 --base-prefix --band results/c1-e4/controls/pod_C/band_eps.json

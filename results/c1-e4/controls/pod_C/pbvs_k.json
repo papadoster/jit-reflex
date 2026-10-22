@@ -1,0 +1,12 @@
+{
+ "arm": "PBVS0.3",
+ "lambda": 0.3,
+ "scores": {
+  "PBVS0.1": 0.216766,
+  "PBVS0.3": 0.216659,
+  "PBVS1.0": 0.217232
+ },
+ "n_valid": 58,
+ "n_cases": 60,
+ "flag_lt40": false
+}

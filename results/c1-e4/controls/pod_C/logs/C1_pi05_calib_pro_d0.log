@@ -1,0 +1,44 @@
+[13:33:04] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PRO/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX venv/bin/python scripts/c1e4m_run.py --device cuda --brain pi05 --source pro --set calib --arms=VS0.1,VS0.3,VS1.0 --d 0 --base-prefix --n-envs 6 --out results/c1-e4/controls/pod_C/C1_pi05_calib_pro_d0.jsonl
+18 of 18 pro cases of calib to run, 4 episodes each; split 4beda8e750b4, Wand real
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 1104.96it/s]
+The PI05 model is a direct port of the OpenPI implementation. 
+This implementation follows the original OpenPI structure for compatibility. 
+Original implementation: https://github.com/Physical-Intelligence/openpi
+Loading model from: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+✓ Loaded state dict from model.safetensors
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.bias
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.weight
+All keys loaded successfully!
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+group 0: 6 cases 24 episodes 344.7 s, brain 284.8 s 106 calls 473 rows; 6/18 cases, 57.5 s/case, eta 0.19 h
+group 1: 6 cases 24 episodes 270.1 s, brain 225.3 s 87 calls 394 rows; 12/18 cases, 51.2 s/case, eta 0.09 h
+group 2: 6 cases 24 episodes 374.7 s, brain 320.4 s 122 calls 545 rows; 18/18 cases, 55.0 s/case, eta 0.00 h
+done 18 of 18 cases, failed 0:
+[13:51:56] pass 2 skipped: pass 1 exited cleanly, no failed group
+[16:08:05] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PRO/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX venv/bin/python scripts/c1e4m_run.py --device cuda --brain pi05 --source pro --set calib --arms=VS0.1,VS0.3,VS1.0 --d 0 --base-prefix --n-envs 6 --out results/c1-e4/controls/pod_C/C1_pi05_calib_pro_d0.jsonl
+0 of 18 pro cases of calib to run, 4 episodes each; split 4beda8e750b4, Wand real
+done 0 of 0 cases, failed 0:
+[16:08:10] pass 2 skipped: pass 1 exited cleanly, no failed group

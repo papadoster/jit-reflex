@@ -1,0 +1,985 @@
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+{
+ "checks": {
+  "records": 3600,
+  "read": 3600,
+  "skipped": 0,
+  "off_plan": {},
+  "complete": {
+   "V0": {
+    "expected": 60,
+    "missing": 0,
+    "run": true,
+    "pass": true
+   },
+   "V1": {
+    "expected": 240,
+    "missing": 0,
+    "run": true,
+    "pass": true
+   },
+   "V2": {
+    "expected": 600,
+    "missing": 0,
+    "run": true,
+    "pass": true
+   },
+   "V3d10": {
+    "expected": 600,
+    "missing": 0,
+    "run": true,
+    "pass": true
+   },
+   "V3d20": {
+    "expected": 600,
+    "missing": 0,
+    "run": true,
+    "pass": true
+   },
+   "Nglr": {
+    "expected": 900,
+    "missing": 0,
+    "run": true,
+    "pass": true
+   },
+   "V2eps": {
+    "expected": 600,
+    "missing": 0,
+    "run": true,
+    "pass": true
+   }
+  },
+  "controls_complete": {
+   "2": {
+    "expected": 1008,
+    "missing": 0,
+    "pass": true
+   },
+   "3": {
+    "expected": 1800,
+    "missing": 0,
+    "pass": true
+   }
+  },
+  "band": {
+   "file": {
+    "model": "A",
+    "G": [0.0025, 0.0025],
+    "B": [0.79, 0.79],
+    "delta": 0.026169416,
+    "delta_M": {
+     "I": 0.030371643,
+     "A": 0.026169416,
+     "I*": 0.028827108,
+     "A*": 0.028106085
+    },
+    "coef": {
+     "I": {
+      "G": [0.0105, 0.0121],
+      "B": [0.0, 0.0]
+     },
+     "A": {
+      "G": [0.0025, 0.0025],
+      "B": [0.79, 0.79]
+     },
+     "I*": {
+      "G": [0.01105611, 0.011412947],
+      "B": [0.0, 0.0]
+     },
+     "A*": {
+      "G": [0.002885194, 0.002816796],
+      "B": [0.765374349, 0.772972556]
+     }
+    },
+    "folds": {
+     "I*": [
+      {
+       "G": [0.010833223, 0.01051019],
+       "B": [0.0, 0.0]
+      },
+      {
+       "G": [0.011282727, 0.012521323],
+       "B": [0.0, 0.0]
+      }
+     ],
+     "A*": [
+      {
+       "G": [0.002623335, 0.002115714],
+       "B": [0.786426894, 0.820850903]
+      },
+      {
+       "G": [0.003225651, 0.004707671],
+       "B": [0.738104645, 0.639469943]
+      }
+     ]
+    },
+    "n": 60,
+    "flag_gt_15mm": true
+   },
+   "recomputed": {
+    "model": "A",
+    "G": [0.0025, 0.0025],
+    "B": [0.79, 0.79],
+    "delta": 0.026169416,
+    "delta_M": {
+     "I": 0.030371643,
+     "A": 0.026169416,
+     "I*": 0.028827108,
+     "A*": 0.028106085
+    },
+    "coef": {
+     "I": {
+      "G": [0.0105, 0.0121],
+      "B": [0.0, 0.0]
+     },
+     "A": {
+      "G": [0.0025, 0.0025],
+      "B": [0.79, 0.79]
+     },
+     "I*": {
+      "G": [0.01105611, 0.011412947],
+      "B": [0.0, 0.0]
+     },
+     "A*": {
+      "G": [0.002885194, 0.002816796],
+      "B": [0.765374349, 0.772972556]
+     }
+    },
+    "folds": {
+     "I*": [
+      {
+       "G": [0.010833223, 0.01051019],
+       "B": [0.0, 0.0]
+      },
+      {
+       "G": [0.011282727, 0.012521323],
+       "B": [0.0, 0.0]
+      }
+     ],
+     "A*": [
+      {
+       "G": [0.002623335, 0.002115714],
+       "B": [0.786426894, 0.820850903]
+      },
+      {
+       "G": [0.003225651, 0.004707671],
+       "B": [0.738104645, 0.639469943]
+      }
+     ]
+    },
+    "n": 60,
+    "flag_gt_15mm": true
+   },
+   "pass": true
+  },
+  "pbvs_k": {
+   "file": {
+    "arm": "PBVS0.3",
+    "lambda": 0.3,
+    "scores": {
+     "PBVS0.1": 0.216766,
+     "PBVS0.3": 0.216659,
+     "PBVS1.0": 0.217232
+    },
+    "n_valid": 58,
+    "n_cases": 60,
+    "flag_lt40": false
+   },
+   "recomputed": {
+    "arm": "PBVS0.3",
+    "lambda": 0.3,
+    "scores": {
+     "PBVS0.1": 0.216766,
+     "PBVS0.3": 0.216659,
+     "PBVS1.0": 0.217232
+    },
+    "n_valid": 58,
+    "n_cases": 60,
+    "flag_lt40": false
+   },
+   "pass": true
+  },
+  "band_in_conf": {
+   "off": {},
+   "pass": true
+  },
+  "e_match": {
+   "Nglr/d0": {
+    "equal": 299,
+    "total": 300,
+    "pass": true
+   },
+   "V2/d0": {
+    "equal": 300,
+    "total": 300,
+    "pass": true
+   },
+   "V2eps/d0": {
+    "equal": 299,
+    "total": 300,
+    "pass": true
+   },
+   "V3d10/d10": {
+    "equal": 299,
+    "total": 300,
+    "pass": true
+   },
+   "V3d20/d20": {
+    "equal": 298,
+    "total": 300,
+    "pass": true
+   }
+  },
+  "gauto_on_pod": {
+   "mode": "S",
+   "pass": true
+  },
+  "conf": {
+   "except": ["arms", "gpu", "kbar", "pbvs"],
+   "mixed": {},
+   "pass": true
+  },
+  "pass": true,
+  "invalid_pairs": {
+   "Н1": {
+    "pairs": 300,
+    "invalid": 0,
+    "pass": true
+   },
+   "Н2/d10": {
+    "pairs": 300,
+    "invalid": 1,
+    "pass": true
+   },
+   "Н2/d20": {
+    "pairs": 300,
+    "invalid": 2,
+    "pass": true
+   },
+   "Н2/pool": {
+    "pairs": 600,
+    "invalid": 3,
+    "pass": true
+   },
+   "Н3/d0": {
+    "pairs": 300,
+    "invalid": 0,
+    "pass": true
+   },
+   "Н3/d10": {
+    "pairs": 300,
+    "invalid": 1,
+    "pass": true
+   },
+   "Н3/d20": {
+    "pairs": 300,
+    "invalid": 2,
+    "pass": true
+   },
+   "И5": {
+    "pairs": 300,
+    "invalid": 0,
+    "pass": true
+   },
+   "Н1/eps": {
+    "pairs": 300,
+    "invalid": 1,
+    "pass": true
+   },
+   "PBVSeps-PBVS": {
+    "pairs": 300,
+    "invalid": 1,
+    "pass": true
+   }
+  }
+ },
+ "measurements": {
+  "Н1": {
+   "test": "pi05, M1, d = 0, 300 pairs: PBVS - Gauto",
+   "diff_pp": 2.333,
+   "lo2.5": -3.691,
+   "lo5_one_sided": -2.685,
+   "hi97.5": 8.032,
+   "pairs": 300,
+   "clusters": 33,
+   "invalid_pairs": 0
+  },
+  "Н2/d10": {
+   "test": "pi05, D, d = 10, 300 pairs: PBVS - Gauto",
+   "diff_pp": -4.682,
+   "lo2.5": -11.296,
+   "lo5_one_sided": -10.368,
+   "hi97.5": 2.014,
+   "pairs": 299,
+   "clusters": 33,
+   "invalid_pairs": 1
+  },
+  "Н2/d20": {
+   "test": "pi05, D, d = 20, 300 pairs: PBVS - Gauto",
+   "diff_pp": -1.007,
+   "lo2.5": -5.611,
+   "lo5_one_sided": -4.983,
+   "hi97.5": 3.655,
+   "pairs": 298,
+   "clusters": 33,
+   "invalid_pairs": 2
+  },
+  "Н2/pool": {
+   "test": "pi05, D, the d of pooled_d (10 and 20: 600 pairs; clusters: the task, its d in it): PBVS - Gauto",
+   "diff_pp": -2.848,
+   "lo2.5": -7.191,
+   "lo5_one_sided": -6.376,
+   "hi97.5": 1.167,
+   "pairs": 597,
+   "clusters": 33,
+   "invalid_pairs": 3,
+   "pooled_d": [10, 20]
+  },
+  "Н3/d0": {
+   "test": "pi05, M1, d = 0: PBVS - PPCL",
+   "diff_pp": 5.333,
+   "lo2.5": 0.334,
+   "lo5_one_sided": 1.329,
+   "hi97.5": 10.855,
+   "pairs": 300,
+   "clusters": 33,
+   "invalid_pairs": 0
+  },
+  "Н3/d10": {
+   "test": "pi05, D, d = 10: PBVS - PPCL",
+   "diff_pp": 6.689,
+   "lo2.5": 0.662,
+   "lo5_one_sided": 1.338,
+   "hi97.5": 13.043,
+   "pairs": 299,
+   "clusters": 33,
+   "invalid_pairs": 1
+  },
+  "Н3/d20": {
+   "test": "pi05, D, d = 20: PBVS - PPCL",
+   "diff_pp": 6.711,
+   "lo2.5": 1.695,
+   "lo5_one_sided": 2.666,
+   "hi97.5": 11.449,
+   "pairs": 298,
+   "clusters": 33,
+   "invalid_pairs": 2
+  },
+  "И5": {
+   "test": "pi05, M1, d = 0, glr eyes, 300 pairs: PPCL@glr - PPC@glr",
+   "diff_pp": -2.0,
+   "lo2.5": -4.935,
+   "lo5_one_sided": -4.348,
+   "hi97.5": 1.003,
+   "pairs": 300,
+   "clusters": 33,
+   "invalid_pairs": 0
+  },
+  "Н1/eps": {
+   "test": "pi05, M1, d = 0, the servo at our 5 mm gate (V2eps): PBVS - Gauto",
+   "diff_pp": 3.01,
+   "lo2.5": -2.676,
+   "lo5_one_sided": -1.684,
+   "hi97.5": 8.199,
+   "pairs": 299,
+   "clusters": 33,
+   "invalid_pairs": 1
+  },
+  "PBVSeps-PBVS": {
+   "test": "pi05, M1, d = 0: PBVS at the 5 mm gate - PBVS at band.json's gate",
+   "diff_pp": 0.669,
+   "lo2.5": -4.319,
+   "lo5_one_sided": -3.655,
+   "hi97.5": 5.686,
+   "pairs": 299,
+   "clusters": 33,
+   "invalid_pairs": 1
+  }
+ },
+ "report": {
+  "pbvs_none": {
+   "PBVS0.3/d0": {
+    "diff_pp": 9.365,
+    "lo2.5": 3.716,
+    "lo5_one_sided": 5.016,
+    "hi97.5": 14.57,
+    "pairs": 299,
+    "clusters": 33,
+    "через под": true
+   },
+   "PBVS0.3/d10": {
+    "diff_pp": 15.101,
+    "lo2.5": 9.03,
+    "lo5_one_sided": 9.797,
+    "hi97.5": 20.877,
+    "pairs": 298,
+    "clusters": 33,
+    "через под": true
+   },
+   "PBVS0.3/d20": {
+    "diff_pp": 11.706,
+    "lo2.5": 7.565,
+    "lo5_one_sided": 8.306,
+    "hi97.5": 15.934,
+    "pairs": 299,
+    "clusters": 33,
+    "через под": true
+   }
+  },
+  "pbvs_gates": {
+   "V2": {
+    "arm": "PBVS0.3",
+    "gate_m": 0.026169416,
+    "n": 300,
+    "success_pct": 51.3333,
+    "pbvs-Gauto": {
+     "diff_pp": 2.333,
+     "lo2.5": -3.691,
+     "lo5_one_sided": -2.685,
+     "hi97.5": 8.032,
+     "pairs": 300,
+     "clusters": 33
+    },
+    "pbvs-none": {
+     "diff_pp": 9.365,
+     "lo2.5": 3.716,
+     "lo5_one_sided": 5.016,
+     "hi97.5": 14.57,
+     "pairs": 299,
+     "clusters": 33,
+     "через под": true
+    }
+   },
+   "V2eps": {
+    "arm": "PBVS0.3",
+    "gate_m": 0.005,
+    "n": 300,
+    "success_pct": 52.0,
+    "pbvs-Gauto": {
+     "diff_pp": 3.01,
+     "lo2.5": -2.676,
+     "lo5_one_sided": -1.684,
+     "hi97.5": 8.199,
+     "pairs": 299,
+     "clusters": 33
+    },
+    "pbvs-none": {
+     "diff_pp": 10.067,
+     "lo2.5": 5.724,
+     "lo5_one_sided": 6.643,
+     "hi97.5": 14.048,
+     "pairs": 298,
+     "clusters": 33,
+     "через под": true
+    }
+   }
+  },
+  "slices_M1": {
+   "PBVS0.3-Gauto": {
+    "6cm": {
+     "diff_pp": 0.699,
+     "lo2.5": -7.008,
+     "lo5_one_sided": -5.481,
+     "hi97.5": 7.948,
+     "pairs": 143,
+     "clusters": 33
+    },
+    "12cm": {
+     "diff_pp": 3.822,
+     "lo2.5": -4.083,
+     "lo5_one_sided": -2.995,
+     "hi97.5": 11.567,
+     "pairs": 157,
+     "clusters": 33
+    }
+   },
+   "PBVS0.3-PPCL": {
+    "6cm": {
+     "diff_pp": 0.699,
+     "lo2.5": -6.946,
+     "lo5_one_sided": -5.808,
+     "hi97.5": 8.443,
+     "pairs": 143,
+     "clusters": 33
+    },
+    "12cm": {
+     "diff_pp": 9.554,
+     "lo2.5": 3.875,
+     "lo5_one_sided": 4.895,
+     "hi97.5": 15.152,
+     "pairs": 157,
+     "clusters": 33
+    }
+   },
+   "PBVS0.3-none": {
+    "6cm": {
+     "diff_pp": 4.93,
+     "lo2.5": -3.598,
+     "lo5_one_sided": -2.174,
+     "hi97.5": 12.838,
+     "pairs": 142,
+     "clusters": 33
+    },
+    "12cm": {
+     "diff_pp": 13.376,
+     "lo2.5": 4.828,
+     "lo5_one_sided": 6.211,
+     "hi97.5": 21.57,
+     "pairs": 157,
+     "clusters": 33
+    }
+   }
+  },
+  "pbvs_g1": {
+   "test": "pi05, M1, d = 0, line 2's frozen Plus cases, one pair per case and seed: PBVS0.3 - G(k=1.0)",
+   "cases": 108,
+   "drops": {},
+   "diff_pp": 1.852,
+   "lo2.5": -6.088,
+   "lo5_one_sided": -4.764,
+   "hi97.5": 10.909,
+   "pairs": 108,
+   "clusters": 32
+  },
+  "calls": {
+   "pi05/dynamic/Gauto/0": {
+    "n": 300,
+    "sched": 27.5967,
+    "trig": 0.0,
+    "plans_after_event": 22.4881
+   },
+   "pi05/dynamic/Gauto/10": {
+    "n": 300,
+    "sched": 29.9967,
+    "trig": 0.0,
+    "plans_after_event": 23.949
+   },
+   "pi05/dynamic/Gauto/20": {
+    "n": 300,
+    "sched": 31.8933,
+    "trig": 0.0,
+    "plans_after_event": 24.885
+   },
+   "pi05/dynamic/PBVS0.3/0": {
+    "n": 300,
+    "sched": 27.21,
+    "trig": 0.0,
+    "plans_after_event": 22.0922
+   },
+   "pi05/dynamic/PBVS0.3/10": {
+    "n": 300,
+    "sched": 30.7267,
+    "trig": 0.0,
+    "plans_after_event": 24.6905
+   },
+   "pi05/dynamic/PBVS0.3/20": {
+    "n": 300,
+    "sched": 32.27,
+    "trig": 0.0,
+    "plans_after_event": 25.2753
+   },
+   "pi05/dynamic/PBVS0.3/eps/0": {
+    "n": 300,
+    "sched": 26.7133,
+    "trig": 0.0,
+    "plans_after_event": 21.5836
+   },
+   "pi05/dynamic/PPC@glr/0": {
+    "n": 300,
+    "sched": 26.8933,
+    "trig": 3.33,
+    "plans_after_event": 25.1775
+   },
+   "pi05/dynamic/PPCL/0": {
+    "n": 300,
+    "sched": 27.96,
+    "trig": 1.2867,
+    "plans_after_event": 24.1775
+   },
+   "pi05/dynamic/PPCL/10": {
+    "n": 300,
+    "sched": 31.28,
+    "trig": 1.5233,
+    "plans_after_event": 26.8095
+   },
+   "pi05/dynamic/PPCL/20": {
+    "n": 300,
+    "sched": 33.1667,
+    "trig": 1.1133,
+    "plans_after_event": 27.3798
+   },
+   "pi05/dynamic/PPCL@glr/0": {
+    "n": 300,
+    "sched": 26.3233,
+    "trig": 6.5133,
+    "plans_after_event": 27.8532
+   },
+   "pi05/dynamic/none/0": {
+    "n": 300,
+    "sched": 29.2,
+    "trig": 0.0,
+    "plans_after_event": 24.1297
+   },
+   "pi05/dynamic/none/10": {
+    "n": 300,
+    "sched": 33.2833,
+    "trig": 0.0,
+    "plans_after_event": 27.2993
+   },
+   "pi05/dynamic/none/20": {
+    "n": 300,
+    "sched": 34.0633,
+    "trig": 0.0,
+    "plans_after_event": 27.1498
+   }
+  },
+  "pbvs_counters": {
+   "pi05/dynamic/PBVS0.3/0": {
+    "n": 300,
+    "window": 274,
+    "acting_share": 0.2084,
+    "mean_e_m": 0.0256,
+    "mean_e_p5_p95": [0.0037, 0.0477],
+    "max_e_m": 0.1009,
+    "flips_per_episode": 0.1387,
+    "flipped_share": 0.1022
+   },
+   "pi05/dynamic/PBVS0.3/10": {
+    "n": 300,
+    "window": 273,
+    "acting_share": 0.6199,
+    "mean_e_m": 0.0641,
+    "mean_e_p5_p95": [0.0184, 0.0952],
+    "max_e_m": 0.1212,
+    "flips_per_episode": 1.0769,
+    "flipped_share": 0.6923
+   },
+   "pi05/dynamic/PBVS0.3/20": {
+    "n": 300,
+    "window": 271,
+    "acting_share": 0.5358,
+    "mean_e_m": 0.0626,
+    "mean_e_p5_p95": [0.0176, 0.0909],
+    "max_e_m": 0.1268,
+    "flips_per_episode": 0.7048,
+    "flipped_share": 0.4244
+   },
+   "pi05/dynamic/PBVS0.3/eps/0": {
+    "n": 300,
+    "window": 274,
+    "acting_share": 0.5283,
+    "mean_e_m": 0.0243,
+    "mean_e_p5_p95": [0.0033, 0.0476],
+    "max_e_m": 0.101,
+    "flips_per_episode": 1.354,
+    "flipped_share": 0.8467
+   }
+  },
+  "latch": {
+   "pi05/dynamic/PPCL/0": {
+    "n": 300,
+    "chunks_share": 0.0767,
+    "trig_share": 0.0767
+   },
+   "pi05/dynamic/PPCL/10": {
+    "n": 300,
+    "chunks_share": 0.0567,
+    "trig_share": 0.0567
+   },
+   "pi05/dynamic/PPCL/20": {
+    "n": 300,
+    "chunks_share": 0.0233,
+    "trig_share": 0.0233
+   },
+   "pi05/dynamic/PPCL@glr/0": {
+    "n": 300,
+    "chunks_share": 0.5867,
+    "trig_share": 0.5967
+   }
+  },
+  "grasp_miss": {
+   "d0": {
+    "n": 289,
+    "PBVS0.3": 0.0835,
+    "Gauto": 0.0783,
+    "PBVS0.3-Gauto": 0.0051
+   },
+   "d10": {
+    "n": 294,
+    "PBVS0.3": 0.0977,
+    "Gauto": 0.0903,
+    "PBVS0.3-Gauto": 0.0074
+   },
+   "d20": {
+    "n": 295,
+    "PBVS0.3": 0.1056,
+    "Gauto": 0.0983,
+    "PBVS0.3-Gauto": 0.0073
+   }
+  },
+  "nglr": {
+   "table": {
+    "PPCL@glr": {
+     "n": 300,
+     "success_pct": 39.3333,
+     "calls_mean": 32.8367,
+     "calls_median": 30.0,
+     "latched_share": 0.5867
+    },
+    "PPC@glr (this pod)": {
+     "n": 300,
+     "success_pct": 41.3333,
+     "calls_mean": 30.2233,
+     "calls_median": 29.0
+    },
+    "G@glr (part 2, через под)": {
+     "n": 300,
+     "success_pct": 47.3333,
+     "calls_mean": 28.1333,
+     "calls_median": 28.0
+    },
+    "none (part 2, через под)": {
+     "n": 300,
+     "success_pct": 42.0,
+     "calls_mean": 29.2,
+     "calls_median": 28.0
+    },
+    "Base (this pod, cut at the event)": {
+     "n": 300,
+     "calls_mean": 11.1433,
+     "calls_median": 9.0
+    }
+   },
+   "PPCL@glr-G@glr": {
+    "test": "pi05, M1, d = 0, glr eyes, one pair per case and seed (report only): PPCL@glr - G@glr of part 2",
+    "drops": {
+     "e": 1
+    },
+    "diff_pp": -8.027,
+    "lo2.5": -12.081,
+    "lo5_one_sided": -11.591,
+    "hi97.5": -4.304,
+    "pairs": 299,
+    "clusters": 33,
+    "через под": true
+   },
+   "calls_PPCL@glr-G@glr": {
+    "pairs": 299,
+    "mean": 4.7191,
+    "median": 2.0,
+    "через под": true
+   }
+  },
+  "retention": {
+   "pod": {
+    "PPCL@glr-none": {
+     "diff_pp": -2.676,
+     "lo2.5": -7.721,
+     "lo5_one_sided": -6.954,
+     "hi97.5": 2.341,
+     "pairs": 299,
+     "clusters": 33,
+     "через под": true
+    },
+    "PPCL-none": {
+     "diff_pp": 4.013,
+     "lo2.5": -0.669,
+     "lo5_one_sided": 0.0,
+     "hi97.5": 8.667,
+     "pairs": 299,
+     "clusters": 33,
+     "через под": true
+    },
+    "ratio": -0.667
+   },
+   "part2/G": {
+    "G@glr-none": {
+     "diff_pp": 5.333,
+     "lo2.5": 0.0,
+     "lo5_one_sided": 0.971,
+     "hi97.5": 11.259,
+     "pairs": 300,
+     "clusters": 33
+    },
+    "G-none": {
+     "diff_pp": 8.667,
+     "lo2.5": 3.654,
+     "lo5_one_sided": 4.348,
+     "hi97.5": 13.423,
+     "pairs": 300,
+     "clusters": 33
+    },
+    "ratio": 0.615
+   },
+   "part2/PPC": {
+    "PPC@glr-none": {
+     "diff_pp": -0.667,
+     "lo2.5": -6.0,
+     "lo5_one_sided": -5.017,
+     "hi97.5": 4.348,
+     "pairs": 300,
+     "clusters": 33
+    },
+    "PPC-none": {
+     "diff_pp": 4.0,
+     "lo2.5": -1.325,
+     "lo5_one_sided": -0.662,
+     "hi97.5": 9.0,
+     "pairs": 300,
+     "clusters": 33
+    },
+    "ratio": -0.167
+   }
+  },
+  "gpu": ["NVIDIA GeForce RTX 4090"],
+  "band": {
+   "model": "A",
+   "G": [0.0025, 0.0025],
+   "B": [0.79, 0.79],
+   "delta": 0.026169416,
+   "delta_M": {
+    "I": 0.030371643,
+    "A": 0.026169416,
+    "I*": 0.028827108,
+    "A*": 0.028106085
+   },
+   "coef": {
+    "I": {
+     "G": [0.0105, 0.0121],
+     "B": [0.0, 0.0]
+    },
+    "A": {
+     "G": [0.0025, 0.0025],
+     "B": [0.79, 0.79]
+    },
+    "I*": {
+     "G": [0.01105611, 0.011412947],
+     "B": [0.0, 0.0]
+    },
+    "A*": {
+     "G": [0.002885194, 0.002816796],
+     "B": [0.765374349, 0.772972556]
+    }
+   },
+   "folds": {
+    "I*": [
+     {
+      "G": [0.010833223, 0.01051019],
+      "B": [0.0, 0.0]
+     },
+     {
+      "G": [0.011282727, 0.012521323],
+      "B": [0.0, 0.0]
+     }
+    ],
+    "A*": [
+     {
+      "G": [0.002623335, 0.002115714],
+      "B": [0.786426894, 0.820850903]
+     },
+     {
+      "G": [0.003225651, 0.004707671],
+      "B": [0.738104645, 0.639469943]
+     }
+    ]
+   },
+   "n": 60,
+   "flag_gt_15mm": true
+  },
+  "pbvs_k": {
+   "arm": "PBVS0.3",
+   "lambda": 0.3,
+   "scores": {
+    "PBVS0.1": 0.216766,
+    "PBVS0.3": 0.216659,
+    "PBVS1.0": 0.217232
+   },
+   "n_valid": 58,
+   "n_cases": 60,
+   "flag_lt40": false
+  },
+  "e_match": {
+   "Nglr/d0": {
+    "equal": 299,
+    "total": 300,
+    "pass": true
+   },
+   "V2/d0": {
+    "equal": 300,
+    "total": 300,
+    "pass": true
+   },
+   "V2eps/d0": {
+    "equal": 299,
+    "total": 300,
+    "pass": true
+   },
+   "V3d10/d10": {
+    "equal": 299,
+    "total": 300,
+    "pass": true
+   },
+   "V3d20/d20": {
+    "equal": 298,
+    "total": 300,
+    "pass": true
+   }
+  },
+  "invalid_pairs": {
+   "Н1": {
+    "pairs": 300,
+    "invalid": 0,
+    "pass": true
+   },
+   "Н2/d10": {
+    "pairs": 300,
+    "invalid": 1,
+    "pass": true
+   },
+   "Н2/d20": {
+    "pairs": 300,
+    "invalid": 2,
+    "pass": true
+   },
+   "Н2/pool": {
+    "pairs": 600,
+    "invalid": 3,
+    "pass": true
+   },
+   "Н3/d0": {
+    "pairs": 300,
+    "invalid": 0,
+    "pass": true
+   },
+   "Н3/d10": {
+    "pairs": 300,
+    "invalid": 1,
+    "pass": true
+   },
+   "Н3/d20": {
+    "pairs": 300,
+    "invalid": 2,
+    "pass": true
+   },
+   "И5": {
+    "pairs": 300,
+    "invalid": 0,
+    "pass": true
+   },
+   "Н1/eps": {
+    "pairs": 300,
+    "invalid": 1,
+    "pass": true
+   },
+   "PBVSeps-PBVS": {
+    "pairs": 300,
+    "invalid": 1,
+    "pass": true
+   }
+  }
+ }
+}
+C1-E4 PBVS checks before reading: PASS

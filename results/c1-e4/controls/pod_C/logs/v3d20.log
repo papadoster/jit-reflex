@@ -1,0 +1,2 @@
+[16:55:30] phase v3d20, V3_pi05_eval300_plus_d20 (187 episodes): --brain pi05 --source plus --set eval300 --arms=PBVS0.3 --d 20 --base-prefix --band results/c1-e4/controls/pod_C/band.json
+[18:42:01] phase v3d20, V3_pi05_eval300_pro_d20 (113 episodes): --brain pi05 --source pro --set eval300 --arms=PBVS0.3 --d 20 --base-prefix --band results/c1-e4/controls/pod_C/band.json

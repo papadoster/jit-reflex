@@ -1,0 +1,2 @@
+[02:56:17] phase vt2, VT2_pi05_eval300_plus_d0 (374 episodes): --brain pi05 --source plus --set eval300 --arms=VST0.3 --d 0
+[04:45:54] phase vt2, VT2_pi05_eval300_pro_d0 (226 episodes): --brain pi05 --source pro --set eval300 --arms=VST0.3 --d 0

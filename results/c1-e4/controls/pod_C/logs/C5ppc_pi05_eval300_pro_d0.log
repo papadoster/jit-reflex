@@ -1,0 +1,47 @@
+[08:17:17] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PRO/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX venv/bin/python scripts/c1e4m_run.py --device cuda --brain pi05 --source pro --set eval300 --arms=PPC --d 0 --cases pro-view-occlusion-object-t00-i09-target_relocation-d0-p195,pro-position-goal-t09-i00-target_relocation-d0-p195,pro-position-10-t02-i01-target_relocation-d1-p195,pro-view-occlusion-goal-t04-i07-target_relocation-d1-p195,pro-object-texture-object-t08-i00-target_relocation-d1-p195,pro-task-goal-t01-i02-target_relocation-d0-p195,pro-view-occlusion-goal-t05-i06-target_relocation-d0-p195,pro-task-goal-t08-i08-target_relocation-d0-p195,pro-semantic-10-t07-i02-target_relocation-d0-p195,pro-view-occlusion-object-t04-i09-target_relocation-d0-p195,pro-object-shape-object-t07-i07-target_relocation-d1-p195,pro-object-spatial-t06-i07-target_relocation-d0-p195,pro-semantic-10-t05-i00-target_relocation-d1-p195,pro-task-object-t01-i04-target_relocation-d1-p195,pro-object-shape-spatial-t00-i05-target_relocation-d1-p195,pro-semantic-10-t02-i00-target_relocation-d1-p195,pro-position-goal-t01-i01-target_relocation-d0-p195,pro-view-occlusion-10-t09-i06-target_relocation-d1-p195,pro-object-texture-object-t03-i04-target_relocation-d0-p195,pro-task-spatial-t01-i04-target_relocation-d1-p195,pro-object-object-t06-i07-target_relocation-d1-p195,pro-initial-pose-position-angle-10-t06-i09-target_relocation-d1-p195,pro-initial-pose-position-angle-goal-t08-i05-target_relocation-d0-p195,pro-visual-noise-glare-10-t07-i06-target_relocation-d0-p195,pro-camera-view-angle-goal-t04-i07-target_relocation-d1-p195,pro-initial-pose-position-angle-object-t08-i09-target_relocation-d0-p195,pro-object-texture-spatial-t08-i06-target_relocation-d1-p195,pro-visual-noise-glare-goal-t01-i04-target_relocation-d1-p195,pro-object-shape-spatial-t02-i06-target_relocation-d0-p195,pro-object-texture-10-t09-i07-target_relocation-d1-p195,pro-object-10-t07-i04-target_relocation-d1-p195,pro-position-object-t07-i08-target_relocation-d0-p195,pro-position-object-t05-i06-target_relocation-d0-p195,pro-view-occlusion-10-t05-i09-target_relocation-d0-p195,pro-object-shape-object-t00-i03-target_relocation-d0-p195,pro-visual-noise-glare-goal-t04-i07-target_relocation-d1-p195,pro-object-10-t09-i07-target_relocation-d1-p195,pro-object-texture-object-t02-i03-target_relocation-d0-p195,pro-initial-pose-position-angle-goal-t03-i09-target_relocation-d0-p195,pro-object-shape-goal-t05-i07-target_relocation-d1-p195,pro-task-10-t07-i09-target_relocation-d0-p195,pro-visual-noise-glare-object-t04-i01-target_relocation-d1-p195,pro-object-shape-object-t05-i00-target_relocation-d1-p195,pro-visual-noise-glare-object-t00-i06-target_relocation-d1-p195,pro-object-texture-object-t09-i03-target_relocation-d1-p195,pro-view-occlusion-object-t08-i04-target_relocation-d1-p195,pro-semantic-spatial-t08-i02-target_relocation-d0-p195,pro-object-texture-goal-t01-i04-target_relocation-d1-p195,pro-camera-view-angle-object-t02-i05-target_relocation-d0-p195,pro-task-10-t03-i00-target_relocation-d0-p195,pro-visual-noise-glare-object-t06-i00-target_relocation-d1-p195,pro-object-texture-10-t06-i04-target_relocation-d0-p195,pro-position-object-t04-i02-target_relocation-d1-p195,pro-position-goal-t02-i07-target_relocation-d1-p195,pro-task-10-t00-i04-target_relocation-d0-p195,pro-semantic-10-t04-i03-target_relocation-d0-p195,pro-view-occlusion-object-t02-i04-target_relocation-d1-p195,pro-position-10-t06-i01-target_relocation-d1-p195,pro-camera-view-angle-goal-t05-i07-target_relocation-d1-p195 --base-prefix --n-envs 6 --out results/c1-e4/controls/pod_C/C5ppc_pi05_eval300_pro_d0.jsonl
+59 of 59 pro cases of eval300 to run, 2 episodes each; split 4beda8e750b4, Wand real
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 861.31it/s]
+The PI05 model is a direct port of the OpenPI implementation. 
+This implementation follows the original OpenPI structure for compatibility. 
+Original implementation: https://github.com/Physical-Intelligence/openpi
+Loading model from: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+✓ Loaded state dict from model.safetensors
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.bias
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.weight
+All keys loaded successfully!
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+group 0: 6 cases 12 episodes 187.9 s, brain 148.3 s 146 calls 246 rows; 6/59 cases, 31.3 s/case, eta 0.46 h
+group 1: 6 cases 12 episodes 135.9 s, brain 110.1 s 123 calls 170 rows; 12/59 cases, 27.0 s/case, eta 0.35 h
+group 2: 6 cases 12 episodes 166.9 s, brain 126.8 s 94 calls 219 rows; 18/59 cases, 27.3 s/case, eta 0.31 h
+group 3: 6 cases 12 episodes 154.5 s, brain 127.2 s 132 calls 199 rows; 24/59 cases, 26.9 s/case, eta 0.26 h
+group 4: 6 cases 12 episodes 135.7 s, brain 110.0 s 120 calls 174 rows; 30/59 cases, 26.0 s/case, eta 0.21 h
+group 5: 6 cases 12 episodes 192.7 s, brain 155.5 s 144 calls 258 rows; 36/59 cases, 27.0 s/case, eta 0.17 h
+group 6: 6 cases 12 episodes 178.1 s, brain 147.6 s 150 calls 240 rows; 42/59 cases, 27.4 s/case, eta 0.13 h
+group 7: 6 cases 12 episodes 107.1 s, brain 85.7 s 95 calls 136 rows; 48/59 cases, 26.2 s/case, eta 0.08 h
+group 8: 6 cases 12 episodes 223.1 s, brain 187.8 s 195 calls 309 rows; 54/59 cases, 27.4 s/case, eta 0.04 h
+group 9: 5 cases 10 episodes 159.8 s, brain 129.9 s 155 calls 197 rows; 59/59 cases, 27.8 s/case, eta 0.00 h
+done 59 of 59 cases, failed 0:
+[08:46:49] pass 2 skipped: pass 1 exited cleanly, no failed group

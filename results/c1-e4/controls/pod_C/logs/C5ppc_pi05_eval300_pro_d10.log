@@ -1,0 +1,44 @@
+[09:27:53] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PRO/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX venv/bin/python scripts/c1e4m_run.py --device cuda --brain pi05 --source pro --set eval300 --arms=PPC --d 10 --cases pro-view-occlusion-goal-t05-i06-target_relocation-d0-p195,pro-task-goal-t08-i08-target_relocation-d0-p195,pro-semantic-10-t07-i02-target_relocation-d0-p195,pro-view-occlusion-object-t04-i09-target_relocation-d0-p195,pro-object-shape-object-t07-i07-target_relocation-d1-p195,pro-object-spatial-t06-i07-target_relocation-d0-p195,pro-object-texture-object-t03-i04-target_relocation-d0-p195,pro-task-spatial-t01-i04-target_relocation-d1-p195,pro-object-object-t06-i07-target_relocation-d1-p195,pro-initial-pose-position-angle-10-t06-i09-target_relocation-d1-p195,pro-initial-pose-position-angle-goal-t08-i05-target_relocation-d0-p195,pro-visual-noise-glare-10-t07-i06-target_relocation-d0-p195,pro-object-10-t07-i04-target_relocation-d1-p195,pro-position-object-t07-i08-target_relocation-d0-p195,pro-position-object-t05-i06-target_relocation-d0-p195,pro-view-occlusion-10-t05-i09-target_relocation-d0-p195,pro-object-shape-object-t00-i03-target_relocation-d0-p195,pro-visual-noise-glare-goal-t04-i07-target_relocation-d1-p195,pro-object-shape-object-t03-i03-target_relocation-d1-p195,pro-view-occlusion-spatial-t01-i07-target_relocation-d1-p195,pro-view-occlusion-goal-t05-i07-target_relocation-d1-p195,pro-view-occlusion-10-t07-i00-target_relocation-d0-p195,pro-object-shape-object-t04-i08-target_relocation-d1-p195,pro-view-occlusion-object-t07-i07-target_relocation-d0-p195,pro-camera-view-angle-object-t02-i05-target_relocation-d0-p195,pro-task-10-t03-i00-target_relocation-d0-p195,pro-visual-noise-glare-object-t06-i00-target_relocation-d1-p195,pro-object-texture-10-t06-i04-target_relocation-d0-p195,pro-position-object-t04-i02-target_relocation-d1-p195,pro-position-goal-t02-i07-target_relocation-d1-p195,pro-initial-pose-position-angle-object-t02-i05-target_relocation-d1-p195,pro-object-spatial-t01-i09-target_relocation-d0-p195,pro-initial-pose-position-angle-goal-t06-i09-target_relocation-d1-p195,pro-visual-noise-glare-goal-t05-i02-target_relocation-d1-p195,pro-semantic-object-t04-i09-target_relocation-d1-p195,pro-position-10-t01-i07-target_relocation-d1-p195,pro-task-10-t00-i04-target_relocation-d0-p195,pro-semantic-10-t04-i03-target_relocation-d0-p195,pro-view-occlusion-object-t02-i04-target_relocation-d1-p195,pro-position-10-t06-i01-target_relocation-d1-p195,pro-camera-view-angle-goal-t05-i07-target_relocation-d1-p195 --base-prefix --n-envs 6 --out results/c1-e4/controls/pod_C/C5ppc_pi05_eval300_pro_d10.jsonl
+41 of 41 pro cases of eval300 to run, 2 episodes each; split 4beda8e750b4, Wand real
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 937.83it/s]
+The PI05 model is a direct port of the OpenPI implementation. 
+This implementation follows the original OpenPI structure for compatibility. 
+Original implementation: https://github.com/Physical-Intelligence/openpi
+Loading model from: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+✓ Loaded state dict from model.safetensors
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.bias
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.weight
+All keys loaded successfully!
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+group 0: 6 cases 12 episodes 153.9 s, brain 125.2 s 108 calls 189 rows; 6/41 cases, 25.6 s/case, eta 0.25 h
+group 1: 6 cases 12 episodes 178.8 s, brain 151.7 s 201 calls 222 rows; 12/41 cases, 27.7 s/case, eta 0.22 h
+group 2: 6 cases 12 episodes 210.0 s, brain 174.9 s 153 calls 255 rows; 18/41 cases, 30.1 s/case, eta 0.19 h
+group 3: 6 cases 12 episodes 177.4 s, brain 139.7 s 137 calls 202 rows; 24/41 cases, 30.0 s/case, eta 0.14 h
+group 4: 6 cases 12 episodes 263.5 s, brain 229.3 s 180 calls 331 rows; 30/41 cases, 32.8 s/case, eta 0.10 h
+group 5: 6 cases 12 episodes 215.6 s, brain 180.4 s 161 calls 273 rows; 36/41 cases, 33.3 s/case, eta 0.05 h
+group 6: 5 cases 10 episodes 165.0 s, brain 135.4 s 157 calls 198 rows; 41/41 cases, 33.3 s/case, eta 0.00 h
+done 41 of 41 cases, failed 0:
+[09:52:49] pass 2 skipped: pass 1 exited cleanly, no failed group

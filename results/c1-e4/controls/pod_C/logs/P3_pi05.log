@@ -1,0 +1,67 @@
+[11:53:50] pass 1: venv/bin/python scripts/c1e4_run.py --vector async --device cuda --brain pi05 --kinds move --cells A,A20 --methods none,Gauto,Glead,PPC --tasks libero_spatial:0 --inits 0-9 --kbar 0.324 --n-envs 6 --out results/c1-e4/controls/pod_C/P3_pi05.jsonl
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py
+80 episodes to run
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 1013.74it/s]
+The PI05 model is a direct port of the OpenPI implementation. 
+This implementation follows the original OpenPI structure for compatibility. 
+Original implementation: https://github.com/Physical-Intelligence/openpi
+Loading model from: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+✓ Loaded state dict from model.safetensors
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.bias
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.weight
+All keys loaded successfully!
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=9799) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  self.pid = os.fork()
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+
+Local assets not found. Downloading from HuggingFace Hub...Local assets not found. Downloading from HuggingFace Hub...
+
+Assets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assetsAssets already downloaded at /root/.cache/libero/assets
+
+
+Assets already downloaded at /root/.cache/libero/assets
+Assets already downloaded at /root/.cache/libero/assets
+Local assets not found. Downloading from HuggingFace Hub...
+Assets already downloaded at /root/.cache/libero/assets
+batch libero_spatial:0 A,move real=6/6 72.5 s brain 56.6 s 28 calls 79 rows
+6/80 episodes, 12.20 s/episode, eta 0.25 h
+batch libero_spatial:0 A,move real=6/6 98.4 s brain 87.6 s 28 calls 121 rows
+12/80 episodes, 14.30 s/episode, eta 0.27 h
+batch libero_spatial:0 A,move real=6/6 58.4 s brain 50.5 s 19 calls 79 rows
+18/80 episodes, 12.78 s/episode, eta 0.22 h
+batch libero_spatial:0 A,move real=6/6 48.4 s brain 40.9 s 18 calls 61 rows
+24/80 episodes, 11.60 s/episode, eta 0.18 h
+batch libero_spatial:0 A,move real=6/6 60.0 s brain 48.8 s 28 calls 71 rows
+30/80 episodes, 11.28 s/episode, eta 0.16 h
+batch libero_spatial:0 A,move real=6/6 94.5 s brain 83.4 s 72 calls 97 rows
+36/80 episodes, 12.03 s/episode, eta 0.15 h
+batch libero_spatial:0 A,move real=4/6 68.5 s brain 58.0 s 53 calls 66 rows
+40/80 episodes, 12.53 s/episode, eta 0.14 h
+batch libero_spatial:0 A20,move real=6/6 120.0 s brain 109.9 s 28 calls 168 rows
+46/80 episodes, 13.51 s/episode, eta 0.13 h
+batch libero_spatial:0 A20,move real=6/6 122.4 s brain 112.2 s 28 calls 168 rows
+52/80 episodes, 14.30 s/episode, eta 0.11 h
+batch libero_spatial:0 A20,move real=6/6 101.4 s brain 90.7 s 28 calls 128 rows
+58/80 episodes, 14.57 s/episode, eta 0.09 h
+batch libero_spatial:0 A20,move real=6/6 92.7 s brain 82.6 s 28 calls 128 rows
+64/80 episodes, 14.65 s/episode, eta 0.07 h
+batch libero_spatial:0 A20,move real=6/6 92.2 s brain 81.6 s 28 calls 128 rows
+70/80 episodes, 14.72 s/episode, eta 0.04 h
+batch libero_spatial:0 A20,move real=6/6 118.5 s brain 107.3 s 103 calls 119 rows
+76/80 episodes, 15.11 s/episode, eta 0.02 h
+batch libero_spatial:0 A20,move real=4/6 92.2 s brain 82.1 s 30 calls 120 rows
+80/80 episodes, 15.51 s/episode, eta 0.00 h
+[12:16:46] pass 2 skipped: pass 1 exited cleanly, no failed group
