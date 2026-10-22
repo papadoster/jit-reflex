@@ -132,6 +132,33 @@ def test_plans_before_t_e_run_without_their_aim():
     assert np.array_equal(ag.a_floor, arr[0][1]) and np.array_equal(ag.a_first, arr[20][1])
 
 
+@pytest.mark.parametrize("close_at", [29, 30])
+def test_a_first_arrived_before_the_close(close_at):
+    """The journal's "уточнения": a_first counts only a plan that arrived before the first close was executed. s 10,
+    d 10, the jump at 12: plan 20, the first observed after t_e, arrives at 30. Plans close from close_at: at 30 plan
+    20 executes the close itself (it arrived before it: a_first = a_20); at 29 plan 10 closes first, so plan 20 and
+    every later one arrived after the close: a_first None, a_floor still plan 0's."""
+    ag = vservo.VTMAgent("VTm", 10, 10, FINE, S)
+    acts, arr, _ = drive(ag, lambda t: plan(t, close_at), 50)
+    assert ag.t_e == 12 and int(np.argmax(acts[:, 6] > 0)) == close_at and arr[20][0] == 30 and arr[20][2]
+    assert all(arr[t][1] is not None for t in (0, 10, 20, 30)) and np.array_equal(ag.a_floor, arr[0][1])
+    assert (ag.a_first is None) if close_at == 29 else np.array_equal(ag.a_first, arr[20][1])
+
+
+@pytest.mark.parametrize("d", [0, 10])
+def test_a_floor_is_the_plan_acting_at_t_e(d):
+    """The journal's "уточнения": a_floor is the a of the plan whose action runs at step t_e. s 10, the jump at 20 (t_e
+    20 against plan 0 at d 10, plan 10 at d 0). d 10: plan 10, observed before t_e, arrives exactly at 20, after
+    observe(20): the floor is its a, not plan 0's. d 0: plan 20, observed at t_e, arrives at 20: it saw the shift, its
+    a is applied (a_first), and the floor stays plan 10's, executing at observe(20)."""
+    ag = vservo.VTMAgent("VTm", 10, d, FINE, S)
+    _, arr, _ = drive(ag, lambda t: plan(t, 45), 50, shift_at=20)
+    assert ag.t_e == 20 and arr[10][0] == {0: 10, 10: 20}[d] and arr[20][0] == 20 + d
+    assert not np.array_equal(arr[0][1], arr[10][1]) and not np.array_equal(arr[10][1], arr[20][1])
+    assert np.array_equal(ag.a_floor, arr[10][1]) and np.array_equal(ag.a_first, arr[20][1])
+    assert [arr[t][2] for t in (10, 20)] == [False, True]
+
+
 @pytest.mark.parametrize("d", [0, 10, 20])
 @pytest.mark.parametrize("band", [FINE, BAND_A], ids=["I", "A"])
 @pytest.mark.parametrize("close_at", [28, None])

@@ -155,8 +155,12 @@ class VTMAgent(PBVSAgent):
     close row ahead (no clamp, no skip) or no s_star. a_N is applied only when N was observed at or after t_e; a plan
     observed before t_e (it did not see the shift) runs with a = 0, its a the noise floor, recorded only. With a = 0
     VT-m is PBVS on the band. vtm_stats: PBVS's five counters plus steps_aim (window steps with a applied) and no_aim
-    (window steps under a plan observed at or after t_e whose a is None); a_floor: the a of the plan executing at
-    observe(t_e) (None: undefined), a_first: the a of the first plan observed at or after t_e with a defined."""
+    (window steps under a plan observed at or after t_e whose a is None). The journal's "VT-m: уточнения по ходу
+    реализации": a_floor, the a of the plan whose action runs at step t_e among those observed before it (one arriving
+    at t_e replaces the one executing at observe(t_e); one observed at t_e, d = 0, does not); a_first, the a of the
+    first plan observed at or after t_e with a defined that arrived before the first close was executed (a later one's
+    a is almost the measured grasp, not an aim). None: undefined. Per step (the runner, GAgent): observe(t) sets t_e,
+    then arrivals (on_new_chunk), then act(t) sets grasp_started at the first close."""
 
     def __init__(self, method, s, d, band, s_star=None, **kw):
         super().__init__("PBVS0.3", s, d, band, **kw)
@@ -168,7 +172,7 @@ class VTMAgent(PBVSAgent):
 
     def observe(self, t, eef, obj, contact=False):
         super().observe(t, eef, obj, contact)
-        if self.t_e == t:  # the plan executing at the engagement: before any arrival of step t_e
+        if self.t_e == t:  # the plan executing at observe(t_e); a pre-t_e plan arriving at t_e replaces it
             self.a_floor = self.a
 
     def on_new_chunk(self):
@@ -184,8 +188,10 @@ class VTMAgent(PBVSAgent):
                 w = w + dx
             self.a = (w - self.p_hist[sc.t_obs][:2]) - self.s_star
         self.aim = self.t_e is not None and sc.t_obs >= self.t_e
-        if self.aim and self.a is not None and self.a_first is None:
+        if self.aim and self.a is not None and self.a_first is None and not self.grasp_started:
             self.a_first = self.a
+        if self.t_e == ta and sc.t_obs < self.t_e:  # observed before t_e, its action runs at t_e: the floor
+            self.a_floor = self.a
 
     def _e(self, t):
         e = super()._e(t)
