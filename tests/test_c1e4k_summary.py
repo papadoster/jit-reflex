@@ -1,4 +1,5 @@
-"""scripts/c1e4k_summary.py (the kappa law's ablation, C): its selftest, the plan on the real split."""
+"""scripts/c1e4k_summary.py (the kappa law's ablation, C): its selftest, the plan on the real split and the reading
+on a synthetic pod."""
 
 import sys
 from pathlib import Path
