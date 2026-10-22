@@ -1,0 +1,136 @@
+{
+ "checks": {
+  "records": 748,
+  "read": 2302,
+  "skipped": 0,
+  "off_plan": {},
+  "complete": {
+   "C2d0": {
+    "expected": 216,
+    "missing": 0,
+    "pass": true
+   },
+   "C3d10": {
+    "expected": 187,
+    "missing": 0,
+    "pass": true
+   },
+   "C3d20": {
+    "expected": 187,
+    "missing": 0,
+    "pass": true
+   },
+   "Kd10": {
+    "expected": 187,
+    "missing": 0,
+    "pass": true
+   },
+   "Kd20": {
+    "expected": 187,
+    "missing": 0,
+    "pass": true
+   }
+  },
+  "invalid_pairs": {
+   "d0": {
+    "pairs": 108,
+    "invalid": 0,
+    "pass": true
+   },
+   "d10": {
+    "pairs": 187,
+    "invalid": 0,
+    "pass": true
+   },
+   "d20": {
+    "pairs": 187,
+    "invalid": 1,
+    "pass": true
+   }
+  },
+  "conf": {
+   "except": ["arms", "gpu", "kbar"],
+   "mixed": {},
+   "pass": true
+  },
+  "pass": true
+ },
+ "measurements": {
+  "D(0)": {
+   "test": "pi05, Plus, d = 0, line 2's frozen 108 Plus cases (one process, one Base): Gauto - VS1.0 (G(k = 1.0)), pp",
+   "diff_pp": -0.926,
+   "lo2.5": -10.436,
+   "lo5_one_sided": -8.911,
+   "hi97.5": 7.895,
+   "pairs": 108,
+   "clusters": 32,
+   "invalid_pairs": 0,
+   "drops": {}
+  },
+  "D(10)": {
+   "test": "pi05, Plus, d = 10, 187 Plus cases: Gauto - VS1.0 (G(k = 1.0)), pp",
+   "diff_pp": 5.348,
+   "lo2.5": 1.042,
+   "lo5_one_sided": 1.604,
+   "hi97.5": 10.215,
+   "pairs": 187,
+   "clusters": 33,
+   "invalid_pairs": 0,
+   "drops": {}
+  },
+  "D(20)": {
+   "test": "pi05, Plus, d = 20, 187 Plus cases: Gauto - VS1.0 (G(k = 1.0)), pp",
+   "diff_pp": 0.0,
+   "lo2.5": -2.139,
+   "lo5_one_sided": -1.676,
+   "hi97.5": 2.128,
+   "pairs": 186,
+   "clusters": 33,
+   "invalid_pairs": 1,
+   "drops": {
+    "e": 1
+   }
+  },
+  "D(10)/108": {
+   "test": "pi05, Plus, d = 10, line 2's 108 Plus cases: Gauto - VS1.0 (G(k = 1.0)), pp",
+   "diff_pp": 5.556,
+   "lo2.5": 0.0,
+   "lo5_one_sided": 0.961,
+   "hi97.5": 11.111,
+   "pairs": 108,
+   "clusters": 32,
+   "invalid_pairs": 0,
+   "drops": {}
+  },
+  "D(20)/108": {
+   "test": "pi05, Plus, d = 20, line 2's 108 Plus cases: Gauto - VS1.0 (G(k = 1.0)), pp",
+   "diff_pp": 0.0,
+   "lo2.5": -2.703,
+   "lo5_one_sided": -2.0,
+   "hi97.5": 2.752,
+   "pairs": 108,
+   "clusters": 32,
+   "invalid_pairs": 0,
+   "drops": {}
+  },
+  "T": {
+   "test": "pi05, Plus, line 2's 108 Plus cases: D(20) - D(0), pp (clusters: the task, its pairs at d = 20 and d = 0 in it, resampled jointly)",
+   "diff_pp": 0.926,
+   "lo2.5": -9.091,
+   "lo5_one_sided": -7.477,
+   "hi97.5": 11.43,
+   "pairs": [108, 108],
+   "clusters": 32
+  },
+  "D(10)-D(0)": {
+   "test": "pi05, Plus, line 2's 108 Plus cases: D(10) - D(0), pp (clusters: the task, its pairs at d = 10 and d = 0 in it, resampled jointly)",
+   "diff_pp": 6.481,
+   "lo2.5": -3.67,
+   "lo5_one_sided": -1.98,
+   "hi97.5": 16.667,
+   "pairs": [108, 108],
+   "clusters": 32
+  }
+ },
+ "reading": "рост с задержкой не показан"
+}

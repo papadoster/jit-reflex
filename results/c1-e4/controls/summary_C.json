@@ -1,0 +1,725 @@
+{
+ "checks": {
+  "records": 4092,
+  "read": 4092,
+  "skipped": 0,
+  "off_plan": {},
+  "complete": {
+   "1": {
+    "expected": 240,
+    "missing": 0,
+    "run": true,
+    "pass": true
+   },
+   "2": {
+    "expected": 1008,
+    "missing": 0,
+    "run": true,
+    "pass": true
+   },
+   "3": {
+    "expected": 1800,
+    "missing": 0,
+    "run": true,
+    "pass": true
+   },
+   "4": {
+    "expected": 0,
+    "missing": 0,
+    "run": false,
+    "pass": true
+   },
+   "5": {
+    "expected": 0,
+    "missing": 0,
+    "run": false,
+    "pass": true
+   },
+   "6": {
+    "expected": 0,
+    "missing": 0,
+    "run": false,
+    "pass": true
+   },
+   "7": {
+    "expected": 520,
+    "missing": 0,
+    "run": true,
+    "pass": true
+   },
+   "8": {
+    "expected": 0,
+    "missing": 0,
+    "run": false,
+    "pass": true
+   },
+   "c5": {
+    "expected": 524,
+    "missing": 0,
+    "run": true,
+    "pass": true
+   }
+  },
+  "k_select": {
+   "pi05": {
+    "file": {
+     "k": "VS1.0",
+     "scores": {
+      "VS0.1": 0.183486,
+      "VS0.3": 0.173176,
+      "VS1.0": 0.150788
+     },
+     "n_valid": 50,
+     "n_cases": 60,
+     "flag_lt40": false
+    },
+    "recomputed": {
+     "k": "VS1.0",
+     "scores": {
+      "VS0.1": 0.183486,
+      "VS0.3": 0.173176,
+      "VS1.0": 0.150788
+     },
+     "n_valid": 50,
+     "n_cases": 60,
+     "flag_lt40": false
+    },
+    "pass": true
+   },
+   "oftplus": {
+    "file": null,
+    "recomputed": null,
+    "pass": true
+   }
+  },
+  "vs_label": {
+   "selected": {
+    "pi05": ["VS1.0"]
+   },
+   "other": {},
+   "pass": true
+  },
+  "e_match": {
+   "pi05/d0": {
+    "equal": 299,
+    "total": 300,
+    "mode": "S",
+    "pass": true
+   },
+   "pi05/d10": {
+    "equal": 298,
+    "total": 300,
+    "mode": "S",
+    "pass": true
+   },
+   "pi05/d20": {
+    "equal": 299,
+    "total": 300,
+    "mode": "S",
+    "pass": true
+   }
+  },
+  "batch_rows_pre_event": {
+   "pi05/d0": {
+    "calls_equal": 1675,
+    "calls": 1676,
+    "cases_equal": 298,
+    "cases": 299,
+    "rows_max": 6,
+    "mode": "S",
+    "pass": true
+   },
+   "pi05/d10": {
+    "calls_equal": 1631,
+    "calls": 1635,
+    "cases_equal": 297,
+    "cases": 298,
+    "rows_max": 6,
+    "mode": "S",
+    "pass": true
+   },
+   "pi05/d20": {
+    "calls_equal": 1838,
+    "calls": 1838,
+    "cases_equal": 299,
+    "cases": 299,
+    "rows_max": 6,
+    "mode": "S",
+    "pass": true
+   }
+  },
+  "on_probe_gpu": {
+   "pi05_lmax": {
+    "mode": "S",
+    "probe": ["NVIDIA GeForce RTX 4090"],
+    "records": {
+     "NVIDIA GeForce RTX 4090": 3572
+    },
+    "pass": true
+   },
+   "oftplus_lmax": {
+    "mode": "S",
+    "probe": ["NVIDIA GeForce RTX 4090"],
+    "records": {},
+    "pass": true
+   },
+   "pi05_bench": {
+    "mode": "P",
+    "probe": ["NVIDIA GeForce RTX 4090"],
+    "records": {
+     "NVIDIA GeForce RTX 4090": 520
+    },
+    "pass": true
+   }
+  },
+  "c5_base_e_mismatch": 0,
+  "bases_cut": [893, 1222],
+  "conf": {
+   "except": ["arms", "gpu", "kbar"],
+   "mixed": {},
+   "kbar_not_part2s": {},
+   "pass": true
+  },
+  "pass": true,
+  "invalid_pairs": {
+   "И4": {
+    "pairs": 520,
+    "invalid": 0,
+    "pass": true
+   },
+   "C5": {
+    "pairs": 1420,
+    "invalid": 0,
+    "pass": true
+   }
+  }
+ },
+ "rules": {
+  "C5": {
+   "test": "pi05, the pairs of M1 300 + D 600 + bench 520 where PPCL's latch held a chunk: (PPCL - PPC), the 95% CI without 0; fewer than 20 such pairs or 5 tasks: not read",
+   "diff_pp": 1.099,
+   "lo2.5": -5.618,
+   "lo5_one_sided": -4.35,
+   "hi97.5": 7.018,
+   "pairs": 91,
+   "clusters": 31,
+   "invalid_pairs": 0,
+   "outcome": "не меняет различимо",
+   "latched_pairs": 91,
+   "latched_clusters": 31,
+   "pool": {
+    "diff_pp": 0.0,
+    "lo2.5": -0.496,
+    "lo5_one_sided": -0.417,
+    "hi97.5": 0.43,
+    "pairs": 1420,
+    "clusters": 59
+   }
+  }
+ },
+ "measurements": {
+  "И4": {
+   "test": "bench oracle A + A20, inits 0-9: Gauto - PPCL",
+   "diff_pp": 7.115,
+   "lo2.5": 2.115,
+   "lo5_one_sided": 2.885,
+   "hi97.5": 12.308,
+   "pairs": 520,
+   "clusters": 26,
+   "invalid_pairs": 0
+  }
+ },
+ "claims": {
+  "ЛАТЧ МЕНЯЕТ PPC": "НЕТ"
+ },
+ "report": {
+  "ppcl_none": {
+   "pi05/d0": {
+    "diff_pp": 4.013,
+    "lo2.5": -0.669,
+    "lo5_one_sided": 0.0,
+    "hi97.5": 8.667,
+    "pairs": 299,
+    "clusters": 33,
+    "через под": true
+   },
+   "pi05/d10": {
+    "diff_pp": 8.389,
+    "lo2.5": 4.422,
+    "lo5_one_sided": 5.137,
+    "hi97.5": 12.121,
+    "pairs": 298,
+    "clusters": 33,
+    "через под": true
+   },
+   "pi05/d20": {
+    "diff_pp": 5.017,
+    "lo2.5": 1.0,
+    "lo5_one_sided": 1.661,
+    "hi97.5": 9.061,
+    "pairs": 299,
+    "clusters": 33,
+    "через под": true
+   },
+   "bench/A": {
+    "diff_pp": 8.077,
+    "lo2.5": 0.0,
+    "lo5_one_sided": 1.154,
+    "hi97.5": 16.154,
+    "pairs": 260,
+    "clusters": 26,
+    "через под": false
+   },
+   "bench/A20": {
+    "diff_pp": 9.615,
+    "lo2.5": 5.0,
+    "lo5_one_sided": 5.769,
+    "hi97.5": 14.231,
+    "pairs": 260,
+    "clusters": 26,
+    "через под": false
+   }
+  },
+  "gauto_ppcl": {
+   "pi05/d0": {
+    "diff_pp": 3.0,
+    "lo2.5": -1.994,
+    "lo5_one_sided": -1.325,
+    "hi97.5": 7.973,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "pi05/d10": {
+    "diff_pp": 11.333,
+    "lo2.5": 5.369,
+    "lo5_one_sided": 6.312,
+    "hi97.5": 17.726,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "pi05/d20": {
+    "diff_pp": 7.667,
+    "lo2.5": 2.667,
+    "lo5_one_sided": 3.344,
+    "hi97.5": 12.71,
+    "pairs": 300,
+    "clusters": 33
+   }
+  },
+  "ppcl_ppc": {
+   "pi05/d0": {
+    "diff_pp": 0.333,
+    "lo2.5": -0.671,
+    "lo5_one_sided": -0.664,
+    "hi97.5": 1.661,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "pi05/d10": {
+    "diff_pp": 0.333,
+    "lo2.5": -0.671,
+    "lo5_one_sided": -0.665,
+    "hi97.5": 1.65,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "pi05/d20": {
+    "diff_pp": 0.0,
+    "lo2.5": 0.0,
+    "lo5_one_sided": 0.0,
+    "hi97.5": 0.0,
+    "pairs": 300,
+    "clusters": 33
+   },
+   "bench/A": {
+    "diff_pp": -0.769,
+    "lo2.5": -2.692,
+    "lo5_one_sided": -2.308,
+    "hi97.5": 0.769,
+    "pairs": 260,
+    "clusters": 26
+   },
+   "bench/A20": {
+    "diff_pp": 0.0,
+    "lo2.5": 0.0,
+    "lo5_one_sided": 0.0,
+    "hi97.5": 0.0,
+    "pairs": 260,
+    "clusters": 26
+   }
+  },
+  "slices_M1": {
+   "pi05/PPCL-none": {
+    "6cm": {
+     "diff_pp": 4.225,
+     "lo2.5": -2.239,
+     "lo5_one_sided": -1.429,
+     "hi97.5": 10.295,
+     "pairs": 142,
+     "clusters": 33
+    },
+    "12cm": {
+     "diff_pp": 3.822,
+     "lo2.5": -2.582,
+     "lo5_one_sided": -1.841,
+     "hi97.5": 10.205,
+     "pairs": 157,
+     "clusters": 33
+    }
+   },
+   "pi05/Gauto-PPCL": {
+    "6cm": {
+     "diff_pp": 0.0,
+     "lo2.5": -6.724,
+     "lo5_one_sided": -5.634,
+     "hi97.5": 6.123,
+     "pairs": 143,
+     "clusters": 33
+    },
+    "12cm": {
+     "diff_pp": 5.732,
+     "lo2.5": -1.206,
+     "lo5_one_sided": 0.0,
+     "hi97.5": 12.905,
+     "pairs": 157,
+     "clusters": 33
+    }
+   },
+   "pi05/PPCL-PPC": {
+    "6cm": {
+     "diff_pp": 1.399,
+     "lo2.5": 0.0,
+     "lo5_one_sided": 0.0,
+     "hi97.5": 3.731,
+     "pairs": 143,
+     "clusters": 33
+    },
+    "12cm": {
+     "diff_pp": -0.637,
+     "lo2.5": -2.055,
+     "lo5_one_sided": -1.875,
+     "hi97.5": 0.0,
+     "pairs": 157,
+     "clusters": 33
+    }
+   }
+  },
+  "calls": {
+   "pi05/dynamic/Gauto/0": {
+    "n": 300,
+    "sched": 27.5967,
+    "trig": 0.0,
+    "plans_after_event": 22.4881
+   },
+   "pi05/dynamic/Gauto/10": {
+    "n": 300,
+    "sched": 29.9967,
+    "trig": 0.0,
+    "plans_after_event": 23.949
+   },
+   "pi05/dynamic/Gauto/20": {
+    "n": 300,
+    "sched": 31.8933,
+    "trig": 0.0,
+    "plans_after_event": 24.885
+   },
+   "pi05/dynamic/PPC/0": {
+    "n": 300,
+    "sched": 28.0767,
+    "trig": 1.0,
+    "plans_after_event": 24.0034
+   },
+   "pi05/dynamic/PPC/10": {
+    "n": 300,
+    "sched": 31.2833,
+    "trig": 1.4467,
+    "plans_after_event": 26.7347
+   },
+   "pi05/dynamic/PPC/20": {
+    "n": 300,
+    "sched": 33.1667,
+    "trig": 1.08,
+    "plans_after_event": 27.3449
+   },
+   "pi05/dynamic/PPCL/0": {
+    "n": 300,
+    "sched": 27.96,
+    "trig": 1.2867,
+    "plans_after_event": 24.1775
+   },
+   "pi05/dynamic/PPCL/10": {
+    "n": 300,
+    "sched": 31.28,
+    "trig": 1.5233,
+    "plans_after_event": 26.8095
+   },
+   "pi05/dynamic/PPCL/20": {
+    "n": 300,
+    "sched": 33.1667,
+    "trig": 1.1133,
+    "plans_after_event": 27.3798
+   },
+   "pi05/dynamic/none/0": {
+    "n": 300,
+    "sched": 29.2,
+    "trig": 0.0,
+    "plans_after_event": 24.1297
+   },
+   "pi05/dynamic/none/10": {
+    "n": 300,
+    "sched": 33.2833,
+    "trig": 0.0,
+    "plans_after_event": 27.2993
+   },
+   "pi05/dynamic/none/20": {
+    "n": 300,
+    "sched": 34.0633,
+    "trig": 0.0,
+    "plans_after_event": 27.1498
+   },
+   "pi05/move/A/Gauto": {
+    "n": 260,
+    "sched": 19.6769,
+    "trig": 0.0,
+    "plans_after_event": null
+   },
+   "pi05/move/A/PPC": {
+    "n": 260,
+    "sched": 19.7038,
+    "trig": 1.5654,
+    "plans_after_event": null
+   },
+   "pi05/move/A/PPCL": {
+    "n": 260,
+    "sched": 19.7038,
+    "trig": 2.0269,
+    "plans_after_event": null
+   },
+   "pi05/move/A/none": {
+    "n": 260,
+    "sched": 22.2269,
+    "trig": 0.0,
+    "plans_after_event": null
+   },
+   "pi05/move/A20/Gauto": {
+    "n": 260,
+    "sched": 24.4,
+    "trig": 0.0,
+    "plans_after_event": null
+   },
+   "pi05/move/A20/PPC": {
+    "n": 260,
+    "sched": 25.8615,
+    "trig": 2.0769,
+    "plans_after_event": null
+   },
+   "pi05/move/A20/PPCL": {
+    "n": 260,
+    "sched": 25.8615,
+    "trig": 2.0808,
+    "plans_after_event": null
+   },
+   "pi05/move/A20/none": {
+    "n": 260,
+    "sched": 27.8154,
+    "trig": 0.0,
+    "plans_after_event": null
+   }
+  },
+  "vs_metrics": {
+   "pi05/dynamic/Gauto/0": {
+    "jerk": 32.315,
+    "path_m": 1.4667,
+    "grasp_miss_m": 0.0853
+   },
+   "pi05/dynamic/Gauto/10": {
+    "jerk": 47.7483,
+    "path_m": 1.6076,
+    "grasp_miss_m": 0.0903
+   },
+   "pi05/dynamic/Gauto/20": {
+    "jerk": 62.5932,
+    "path_m": 1.5359,
+    "grasp_miss_m": 0.0983
+   },
+   "pi05/dynamic/PPCL/0": {
+    "jerk": 36.8279,
+    "path_m": 1.4401,
+    "grasp_miss_m": 0.1042
+   },
+   "pi05/dynamic/PPCL/10": {
+    "jerk": 55.8112,
+    "path_m": 1.6399,
+    "grasp_miss_m": 0.1213
+   },
+   "pi05/dynamic/PPCL/20": {
+    "jerk": 81.2763,
+    "path_m": 1.5338,
+    "grasp_miss_m": 0.1301
+   },
+   "pi05/move/A/Gauto": {
+    "jerk": 28.2281,
+    "path_m": 1.2488,
+    "grasp_miss_m": 0.0326
+   },
+   "pi05/move/A/PPCL": {
+    "jerk": 33.9904,
+    "path_m": 1.3408,
+    "grasp_miss_m": 0.0364
+   },
+   "pi05/move/A20/Gauto": {
+    "jerk": 57.8852,
+    "path_m": 1.3663,
+    "grasp_miss_m": 0.0337
+   },
+   "pi05/move/A20/PPCL": {
+    "jerk": 71.2394,
+    "path_m": 1.4394,
+    "grasp_miss_m": 0.0464
+   }
+  },
+  "latch": {
+   "pi05/dynamic/PPCL/0": {
+    "n": 300,
+    "latched_share": 0.0767,
+    "chunks_per_episode": 0.3867,
+    "trig_per_episode": 0.1133,
+    "resets_per_episode": 0.0
+   },
+   "pi05/dynamic/PPCL/10": {
+    "n": 300,
+    "latched_share": 0.0567,
+    "chunks_per_episode": 0.28,
+    "trig_per_episode": 0.0967,
+    "resets_per_episode": 0.0
+   },
+   "pi05/dynamic/PPCL/20": {
+    "n": 300,
+    "latched_share": 0.0233,
+    "chunks_per_episode": 0.1033,
+    "trig_per_episode": 0.0367,
+    "resets_per_episode": 0.0
+   },
+   "pi05/move/A/PPCL": {
+    "n": 260,
+    "latched_share": 0.1385,
+    "chunks_per_episode": 0.7308,
+    "trig_per_episode": 0.3192,
+    "resets_per_episode": 0.0192
+   },
+   "pi05/move/A20/PPCL": {
+    "n": 260,
+    "latched_share": 0.0308,
+    "chunks_per_episode": 0.0654,
+    "trig_per_episode": 0.0385,
+    "resets_per_episode": 0.0
+   }
+  },
+  "gpu": {
+   "pi05": ["NVIDIA GeForce RTX 4090"]
+  },
+  "k_select": {
+   "pi05": {
+    "k": "VS1.0",
+    "scores": {
+     "VS0.1": 0.183486,
+     "VS0.3": 0.173176,
+     "VS1.0": 0.150788
+    },
+    "n_valid": 50,
+    "n_cases": 60,
+    "flag_lt40": false
+   }
+  },
+  "mode": {
+   "pi05_lmax": {
+    "mode": "S",
+    "equal": 88,
+    "total": 96,
+    "missing": 0,
+    "e_equal": 12,
+    "e_total": 12,
+    "gpu": ["NVIDIA GeForce RTX 4090"]
+   },
+   "oftplus_lmax": {
+    "mode": "S",
+    "equal": 0,
+    "total": 60,
+    "missing": 0,
+    "e_equal": 9,
+    "e_total": 12,
+    "gpu": ["NVIDIA GeForce RTX 4090"]
+   },
+   "pi05_bench": {
+    "mode": "P",
+    "equal": 80,
+    "total": 80,
+    "missing": 0,
+    "gpu": ["NVIDIA GeForce RTX 4090"]
+   }
+  },
+  "e_match": {
+   "pi05/d0": {
+    "equal": 299,
+    "total": 300,
+    "mode": "S",
+    "pass": true
+   },
+   "pi05/d10": {
+    "equal": 298,
+    "total": 300,
+    "mode": "S",
+    "pass": true
+   },
+   "pi05/d20": {
+    "equal": 299,
+    "total": 300,
+    "mode": "S",
+    "pass": true
+   }
+  },
+  "batch_rows_pre_event": {
+   "pi05/d0": {
+    "calls_equal": 1675,
+    "calls": 1676,
+    "cases_equal": 298,
+    "cases": 299,
+    "rows_max": 6,
+    "mode": "S",
+    "pass": true
+   },
+   "pi05/d10": {
+    "calls_equal": 1631,
+    "calls": 1635,
+    "cases_equal": 297,
+    "cases": 298,
+    "rows_max": 6,
+    "mode": "S",
+    "pass": true
+   },
+   "pi05/d20": {
+    "calls_equal": 1838,
+    "calls": 1838,
+    "cases_equal": 299,
+    "cases": 299,
+    "rows_max": 6,
+    "mode": "S",
+    "pass": true
+   }
+  },
+  "c5_base_e_mismatch": 0,
+  "invalid_pairs": {
+   "И4": {
+    "pairs": 520,
+    "invalid": 0,
+    "pass": true
+   },
+   "C5": {
+    "pairs": 1420,
+    "invalid": 0,
+    "pass": true
+   }
+  },
+  "vs_unread": 108
+ }
+}

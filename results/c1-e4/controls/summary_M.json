@@ -1,0 +1,310 @@
+{
+ "checks": {
+  "records": 974,
+  "read": 2774,
+  "skipped": 0,
+  "off_plan": {},
+  "complete": {
+   "VTm/d0": {
+    "expected": 226,
+    "missing": 0,
+    "pass": true
+   },
+   "Gauto/d0": {
+    "expected": 226,
+    "missing": 0,
+    "pass": true
+   },
+   "VST/d0": {
+    "expected": 226,
+    "missing": 0,
+    "pass": true
+   },
+   "VTm/d10": {
+    "expected": 374,
+    "missing": 0,
+    "pass": true
+   },
+   "Gauto/d10": {
+    "expected": 374,
+    "missing": 0,
+    "pass": true
+   },
+   "VST/d10": {
+    "expected": 374,
+    "missing": 0,
+    "pass": true
+   },
+   "PBVS/d0": {
+    "expected": 226,
+    "missing": 0,
+    "pass": true
+   },
+   "PBVS/d10": {
+    "expected": 374,
+    "missing": 0,
+    "pass": true
+   },
+   "PBVS26/d10": {
+    "expected": 374,
+    "missing": 0,
+    "pass": true
+   }
+  },
+  "e_match": {
+   "d0": {
+    "equal": 113,
+    "total": 113,
+    "pass": true
+   },
+   "d10": {
+    "equal": 187,
+    "total": 187,
+    "pass": true
+   }
+  },
+  "s_star": {
+   "off": {
+    "d0": 0,
+    "d10": 0
+   },
+   "pass": true
+  },
+  "band_in_conf": {
+   "want": {
+    "model": "A",
+    "G": [0.0025, 0.0025],
+    "B": [0.79, 0.79],
+    "delta": 0.005,
+    "delta_M": {
+     "I": 0.030371643,
+     "A": 0.026169416,
+     "I*": 0.028827108,
+     "A*": 0.028106085
+    },
+    "coef": {
+     "I": {
+      "G": [0.0105, 0.0121],
+      "B": [0.0, 0.0]
+     },
+     "A": {
+      "G": [0.0025, 0.0025],
+      "B": [0.79, 0.79]
+     },
+     "I*": {
+      "G": [0.01105611, 0.011412947],
+      "B": [0.0, 0.0]
+     },
+     "A*": {
+      "G": [0.002885194, 0.002816796],
+      "B": [0.765374349, 0.772972556]
+     }
+    },
+    "folds": {
+     "I*": [
+      {
+       "G": [0.010833223, 0.01051019],
+       "B": [0.0, 0.0]
+      },
+      {
+       "G": [0.011282727, 0.012521323],
+       "B": [0.0, 0.0]
+      }
+     ],
+     "A*": [
+      {
+       "G": [0.002623335, 0.002115714],
+       "B": [0.786426894, 0.820850903]
+      },
+      {
+       "G": [0.003225651, 0.004707671],
+       "B": [0.738104645, 0.639469943]
+      }
+     ]
+    },
+    "n": 60,
+    "flag_gt_15mm": true
+   },
+   "off": {},
+   "pass": true
+  },
+  "invalid_pairs": {
+   "main/d0": {
+    "pairs": 113,
+    "invalid": 0,
+    "pass": true
+   },
+   "main/d10": {
+    "pairs": 187,
+    "invalid": 1,
+    "pass": true
+   },
+   "B1/d0": {
+    "pairs": 113,
+    "invalid": 0,
+    "pass": true
+   },
+   "B1/d10": {
+    "pairs": 187,
+    "invalid": 0,
+    "pass": true
+   },
+   "B2/d0": {
+    "pairs": 113,
+    "invalid": 0,
+    "pass": true
+   },
+   "B2/d10": {
+    "pairs": 187,
+    "invalid": 1,
+    "pass": true
+   },
+   "B2gate26/d10": {
+    "pairs": 187,
+    "invalid": 0,
+    "pass": true
+   }
+  },
+  "conf": {
+   "except": ["arms", "gpu", "kbar", "pbvs"],
+   "mixed": {},
+   "pass": true
+  },
+  "pass": true
+ },
+ "measurements": {
+  "main/d0": {
+   "test": "pi05, pro, d = 0: VTm - Gauto (C2_nv_pi05_eval300_pro_d0), pp",
+   "diff_pp": 12.389,
+   "lo2.5": 4.202,
+   "lo5_one_sided": 5.556,
+   "hi97.5": 20.536,
+   "pairs": 113,
+   "clusters": 33,
+   "hi95_one_sided": 18.939,
+   "invalid_pairs": 0,
+   "drops": {}
+  },
+  "main/d10": {
+   "test": "pi05, plus, d = 10: VTm - Gauto (C3_pi05_eval300_plus_d10), pp",
+   "diff_pp": -4.301,
+   "lo2.5": -10.171,
+   "lo5_one_sided": -9.231,
+   "hi97.5": 1.184,
+   "pairs": 186,
+   "clusters": 33,
+   "hi95_one_sided": 0.529,
+   "invalid_pairs": 1,
+   "drops": {
+    "e": 1
+   }
+  },
+  "B1/d0": {
+   "test": "pi05, pro, d = 0: VTm - VST0.3 (VT2_pi05_eval300_pro_d0), pp",
+   "diff_pp": 1.77,
+   "lo2.5": -4.465,
+   "lo5_one_sided": -3.604,
+   "hi97.5": 8.036,
+   "pairs": 113,
+   "clusters": 33,
+   "hi95_one_sided": 7.143,
+   "invalid_pairs": 0,
+   "drops": {}
+  },
+  "B1/d10": {
+   "test": "pi05, plus, d = 10: VTm - VST0.3 (VT3_pi05_eval300_plus_d10), pp",
+   "diff_pp": 2.139,
+   "lo2.5": -5.348,
+   "lo5_one_sided": -3.978,
+   "hi97.5": 9.043,
+   "pairs": 187,
+   "clusters": 33,
+   "hi95_one_sided": 8.022,
+   "invalid_pairs": 0,
+   "drops": {}
+  },
+  "B2/d0": {
+   "test": "pi05, pro, d = 0: VTm - PBVS0.3 (V2eps_pi05_eval300_pro_d0), pp",
+   "diff_pp": 7.965,
+   "lo2.5": 2.062,
+   "lo5_one_sided": 3.148,
+   "hi97.5": 14.546,
+   "pairs": 113,
+   "clusters": 33,
+   "hi95_one_sided": 13.133,
+   "invalid_pairs": 0,
+   "drops": {},
+   "measured": true,
+   "note": "сравнение чистое: тот же порог 5 мм и та же модель (V2eps); измерено, только если пол шума показателен"
+  },
+  "B2/d10": {
+   "test": "pi05, plus, d = 10: VTm - PBVS0.3 (E_pi05_eval300_plus_d10), pp",
+   "diff_pp": 0.0,
+   "lo2.5": -6.937,
+   "lo5_one_sided": -5.848,
+   "hi97.5": 6.843,
+   "pairs": 186,
+   "clusters": 33,
+   "hi95_one_sided": 5.641,
+   "invalid_pairs": 1,
+   "drops": {
+    "e": 1
+   },
+   "measured": true,
+   "note": "сравнение чистое: тот же порог 5 мм, та же модель и λ (Ed10); измерено, только если пол шума показателен"
+  },
+  "B2gate26/d10": {
+   "test": "pi05, plus, d = 10: VTm - PBVS0.3 (V3_pi05_eval300_plus_d10), pp",
+   "diff_pp": 1.07,
+   "lo2.5": -6.548,
+   "lo5_one_sided": -5.208,
+   "hi97.5": 8.841,
+   "pairs": 187,
+   "clusters": 33,
+   "hi95_one_sided": 7.609,
+   "invalid_pairs": 0,
+   "drops": {},
+   "measured": false,
+   "note": "только отчёт: против V3d10, где порог band.json — смешаны цель и порог; В2 при d = 10 остаётся неизмеренным"
+  }
+ },
+ "noise_floor": {
+  "n": 223,
+  "median_floor_m": 0.016609,
+  "median_signal_m": 0.043859,
+  "ratio": 2.641,
+  "rule": "n >= 30, ratio >= 2",
+  "informative": true,
+  "verdict": "показательно",
+  "why": null
+ },
+ "reading": {
+  "main": {
+   "outcome": "(i)",
+   "sentence": "«плоская кривая» снимается. Вывод: «информация полезна, беспамятная реализация неудачна». Пишем так, даже если это рушит тезис сводки.",
+   "noise_floor": "показательно",
+   "label": null
+  },
+  "B1": "не показано"
+ },
+ "counters": {
+  "d0": {
+   "n": 113,
+   "s_star_none": 5,
+   "window": 100,
+   "acting_share": 0.7792,
+   "steps_aim_share": 0.7101,
+   "no_aim_share": 0.0552,
+   "mean_e_m": 0.0585
+  },
+  "d10": {
+   "n": 187,
+   "s_star_none": 4,
+   "window": 172,
+   "acting_share": 0.8731,
+   "steps_aim_share": 0.2717,
+   "no_aim_share": 0.0221,
+   "mean_e_m": 0.0433
+  }
+ }
+}
