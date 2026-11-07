@@ -1,0 +1,189 @@
+{
+ "measurement": "измерение, не правило (part-2 spec journal 2026-11-08)",
+ "cases": 300,
+ "clusters": 33,
+ "resamples": 2000,
+ "arms": {
+  "Base": {
+   "n": 300,
+   "grasps": 191,
+   "grasped_successes": 126,
+   "successes": 130,
+   "ungrasped_successes": 4,
+   "c": {
+    "est": 65.969,
+    "ci95": [
+     57.21,
+     74.419
+    ]
+   },
+   "g": {
+    "est": 63.667,
+    "ci95": [
+     55.295,
+     72.093
+    ]
+   },
+   "s": {
+    "est": 43.333,
+    "ci95": [
+     36.666,
+     49.833
+    ]
+   },
+   "r": {
+    "est": 1.333,
+    "ci95": [
+     0.0,
+     3.987
+    ]
+   },
+   "c_undefined_resamples": 0
+  },
+  "none": {
+   "n": 300,
+   "grasps": 51,
+   "grasped_successes": 9,
+   "successes": 12,
+   "ungrasped_successes": 3,
+   "c": {
+    "est": 17.647,
+    "ci95": [
+     4.082,
+     36.538
+    ]
+   },
+   "g": {
+    "est": 17.0,
+    "ci95": [
+     10.702,
+     24.161
+    ]
+   },
+   "s": {
+    "est": 4.0,
+    "ci95": [
+     1.007,
+     8.001
+    ]
+   },
+   "r": {
+    "est": 1.0,
+    "ci95": [
+     0.0,
+     2.649
+    ]
+   },
+   "c_undefined_resamples": 0
+  },
+  "PPC": {
+   "n": 300,
+   "grasps": 76,
+   "grasped_successes": 26,
+   "successes": 27,
+   "ungrasped_successes": 1,
+   "c": {
+    "est": 34.211,
+    "ci95": [
+     22.222,
+     48.531
+    ]
+   },
+   "g": {
+    "est": 25.333,
+    "ci95": [
+     18.935,
+     31.667
+    ]
+   },
+   "s": {
+    "est": 9.0,
+    "ci95": [
+     5.667,
+     12.709
+    ]
+   },
+   "r": {
+    "est": 0.333,
+    "ci95": [
+     0.0,
+     1.007
+    ]
+   },
+   "c_undefined_resamples": 0
+  },
+  "Gauto": {
+   "n": 300,
+   "grasps": 149,
+   "grasped_successes": 49,
+   "successes": 50,
+   "ungrasped_successes": 1,
+   "c": {
+    "est": 32.886,
+    "ci95": [
+     23.204,
+     44.279
+    ]
+   },
+   "g": {
+    "est": 49.667,
+    "ci95": [
+     40.604,
+     59.06
+    ]
+   },
+   "s": {
+    "est": 16.667,
+    "ci95": [
+     11.96,
+     21.74
+    ]
+   },
+   "r": {
+    "est": 0.333,
+    "ci95": [
+     0.0,
+     1.007
+    ]
+   },
+   "c_undefined_resamples": 0
+  }
+ },
+ "split_base_minus_gauto": {
+  "gap": {
+   "est": 26.667,
+   "ci95": [
+    20.804,
+    32.886
+   ]
+  },
+  "S_star": {
+   "est": 33.098,
+   "ci95": [
+    27.26,
+    38.962
+   ]
+  },
+  "after_grasp": {
+   "est": 16.431,
+   "ci95": [
+    10.966,
+    21.909
+   ]
+  },
+  "at_grasp": {
+   "est": 10.236,
+   "ci95": [
+    5.793,
+    15.535
+   ]
+  },
+  "undefined_resamples": 0,
+  "after_share_of_gap": 0.6162
+ },
+ "dropped_cases": [],
+ "files": [
+  "results/c1-e4/part2/pod_A/D_pi05_eval300_plus_d20.jsonl",
+  "results/c1-e4/part2/pod_A/D_pi05_eval300_pro_d20.jsonl"
+ ]
+}
