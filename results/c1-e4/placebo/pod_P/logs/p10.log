@@ -1,0 +1,1 @@
+[18:32:19] phase p10, P10_pi05_eval300_plus_d10 (748 episodes): --brain pi05 --source plus --set eval300 --arms=none,none2,Gauto,GautoSham --d 10 --kbar 0.306 --base-prefix

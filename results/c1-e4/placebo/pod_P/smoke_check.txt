@@ -1,0 +1,34 @@
+{
+ "complete": {
+  "expected": 30,
+  "missing": 0,
+  "off_plan": 0,
+  "pass": true
+ },
+ "prefix": {
+  "dynamic": 24,
+  "invalid": 0,
+  "pass": true
+ },
+ "kbar": {
+  "want": 0.306,
+  "off": 0,
+  "pass": true
+ },
+ "theta": {
+  "records": 6,
+  "off": 0,
+  "pass": true
+ },
+ "seed_shift": {
+  "records": 6,
+  "off": 0,
+  "pass": true
+ },
+ "act_hash_N'_vs_N": {
+  "events": 6,
+  "differ": 6,
+  "pass": true
+ }
+}
+C1-E4 placebo smoke (code only): PASS

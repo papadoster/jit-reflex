@@ -1,0 +1,2 @@
+[15:53:08] pgrid, pod P: P0, P10
+forecast at psmoke's 12.4 s/record: 1870 records, 6.4 h, $2.39 at $0.371/h (placebo spec §10: ~11.5 h, ~$4.3 with setup, smoke and 10 %)
