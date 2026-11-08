@@ -1,0 +1,447 @@
+{
+ "checks": {
+  "records": 1870,
+  "read": 1870,
+  "skipped": 0,
+  "off_plan": {},
+  "complete": {
+   "P0_pi05_eval300_plus_d0": {
+    "expected": 432,
+    "missing": 0,
+    "pass": true
+   },
+   "P0nv_pi05_eval300_plus_d0": {
+    "expected": 316,
+    "missing": 0,
+    "pass": true
+   },
+   "P10_pi05_eval300_plus_d10": {
+    "expected": 748,
+    "missing": 0,
+    "pass": true
+   }
+  },
+  "invalid_pairs": {
+   "P0": {
+    "pairs": 187,
+    "invalid": 0,
+    "pass": true
+   },
+   "P10": {
+    "pairs": 187,
+    "invalid": 0,
+    "pass": true
+   }
+  },
+  "conf": {
+   "except": ["arms"],
+   "mixed": {},
+   "pass": true
+  },
+  "arms": {
+   "P0": {
+    "kbar": {
+     "want": 0.306,
+     "off": 0,
+     "pass": true
+    },
+    "theta": {
+     "records": 187,
+     "off": 0,
+     "pass": true
+    },
+    "seed_shift": {
+     "records": 187,
+     "off": 0,
+     "pass": true
+    },
+    "act_hash_N'_vs_N": {
+     "events": 187,
+     "differ": 187,
+     "pass": true
+    }
+   },
+   "P10": {
+    "kbar": {
+     "want": 0.306,
+     "off": 0,
+     "pass": true
+    },
+    "theta": {
+     "records": 187,
+     "off": 0,
+     "pass": true
+    },
+    "seed_shift": {
+     "records": 187,
+     "off": 0,
+     "pass": true
+    },
+    "act_hash_N'_vs_N": {
+     "events": 186,
+     "differ": 186,
+     "pass": true
+    }
+   }
+  },
+  "pass": true
+ },
+ "rule": {
+  "branch": "П1",
+  "sentence": "фиктивная поправка той же величины дала над «нет» меньше половины нашего выигрыша: выигрыш приписывается направлению поправки, а не самому возмущению действий",
+  "bound": "фиктивная ветвь даёт над «нет» не более -3.9 п.п. при нашем выигрыше 15.0 п.п."
+ },
+ "measurements": {
+  "pooled": {
+   "Q": {
+    "diff_pp": -14.973,
+    "lo2.5": -19.549,
+    "lo5_one_sided": -18.75,
+    "hi97.5": -10.427,
+    "pairs": 374,
+    "clusters": 33,
+    "hi95_one_sided": -11.231
+   },
+   "G-N": {
+    "diff_pp": 14.973,
+    "lo2.5": 8.776,
+    "lo5_one_sided": 9.819,
+    "hi97.5": 21.271,
+    "pairs": 374,
+    "clusters": 33,
+    "hi95_one_sided": 20.215
+   },
+   "P-N": {
+    "diff_pp": -7.487,
+    "lo2.5": -12.107,
+    "lo5_one_sided": -11.34,
+    "hi97.5": -3.295,
+    "pairs": 374,
+    "clusters": 33,
+    "hi95_one_sided": -3.946
+   },
+   "G-P": {
+    "diff_pp": 22.46,
+    "lo2.5": 16.223,
+    "lo5_one_sided": 17.112,
+    "hi97.5": 29.188,
+    "pairs": 374,
+    "clusters": 33,
+    "hi95_one_sided": 27.949
+   },
+   "N'-N": {
+    "diff_pp": 0.802,
+    "lo2.5": -3.158,
+    "lo5_one_sided": -2.601,
+    "hi97.5": 4.946,
+    "pairs": 374,
+    "clusters": 33,
+    "hi95_one_sided": 4.348
+   },
+   "G-N'": {
+    "diff_pp": 14.171,
+    "lo2.5": 7.734,
+    "lo5_one_sided": 8.918,
+    "hi97.5": 20.161,
+    "pairs": 374,
+    "clusters": 33,
+    "hi95_one_sided": 19.232
+   },
+   "drops": {}
+  },
+  "P0": {
+   "Q": {
+    "diff_pp": -16.578,
+    "lo2.5": -22.606,
+    "lo5_one_sided": -21.58,
+    "hi97.5": -10.622,
+    "pairs": 187,
+    "clusters": 33,
+    "hi95_one_sided": -11.612
+   },
+   "G-N": {
+    "diff_pp": 11.765,
+    "lo2.5": 4.57,
+    "lo5_one_sided": 5.611,
+    "hi97.5": 18.618,
+    "pairs": 187,
+    "clusters": 33,
+    "hi95_one_sided": 17.588
+   },
+   "P-N": {
+    "diff_pp": -10.695,
+    "lo2.5": -17.205,
+    "lo5_one_sided": -16.23,
+    "hi97.5": -4.372,
+    "pairs": 187,
+    "clusters": 33,
+    "hi95_one_sided": -5.263
+   },
+   "G-P": {
+    "diff_pp": 22.46,
+    "lo2.5": 15.385,
+    "lo5_one_sided": 16.374,
+    "hi97.5": 30.0,
+    "pairs": 187,
+    "clusters": 33,
+    "hi95_one_sided": 28.729
+   },
+   "N'-N": {
+    "diff_pp": 2.139,
+    "lo2.5": -3.191,
+    "lo5_one_sided": -2.374,
+    "hi97.5": 7.61,
+    "pairs": 187,
+    "clusters": 33,
+    "hi95_one_sided": 6.706
+   },
+   "G-N'": {
+    "diff_pp": 9.626,
+    "lo2.5": 2.139,
+    "lo5_one_sided": 3.387,
+    "hi97.5": 16.489,
+    "pairs": 187,
+    "clusters": 33,
+    "hi95_one_sided": 15.464
+   },
+   "drops": {}
+  },
+  "P10": {
+   "Q": {
+    "diff_pp": -13.369,
+    "lo2.5": -18.852,
+    "lo5_one_sided": -18.093,
+    "hi97.5": -7.584,
+    "pairs": 187,
+    "clusters": 33,
+    "hi95_one_sided": -8.523
+   },
+   "G-N": {
+    "diff_pp": 18.182,
+    "lo2.5": 10.16,
+    "lo5_one_sided": 11.578,
+    "hi97.5": 26.066,
+    "pairs": 187,
+    "clusters": 33,
+    "hi95_one_sided": 24.737
+   },
+   "P-N": {
+    "diff_pp": -4.278,
+    "lo2.5": -9.091,
+    "lo5_one_sided": -8.164,
+    "hi97.5": 0.0,
+    "pairs": 187,
+    "clusters": 33,
+    "hi95_one_sided": -0.546
+   },
+   "G-P": {
+    "diff_pp": 22.46,
+    "lo2.5": 13.792,
+    "lo5_one_sided": 15.104,
+    "hi97.5": 31.19,
+    "pairs": 187,
+    "clusters": 33,
+    "hi95_one_sided": 29.787
+   },
+   "N'-N": {
+    "diff_pp": -0.535,
+    "lo2.5": -4.593,
+    "lo5_one_sided": -4.061,
+    "hi97.5": 3.805,
+    "pairs": 187,
+    "clusters": 33,
+    "hi95_one_sided": 3.125
+   },
+   "G-N'": {
+    "diff_pp": 18.717,
+    "lo2.5": 10.714,
+    "lo5_one_sided": 12.088,
+    "hi97.5": 26.426,
+    "pairs": 187,
+    "clusters": 33,
+    "hi95_one_sided": 25.374
+   },
+   "drops": {}
+  }
+ },
+ "angle": {
+  "test": "pi05, P0 + P10 pooled: OLS slope of (P - G) pp on r = 2 sin(phi / 2), phi = min(theta, 2 pi - theta)",
+  "beta_pp_per_r": -10.826,
+  "lo2.5": -22.521,
+  "lo5_one_sided": -20.684,
+  "hi95_one_sided": -0.895,
+  "hi97.5": 1.195,
+  "pairs": 374,
+  "clusters": 33,
+  "sentence": "успех плацебо падает с ростом ошибки, которую оставляет поправка: β = -10.8 п.п. на единицу r [-22.5; 1.2]",
+  "bands_P-N": {
+   "[0, 60)": {
+    "diff_pp": 0.794,
+    "lo2.5": -8.621,
+    "lo5_one_sided": -6.78,
+    "hi97.5": 9.525,
+    "pairs": 126,
+    "clusters": 29
+   },
+   "[60, 120)": {
+    "diff_pp": -11.194,
+    "lo2.5": -16.667,
+    "lo5_one_sided": -15.762,
+    "hi97.5": -5.556,
+    "pairs": 134,
+    "clusters": 29
+   },
+   "[120, 180]": {
+    "diff_pp": -12.281,
+    "lo2.5": -20.833,
+    "lo5_one_sided": -19.444,
+    "hi97.5": -4.31,
+    "pairs": 114,
+    "clusters": 28
+   }
+  }
+ },
+ "report": {
+  "success": {
+   "P0": {
+    "none": [0.4385, 187],
+    "none2": [0.4599, 187],
+    "Gauto": [0.5561, 187],
+    "GautoSham": [0.3316, 187]
+   },
+   "P10": {
+    "none": [0.1497, 187],
+    "none2": [0.1444, 187],
+    "Gauto": [0.3316, 187],
+    "GautoSham": [0.107, 187]
+   }
+  },
+  "calls": {
+   "P0/none": {
+    "n": 187,
+    "sched": 28.6203,
+    "trig": 0.0,
+    "per_episode": 28.6203
+   },
+   "P0/none2": {
+    "n": 187,
+    "sched": 28.4011,
+    "trig": 0.0,
+    "per_episode": 28.4011
+   },
+   "P0/Gauto": {
+    "n": 187,
+    "sched": 26.4973,
+    "trig": 0.0,
+    "per_episode": 26.4973
+   },
+   "P0/GautoSham": {
+    "n": 187,
+    "sched": 30.3369,
+    "trig": 0.0,
+    "per_episode": 30.3369
+   },
+   "P10/none": {
+    "n": 187,
+    "sched": 32.7914,
+    "trig": 0.0,
+    "per_episode": 32.7914
+   },
+   "P10/none2": {
+    "n": 187,
+    "sched": 32.8556,
+    "trig": 0.0,
+    "per_episode": 32.8556
+   },
+   "P10/Gauto": {
+    "n": 187,
+    "sched": 29.8342,
+    "trig": 0.0,
+    "per_episode": 29.8342
+   },
+   "P10/GautoSham": {
+    "n": 187,
+    "sched": 33.631,
+    "trig": 0.0,
+    "per_episode": 33.631
+   }
+  },
+  "g_on": {
+   "P0/Gauto": 0.9305,
+   "P0/GautoSham": 0.9305,
+   "P10/Gauto": 0.9198,
+   "P10/GautoSham": 0.9198
+  },
+  "through_pod": {
+   "P0: G - G-auto of controls line 2 (pod C)": {
+    "diff_pp": 0.0,
+    "lo2.5": -3.371,
+    "lo5_one_sided": -2.841,
+    "hi97.5": 3.209,
+    "pairs": 186,
+    "clusters": 33,
+    "drops": {
+     "e": 1
+    }
+   },
+   "P0: N - part 2's none (pod A)": {
+    "diff_pp": -3.243,
+    "lo2.5": -8.947,
+    "lo5_one_sided": -7.98,
+    "hi97.5": 2.222,
+    "pairs": 185,
+    "clusters": 33,
+    "drops": {
+     "e": 2
+    }
+   },
+   "P10: G - G-auto of controls line 3 (pod C)": {
+    "diff_pp": 0.0,
+    "lo2.5": -1.538,
+    "lo5_one_sided": -1.143,
+    "hi97.5": 1.588,
+    "pairs": 186,
+    "clusters": 33,
+    "drops": {
+     "e": 1
+    }
+   },
+   "P10: N - part 2's none (pod A)": {
+    "diff_pp": 1.075,
+    "lo2.5": -1.075,
+    "lo5_one_sided": -0.562,
+    "hi97.5": 3.315,
+    "pairs": 186,
+    "clusters": 33,
+    "drops": {
+     "e": 1
+    }
+   }
+  },
+  "base_e_controls": {
+   "P0": {
+    "equal": 186,
+    "total": 187
+   },
+   "P10": {
+    "equal": 186,
+    "total": 187
+   }
+  },
+  "phi": {
+   "bands": {
+    "0-60": 0.3369,
+    "60-120": 0.3583,
+    "120-180": 0.3048
+   },
+   "mean_r": 1.2605,
+   "pairs": 374
+  },
+  "rho_point": {
+   "pooled": -0.5,
+   "P0": -0.9091,
+   "P10": -0.2353
+  },
+  "gpu": ["NVIDIA GeForce RTX 4090"]
+ }
+}
