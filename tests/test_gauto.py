@@ -486,3 +486,57 @@ def test_vs_labels_parse_with_cv_eyes():
     assert gauto.parse_arm("VS1.0") == ("VS1.0", "")
     with pytest.raises(AssertionError):
         gauto.parse_arm("VS0.3@glr")
+
+
+# ------------------------------------------------------------------ placebo: GautoSham (P) and none2 (N')
+
+DXY = [0.03, 0.01, 0.0]
+
+
+def test_sham_at_zero_is_gauto_bitwise():
+    """placebo spec §2: theta = 0 turns nothing, so GautoSham is Gauto bitwise (actions, C, the kappa log)."""
+    g, sh = gauto.GAgent("Gauto", 10, 0, kbar=0.3), gauto.GAgent("GautoSham", 10, 0, kbar=0.3, sham_theta=0.0)
+    assert np.array_equal(_run(g, DXY), _run(sh, DXY)) and g.kappa_log == sh.kappa_log and g.kappa_log
+    assert np.array_equal(g.c, sh.c) and (g.t_e, g.g_on) == (sh.t_e, sh.g_on)
+
+
+@pytest.mark.parametrize("d", [0, 10])
+def test_sham_turns_the_shift_and_keeps_z1(d):
+    """Without clipping (a still plan, |U| / T_ramp = 6.3 mm < G_POS a step), GautoSham's commanded extra C is R C of
+    Gauto at every step and its kappa log is Gauto's (a rotation keeps the dot products: share(R S, R Delta) =
+    share(S, Delta)); |U| is kept, z is untouched; delta_n stays unturned."""
+    th = 2.0
+    R = np.array([[np.cos(th), -np.sin(th), 0], [np.sin(th), np.cos(th), 0], [0, 0, 1]])
+    g, sh = gauto.GAgent("Gauto", 10, d, kbar=0.3), gauto.GAgent("GautoSham", 10, d, kbar=0.3, sham_theta=th)
+    a, b = _run(g, DXY, T=60), _run(sh, DXY, T=60)
+    assert np.abs(a[:, :3]).max() < 1 and sh.t_e == g.t_e == 12 and len(sh.kappa_log) >= 2
+    for t in range(60):
+        assert np.allclose(sh.c_hist[t], R @ g.c_hist[t], atol=1e-12), t
+        assert np.linalg.norm(sh.unknown_shift(t)) == pytest.approx(np.linalg.norm(g.unknown_shift(t)), abs=1e-12)
+    assert np.allclose(b[:, :3], a[:, :3] @ R.T, atol=1e-9) and not np.allclose(a, b) and not b[:, 2].any()
+    assert [(k["t"], k["s"], k["k"], k["d"]) for k in sh.kappa_log] == [(k["t"], k["s"], k["k"], k["d"])
+                                                                         for k in g.kappa_log]
+    assert np.allclose(sh.delta_n, g.delta_n) and np.allclose(sh.unknown_shift(59), R @ g.unknown_shift(59))
+
+
+def test_none2_is_none_bitwise():
+    """placebo spec §2, N': the agent of none2 is none's (the runner changes only the brain's seed)."""
+    for d, delta in itertools.product((0, 10), (DXY, [0.06, 0.0, 0.0])):
+        a, b = gauto.GAgent("none", 10, d), gauto.GAgent("none2", 10, d)
+        assert np.array_equal(_run(a, delta), _run(b, delta)) and not b.kappa_log and not b.g_on
+        assert (a.t_e, a.sched.n_sched, a.sched.n_trig, b.sched.n_trig) == (b.t_e, b.sched.n_sched, b.sched.n_trig, 0)
+
+
+def test_sham_needs_its_angle():
+    for kw in ({}, {"sham_theta": None}):
+        with pytest.raises(AssertionError):
+            gauto.GAgent("GautoSham", 10, 0, kbar=0.3, **kw)
+    with pytest.raises(AssertionError):
+        gauto.GAgent("GautoSham", 10, 0, sham_theta=1.0)  # kbar as Gauto
+    for m in ("Gauto", "none", "none2", "G"):
+        with pytest.raises(AssertionError):
+            gauto.GAgent(m, 10, 0, kbar=0.3 if m == "Gauto" else None, sham_theta=1.0)
+    assert gauto.parse_arm("GautoSham") == ("GautoSham", "") and gauto.parse_arm("none2") == ("none2", "")
+    for bad in ("GautoSham@cv", "GautoSham@glr", "none2@glr"):
+        with pytest.raises(AssertionError):
+            gauto.parse_arm(bad)

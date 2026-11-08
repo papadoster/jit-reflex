@@ -31,6 +31,10 @@ per process. Per case:
 - VTm (PBVS spec journal "2026-10-22 — ветка VT-m: формула и правила", src/vservo.py VTMAgent): PBVS's band of --band
   (band_eps.json) in conf["pbvs"] and VS-T's s_star of the same run's full Base (no --base-prefix). Its records carry
   "vtm": s_star, the servo's counters, a_floor and a_first (vectors rounded to 1e-6, None when undefined).
+- GautoSham and none2 (placebo spec docs/superpowers/specs/2026-11-08-c1-e4-placebo-design.md §2): GautoSham is G-auto
+  (--kbar) with its shifts turned about the vertical by theta = sham_theta(case_seed(case id)), one per case; its
+  records carry "sham": {"theta"}. none2 is "none" whose live brain calls take the seeds policy_seed + SEED2 + t (the
+  env, the scene and the replayed prefix as "none"'s); its records carry "seed_shift": SEED2.
 - Time t: their policy step (total_env_steps - warmup_steps); e: their cosmos_query_boundary_step (Base: the would-be
   one), the first policy step whose observation is post-event. Brain noise seed: policy_seed + t (their runners);
   the shadow pair's: policy_seed + t_e.
@@ -79,6 +83,7 @@ MAX_STEPS = {"libero_spatial": 220, "libero_object": 280, "libero_goal": 300, "l
 Q = {"pi05": 10, "smolvla": 10, "oft": 8, "oftplus": 8}  # native call period (pi0.5: ours, as part 1)
 DUMMY = [0, 0, 0, 0, 0, 0, -1]  # lerobot.envs.libero.get_libero_dummy_action(), their warm-up action
 T_RAMP, K_P, TAU_K = 5, 1.0, 0.01  # scripts/c1e4_run.py's defaults
+SEED2 = 10 ** 6  # placebo spec §2: none2's brain noise seeds, policy_seed + SEED2 + t
 STRICT = json.JSONEncoder(allow_nan=False)  # not json.dumps: openvla-oft's import patches it to pass numpy silently
 
 
@@ -149,6 +154,11 @@ def case_seed(case_id):
     return int.from_bytes(hashlib.sha256(f"c1e4m/{case_id}".encode()).digest()[:4], "little")
 
 
+def sham_theta(seed):
+    """placebo spec §2: GautoSham's angle, U[0, 2 pi) from the case's seed (case_seed): the same at every d."""
+    return 2 * math.pi * float(np.random.default_rng(seed).random())
+
+
 def make_agent(arm, conf, seed, s_star=None):
     """scripts/c1e4_run.py make_agent (copied: Task 6 edits that file), oracle or GLR eyes; s_star: VS-T's reference
     (VST and VTm arms only)."""
@@ -164,7 +174,9 @@ def make_agent(arm, conf, seed, s_star=None):
     if noise == "glr":
         kw["tracker"] = gauto.GLRKalman(seed, *gauto.NOISE)
     kbar = (gauto.KAPPA0[conf["brain"]] if method in ("Gk0", "Gk0T")
-            else conf["kbar"] if method in ("Gauto", "GautoT") else None)
+            else conf["kbar"] if method in ("Gauto", "GautoT", "GautoSham") else None)
+    if method == "GautoSham":
+        kw["sham_theta"] = sham_theta(seed)
     return gauto.GAgent(method, conf["s"], conf["d"], kbar=kbar, **kw)
 
 
@@ -385,8 +397,10 @@ class Episode:
     def __init__(self, case, arm, kind, conf, base=None, video=False, base_prefix=False):
         self.case, self.arm, self.kind, self.conf, self.base = case, arm, kind, conf, base
         self.base_prefix, self.cut = base_prefix and kind == "base", False
-        self.seed0, self.suite = int(case["policy_seed"]), case["task_suite_name"]
         self.ag = make_agent(arm, conf, case_seed(case["case_id"]), (base or {}).get("s_star"))
+        # brain noise seeds of its calls (seed0 + t); the env keeps policy_seed (start)
+        self.seed0 = int(case["policy_seed"]) + SEED2 * (self.ag.method == "none2")
+        self.suite = case["task_suite_name"]
         # the event step is set when the event is seen (their replay: while not runtime.applied)
         self.replay = maxwrap.ChunkReplay(base["chunks"], math.inf) if kind == "dynamic" else None
         self.t, self.t_max, self.cur, self.prev = 0, MAX_STEPS[self.suite], None, None
@@ -483,6 +497,10 @@ class Episode:
                            and orx.episode_metrics(self.xs[k:], self.acts[k:], self.objs[k:])["grasp_ok"])
         if method == "PPCL":  # controls spec §11
             rec["latch"] = dict(ag.latch_stats)
+        if method == "GautoSham":  # placebo spec §2
+            rec["sham"] = {"theta": ag.sham_theta}
+        if method == "none2":
+            rec["seed_shift"] = SEED2
         if method in vservo.LAMBDAS:  # PBVS spec §6: the regulator's counters
             rec["pbvs"] = {k: round(v, 6) for k, v in ag.pbvs_stats.items()}
         if method in vservo.VST:  # VS-T: its reference and counters
@@ -700,7 +718,7 @@ def main():
     methods = {vservo.parse_arm(a)[0] for a in arms}
     pbvs = methods & {*vservo.LAMBDAS, *vservo.VTM}
     assert args.band or not pbvs, f"{sorted(pbvs)} need --band"
-    assert args.kbar is not None or not methods & {"Gauto", "GautoT"}, "G-auto needs --kbar"
+    assert args.kbar is not None or not methods & {"Gauto", "GautoT", "GautoSham"}, "G-auto needs --kbar"
     assert arms or not args.base_prefix, "--base-prefix cuts the Bases for Dynamic arms: a Base-only run keeps its ends"
     assert not (methods & {*vservo.VST, *vservo.VTM} and args.base_prefix), \
         "VS-T and VT-m arms need the full Base: no --base-prefix"

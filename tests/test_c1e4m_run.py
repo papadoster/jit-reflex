@@ -491,6 +491,37 @@ def test_ppcl_glr_on_ppc_glrs_frames():
     assert np.array_equal(m0, m2)  # the latch on: the same frames (one per observed step)
 
 
+def test_placebo_arms():
+    """placebo spec §2: GautoSham's theta from the case's seed, the same per case, in its record; none2 is "none"
+    with its live brain calls at policy_seed + 10^6 + t (the env and the replayed prefix as "none"'s), its record
+    carrying the shift; adding both changes nothing of the Base, "none" or Gauto."""
+    import math
+    th = run.sham_theta(run.case_seed(CASE["case_id"]))
+    assert th == run.sham_theta(run.case_seed(CASE["case_id"])) and 0 <= th < 2 * math.pi and run.SEED2 == 10 ** 6
+    assert len({round(run.sham_theta(run.case_seed(f"c{i}")), 9) for i in range(50)}) == 50
+    keys = ("act_hash", "success", "steps", "e", "prefix_ok", "t_engage", "calls_sched", "calls_trig", "kappa_log",
+            "c_extra", "plans_in")
+    brain = Brain()
+    runs = ((["none", "Gauto"], Brain()), (["none", "none2", "Gauto", "GautoSham"], brain))
+    (b0, d0), (b1, d1) = (by_arm(run.run_cases([CASE], arms, conf(), [Toy(), Toy()], br)) for arms, br in runs)
+    assert [b0[k] for k in keys] == [b1[k] for k in keys]
+    for a in ("none", "Gauto"):
+        assert [d0[a][k] for k in keys] == [d1[a][k] for k in keys]
+        assert "sham" not in d1[a] and "seed_shift" not in d1[a]
+    e = b1["e"]
+    assert d1["GautoSham"]["sham"] == {"theta": th} and d1["none2"]["seed_shift"] == 10 ** 6 and "sham" not in b1
+    assert all(r["prefix_ok"] is True and r["e"] == e for r in d1.values())
+    assert d1["none2"]["act_hash"] != d1["none"]["act_hash"] and d1["GautoSham"]["act_hash"] != d1["Gauto"]["act_hash"]
+    assert d1["GautoSham"]["t_engage"] == d1["Gauto"]["t_engage"] == e and d1["GautoSham"]["g_on"]
+    shifted = sorted(sd - 195 - 10 ** 6 for arm, sd in brain.log if sd >= 10 ** 6)  # none2's live calls only
+    assert shifted and shifted[0] >= e and len(shifted) == d1["none2"]["calls_live"]
+    assert [json.loads(x) for x in run.lines([d1["GautoSham"]]).splitlines()] == [d1["GautoSham"]]
+    run.validate(["none", "none2", "Gauto", "GautoSham"], conf(), [CASE])
+    assert run.make_agent("GautoSham", conf(), 7).sham_theta == run.sham_theta(7)
+    with pytest.raises(AssertionError):
+        run.validate(["GautoSham"], {**conf(), "kbar": None}, [CASE])
+
+
 def test_shim_leaves_gym_without_gymnasium(monkeypatch):
     real = object()
     monkeypatch.setitem(sys.modules, "gym", real)
