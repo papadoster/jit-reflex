@@ -1,8 +1,8 @@
 """C1-E4 placebo cell: the direction of the correction, or the perturbation itself
 (docs/superpowers/specs/2026-11-08-c1-e4-placebo-design.md, "spec"), on pod P (scripts/gpu_c1e4m.sh POD=P psmoke,
 pgrid): the runner plan per line, the smoke's code check and the reading. Reuses scripts/c1e4c_summary.py (mlines,
-plan, lk, lkeys, KBAR, tsv), scripts/c1e4v_summary.py (CMODE, CK, ids, groups, unique, pairs, est), scripts/c1e4b_summary.py
-(est: hi95 of the same resamples) and scripts/c1e4m_summary.py; the controls' and part 2's records are read only; run
+plan, lk, lkeys, KBAR, tsv), scripts/c1e4v_summary.py (CMODE, CK, ids, groups, unique, pairs, est) and
+scripts/c1e4m_summary.py (e2.diff_pp's bootstrap); the controls' and part 2's records are read only; run
 from the repository root. R = results/c1-e4/placebo/pod_P:
     python scripts/c1e4p_summary.py --plan --line L
         L: Psmoke P0 P10, the runner lines as c1e4c_summary --plan (phase: L in lower case)
@@ -24,7 +24,6 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import c1e4b_summary as cb  # noqa: E402
 import c1e4c_summary as cc  # noqa: E402
 import c1e4m_summary as cs  # noqa: E402  (puts src/ on sys.path)
 import c1e4v_summary as cv  # noqa: E402
@@ -164,17 +163,34 @@ def slope(pts):
             "hi95_one_sided": float(hi95), "hi97.5": float(hi), "pairs": len(pts), "clusters": len(keys)}
 
 
+def est(prs):
+    """spec §5: the paired difference x - y in pp of (case, cluster, x, y), e2.diff_pp's estimate and percentiles, and
+    hi95_one_sided, the 95th percentile of the same draws (clusters sorted, e2.N_BOOT, default_rng(0)), raw: the
+    rule tests the raw bounds (cv.upper95 rounds to 1e-3, so a bound in [-0.0005, 0) would read as 0)."""
+    p = [q[1:] for q in prs]
+    cl = defaultdict(list)
+    for c, a, b in p:
+        cl[c].append(float(a) - float(b))
+    keys = sorted(cl)
+    s, n = np.array([sum(cl[k]) for k in keys]), np.array([len(cl[k]) for k in keys])
+    pick = np.random.default_rng(0).integers(len(keys), size=(e2.N_BOOT, len(keys)))
+    return e2.diff_pp(p) | {"hi95_one_sided": float(np.percentile(100 * s[pick].sum(1) / n[pick].sum(1), 95))}
+
+
 def slope_sentence(sl):
-    """spec §5: the angle dependence's sentence by the raw one-sided bound hi95(beta) < 0, its numbers as printed."""
+    """spec §5: the angle dependence's sentence by the raw one-sided bound hi95(beta) < 0 (< -TOL), its numbers as
+    printed."""
     r = e2.rnd(sl)
-    return SLOPE[True].format(r["beta_pp_per_r"], r["lo2.5"], r["hi97.5"]) if sl["hi95_one_sided"] < 0 else SLOPE[False]
+    return (SLOPE[True].format(r["beta_pp_per_r"], r["lo2.5"], r["hi97.5"]) if sl["hi95_one_sided"] < -TOL
+            else SLOPE[False])
 
 
 def rule(m):
-    """spec §6 on the pooled raw estimates m (cb.est's): П0 the precondition lo5(G - N) > 0, then П1 hi95(Q) < 0, П2
-    lo5(Q) >= 0 (equality passes), else П3; the sentence, П1's bound (pooled hi95(P - N) and G - N), П3's numbers."""
+    """spec §6 on the pooled raw estimates m (est's): П0 the precondition lo5(G - N) > 0, then П1 hi95(Q) < 0, П2
+    lo5(Q) >= 0 (equality passes), else П3, each against TOL (strict: beyond it; equality: within it); the sentence,
+    П1's bound (pooled hi95(P - N) and G - N), П3's numbers, printed rounded."""
     gn, q, pn = m["G-N"], m["Q"], m["P-N"]
-    b = ("П0" if not gn["lo5_one_sided"] > 0 else "П1" if q["hi95_one_sided"] < 0 else
+    b = ("П0" if not gn["lo5_one_sided"] > TOL else "П1" if q["hi95_one_sided"] < -TOL else
          "П2" if q["lo5_one_sided"] >= -TOL else "П3")
     out, (gn, q, pn) = {"branch": b, "sentence": RULE[b]}, (e2.rnd(x) for x in (gn, q, pn))  # printed as rounded
     ci = lambda d: f"{d['diff_pp']:.1f} [{d['lo2.5']:.1f}; {d['hi97.5']:.1f}]"  # noqa: E731
@@ -257,7 +273,7 @@ def read(new, ctrl, p2, names, split):
         return {"checks": checks}
 
     pool = pairs["P0"] + pairs["P10"]  # spec §5: every case x cell weighs one, a cluster carries both cells' pairs
-    raw = {g: {n: cb.est(prs(p, n)) for n in DIFF} for g, p in (("pooled", pool), *pairs.items())}
+    raw = {g: {n: est(prs(p, n)) for n in DIFF} for g, p in (("pooled", pool), *pairs.items())}
     drops["pooled"] = dict(sum((Counter(drops[L]) for L in CELLS), Counter()))
     meas = {g: {n: e2.rnd(v) for n, v in m.items()} | {"drops": drops[g]} for g, m in raw.items()}
     geo = [(c, cl, s, phi(r["sham"]["theta"])) for c, cl, s, r in pool]
@@ -421,12 +437,14 @@ def selftest_read(split, plus):
                <= ms["pooled"][n]["diff_pp"] <= ms["pooled"][n]["hi95_one_sided"] <= ms["pooled"][n]["hi97.5"]
                for n in DIFF), ms["pooled"]
     # the bootstrap of Q, by hand: clusters sorted, 2000 resamples of whole clusters, seed 0, hi95 of the same draws
-    q, ptsq = boot_by_hand(new, names, lambda s: s["P"] - (s["G"] + s["N"]) / 2)
+    q, rows, q95 = boot_by_hand(new, names, lambda s: s["P"] - (s["G"] + s["N"]) / 2)
     assert {k: ms["pooled"]["Q"][k] for k in q} == q, (ms["pooled"]["Q"], q)
+    h = est([(None, cl, y, 0.0) for cl, _, y in rows])["hi95_one_sided"]
+    assert h == q95 and round(h, 3) != h, (h, q95)  # raw, the rule's: not the printed 1e-3
     assert ru == {"branch": "П1", "sentence": RULE["П1"], "bound": BOUND.format(
         ms["pooled"]["P-N"]["hi95_one_sided"], ms["pooled"]["G-N"]["diff_pp"])}, ru
     # the angle: P independent of theta here, the slope not shown; by hand it is the same bootstrap with OLS per draw
-    b, _ = boot_by_hand(new, names, lambda s: 100 * (s["P"] - s["G"]), slope_=True)
+    b, _, _ = boot_by_hand(new, names, lambda s: 100 * (s["P"] - s["G"]), slope_=True)
     assert {k: round(an[k], 3) for k in b} == b and an["sentence"] == SLOPE[False] and an["pairs"] == 374, (an, b)
     phis = [phi(th[c]) for c in plus]
     for j, (lo, hi) in enumerate(BANDS):
@@ -465,18 +483,21 @@ def selftest_read(split, plus):
         assert b_ != "П0" or r["measurements"]["pooled"]["G-N"]["diff_pp"] > 0  # П0 by its bound, not the estimate
     assert "numbers" in r["rule"] and r["rule"]["numbers"].startswith("Q = ") and "bound" not in r["rule"], r["rule"]
     # the bounds' edges, on estimates by hand: lo5(G - N) = 0 is no precondition (П0, also with a positive estimate);
-    # hi95(Q) = 0 is no П1; lo5(Q) = 0 is П2 (equality passes); П1's bound sentence; the slope's sentence by hi95 alone
+    # hi95(Q) = 0 is no П1, one just below 0 inside the 1e-3 rounding is; lo5(Q) = 0 is П2 (equality passes); П1's
+    # bound sentence; the slope's sentence by its raw hi95 alone
     e = lambda d, lo2, lo5, hi95, hi: {"diff_pp": d, "lo2.5": lo2, "lo5_one_sided": lo5,  # noqa: E731
                                        "hi95_one_sided": hi95, "hi97.5": hi}
     gn, pn = e(14.0, 6.0, 8.0, 20.0, 22.0), e(2.0, -1.0, 0.0, 3.44, 4.0)
     for g_, q_, b_ in ((e(14.0, -1.0, 0.0, 20.0, 22.0), e(-5.0, -9.0, -8.0, -1.0, -0.5), "П0"),
                        (e(3.0, -2.0, -1.0, 6.0, 7.0), e(-5.0, -9.0, -8.0, -1.0, -0.5), "П0"),
                        (gn, e(-5.0, -9.0, -8.0, 0.0, 1.0), "П3"), (gn, e(3.0, -1.0, 0.0, 6.0, 7.0), "П2"),
-                       (gn, e(1.0, -1.0, -1e-6, 6.0, 7.0), "П3"), (gn, e(-5.0, -9.0, -8.0, -1e-6, 0.2), "П1")):
+                       (gn, e(1.0, -1.0, -1e-6, 6.0, 7.0), "П3"), (gn, e(-5.0, -9.0, -8.0, -1e-6, 0.2), "П1"),
+                       (gn, e(-1.0, -3.0, -2.0, -0.0004, 0.2), "П1"), (gn, e(-1.0, -3.0, -2.0, 0.0, 0.2), "П3"),
+                       (e(14.0, -1.0, 1e-10, 20.0, 22.0), e(-5.0, -9.0, -8.0, -1.0, -0.5), "П0")):
         assert rule({"G-N": g_, "Q": q_, "P-N": pn})["branch"] == b_, (g_, q_, b_)
     assert rule({"G-N": gn, "Q": e(-5.0, -9.0, -8.0, -1.0, 0.2), "P-N": pn})["bound"] == (
         "фиктивная ветвь даёт над «нет» не более 3.4 п.п. при нашем выигрыше 14.0 п.п."), "П1's bound"
-    x = e(-5.0, -9.0, -8.0, -0.001, 0.5) | {"beta_pp_per_r": -5.0}
+    x = e(-5.0, -9.0, -8.0, -0.0004, 0.5) | {"beta_pp_per_r": -5.0}
     assert slope_sentence(x) == SLOPE[True].format(-5.0, -9.0, 0.5) and slope_sentence(
         x | {"hi95_one_sided": 0.0, "hi97.5": -0.5}) == SLOPE[False], "the slope's sentence"
     near = lambda s, L, a, c: (phi(th[c])[1] < 1) if (s, a) == ("pod", "GautoSham") else win0(s, L, a, c)  # noqa
@@ -548,7 +569,7 @@ def selftest_read(split, plus):
 def boot_by_hand(new, names, f, slope_=False):
     """The pooled bootstrap written out, for the selftest: per valid pair (both cells, the plan's records) its cluster
     and f(successes) (slope_: and r), clusters sorted, e2.N_BOOT draws of whole clusters from default_rng(0); the mean
-    (or np.polyfit's slope per draw). Rounded as the reading."""
+    (or np.polyfit's slope per draw). Rounded as the reading; the rows and the raw hi95."""
     rows = []
     for r in new:
         if r["kind"] == "dynamic" and r["arm"] == "GautoSham":
@@ -566,12 +587,12 @@ def boot_by_hand(new, names, f, slope_=False):
         lo2, lo5, hi95, hi = np.percentile(st, [2.5, 5, 95, 97.5])
         return {"beta_pp_per_r": round(float(full), 3), "lo2.5": round(float(lo2), 3),
                 "lo5_one_sided": round(float(lo5), 3), "hi95_one_sided": round(float(hi95), 3),
-                "hi97.5": round(float(hi), 3)}, rows
+                "hi97.5": round(float(hi), 3)}, rows, float(hi95)
     st = [100 * sum(y for j in row for _, y in by[keys[j]]) / sum(len(by[keys[j]]) for j in row) for row in pick]
     lo2, lo5, hi95, hi = np.percentile(st, [2.5, 5, 95, 97.5])
     return {"diff_pp": round(100 * sum(y for *_, y in rows) / len(rows), 3), "lo2.5": round(float(lo2), 3),
             "lo5_one_sided": round(float(lo5), 3), "hi95_one_sided": round(float(hi95), 3),
-            "hi97.5": round(float(hi), 3), "clusters": len(keys)}, rows
+            "hi97.5": round(float(hi), 3), "clusters": len(keys)}, rows, float(hi95)
 
 
 if __name__ == "__main__":

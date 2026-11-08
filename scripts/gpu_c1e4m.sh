@@ -123,13 +123,15 @@
 #   setup       A's: the token check and pi0.5's SHA-256, pytest; no OFT
 #   psmoke      §10: P0's first 6 cases, the four arms (none, none2, Gauto, GautoSham; the Base cut at the event), into
 #               $O/smoke, afresh (never read), then their code check only (scripts/c1e4p_summary.py --smoke-check:
-#               every record there, prefix_ok, GautoSham's theta and kbar, none2's seed shift and act_hash): no outcome
+#               every record there, prefix_ok, GautoSham's theta and kbar, none2's seed shift and act_hash): no outcome.
+#               $O/CODE.p, the code record, is removed at its start and written only once its check passed
 #   pgrid       §10: after a passed psmoke (its check's last line PASS; refused while another stage or a runner is
-#               live). The platform ($O/PLATFORM: the first pgrid's, later ones require it), the C1-E4 tests with the
-#               seven summaries' tests, their selftests, then its own code record $O/CODE.p. A forecast at psmoke's
-#               tempo, then P0 -> P10 (scripts/c1e4p_summary.py --plan --line L: the four arms with part 2's kbar and
-#               --base-prefix on controls lines 2 (d 0) / 3 (d 10)'s 187 Plus cases in their runner lines and Base
-#               groups) and grid_all_P.jsonl (P0*, P10; not the smoke's); the reading on the Mac. A rerun resumes
+#               live) and only on the code it ran ($O/CODE.p there and equal). The platform ($O/PLATFORM: the first
+#               pgrid's, later ones require it), the C1-E4 tests with the seven summaries' tests, their selftests. A
+#               forecast at psmoke's tempo, then P0 -> P10 (scripts/c1e4p_summary.py --plan --line L: the four arms
+#               with part 2's kbar and --base-prefix on controls lines 2 (d 0) / 3 (d 10)'s 187 Plus cases in their
+#               runner lines and Base groups) and grid_all_P.jsonl (P0*, P10; not the smoke's); the reading on the
+#               Mac. A rerun resumes
 # One stage at a time on a pod (flock). Each runner line has its own --out (block, brain, set, source, d), runs twice
 # (pass 2 resumes and retries failed groups, scripts/gpu_c1e3.sh's watchdog STALL, default 7200 s) and a stage fails if a
 # runner still exits non-zero after pass 2. Every exit appends the environment to $O/pod_env_<stage>.txt, refreshes
@@ -394,9 +396,11 @@ pack() {
 CODE_PATHS="src scripts/c1e4m_run.py scripts/c1e4m_brains.py scripts/c1e4_run.py"
 # POD=C: the controls summary's plan, mode and k selection too (and part 2's summary, which it imports)
 [ $POD = C ] && CODE_PATHS+=" scripts/c1e4c_summary.py scripts/c1e4m_summary.py"
-# POD=P: the placebo summary's plan and smoke check, and the summaries it imports
+# POD=P: everything pgrid tests and the placebo summary imports (its plan, smoke check and reading): the summaries,
+# part 1's two they import, and C1-E3's detectors (tests/test_gauto.py)
 [ $POD = P ] && CODE_PATHS+=" scripts/c1e4c_summary.py scripts/c1e4m_summary.py scripts/c1e4v_summary.py \
-scripts/c1e4t_summary.py scripts/c1e4k_summary.py scripts/c1e4b_summary.py scripts/c1e4p_summary.py"
+scripts/c1e4t_summary.py scripts/c1e4k_summary.py scripts/c1e4b_summary.py scripts/c1e4o_summary.py \
+scripts/c1e4p_summary.py scripts/c1e2_summary.py scripts/c1e3_summary.py scripts/c1e3_detectors.py"
 code_hash() {
   local f
   for f in $CODE_PATHS; do git rev-parse -q --verify "HEAD:$f" || { echo "!!! $f is not in HEAD" >&2; return 1; }; done
@@ -411,8 +415,8 @@ check_code() {  # check_code record|require: connect, calib, calib_more and grid
   [ "$(cat $O/CODE 2>/dev/null)" = "$h" ] || fail "the runner code is not connect's ($O/CODE): the owner decides (archive
     the results under $O and rerun from connect, or check out connect's commit)"
 }
-check_code_v() {  # check_code_v check|record [t|k|m|o|p], vgrid (PBVS spec §5) / vtgrid (t: the VS-T journal) / kgrid
-  local h f=$O/CODE.${2:-v}  # (k: the journal's C) / mgrid (m: VT-m) / ogrid (o: cell О12) / pgrid (p: placebo)
+check_code_v() {  # check_code_v check|record [t|k|m|o|p.run], vgrid (PBVS spec §5) / vtgrid (t: VS-T's journal) / kgrid
+  local h f=$O/CODE.${2:-v}  # (k: the journal's C) / mgrid (m: VT-m) / ogrid (o: cell О12) / psmoke (p.run: placebo)
   # $O/CODE.v / .t / .k / .m / .o of CODE_PATHS (its summaries added), written by record once its tests passed (its
   # first line starts); then both require it. $O/CODE: the controls'
   dry && { echo "+ check_code_${2:-v} $1 ($CODE_PATHS at HEAD vs $f)"; return; }
@@ -1197,13 +1201,15 @@ $live"
     echo "ogrid done: $O/grid_all_O.jsonl; the reading on the Mac (the journal's rules, before it is read)"
     ;;
   psmoke)  # placebo spec §10: P0's first 6 cases, the four arms, into $SM (never read); the code check, no outcome
-    check_code_v check p  # nothing to require before the first pgrid's record
-    dry || rm -rf $SM $LOG/Psmoke_*.log $W/smoke_check.txt  # afresh: a failed rerun leaves no pass for pgrid's gate
+    # afresh: a failed rerun leaves no pass and no code record for pgrid's gate
+    dry || rm -rf $SM $LOG/Psmoke_*.log $W/smoke_check.txt $O/CODE.p $O/CODE.p.run
+    check_code_v record p.run  # the code this smoke runs (committed, at HEAD): CODE.p once its check passed
     dry || mkdir -p $SM
     SUMM=cpl RD=$SM  # cphase plans with the placebo summary, the smoke's records go to $SM
     cphase psmoke --plan --line Psmoke || fail "psmoke: the smoke line still fails after pass 2 (above)"
     x cpl --smoke-check $SM/Psmoke_pi05.jsonl | tee $W/smoke_check.txt
     [ "${PIPESTATUS[0]}" = 0 ] || fail "the smoke's code check failed (above): stop, the owner decides (spec §10)"
+    check_code_v check p.run && x mv $O/CODE.p.run $O/CODE.p  # still the code it started with: pgrid runs that
     echo "[$(date +%T)] psmoke done (the code only; no outcome read). Next: POD=P ./scripts/gpu_c1e4m.sh pgrid"
     ;;
   pgrid)  # placebo spec §10: P0, then P10, grid_all_P.jsonl; the reading on the Mac
@@ -1215,7 +1221,14 @@ $live"
       [ -z "$live" ] || fail "a stage or a runner is live (below): pgrid starts after it ends
 $live"
     fi
-    check_code_v check p
+    # the grid runs the code the passed smoke ran
+    if dry; then echo "+ require $O/CODE.p (psmoke's record) equal to $CODE_PATHS at HEAD, committed"
+    else [ -f $O/CODE.p ] || fail "no $O/CODE.p, the code record a passed psmoke writes: POD=P \
+./scripts/gpu_c1e4m.sh psmoke first"
+      [ "$(code_hash)" = "$(cat $O/CODE.p)" ] && [ -z "$(git status --porcelain -- $CODE_PATHS)" ] || {
+        git status --short -- $CODE_PATHS; fail "the code at HEAD (or an uncommitted edit, above) is not the one \
+psmoke ran ($O/CODE.p): rerun psmoke, or the owner decides"; }
+    fi
     if dry; then platform; echo "+ write $O/PLATFORM: the output of these (the first pgrid's; later ones require it)"
     else p=$(platform) || fail "nvidia-smi or torch failed: no $O/PLATFORM"
       [ -f $O/PLATFORM ] || echo "$p" > $O/PLATFORM
@@ -1230,7 +1243,6 @@ $live"
     [ "${PIPESTATUS[0]}" = 0 ] || fail "the C1-E4 tests fail on the pod (above): the owner decides"
     x cc --selftest && x cv --selftest && x ct --selftest && x ck --selftest && x cb --selftest && x co --selftest \
       && x cpl --selftest || fail "a summary's selftest fails (above): the owner decides"
-    check_code_v record p  # the first pgrid's, once its tests passed: later pgrids require it
     SUMM=cpl  # cphase plans with the placebo summary
     echo "[$(date +%T)] pgrid, pod P: P0, P10" | tee -a $W/forecast.txt
     pfc | tee -a $W/forecast.txt
