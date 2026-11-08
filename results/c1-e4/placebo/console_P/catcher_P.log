@@ -1,0 +1,80 @@
+[2026-11-08 11:40:19] catcher starts: roles [], failed 0/10
+[2026-11-08 11:40:20] pod P: no pod (HTTP 500): {"error":"create pod: There are no instances currently available","status":500}
+
+[2026-11-08 12:05:38] CREATED ugqcut9t0ii5ue for P: $0.340/h
+[2026-11-08 12:05:55] TERMINATED ugqcut9t0ii5ue: excluded host 194.14.47.19 / SE None; lived 0.3 min, ~$0.002; failed pods 1/10, spent on failed ~$0.00
+[2026-11-08 12:05:55] pod P: excluded host
+[2026-11-08 12:06:47] pod P: no pod (HTTP 500): {"error":"create pod: There are no instances currently available","status":500}
+
+[2026-11-08 12:09:42] pod P: no pod (HTTP 500): {"error":"create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.","status":500}
+
+[2026-11-08 12:10:24] pod P: no pod (HTTP 500): {"error":"create pod: There are no instances currently available","status":500}
+
+[2026-11-08 12:18:01] pod P: no pod (HTTP 500): {"error":"create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.","status":500}
+
+[2026-11-08 12:19:27] pod P: no pod (HTTP 500): {"error":"create pod: There are no instances currently available","status":500}
+
+[2026-11-08 12:26:26] CREATED j75b7sqhvtggfy for P: $0.340/h
+[2026-11-08 12:26:42] TERMINATED j75b7sqhvtggfy: excluded host  / SE None; lived 0.3 min, ~$0.002; failed pods 2/10, spent on failed ~$0.00
+[2026-11-08 12:26:42] pod P: excluded host
+[2026-11-08 12:27:22] pod P: no pod (HTTP 500): {"error":"create pod: There are no instances currently available","status":500}
+
+[2026-11-08 12:31:33] CREATED 444tmu8c1me8wy for P: $0.340/h
+[2026-11-08 12:31:49] TERMINATED 444tmu8c1me8wy: excluded host 194.14.47.19 / SE None; lived 0.3 min, ~$0.002; failed pods 3/10, spent on failed ~$0.00
+[2026-11-08 12:31:49] pod P: excluded host
+[2026-11-08 12:32:32] pod P: no pod (HTTP 500): {"error":"create pod: There are no instances currently available","status":500}
+
+[2026-11-08 12:32:55] catcher starts: roles [], failed 0/10
+[2026-11-08 12:32:56] pod P: no pod (HTTP 500): {"error":"create pod: There are no instances currently available","status":500}
+
+[2026-11-08 12:34:36] CREATED iio539kicbnsma for P: $0.340/h
+[2026-11-08 12:34:53] TERMINATED iio539kicbnsma: excluded host 194.14.47.19 / SE None; lived 0.3 min, ~$0.002; failed pods 0/10, excluded 4/100, spent ~$0.01
+[2026-11-08 12:34:53] pod P: excluded host
+[2026-11-08 12:35:34] pod P: no pod (HTTP 500): {"error":"create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.","status":500}
+
+[2026-11-08 12:36:15] pod P: no pod (HTTP 500): {"error":"create pod: There are no instances currently available","status":500}
+
+[2026-11-08 12:38:37] pod P: no pod (HTTP 500): {"error":"create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.","status":500}
+
+[2026-11-08 12:39:20] pod P: no pod (HTTP 500): {"error":"create pod: There are no instances currently available","status":500}
+
+[2026-11-08 12:40:35] CREATED pjwx6ahbj7eitf for P: $0.340/h
+[2026-11-08 12:40:51] TERMINATED pjwx6ahbj7eitf: excluded host 194.14.47.19 / SE None; lived 0.3 min, ~$0.002; failed pods 0/10, excluded 5/100, spent ~$0.01
+[2026-11-08 12:40:51] pod P: excluded host
+[2026-11-08 12:41:49] pod P: no pod (HTTP 500): {"error":"create pod: There are no instances currently available","status":500}
+
+[2026-11-08 13:04:09] CREATED 1hgltauxl4n6hu for P: $0.340/h
+[2026-11-08 13:04:25] TERMINATED 1hgltauxl4n6hu: excluded host 194.14.47.19 / SE None; lived 0.3 min, ~$0.002; failed pods 0/10, excluded 6/100, spent ~$0.01
+[2026-11-08 13:04:25] pod P: excluded host
+[2026-11-08 13:05:11] CREATED 3o7dhjsbkwojjs for P: $0.340/h
+[2026-11-08 13:15:21] TERMINATED 3o7dhjsbkwojjs: no public IP / SSH port in 10 min; lived 10.2 min, ~$0.058; failed pods 1/10, excluded 6/100, spent ~$0.07
+[2026-11-08 13:15:21] pod P: no IP
+[2026-11-08 13:16:07] pod P: no pod (HTTP 500): {"error":"create pod: There are no instances currently available","status":500}
+
+[2026-11-08 13:22:04] CREATED 97zrldm1ecwca8 for P: $0.340/h
+[2026-11-08 13:32:11] TERMINATED 97zrldm1ecwca8: no public IP / SSH port in 10 min; lived 10.1 min, ~$0.057; failed pods 2/10, excluded 6/100, spent ~$0.12
+[2026-11-08 13:32:11] pod P: no IP
+[2026-11-08 13:32:58] pod P: no pod (HTTP 500): {"error":"create pod: There are no instances currently available","status":500}
+
+[2026-11-08 13:33:30] catcher starts: roles [], failed 0/10
+[2026-11-08 13:33:31] pod P: no pod (HTTP 500): {"error":"create pod: There are no instances currently available","status":500}
+
+[2026-11-08 14:54:20] pod P: no pod (HTTP 500): {"error":"create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.","status":500}
+
+[2026-11-08 14:55:20] pod P: no pod (HTTP 500): {"error":"create pod: There are no instances currently available","status":500}
+
+[2026-11-08 15:32:51] catcher starts: roles [], failed 0/10
+[2026-11-08 15:32:52] pod P: no pod (HTTP 500): {"error":"create pod: There are no instances currently available","status":500}
+
+[2026-11-08 16:13:52] CREATED h7jn96e004aenl for P: $0.340/h
+[2026-11-08 16:14:09] TERMINATED h7jn96e004aenl: excluded host 194.14.47.19 / SE None; lived 0.3 min, ~$0.002; failed pods 0/10, excluded 7/100, slow 2/8, spent ~$0.13
+[2026-11-08 16:14:09] pod P: excluded host
+[2026-11-08 16:15:05] pod P: no pod (HTTP 500): {"error":"create pod: There are no instances currently available","status":500}
+
+[2026-11-08 16:34:11] CREATED pgzzaar07ajfog for P: $0.340/h
+[2026-11-08 16:34:43] HEALTHY pgzzaar07ajfog -> pod P: {"id": "pgzzaar07ajfog", "ip": "80.15.7.37", "port": 46178, "costPerHr": 0.34, "location": "FR", "dataCenterId": null, "vcpu": 25, "memoryInGb": 50, "cpu": null, "check": "NVIDIA GeForce RTX 4090, 580.178.04, 24564 MiB\nCUDA Version: 13.0\nnproc 128, cpu.max 2125000 100000\nmodel name\t: AMD EPYC 7763 64-Core Processor\nRAM 251 GB\n/dev/nvme0n1    100G  9.8M  100G   1% /workspace\nWarning: Permanently added '[80.15.7.37]:46178' (ED25519) to the list of known hosts."}
+[2026-11-08 16:34:47] pod P: HF token copied ok, PaliGemma config HTTP 200
+[2026-11-08 16:34:47] pod P: setup started in tmux c1e4m
+[2026-11-08 16:34:49] pod P: chainP started
+[2026-11-08 16:34:49] pod P: ok
+[2026-11-08 16:34:49] a healthy pod P: the catcher stops

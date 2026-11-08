@@ -1,0 +1,32 @@
+{
+ "created": [
+  "ugqcut9t0ii5ue",
+  "j75b7sqhvtggfy",
+  "444tmu8c1me8wy",
+  "iio539kicbnsma",
+  "pjwx6ahbj7eitf",
+  "1hgltauxl4n6hu",
+  "3o7dhjsbkwojjs",
+  "97zrldm1ecwca8",
+  "h7jn96e004aenl",
+  "pgzzaar07ajfog"
+ ],
+ "fails": 0,
+ "spent": 0.1259400067806244,
+ "roles": {
+  "P": {
+   "id": "pgzzaar07ajfog",
+   "ip": "80.15.7.37",
+   "port": 46178,
+   "costPerHr": 0.34,
+   "location": "FR",
+   "dataCenterId": null,
+   "vcpu": 25,
+   "memoryInGb": 50,
+   "cpu": null,
+   "check": "NVIDIA GeForce RTX 4090, 580.178.04, 24564 MiB\nCUDA Version: 13.0\nnproc 128, cpu.max 2125000 100000\nmodel name\t: AMD EPYC 7763 64-Core Processor\nRAM 251 GB\n/dev/nvme0n1    100G  9.8M  100G   1% /workspace\nWarning: Permanently added '[80.15.7.37]:46178' (ED25519) to the list of known hosts."
+  }
+ },
+ "excluded": 7,
+ "slow": 2
+}
