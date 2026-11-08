@@ -1,0 +1,3 @@
+!!! a stage or a runner is live (below): pgrid starts after it ends
+213 tmux new -d -s c1e4m cd /workspace && git clone -q https://github.com/papadoster/jit-reflex.git && cd jit-reflex && git checkout -q c1-e4 && git log --oneline -1 && POD=P ./scripts/gpu_c1e4m.sh setup 2>&1 | tee /workspace/setup_P.log; exec bash
+[15:50:41] packed c1e4m_results_P.tgz (40K)
