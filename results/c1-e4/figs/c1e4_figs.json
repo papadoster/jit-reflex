@@ -1,0 +1,257 @@
+{
+ "delay": {
+  "0": {
+   "Base": {
+    "pct": 79.33,
+    "n": 300,
+    "files": [
+     "results/c1-e4/part2/pod_A/M1M2_pi05_eval300_plus_d0.jsonl",
+     "results/c1-e4/part2/pod_A/M1M2_pi05_eval300_pro_d0.jsonl"
+    ]
+   },
+   "none": {
+    "pct": 42.0,
+    "n": 300,
+    "files": [
+     "results/c1-e4/part2/pod_A/M1M2_pi05_eval300_plus_d0.jsonl",
+     "results/c1-e4/part2/pod_A/M1M2_pi05_eval300_pro_d0.jsonl"
+    ]
+   },
+   "PPC": {
+    "pct": 46.0,
+    "n": 300,
+    "files": [
+     "results/c1-e4/part2/pod_A/M1M2_pi05_eval300_plus_d0.jsonl",
+     "results/c1-e4/part2/pod_A/M1M2_pi05_eval300_pro_d0.jsonl"
+    ]
+   },
+   "Gauto": {
+    "pct": 49.0,
+    "n": 300,
+    "files": [
+     "results/c1-e4/part2/pod_A/M1M2_pi05_eval300_plus_d0.jsonl",
+     "results/c1-e4/part2/pod_A/M1M2_pi05_eval300_pro_d0.jsonl"
+    ]
+   }
+  },
+  "10": {
+   "Base": {
+    "pct": 62.33,
+    "n": 300,
+    "files": [
+     "results/c1-e4/part2/pod_A/D_pi05_eval300_plus_d10.jsonl",
+     "results/c1-e4/part2/pod_A/D_pi05_eval300_pro_d10.jsonl"
+    ]
+   },
+   "none": {
+    "pct": 12.0,
+    "n": 300,
+    "files": [
+     "results/c1-e4/part2/pod_A/D_pi05_eval300_plus_d10.jsonl",
+     "results/c1-e4/part2/pod_A/D_pi05_eval300_pro_d10.jsonl"
+    ]
+   },
+   "PPC": {
+    "pct": 19.33,
+    "n": 300,
+    "files": [
+     "results/c1-e4/part2/pod_A/D_pi05_eval300_plus_d10.jsonl",
+     "results/c1-e4/part2/pod_A/D_pi05_eval300_pro_d10.jsonl"
+    ]
+   },
+   "Gauto": {
+    "pct": 31.0,
+    "n": 300,
+    "files": [
+     "results/c1-e4/part2/pod_A/D_pi05_eval300_plus_d10.jsonl",
+     "results/c1-e4/part2/pod_A/D_pi05_eval300_pro_d10.jsonl"
+    ]
+   }
+  },
+  "20": {
+   "Base": {
+    "pct": 43.33,
+    "n": 300,
+    "files": [
+     "results/c1-e4/part2/pod_A/D_pi05_eval300_plus_d20.jsonl",
+     "results/c1-e4/part2/pod_A/D_pi05_eval300_pro_d20.jsonl"
+    ]
+   },
+   "none": {
+    "pct": 4.0,
+    "n": 300,
+    "files": [
+     "results/c1-e4/part2/pod_A/D_pi05_eval300_plus_d20.jsonl",
+     "results/c1-e4/part2/pod_A/D_pi05_eval300_pro_d20.jsonl"
+    ]
+   },
+   "PPC": {
+    "pct": 9.0,
+    "n": 300,
+    "files": [
+     "results/c1-e4/part2/pod_A/D_pi05_eval300_plus_d20.jsonl",
+     "results/c1-e4/part2/pod_A/D_pi05_eval300_pro_d20.jsonl"
+    ]
+   },
+   "Gauto": {
+    "pct": 16.67,
+    "n": 300,
+    "files": [
+     "results/c1-e4/part2/pod_A/D_pi05_eval300_plus_d20.jsonl",
+     "results/c1-e4/part2/pod_A/D_pi05_eval300_pro_d20.jsonl"
+    ]
+   }
+  }
+ },
+ "ladder": {
+  "нет": {
+   "pct": 13.9,
+   "n": 187,
+   "files": [
+    "results/c1-e4/part2/pod_A/D_pi05_eval300_plus_d10.jsonl"
+   ]
+  },
+  "PPC": {
+   "pct": 22.46,
+   "n": 187,
+   "files": [
+    "results/c1-e4/part2/pod_A/D_pi05_eval300_plus_d10.jsonl"
+   ]
+  },
+  "PPCL": {
+   "pct": 23.53,
+   "n": 187,
+   "files": [
+    "results/c1-e4/controls/pod_C/C3_pi05_eval300_plus_d10.jsonl"
+   ]
+  },
+  "PBVS": {
+   "pct": 27.27,
+   "n": 187,
+   "files": [
+    "results/c1-e4/controls/pod_C/V3_pi05_eval300_plus_d10.jsonl"
+   ]
+  },
+  "VS-T": {
+   "pct": 26.2,
+   "n": 187,
+   "files": [
+    "results/c1-e4/controls/pod_C/VT3_pi05_eval300_plus_d10.jsonl"
+   ]
+  },
+  "VT-m": {
+   "pct": 28.34,
+   "n": 187,
+   "files": [
+    "results/c1-e4/controls/pod_C/M_pi05_eval300_plus_d10.jsonl"
+   ]
+  },
+  "G-auto": {
+   "pct": 33.16,
+   "n": 187,
+   "files": [
+    "results/c1-e4/controls/pod_C/C3_pi05_eval300_plus_d10.jsonl"
+   ]
+  }
+ },
+ "placebo": {
+  "success": {
+   "P0": {
+    "N": {
+     "pct": 43.85,
+     "n": 187
+    },
+    "N′": {
+     "pct": 45.99,
+     "n": 187
+    },
+    "G": {
+     "pct": 55.61,
+     "n": 187
+    },
+    "P": {
+     "pct": 33.16,
+     "n": 187
+    }
+   },
+   "P10": {
+    "N": {
+     "pct": 14.97,
+     "n": 187
+    },
+    "N′": {
+     "pct": 14.44,
+     "n": 187
+    },
+    "G": {
+     "pct": 33.16,
+     "n": 187
+    },
+    "P": {
+     "pct": 10.7,
+     "n": 187
+    }
+   }
+  },
+  "bands_P-N": {
+   "[0, 60)": {
+    "diff_pp": 0.794,
+    "lo2.5": -8.621,
+    "lo5_one_sided": -6.78,
+    "hi97.5": 9.525,
+    "pairs": 126,
+    "clusters": 29
+   },
+   "[60, 120)": {
+    "diff_pp": -11.194,
+    "lo2.5": -16.667,
+    "lo5_one_sided": -15.762,
+    "hi97.5": -5.556,
+    "pairs": 134,
+    "clusters": 29
+   },
+   "[120, 180]": {
+    "diff_pp": -12.281,
+    "lo2.5": -20.833,
+    "lo5_one_sided": -19.444,
+    "hi97.5": -4.31,
+    "pairs": 114,
+    "clusters": 28
+   }
+  },
+  "source": "results/c1-e4/placebo/pod_P/summary_P.json"
+ },
+ "split": {
+  "s_Gauto": 16.667,
+  "after_grasp": 16.431,
+  "at_grasp": 10.236,
+  "at_grasp_grasps": 9.236,
+  "at_grasp_ungrasped": 1.0,
+  "s_Base": 43.333,
+  "gap": 26.667,
+  "ci95": {
+   "gap": [
+    20.804,
+    32.886
+   ],
+   "after_grasp": [
+    10.966,
+    21.909
+   ],
+   "at_grasp": [
+    5.793,
+    15.535
+   ]
+  },
+  "source": "results/c1-e4/part2/grasp_split_d20.json"
+ },
+ "ladder_extra": {
+  "PBVS 5 мм (строка E, только в файле)": {
+   "pct": 28.34,
+   "n": 187,
+   "files": [
+    "results/c1-e4/controls/pod_C/E_pi05_eval300_plus_d10.jsonl"
+   ]
+  }
+ }
+}
