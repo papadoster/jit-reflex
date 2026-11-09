@@ -94,6 +94,8 @@ def check(v):
     assert abs(s["at_grasp_grasps"] + s["at_grasp_ungrasped"] - s["at_grasp"]) < 0.01
     memo = {"нет": (-19.0, -24.7, -13.1), "PPCL": (-11.3, -17.7, -5.4), "PBVS": (-4.7, -11.3, 2.0),
             "VS-T": (-3.3, -8.4, 1.7), "VT-m": (-4.3, -10.2, 1.2)}  # as the memos print them (part 2 §3, controls)
+    pp = json.load(open(CS.format("C")))["report"]["ppcl_ppc"]["pi05/d10"]  # the caption's PPCL - PPC line
+    assert all(abs(pp[f] - y) <= 0.05 + 1e-9 for f, y in zip(("diff_pp", "lo2.5", "hi97.5"), (0.3, -0.7, 1.7))), pp
     for k, m in memo.items():
         e = v["controls_d10"][k]
         assert all(abs(round(e[f], 1) - y) < 1e-9 for f, y in zip(("diff_pp", "lo2.5", "hi97.5"), m)), (k, e, m)
@@ -161,9 +163,10 @@ def draw(v, path):
            "строк, без отбора пар.\nb: парные разности и 95% кластерного бутстрэпа из сводок записок; «нет» — часть 2 (под A), "
            "остальные — под C; Plus + PRO, VT-m — только Plus; PPC нет: разности G-auto − PPC при d = 10 в записках нет. "
            "PBVS — зона 26 мм.\n"
+           "PPC: PPCL − PPC при d = 10 +0.3 [−0.7; +1.7], латч почти не меняет PPC (e4-controls.md, таблица по d).\n"
            "c: 95% кластерный бутстрэп из summary_P.json. d: измерение, не правило (grasp_split_d20.json).",
            fontsize=7, va="bottom")
-    f.tight_layout(rect=(0, 0.045, 1, 1))
+    f.tight_layout(rect=(0, 0.055, 1, 1))
     f.savefig(path, dpi=150)
 
 
