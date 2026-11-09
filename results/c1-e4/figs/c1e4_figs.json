@@ -103,55 +103,56 @@
    }
   }
  },
- "ladder": {
+ "controls_d10": {
   "нет": {
-   "pct": 13.9,
-   "n": 187,
-   "files": [
-    "results/c1-e4/part2/pod_A/D_pi05_eval300_plus_d10.jsonl"
-   ]
-  },
-  "PPC": {
-   "pct": 22.46,
-   "n": 187,
-   "files": [
-    "results/c1-e4/part2/pod_A/D_pi05_eval300_plus_d10.jsonl"
-   ]
+   "diff_pp": -19.0,
+   "lo2.5": -24.749,
+   "hi97.5": -13.086,
+   "pairs": 300,
+   "source": "results/c1-e4/part2/summary.json",
+   "key": "report/delay_D/d10/Gauto-none",
+   "sign_flipped": true,
+   "note": "часть 2, блок D, под A"
   },
   "PPCL": {
-   "pct": 23.53,
-   "n": 187,
-   "files": [
-    "results/c1-e4/controls/pod_C/C3_pi05_eval300_plus_d10.jsonl"
-   ]
+   "diff_pp": -11.333,
+   "lo2.5": -17.726,
+   "hi97.5": -5.369,
+   "pairs": 300,
+   "source": "results/c1-e4/controls/summary_C.json",
+   "key": "report/gauto_ppcl/pi05/d10",
+   "sign_flipped": true,
+   "note": "под C, Plus + PRO"
   },
   "PBVS": {
-   "pct": 27.27,
-   "n": 187,
-   "files": [
-    "results/c1-e4/controls/pod_C/V3_pi05_eval300_plus_d10.jsonl"
-   ]
+   "diff_pp": -4.682,
+   "lo2.5": -11.296,
+   "hi97.5": 2.014,
+   "pairs": 299,
+   "source": "results/c1-e4/controls/summary_V.json",
+   "key": "measurements/Н2/d10",
+   "sign_flipped": false,
+   "note": "Н2, зона 26 мм, под C, Plus + PRO"
   },
   "VS-T": {
-   "pct": 26.2,
-   "n": 187,
-   "files": [
-    "results/c1-e4/controls/pod_C/VT3_pi05_eval300_plus_d10.jsonl"
-   ]
+   "diff_pp": -3.344,
+   "lo2.5": -8.418,
+   "hi97.5": 1.672,
+   "pairs": 299,
+   "source": "results/c1-e4/controls/summary_T.json",
+   "key": "measurements/Т1/d10",
+   "sign_flipped": false,
+   "note": "Т1, под C, Plus + PRO"
   },
   "VT-m": {
-   "pct": 28.34,
-   "n": 187,
-   "files": [
-    "results/c1-e4/controls/pod_C/M_pi05_eval300_plus_d10.jsonl"
-   ]
-  },
-  "G-auto": {
-   "pct": 33.16,
-   "n": 187,
-   "files": [
-    "results/c1-e4/controls/pod_C/C3_pi05_eval300_plus_d10.jsonl"
-   ]
+   "diff_pp": -4.301,
+   "lo2.5": -10.171,
+   "hi97.5": 1.184,
+   "pairs": 186,
+   "source": "results/c1-e4/controls/summary_M.json",
+   "key": "measurements/main/d10",
+   "sign_flipped": false,
+   "note": "B, главное, под C, только Plus"
   }
  },
  "placebo": {
@@ -244,14 +245,5 @@
    ]
   },
   "source": "results/c1-e4/part2/grasp_split_d20.json"
- },
- "ladder_extra": {
-  "PBVS 5 мм (строка E, только в файле)": {
-   "pct": 28.34,
-   "n": 187,
-   "files": [
-    "results/c1-e4/controls/pod_C/E_pi05_eval300_plus_d10.jsonl"
-   ]
-  }
  }
 }

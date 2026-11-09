@@ -3,14 +3,16 @@ every drawn value and its source file.
 
   a. the delay axis: success vs d for Base, "none", PPC, G-auto (pi0.5, part 2's pod A, the first 300 evaluation cases,
      the same cases at every d; all records of those lines, no pair selection);
-  b. the ladder of controls in one cell, d = 10 Plus (187 cases, the only cell where all seven arms ran): "none" and PPC
-     from part 2's pod A (through the pod), PPCL and G-auto (controls line 3), PBVS at its 26 mm gate (V3), VS-T (VT3)
-     and VT-m (M) from pod C; success shares, no intervals;
+  b. the controls at d = 10 as paired differences X - G-auto with their 95% cluster-bootstrap intervals, copied from
+     the committed summaries the memos quote (a difference no memo holds is not drawn and not computed: G-auto - PPC
+     at d = 10 is absent, so PPC is not on the panel). "none": part 2's block D (pod A, both arms there); PPCL, PBVS
+     (26 mm gate, Н2), VS-T (Т1): pod C, Plus + PRO; VT-m (B main): pod C, Plus only. The memos' G-auto - X are shown
+     as X - G-auto: the paired percentile interval of a sign-flipped difference is the flipped interval;
   c. the placebo: G / P / N / N' success at d = 0 and 10 and P - N in the three phi bands with their 95% (summary_P.json);
   d. the gap Base - G-auto at d = 20 split into after the grasp, at the grasp (the grasp gap itself and the ungrasped
      successes apart) (grasp_split_d20.json).
-Success shares here are plain means over a line's records; the memos' differences are paired and filtered, so a share
-here can differ from a memo's in the last digit where a pair was dropped. The script checks its numbers against the
+Success shares in a and c are plain means over a line's records (no pair selection, no intervals); the memos'
+differences are paired and filtered. The script checks its numbers against the
 committed summaries where those hold the same quantity and stops on a mismatch.
 
 Run from the repository root: python scripts/c1e4_figs.py [--out results/c1-e4/figs/c1e4_figs.png]
@@ -24,6 +26,15 @@ from pathlib import Path
 A, C = "results/c1-e4/part2/pod_A", "results/c1-e4/controls/pod_C"
 P_SUM, SPLIT, P2_SUM = ("results/c1-e4/placebo/pod_P/summary_P.json", "results/c1-e4/part2/grasp_split_d20.json",
                         "results/c1-e4/part2/summary.json")
+
+
+CS = "results/c1-e4/controls/summary_{}.json"
+CONTROLS = (  # name, summary, key path, flip (the summary holds G-auto - X), what it is
+    ("нет", P2_SUM, ("report", "delay_D", "d10", "Gauto-none"), True, "часть 2, блок D, под A"),
+    ("PPCL", CS.format("C"), ("report", "gauto_ppcl", "pi05/d10"), True, "под C, Plus + PRO"),
+    ("PBVS", CS.format("V"), ("measurements", "Н2/d10"), False, "Н2, зона 26 мм, под C, Plus + PRO"),
+    ("VS-T", CS.format("T"), ("measurements", "Т1/d10"), False, "Т1, под C, Plus + PRO"),
+    ("VT-m", CS.format("M"), ("measurements", "main/d10"), False, "B, главное, под C, только Plus"))
 
 
 def share(files, kind, arm):
@@ -40,18 +51,20 @@ def share(files, kind, arm):
 
 
 def values():
-    v = {"delay": {}, "ladder": {}, "placebo": {}, "split": {}}
+    v = {"delay": {}, "controls_d10": {}, "placebo": {}, "split": {}}
     for d in (0, 10, 20):
         fs = glob.glob(f"{A}/M1M2_pi05_eval300_*_d0.jsonl" if d == 0 else f"{A}/D_pi05_eval300_*_d{d}.jsonl")
         v["delay"][d] = {"Base": share(fs, "base", "none"),
                          **{a: share(fs, "dynamic", a) for a in ("none", "PPC", "Gauto")}}
-    p = lambda f: [f"{C}/{f}_pi05_eval300_plus_d10.jsonl"]  # noqa: E731
-    for name, fs, arm in (("нет", [f"{A}/D_pi05_eval300_plus_d10.jsonl"], "none"),
-                          ("PPC", [f"{A}/D_pi05_eval300_plus_d10.jsonl"], "PPC"), ("PPCL", p("C3"), "PPCL"),
-                          ("PBVS", p("V3"), "PBVS0.3"), ("VS-T", p("VT3"), "VST0.3"), ("VT-m", p("M"), "VTm"),
-                          ("G-auto", p("C3"), "Gauto")):
-        v["ladder"][name] = share(fs, "dynamic", arm)
-    v["ladder_extra"] = {"PBVS 5 мм (строка E, только в файле)": share(p("E"), "dynamic", "PBVS0.3")}
+    for name, src, path, flip, note in CONTROLS:
+        x = json.load(open(src))
+        for k in path:
+            x = x[k]
+        e = {"diff_pp": x["diff_pp"], "lo2.5": x["lo2.5"], "hi97.5": x["hi97.5"]}
+        if flip:  # the memo's G-auto - X as X - G-auto
+            e = {"diff_pp": -e["diff_pp"], "lo2.5": -e["hi97.5"], "hi97.5": -e["lo2.5"]}
+        v["controls_d10"][name] = {**{k: round(y, 3) for k, y in e.items()}, "pairs": x["pairs"], "source": src,
+                                   "key": "/".join(path), "sign_flipped": flip, "note": note}
     ps = json.load(open(P_SUM))
     names = {"Gauto": "G", "GautoSham": "P", "none": "N", "none2": "N′"}
     v["placebo"] = {"success": {c: {names[a]: {"pct": round(100 * x[0], 2), "n": x[1]} for a, x in arms.items()}
@@ -79,7 +92,11 @@ def check(v):
     s = v["split"]
     assert abs(s["s_Gauto"] + s["after_grasp"] + s["at_grasp"] - s["s_Base"]) < 0.01
     assert abs(s["at_grasp_grasps"] + s["at_grasp_ungrasped"] - s["at_grasp"]) < 0.01
-    assert all(x["n"] == 187 for x in v["ladder"].values()), {k: x["n"] for k, x in v["ladder"].items()}
+    memo = {"нет": (-19.0, -24.7, -13.1), "PPCL": (-11.3, -17.7, -5.4), "PBVS": (-4.7, -11.3, 2.0),
+            "VS-T": (-3.3, -8.4, 1.7), "VT-m": (-4.3, -10.2, 1.2)}  # as the memos print them (part 2 §3, controls)
+    for k, m in memo.items():
+        e = v["controls_d10"][k]
+        assert all(abs(round(e[f], 1) - y) < 1e-9 for f, y in zip(("diff_pp", "lo2.5", "hi97.5"), m)), (k, e, m)
     assert all(v["delay"][d][a]["n"] == 300 for d in v["delay"] for a in v["delay"][d])
 
 
@@ -96,15 +113,18 @@ def draw(v, path):
         a.plot(ds, [v["delay"][d][arm]["pct"] for d in ds], "o-", color=col, label=lab)
     a.set(xticks=ds, xlabel="задержка d, шагов 20 Гц", ylabel="успех, %", title="a. Ось задержки (π0.5, 300 случаев)")
     a.legend(fontsize=8)
-    a = ax["b"]  # the ladder
-    names = list(v["ladder"])
-    ys = [v["ladder"][k]["pct"] for k in names]
-    cols = ["tab:red", "tab:orange", "tab:orange", "tab:green", "tab:green", "tab:green", "tab:blue"]
-    a.bar(range(len(names)), ys, color=cols)
-    for i, y in enumerate(ys):
-        a.text(i, y + 0.5, f"{y:.1f}", ha="center", fontsize=8)
-    a.set_xticks(range(len(names)), names, fontsize=8)
-    a.set(ylabel="успех, %", title="b. Лестница контролей, d = 10 Plus (187 случаев)")
+    a = ax["b"]  # the controls at d = 10, paired differences
+    cs = v["controls_d10"]
+    names = list(cs)
+    for i, k in enumerate(names):
+        e = cs[k]
+        a.errorbar(i, e["diff_pp"], yerr=[[e["diff_pp"] - e["lo2.5"]], [e["hi97.5"] - e["diff_pp"]]], fmt="o",
+                   color="tab:red" if k == "нет" else ("tab:orange" if k == "PPCL" else "tab:green"), capsize=4)
+        a.text(i + 0.08, e["diff_pp"], f"{e['diff_pp']:+.1f}", fontsize=8, va="center")
+    a.axhline(0, color="0.3", lw=1)
+    a.set_xticks(range(len(names)), [f"{k}\n{cs[k]['pairs']} пар" for k in names], fontsize=8)
+    a.set(xlim=(-0.5, len(names) - 0.3), ylabel="X − G-auto, п.п. [95%]",
+          title="b. Контроли при d = 10: разность с G-auto, парно")
     a = ax["c"]  # the placebo
     arms = ["G", "P", "N", "N′"]
     for j, (c, dx) in enumerate((("P0", -0.2), ("P10", 0.2))):
@@ -137,8 +157,10 @@ def draw(v, path):
     a.set(xlim=(-0.6, 3.6), ylabel="успех, %",
           title=f"d. Разрыв Base − G-auto при d = 20: {s['gap']:.1f} п.п.")
     a.legend(fontsize=7, loc="center right")
-    f.text(0.01, 0.005, "Только закоммиченные результаты; значения и файлы — рядом в JSON. a, b: доли по всем записям "
-           "строк, без отбора пар.\nb: «нет» и PPC — часть 2 (под A, через под), остальные — под C; PBVS — зона 26 мм. "
+    f.text(0.01, 0.005, "Только закоммиченные результаты; значения и файлы — рядом в JSON. a, c: доли по всем записям "
+           "строк, без отбора пар.\nb: парные разности и 95% кластерного бутстрэпа из сводок записок; «нет» — часть 2 (под A), "
+           "остальные — под C; Plus + PRO, VT-m — только Plus; PPC нет: разности G-auto − PPC при d = 10 в записках нет. "
+           "PBVS — зона 26 мм.\n"
            "c: 95% кластерный бутстрэп из summary_P.json. d: измерение, не правило (grasp_split_d20.json).",
            fontsize=7, va="bottom")
     f.tight_layout(rect=(0, 0.045, 1, 1))
