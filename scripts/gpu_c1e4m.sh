@@ -11,6 +11,8 @@
 #          as pod A. >= 16 vCPUs, 64 GB RAM, 120 GB disk
 #   POD=P  the placebo cell (docs/superpowers/specs/2026-11-08-c1-e4-placebo-design.md, "placebo spec" §10): pi0.5 only,
 #          results under results/c1-e4/placebo/pod_P; its stages are below. A token as pod A; as pod A's machine
+#   POD=R  cell R, the delay trend (docs/superpowers/specs/2026-11-17-c1-e4-delay-trend-design.md, "delay spec" §8):
+#          pi0.5 only, results under results/c1-e4/delay/pod_R; its stages are below. A token as pod A; as pod P's machine
 # Each pod: RunPod Community RTX 4090 (~$0.34/h), EGL, root (apt-get), tmux, /workspace.
 #   tmux new -s c1e4m   (after a lost SSH session: tmux attach -t c1e4m)
 #   cd /workspace && git clone https://github.com/papadoster/jit-reflex.git && cd jit-reflex && git checkout c1-e4
@@ -132,6 +134,23 @@
 #               with part 2's kbar and --base-prefix on controls lines 2 (d 0) / 3 (d 10)'s 187 Plus cases in their
 #               runner lines and Base groups) and grid_all_P.jsonl (P0*, P10; not the smoke's); the reading on the
 #               Mac. A rerun resumes
+# POD=R pi0.5, cell R (delay spec): setup | rsmoke | rgrid0 | rgrid20, each after the previous one passed; every runner
+# line at n-envs 6 (pass 2 too), the evalrest cases in the set's order:
+#   setup       P's
+#   rsmoke      §8: R0's first 6 Plus cases, the four arms (Gauto, VST0.3, VTm, PBVS0.3 on one full Base: s* of VS-T and
+#               VT-m is its first close), into $O/smoke, afresh (never read), then their code check only
+#               (scripts/c1e4r_summary.py --smoke-check: every record there, prefix_ok, plans_in, conf, kbar,
+#               band_eps.json, s_star, a_floor, a_first, no Base cut): no outcome. $O/CODE.r, the code record, is removed
+#               at its start and written only once its check passed
+#   rgrid0      §8: after a passed rsmoke (its check's last line PASS; refused while another stage or a runner is live)
+#               and only on the code it ran ($O/CODE.r there and equal). The platform ($O/PLATFORM: the first rgrid's,
+#               later ones require it), the C1-E4 tests with the eight summaries' tests, their selftests. A forecast at
+#               rsmoke's tempo, then R0 (scripts/c1e4r_summary.py --plan --line R0: the four arms with part 2's kbar
+#               and band_eps.json, no --base-prefix, on the 640 evalrest cases, Plus then PRO) and the forecast of R20
+#               at R0's tempo (x 1.22, §8). Then on the Mac: download, check the sums, commit, push (§8)
+#   rgrid20     §8: as rgrid0, and only after R0 is complete (every planned record there, --complete); R20 likewise,
+#               then grid_all_R.jsonl (R0 and R20; not the smoke's); the reading on the Mac. Its git check is on
+#               $O/R20_* only: R0's records may be tracked by then. A rerun resumes
 # One stage at a time on a pod (flock). Each runner line has its own --out (block, brain, set, source, d), runs twice
 # (pass 2 resumes and retries failed groups, scripts/gpu_c1e3.sh's watchdog STALL, default 7200 s) and a stage fails if a
 # runner still exits non-zero after pass 2. Every exit appends the environment to $O/pod_env_<stage>.txt, refreshes
@@ -148,17 +167,18 @@ case $POD in  # the pod's LIBERO-MAX brains, its bench brain (spec §13) and its
   A) BRAINS=pi05; BB=pi05; OFTB= ;;
   B) BRAINS="oftplus oft smolvla"; BB=smolvla; OFTB="oft oftplus" ;;
   C) OFTB=oftplus; [ "$TAIL" = 1 ] && OFTB="oft oftplus"; BRAINS="pi05 $OFTB"; BB=pi05 ;;
-  P) BRAINS=pi05; BB=pi05; OFTB= ;;
-  *) echo "!!! POD=A (pi0.5), POD=B (OFT+, OFT, SmolVLA), POD=C (the controls) or POD=P (the placebo cell) is" \
-       "required (spec §13)"; exit 1 ;;
+  P | R) BRAINS=pi05; BB=pi05; OFTB= ;;
+  *) echo "!!! POD=A (pi0.5), POD=B (OFT+, OFT, SmolVLA), POD=C (the controls), POD=P (the placebo cell) or POD=R" \
+       "(cell R) is required (spec §13)"; exit 1 ;;
 esac
-has_pi() { [ $POD = A ] || [ $POD = C ] || [ $POD = P ]; }  # pi0.5: its gated tokenizer (a token), its SHA-256
+has_pi() { [ $POD = A ] || [ $POD = C ] || [ $POD = P ] || [ $POD = R ]; }  # pi0.5: its gated tokenizer, its SHA-256
 has_oft() { [ -n "$OFTB" ]; }  # venv-oft, openvla-oft
 dry || [ -n "${TMUX:-}" ] || { echo "!!! not inside tmux: a lost SSH session kills the workers (tmux new -s c1e4m)"
   sleep 10; }
 O=results/c1-e4/part2/pod_$POD  # the runners' records
 [ $POD = C ] && O=results/c1-e4/controls/pod_C
 [ $POD = P ] && O=results/c1-e4/placebo/pod_P
+[ $POD = R ] && O=results/c1-e4/delay/pod_R
 W=$O  # this script's own files; a dry run writes them to a temporary dir, never into the repository
 dry && W=$(mktemp -d)
 LOG=$W/logs
@@ -255,7 +275,7 @@ setup() {
       cloudpickle opencv-python future "lerobot[dataset,scipy-dep]==0.6.1" "${PIN[@]}" "${SCENE[@]}" || exit 1
     x touch venv/c1e4m-installed
   fi
-  [[ $POD != [CP] ]] || x uv pip install --python $P pytest==9.1.1 || exit 1  # csmoke, pgrid run the C1-E4 tests
+  [[ $POD != [CPR] ]] || x uv pip install --python $P pytest==9.1.1 || exit 1  # csmoke, pgrid, rgrid*: the C1-E4 tests
   # pods A, C: pi0.5's tokenizer is gated; a missing token or unaccepted terms stop here, before anything big is fetched
   has_pi && { x $P -c "from huggingface_hub import model_info, whoami
 print('HF user:', whoami()['name']); model_info('google/paligemma-3b-pt-224'); print('paligemma: access ok')" \
@@ -401,6 +421,11 @@ CODE_PATHS="src scripts/c1e4m_run.py scripts/c1e4m_brains.py scripts/c1e4_run.py
 [ $POD = P ] && CODE_PATHS+=" scripts/c1e4c_summary.py scripts/c1e4m_summary.py scripts/c1e4v_summary.py \
 scripts/c1e4t_summary.py scripts/c1e4k_summary.py scripts/c1e4b_summary.py scripts/c1e4o_summary.py \
 scripts/c1e4p_summary.py scripts/c1e2_summary.py scripts/c1e3_summary.py scripts/c1e3_detectors.py"
+# POD=R: P's and cell R's summary
+[ $POD = R ] && CODE_PATHS+=" scripts/c1e4c_summary.py scripts/c1e4m_summary.py scripts/c1e4v_summary.py \
+scripts/c1e4t_summary.py scripts/c1e4k_summary.py scripts/c1e4b_summary.py scripts/c1e4o_summary.py \
+scripts/c1e4p_summary.py scripts/c1e4r_summary.py scripts/c1e2_summary.py scripts/c1e3_summary.py \
+scripts/c1e3_detectors.py"
 code_hash() {
   local f
   for f in $CODE_PATHS; do git rev-parse -q --verify "HEAD:$f" || { echo "!!! $f is not in HEAD" >&2; return 1; }; done
@@ -466,7 +491,7 @@ run2() {  # run2 <log name> <runner command..>: pass 1, then pass 2 (resume retr
   # 2 envs only after a run that ended by itself with few failed groups (part 1: the bench, exit 0); otherwise the same
   # envs. The last --n-envs wins; fp32 and one-row chunks do not depend on the batch
   { [ -n "$k" ] && [ "$k" -le 3 ]; } || { [ $rc = 0 ] && [ "$f" -le 3 ]; } && small="--n-envs 2"
-  [[ $POD = [CP] ]] && small=  # controls spec §7: part 2's batches of 6 (pi0.5's fp32 chunks depend on the batch)
+  [[ $POD = [CPR] ]] && small=  # controls spec §7: part 2's batches of 6 (pi0.5's fp32 chunks depend on the batch)
   echo "[$(date +%T)] pass 2 ($f failed groups in pass 1, exit $rc): $* $small" | tee -a "$log"
   wd "$log" "$@" $small; rc=$?
   [ $rc = 0 ] || echo "!!! runner exited with an error (pass 2)" | tee -a "$log"
@@ -516,6 +541,7 @@ ck() { $SP scripts/c1e4k_summary.py "$@"; }  # POD=C kgrid: the kappa ablation's
 cb() { $SP scripts/c1e4b_summary.py "$@"; }  # POD=C mgrid: VT-m's plan (the PBVS spec's journal, B)
 co() { $SP scripts/c1e4o_summary.py "$@"; }  # POD=C ogrid: cell О12's plan (the controls journal, 2026-10-22)
 cpl() { $SP scripts/c1e4p_summary.py "$@"; }  # POD=P: the placebo cell's plan and smoke check (placebo spec)
+cr() { $SP scripts/c1e4r_summary.py "$@"; }  # POD=R: cell R's plan, smoke check and R0's gate (delay spec)
 # the summary cphase plans with (vgrid: cv, vtgrid: ct, kgrid: ck, mgrid: cb, ogrid: co, POD=P: cpl); not CC, the C
 # compiler's variable
 SUMM=cc
@@ -553,6 +579,22 @@ pfc() {  # POD=P: placebo spec §10's forecast at psmoke's tempo (s per record, 
   n=$({ cpl --plan --line P0; cpl --plan --line P10; } | awk -F'\t' '{ s += $6 * 5 / 4 } END { print s }')
   awk -v t="$t" -v n="$n" 'BEGIN { h = t * n / 3600; printf "forecast at psmoke'"'"'s %.1f s/record: %d records, '\
 '%.1f h, $%.2f at $0.371/h (placebo spec §10: ~11.5 h, ~$4.3 with setup, smoke and 10 %%)\n", t, n, h, 0.371 * h }'
+}
+rfc() {  # rfc <R0|R20>: delay spec §8's forecast of a cell, s per record measured: R0 at rsmoke's, R20 at R0's x 1.22
+  local t n f=1 logs=$LOG/Rsmoke_pi05.log
+  [ $1 = R20 ] && { logs="$LOG/R0_*.log"; f=1.22; }
+  dry && { echo "+ forecast of $1: s/record of $logs x $f x its records, \$0.371/h"; return; }
+  # shellcheck disable=SC2086
+  t=$(gtempo $logs)
+  [ -n "$t" ] || { echo "no tempo ($logs): no forecast of $1"; return; }
+  n=$(cr --plan --line $1 | awk -F'\t' '{ s += $6 } END { print s }')  # full Bases: n counts them
+  awk -v L=$1 -v t="$t" -v f=$f -v n="$n" 'BEGIN { h = t * f * n / 3600; printf "forecast of %s at %.1f s/record x '\
+'%s: %d records, %.1f h, $%.2f at $0.371/h\n", L, t, f, n, h, 0.371 * h }'
+}
+live_re() {  # live_re <stage|stage..>: pgrep -f's pattern of those stages of this script or a runner. A stage is anchored
+  # to its process (argv: bash, the script, the stage), so a tmux server or a shell whose argv only names the script
+  # cannot match (pgrid's false refusal, results/c1-e4/placebo/console_P/pgrid_P_refused.log)
+  echo "^([^ ]*/)?bash [^ ]*gpu_c1e4[m]\.sh +($1)( |\$)|c1e4m_ru[n]\.py|c1e4_ru[n]\.py"
 }
 TV='import torch; print("torch", torch.__version__, "CUDA", torch.version.cuda)'
 platform() {  # POD=C: the machine mode П is decided on (cprobe): the card and its driver, torch and its CUDA per venv
@@ -620,11 +662,13 @@ calib_line() {  # the pod's line from M0, B-cal and calib_more's records -> cali
 }
 
 case "$POD:${1:-}" in
-  [ABCP]:setup | [AB]:smoke | [AB]:connect | [AB]:calib | [AB]:calib_more | [AB]:grid) ;;
+  [ABCPR]:setup | [AB]:smoke | [AB]:connect | [AB]:calib | [AB]:calib_more | [AB]:grid) ;;
   C:cprobe | C:csmoke | C:cgrid | C:ctail | C:vgrid | C:vtgrid | C:kgrid | C:mgrid | C:ogrid | P:psmoke | P:pgrid) ;;
+  R:rsmoke | R:rgrid0 | R:rgrid20) ;;
   *) echo "usage: POD=A|B $0 setup | smoke | connect | calib | calib_more | grid"
      echo "       POD=C [TAIL=1] $0 setup | cprobe | csmoke | cgrid | ctail | vgrid | vtgrid | kgrid | mgrid | ogrid"
      echo "       POD=P $0 setup | psmoke | pgrid"
+     echo "       POD=R $0 setup | rsmoke | rgrid0 | rgrid20"
      exit 1 ;;
 esac
 STAGE=$1
@@ -637,7 +681,7 @@ else
 fi
 # ogrid: the earlier stages' results under $O are tracked (the results commit after mgrid); only its own lines' files
 # would be seen as done
-G=$O; [ $STAGE = ogrid ] && G="$O/O_*"
+G=$O; [ $STAGE = ogrid ] && G="$O/O_*"; [ $STAGE = rgrid20 ] && G="$O/R20_*"  # R0 committed first
 [ -z "$(git ls-files "$G")" ] || fail "git tracks results of an earlier run under $G: resume would see them as done.
     Run from a commit without them, or move them away, as the owner decides."
 dry || trap 'trap "" INT TERM HUP; record $STAGE; pack' EXIT
@@ -645,10 +689,10 @@ if [ $STAGE = setup ]; then
   setup 2>&1 | tee -a $LOG/setup.log
   exit "${PIPESTATUS[0]}"
 fi
-[[ $POD = [CP] ]] || summ --plan --pod $POD >/dev/null || exit 1
-[[ $POD = [CP] ]] || S0=$(summ --split0 $W/split0.json) || exit 1  # the split as first frozen: connect, calib(_more)
+[[ $POD = [CPR] ]] || summ --plan --pod $POD >/dev/null || exit 1
+[[ $POD = [CPR] ]] || S0=$(summ --split0 $W/split0.json) || exit 1  # the split as first frozen: connect, calib(_more)
 dry || [ -f $DEPS/c1e4m-setup-ok ] || fail "no $DEPS/c1e4m-setup-ok: POD=$POD ./scripts/gpu_c1e4m.sh setup first"
-[ $STAGE = smoke ] || [[ $POD = [CP] ]] || dry || grep -q '^C1-E4m envs:' $W/tempo_smoke.txt 2>/dev/null \
+[ $STAGE = smoke ] || [[ $POD = [CPR] ]] || dry || grep -q '^C1-E4m envs:' $W/tempo_smoke.txt 2>/dev/null \
   || fail "no passed smoke ($W/tempo_smoke.txt): POD=$POD ./scripts/gpu_c1e4m.sh smoke first"
 export HF_HUB_OFFLINE=1  # everything is cached by setup: no silent weight change, no Hub outage mid-run
 case "$STAGE" in
@@ -1252,5 +1296,68 @@ psmoke ran ($O/CODE.p): rerun psmoke, or the owner decides"; }
     x sh -c "cat $O/P[0-9]*_*.jsonl > $O/grid_all_P.jsonl"  # P0, P0nv, P10; not the smoke's ($SM)
     echo "pgrid done: $O/grid_all_P.jsonl; the reading on the Mac: python scripts/c1e4p_summary.py" \
       "$O/grid_all_P.jsonl --out $O/summary_P.json"
+    ;;
+  rsmoke)  # delay spec §8: R0's first 6 Plus cases, the four arms, into $SM (never read); the code check, no outcome
+    # afresh: a failed rerun leaves no pass and no code record for rgrid's gate
+    dry || rm -rf $SM $LOG/Rsmoke_*.log $W/smoke_check.txt $O/CODE.r $O/CODE.r.run
+    check_code_v record r.run  # the code this smoke runs (committed, at HEAD): CODE.r once its check passed
+    dry || mkdir -p $SM
+    SUMM=cr RD=$SM  # cphase plans with cell R's summary, the smoke's records go to $SM
+    cphase rsmoke --plan --line Rsmoke || fail "rsmoke: the smoke line still fails after pass 2 (above)"
+    x cr --smoke-check $SM/Rsmoke_pi05.jsonl | tee $W/smoke_check.txt
+    [ "${PIPESTATUS[0]}" = 0 ] || fail "the smoke's code check failed (above): stop, the owner decides (delay spec §8)"
+    check_code_v check r.run && x mv $O/CODE.r.run $O/CODE.r  # still the code it started with: rgrid runs that
+    echo "[$(date +%T)] rsmoke done (the code only; no outcome read). Next: POD=R ./scripts/gpu_c1e4m.sh rgrid0"
+    ;;
+  rgrid0 | rgrid20)  # delay spec §8: R0 whole, then (after its records are committed on the Mac) R20
+    L=R${STAGE#rgrid}
+    dry || [ "$(tail -1 $W/smoke_check.txt 2>/dev/null)" = "C1-E4 delay smoke (code only): PASS" ] \
+      || fail "no passed rsmoke ($W/smoke_check.txt): POD=R ./scripts/gpu_c1e4m.sh rsmoke first"
+    if ! dry; then  # one runner on the GPU: any other stage of this script, or a runner, live
+      st=$(tr ' ' '\n' <<< "setup smoke connect calib calib_more grid cprobe csmoke cgrid ctail vgrid vtgrid kgrid \
+mgrid ogrid psmoke pgrid rsmoke rgrid0 rgrid20" | grep -vx "$STAGE" | paste -sd'|' -)
+      live=$(pgrep -af "$(live_re "$st")")
+      [ -z "$live" ] || fail "a stage or a runner is live (below): $STAGE starts after it ends
+$live"
+    fi
+    # the grid runs the code the passed smoke ran
+    if dry; then echo "+ require $O/CODE.r (rsmoke's record) equal to $CODE_PATHS at HEAD, committed"
+    else [ -f $O/CODE.r ] || fail "no $O/CODE.r, the code record a passed rsmoke writes: POD=R \
+./scripts/gpu_c1e4m.sh rsmoke first"
+      [ "$(code_hash)" = "$(cat $O/CODE.r)" ] && [ -z "$(git status --porcelain -- $CODE_PATHS)" ] || {
+        git status --short -- $CODE_PATHS; fail "the code at HEAD (or an uncommitted edit, above) is not the one \
+rsmoke ran ($O/CODE.r): rerun rsmoke, or the owner decides"; }
+    fi
+    if [ $STAGE = rgrid20 ]; then  # spec §8: R0 whole before R20
+      x cr --complete $O/R0_*.jsonl --line R0 || fail "R0 is not complete (above): POD=R ./scripts/gpu_c1e4m.sh rgrid0 \
+first"
+    fi
+    if dry; then platform; echo "+ write $O/PLATFORM: the output of these (the first rgrid's; later ones require it)"
+    else p=$(platform) || fail "nvidia-smi or torch failed: no $O/PLATFORM"
+      [ -f $O/PLATFORM ] || echo "$p" > $O/PLATFORM
+      [ "$p" = "$(cat $O/PLATFORM)" ] || { echo "$p"; fail "this machine (above) is not the first rgrid's \
+($O/PLATFORM): the owner decides"; }
+    fi
+    x $P -m pytest -q tests/test_objreflex.py tests/test_gauto.py tests/test_handoff.py tests/test_lead.py \
+      tests/test_maxwrap.py tests/test_c1e4m_run.py tests/test_c1e4c_summary.py tests/test_c1e4m_brains.py \
+      tests/test_vservo.py tests/test_c1e4v_summary.py tests/test_vst.py tests/test_c1e4t_summary.py \
+      tests/test_c1e4k_summary.py tests/test_vtm.py tests/test_c1e4b_summary.py tests/test_c1e4o_summary.py \
+      tests/test_c1e4p_summary.py tests/test_c1e4r_summary.py 2>&1 | tee $LOG/${STAGE}_tests.log
+    [ "${PIPESTATUS[0]}" = 0 ] || fail "the C1-E4 tests fail on the pod (above): the owner decides"
+    x cc --selftest && x cv --selftest && x ct --selftest && x ck --selftest && x cb --selftest && x co --selftest \
+      && x cpl --selftest && x cr --selftest || fail "a summary's selftest fails (above): the owner decides"
+    SUMM=cr  # cphase plans with cell R's summary
+    echo "[$(date +%T)] $STAGE, pod R: $L, Plus then PRO" | tee -a $W/forecast.txt
+    rfc $L | tee -a $W/forecast.txt
+    cphase "$(tr A-Z a-z <<< $L)" --plan --line $L || fail "$STAGE: $L still fails after pass 2 (above)"
+    if [ $STAGE = rgrid0 ]; then
+      rfc R20 | tee -a $W/forecast.txt
+      echo "rgrid0 done. On the Mac (delay spec §8): download, check the sums, commit and push R0; journal R20's" \
+        "forecast (above); then POD=R ./scripts/gpu_c1e4m.sh rgrid20"
+    else
+      x sh -c "cat $O/R0_*.jsonl $O/R20_*.jsonl > $O/grid_all_R.jsonl"  # not the smoke's ($SM)
+      echo "rgrid20 done: $O/grid_all_R.jsonl; the reading on the Mac: python scripts/c1e4r_summary.py" \
+        "$O/grid_all_R.jsonl --out $O/summary_R.json"
+    fi
     ;;
 esac
