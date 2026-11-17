@@ -1353,7 +1353,8 @@ first"
     if [ $STAGE = rgrid0 ]; then
       rfc R20 | tee -a $W/forecast.txt
       echo "rgrid0 done. On the Mac (delay spec §8): download, check the sums, commit and push R0; journal R20's" \
-        "forecast (above); then POD=R ./scripts/gpu_c1e4m.sh rgrid20"
+        "forecast (above); then POD=R ./scripts/gpu_c1e4m.sh rgrid20. Do NOT git pull here before rgrid20: R0's" \
+        "files are untracked here, the pushed ones would collide with them"
     else
       x sh -c "cat $O/R0_*.jsonl $O/R20_*.jsonl > $O/grid_all_R.jsonl"  # not the smoke's ($SM)
       echo "rgrid20 done: $O/grid_all_R.jsonl; the reading on the Mac: python scripts/c1e4r_summary.py" \

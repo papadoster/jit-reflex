@@ -292,9 +292,12 @@ def lam_bands(pairs, cell, bs, m):
     case's arms (mismatches listed); then T - G and M - V5 per band of the cell, on the pairs whose arms agree."""
     out = {}
     for L, p in pairs.items():
-        lams, mis = {}, []
+        lams, mis, none = {}, [], 0
         for c, q in p.items():
             v = {k: lam(r) for k, r in q.items()}
+            if set(v.values()) == {None}:  # every arm's episode ended before a fresh plan arrived: out of the bands
+                none += 1
+                continue
             r = q["G"]
             f = -r["e"] % r["conf"]["s"] + r["d"]
             if set(v.values()) != {f}:
@@ -307,6 +310,7 @@ def lam_bands(pairs, cell, bs, m):
             bands[f"[{lo}, {hi}]"] = {f"{x}-{y}": m(x, y) or e2.rnd(dpp(prs, x, y, bs)) for x, y in (("T", "G"),
                                                                                                      ("M", "V5"))}
         out[L] = {"bands": bands, "mismatches": len(mis), "mismatch_list": mis[:20],
+                  "no_fresh_plan_before_the_end": none,
                   "outside_bands": sum(not any(lo <= v <= hi for lo, hi in LAM[L]) for v in lams.values())}
     return out
 
@@ -430,7 +434,7 @@ def selftest_read(split, rest):
              "suite": su, "task_name": f"{su}_t{h // 4 % 10}_v{h % 7}", "substrate_variant": None, "e": 15 + j % 37,
              "prefix_ok": None if kind == "base" else True, "replay_miss": None, "skipped_reason": None,
              "success": bool(win(L, a, c)) if kind == "dynamic" else j % 2 == 0, "calls_sched": 30,
-             "calls_trig": int(a == "Gauto"), "plans_in": [[t, t + d * (t > 0)] for t in range(0, 300, 10)]}
+             "calls_trig": 0, "plans_in": [[t, t + d * (t > 0)] for t in range(0, 300, 10)]}
         s_star = None if j % 50 == (0 if L == "R0" else 25) else [0.001, 0.0]  # T without s*: 26 cases
         r |= ({"base_cut": False} if kind == "base" else {"vst": {"s_star": s_star, "steps_window": 10}}
               if a == "VST0.3" else {"pbvs": {"steps_window": 10}} if a == "PBVS0.3" else {
@@ -539,7 +543,7 @@ def selftest_read(split, rest):
     co = rp["counters"]
     assert co["noise_floor"]["informative"] and co["noise_floor"]["n"] == 2 * len([c for c in rest if i[c] % 3 == 0])
     assert co["R0"]["T_without_s_star"] == round(13 / 640, 4) and co["R0"]["M_steps_aim_share"] == 0.4 and co["R20"][
-        "calls_per_episode"] == {"G": 31.0, "T": 30.0, "M": 30.0, "V5": 30.0} and co["R20"]["base_e"] == {
+        "calls_per_episode"] == {"G": 30.0, "T": 30.0, "M": 30.0, "V5": 30.0} and co["R20"]["base_e"] == {
         "equal": 2560, "total": 2560}, co
     cc.exits(lambda: read(new + [new[3] | {"success": not new[3]["success"]}], old, names, split), 2)
 
@@ -560,13 +564,17 @@ def selftest_read(split, rest):
     assert u["R20"]["L"] is None and u["R20"]["undefined_resamples"] == REPS and u["L0-L20"]["L"] is None, u
 
     # drops by reason, per cell; the trend on the cases valid in both
-    c1, c2, c3, c4, c5, c6, c7, c8 = rest[1:9]  # c6: every R0 arm a step late; c7: its R0 Base's e off by one
+    c1, c2, c3, c4, c5, c6, c7, c8, c9 = rest[1:10]  # c6: every R0 arm a step late; c7: its R0 Base's e off by one;
+    # c9: at R20 no fresh plan before the end in any arm; c4: also an invalid VT-m episode with an outlying a_floor
     ed = lambda r: (r | {"skipped_reason": "x"} if (r["case_id"], r["d"]) == (c1, 0) else  # noqa: E731
                     r | {"plans_in": [[t, t + 1] for t in range(0, 300, 10)]}
                     if (r["case_id"], r["d"], r["kind"]) == (c6, 0, "dynamic") else
                     r | {"e": r["e"] + 1} if (r["case_id"], r["d"], r["kind"]) == (c7, 0, "base") else
                     r | {"e": None} if (r["case_id"], r["d"]) == (c3, 0) else
                     r | {"replay_miss": 12} if (r["case_id"], r["d"], r["arm"]) == (c4, 20, "PBVS0.3") else
+                    r | {"prefix_ok": False, "vtm": r["vtm"] | {"a_floor": [1.0, 0.0]}}
+                    if (r["case_id"], r["d"], r["arm"]) == (c4, 20, "VTm") else
+                    r | {"plans_in": [[0, 0]]} if (r["case_id"], r["d"], r["kind"]) == (c9, 20, "dynamic") else
                     r | {"plans_in": [[t, t + 21 * (t > 0)] for t in range(0, 300, 10)]}
                     if (r["case_id"], r["d"], r["arm"]) == (c5, 20, "VST0.3") else r)
     r = read([ed(x) for x in new if (x["case_id"], x["d"], x["arm"], x["kind"]) not in (
@@ -581,7 +589,10 @@ def selftest_read(split, rest):
         "invalid_pairs"]["R20"] == {"pairs": 638, "invalid": 1, "pass": True}
     lm = r["report"]["lambda"]["R20"]
     assert lm["mismatches"] == 1 and lm["mismatch_list"][0]["case"] == c5 and lm["mismatch_list"][0]["lambda"][
-        "T"] == lm["mismatch_list"][0]["formula"] + 1 and sum(b["T-G"]["pairs"] for b in lm["bands"].values()) == 636
+        "T"] == lm["mismatch_list"][0]["formula"] + 1 and sum(b["T-G"]["pairs"] for b in lm["bands"].values()) == 635
+    assert lm["no_fresh_plan_before_the_end"] == 1 and r["report"]["lambda"]["R0"]["no_fresh_plan_before_the_end"] == 0
+    fl = r["report"]["counters"]["noise_floor"]  # c4's invalid VT-m episode not in the floor
+    assert fl["n"] == 2 * len([c for c in rest if i[c] % 3 == 0]) and fl["median_floor_m"] == 0.001, fl
     lm = r["report"]["lambda"]["R0"]  # c6: its arms agree, off the formula: listed, in its band
     assert lm["mismatches"] == 1 and lm["mismatch_list"][0]["case"] == c6 and set(lm["mismatch_list"][0][
         "lambda"].values()) == {lm["mismatch_list"][0]["formula"] + 1} and sum(
