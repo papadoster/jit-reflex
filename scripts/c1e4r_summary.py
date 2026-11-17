@@ -182,10 +182,10 @@ def lam(r):
 def read(new, old, names, split, bj=None):
     """spec §3-§6. The checks before reading (§6: each runner line's Dynamic episodes present on >= 99 %; invalid pairs
     <= 2 % per cell, a missing record, a skipped case or one without an event not one; conf equal per cell but arms;
-    arm_checks per cell; both cells' records on the same 640 planned cases), then Q8, Q9 and the report. new:
-    grid_all_R.jsonl; old: old300()'s rows or None. A pair: one case in one cell, its full Base and four Dynamic
-    episodes there, the Base with an event, every Dynamic one valid (cs.invalid: prefix_ok false or a replay miss); a
-    trend case: a pair in both cells. Clusters: maxwrap.base_task. Records off the plan are counted, never read."""
+    arm_checks per cell; both plans the same 640 cases, no record of either cell on another case), then Q8, Q9 and the
+    report. new: grid_all_R.jsonl; old: old300()'s rows or None. A pair: one case in one cell, its full Base and four
+    Dynamic episodes there, the Base with an event, every Dynamic one valid (cs.invalid: prefix_ok false or a replay
+    miss); a trend case: a pair in both cells (the others counted in trend_cases by the cell that dropped them). Clusters: maxwrap.base_task. Records off the plan are counted, never read."""
     bj = bj or band()
     lns = {L: plan(L, split) for L in CELLS}
     want = {x: L for L, ln in lns.items() for x in cc.lkeys(ln)}
@@ -200,10 +200,12 @@ def read(new, old, names, split, bj=None):
         miss = len(exp - used.keys())
         comp[ln["id"]] = {"expected": len(exp), "missing": miss, "pass": miss <= 0.01 * len(exp) + TOL}
     cases = run.set_ids(split, "evalrest")
-    seen = {L: {r["case_id"] for x, r in by.items() if want.get(x) == L} for L in CELLS}
-    same = {"planned": len(cases), **{L: len(v) for L, v in seen.items()},
-            "pass": all(set(cv.ids(a, split)) == set(cv.ids(b, split)) for a, b in zip(*lns.values()))
-            and seen["R0"] == seen["R20"] == set(cases)}
+    # spec §6: both plans the same 640 ids, no record of a cell's d and arms on another case (a missing case is the
+    # completeness's, and the trend's drop)
+    foreign = sorted({r["case_id"] for r in by.values() if "case_id" in r and r["d"] in CELLS.values()
+                      and tuple(r["conf"]["arms"]) == ARMS and r["case_id"] not in set(cases)})
+    same = {"planned": len(cases), "foreign_cases": foreign[:10], "foreign": len(foreign),
+            "pass": all(set(cv.ids(a, split)) == set(cv.ids(b, split)) for a, b in zip(*lns.values())) and not foreign}
     one = {r["case_id"]: r for r in used.values()}
     clu = {c: maxwrap.base_task({"case_id": c, "task_suite_name": r["suite"], "task_name": r["task_name"],
                                  "substrate_variant": r["substrate_variant"]}, names) for c, r in one.items()}
@@ -261,7 +263,8 @@ def read(new, old, names, split, bj=None):
                     "sentence": sentence(est, text)}
     rules["Q8"]["without_s_star"] = e2.rnd(trend([b for b in both if b[0] not in nos], "T", "G", bs)) | {
         "cases_out": len(nos), "note": "вторичная строка: без случаев, где у T нет s* хотя бы в одной клетке"}
-    rep = {"trend_cases": {"both_valid": len(tc), "one_cell_only": len(set(pairs["R0"]) ^ set(pairs["R20"]))},
+    rep = {"trend_cases": {"both_valid": len(tc), **{f"out: valid in {a} only, dropped in {b}": len(set(pairs[a]) - set(
+        pairs[b])) for a, b in (("R0", "R20"), ("R20", "R0"))}},
            "drops": drops, "cells": {}, "scale": {}, "lambda": {}}
     for L, prs in cell.items():
         rep["cells"][L] = {f"{x}-{y}": m(x, y) or e2.rnd(dpp(prs, x, y, bs)) for x, y in DIFFS} | {"success": {
@@ -570,7 +573,8 @@ def selftest_read(split, rest):
     assert r["checks"]["pass"] and r["report"]["drops"] == {"R0": {"skipped": 1, "no_event": 1},
                                                             "R20": {"missing": 2, "invalid": 1}}, r["report"]["drops"]
     out = (c1, c2, c3, c4, c8)
-    assert r["rules"]["Q8"]["pairs"] == 635 and r["report"]["trend_cases"] == {"both_valid": 635, "one_cell_only": 5}
+    assert r["rules"]["Q8"]["pairs"] == 635 and r["report"]["trend_cases"] == {
+        "both_valid": 635, "out: valid in R0 only, dropped in R20": 3, "out: valid in R20 only, dropped in R0": 2}
     assert r["rules"]["Q8"]["diff_pp"] == round(100 * sum(q for c, q in zip(rest, q640) if c not in out) / 635, 3)
     assert r["report"]["cells"]["R0"]["T-G"]["diff_pp"] == hand("R0", "T", "G", (c1, c3)) and r["checks"][
         "invalid_pairs"]["R20"] == {"pairs": 638, "invalid": 1, "pass": True}
@@ -598,7 +602,8 @@ def selftest_read(split, rest):
                          False),
                         ("arms/band", sub(lambda x: x | {"conf": x["conf"] | {"pbvs": bj | {"delta": 0.026}}}
                                           if x["d"] == 0 else x), False),
-                        ("same_cases", [x for x in new if (x["case_id"], x["d"]) != (rest[9], 20)], False)):
+                        ("same_cases", [x for x in new if (x["case_id"], x["d"]) != (rest[9], 20)], True),  # a drop
+                        ("same_cases", new + [new[0] | {"case_id": run.set_ids(split, "eval300")[0]}], False)):
         r = read(rs, None, names, split)
         f, _, k_ = why.partition("/")
         c = {L: r["checks"][f][L][k_] for L in CELLS} if k_ else r["checks"][f]
