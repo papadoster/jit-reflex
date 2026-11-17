@@ -185,7 +185,8 @@ def read(new, old, names, split, bj=None):
     arm_checks per cell; both plans the same 640 cases, no record of either cell on another case), then Q8, Q9 and the
     report. new: grid_all_R.jsonl; old: old300()'s rows or None. A pair: one case in one cell, its full Base and four
     Dynamic episodes there, the Base with an event, every Dynamic one valid (cs.invalid: prefix_ok false or a replay
-    miss); a trend case: a pair in both cells (the others counted in trend_cases by the cell that dropped them). Clusters: maxwrap.base_task. Records off the plan are counted, never read."""
+    miss); a trend case: a pair in both cells (the others counted in trend_cases by the cell that dropped them).
+    Clusters: maxwrap.base_task. Records off the plan are counted, never read."""
     bj = bj or band()
     lns = {L: plan(L, split) for L in CELLS}
     want = {x: L for L, ln in lns.items() for x in cc.lkeys(ln)}
