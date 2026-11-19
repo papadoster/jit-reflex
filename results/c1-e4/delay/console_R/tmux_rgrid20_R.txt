@@ -1,0 +1,450 @@
+=== window 0
+ Downloaded av
+ Downloaded pyarrow
+ Downloaded llvmlite
+ Downloaded opencv-python
+ Downloaded robosuite
+Prepared 58 packages in 42.56s
+Uninstalled 1 package in 3ms
+Installed 58 packages in 805ms
+ + aiohappyeyeballs==2.7.1
+ + aiohttp==3.14.5
+ + aiosignal==1.4.0
+ + antlr4-python3-runtime==4.9.3
+ + attrs==26.1.0
+ + av==15.1.0
+ + bddl==1.0.1
+ + contourpy==1.4.0
+ + cycler==0.12.1
+ + datasets==4.8.5
+ + dill==0.4.1
+ + easydict==1.14
+ + fastjsonschema==2.22.3
+ + fonttools==4.68.0
+ + frozenlist==1.8.0
+ - fsspec==2026.9.0
+ + fsspec==2026.2.0
+ + future==1.0.0
+ + hydra-core==1.3.8
+ + imageio==2.38.0
+ + iniconfig==2.3.1
+ + jsonlines==4.0.0
+ + jsonschema==4.26.0
+ + jsonschema-specifications==2025.9.1
+ + jupyter-core==5.9.1
+ + jupytext==1.19.6
+ + kiwisolver==1.5.1
+ + lazy-loader==0.6
+ + llvmlite==0.50.0
+ + matplotlib==3.11.2
+ + mdit-py-plugins==0.7.0
+ + multidict==7.2.1
+ + multiprocess==0.70.19
+ + nbformat==5.11.1
+ + numba==0.68.1
+ + omegaconf==2.3.1
+ + opencv-python==5.1.0.95
+ + pandas==2.3.3
+ + platformdirs==4.14.7
+ + pluggy==1.7.0
+ + propcache==0.5.4
+ + pyarrow==26.0.1
+ + pyparsing==3.3.3
+ + pytest==9.2.0
+ + python-dateutil==4.0.0
+ + pytz==2026.6
+ + referencing==0.37.0
+ + robosuite==1.4.0
+ + rpds-py==2026.9.1
+ + scikit-image==0.26.0
+ + scipy==1.18.1
+ + thop==0.1.1.post2209072238
+ + tifffile==2026.9.20
+ + torchcodec==0.11.1
+ + traitlets==5.16.1
+ + tzdata==2026.6
+ + wand==0.6.13
+ + xxhash==4.1.0
+ + yarl==1.25.1
+Using Python 3.12.16 environment at: venv
+Resolved 5 packages in 72ms
+Prepared 1 package in 65ms
+Uninstalled 1 package in 3ms
+Installed 1 package in 17ms
+ - pytest==9.2.0
+ + pytest==9.1.1
+HF user: papadoster
+paligemma: access ok
+Hint: A new version of huggingface_hub (2.4.0) is available! You are using versi
+on 1.33.0.
+Hint: The `hf-cli` skill is not installed. Run `hf skills add -g` to teach your
+AI agents how to use the `hf` CLI.
+Fetching 674 files:   0%|          | 0/674 [00:00<?, ?it/s]Still waiting to acqu
+ire lock on /workspace/lmax-deps/libero-pro-data/.cache/huggingface/.gitignore.l
+ock (elapsed: 0.1 seconds)
+Fetching 674 files: 100%|██████████| 674/674 [00:12<00:00, 55.79it/s]
+✓ Downloaded
+  path: /workspace/lmax-deps/libero-pro-data
+{
+  "config_dir": "/workspace/lmax-deps/libero-pro-config",
+  "dataset": "zhouxueyang/LIBERO-Pro",
+  "dataset_root": "/workspace/lmax-deps/libero-pro-data",
+  "libero_pro_root": "/workspace/lmax-deps/LIBERO-PRO",
+  "revision": "c86fc3b8293185a6f373677018ff3e37f8391602",
+  "runtime_revision": "2b910b5b5f53016bef9907632f6f840f1ce2229c"
+}
+/workspace/lmax-deps/dl/assets.zip: OK
+Do you want to specify a custom path for the dataset folder? (Y/N): Initializing
+ the default config file...
+The following information is stored in the config file: /root/.libero/config.yam
+l
+benchmark_root: /workspace/jit-reflex/venv/lib/python3.12/site-packages/libero/l
+ibero
+bddl_files: /workspace/jit-reflex/venv/lib/python3.12/site-packages/libero/liber
+o/./bddl_files
+init_states: /workspace/jit-reflex/venv/lib/python3.12/site-packages/libero/libe
+ro/./init_files
+datasets: /workspace/jit-reflex/venv/lib/python3.12/site-packages/libero/libero/
+../datasets
+assets: /workspace/jit-reflex/venv/lib/python3.12/site-packages/libero/libero/./
+assets
+Local assets not found. Downloading from HuggingFace Hub...
+Downloading LIBERO assets from Hugging Face...
+/workspace/jit-reflex/venv/lib/python3.12/site-packages/huggingface_hub/utils/_v
+alidators.py:206: UserWarning: The `local_dir_use_symlinks` argument is deprecat
+ed and ignored in `snapshot_download`. Downloading to a local directory does not
+ use symlinks anymore.
+  warnings.warn(
+Fetching 586 files: 100%|██████████| 586/586 [00:17<00:00, 34.46it/s]
+Assets downloaded successfully to /root/.cache/libero/assets
+LIBERO assets: /root/.cache/libero/assets
+Wand: MagickWand loads
+torch 2.11.0+cu126 CUDA 12.6 NVIDIA GeForce RTX 3090
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/__init__.
+py", line 62, in <module>
+    from mujoco.gl_context import *
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/gl_contex
+t.py", line 41, in <module>
+    from mujoco.egl import GLContext as _GLContext
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/__ini
+t__.py", line 31, in <module>
+    from mujoco.egl import egl_ext as EGL
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/egl_e
+xt.py", line 27, in <module>
+    from OpenGL import EGL
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/OpenGL/EGL/__ini
+t__.py", line 2, in <module>
+    from OpenGL.raw.EGL._types import *
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/OpenGL/raw/EGL/_
+types.py", line 87, in <module>
+    raw_eglQueryString = _p.PLATFORM.EGL.eglQueryString
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'eglQueryString'
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package libwayland-server0:amd64.
+(Reading database ... 29730 files and directories currently installed.)
+Preparing to unpack .../0-libwayland-server0_1.20.0-1ubuntu0.1_amd64.deb ...
+Unpacking libwayland-server0:amd64 (1.20.0-1ubuntu0.1) ...
+Selecting previously unselected package libgbm1:amd64.
+Preparing to unpack .../1-libgbm1_23.2.1-1ubuntu3.1~22.04.4_amd64.deb ...
+Unpacking libgbm1:amd64 (23.2.1-1ubuntu3.1~22.04.4) ...
+Preparing to unpack .../2-libgl1-mesa-dri_23.2.1-1ubuntu3.1~22.04.4_amd64.deb ..
+.
+Unpacking libgl1-mesa-dri:amd64 (23.2.1-1ubuntu3.1~22.04.4) over (23.2.1-1ubuntu
+3.1~22.04.2) ...
+Preparing to unpack .../3-libglx-mesa0_23.2.1-1ubuntu3.1~22.04.4_amd64.deb ...
+Unpacking libglx-mesa0:amd64 (23.2.1-1ubuntu3.1~22.04.4) over (23.2.1-1ubuntu3.1
+~22.04.2) ...
+Preparing to unpack .../4-libglapi-mesa_23.2.1-1ubuntu3.1~22.04.4_amd64.deb ...
+Unpacking libglapi-mesa:amd64 (23.2.1-1ubuntu3.1~22.04.4) over (23.2.1-1ubuntu3.
+1~22.04.2) ...
+Selecting previously unselected package libwayland-client0:amd64.
+Preparing to unpack .../5-libwayland-client0_1.20.0-1ubuntu0.1_amd64.deb ...
+Unpacking libwayland-client0:amd64 (1.20.0-1ubuntu0.1) ...
+Selecting previously unselected package libegl-mesa0:amd64.
+Preparing to unpack .../6-libegl-mesa0_23.2.1-1ubuntu3.1~22.04.4_amd64.deb ...
+Unpacking libegl-mesa0:amd64 (23.2.1-1ubuntu3.1~22.04.4) ...
+Selecting previously unselected package libegl1:amd64.
+Preparing to unpack .../7-libegl1_1.4.0-1_amd64.deb ...
+Unpacking libegl1:amd64 (1.4.0-1) ...
+Selecting previously unselected package libopengl0:amd64.
+Preparing to unpack .../8-libopengl0_1.4.0-1_amd64.deb ...
+Unpacking libopengl0:amd64 (1.4.0-1) ...
+Setting up libwayland-server0:amd64 (1.20.0-1ubuntu0.1) ...
+Setting up libgbm1:amd64 (23.2.1-1ubuntu3.1~22.04.4) ...
+Setting up libopengl0:amd64 (1.4.0-1) ...
+Setting up libglapi-mesa:amd64 (23.2.1-1ubuntu3.1~22.04.4) ...
+Setting up libwayland-client0:amd64 (1.20.0-1ubuntu0.1) ...
+Setting up libgl1-mesa-dri:amd64 (23.2.1-1ubuntu3.1~22.04.4) ...
+Setting up libegl-mesa0:amd64 (23.2.1-1ubuntu3.1~22.04.4) ...
+Setting up libegl1:amd64 (1.4.0-1) ...
+Setting up libglx-mesa0:amd64 (23.2.1-1ubuntu3.1~22.04.4) ...
+Processing triggers for libc-bin (2.35-0ubuntu3.8) ...
+EGL vendor: NVIDIA GL renderer: NVIDIA GeForce RTX 3090/PCIe/SSE2
+Exception ignored in: <function GLContext.__del__ at 0x796cf8468f40>
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/__ini
+t__.py", line 138, in __del__
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/mujoco/egl/__ini
+t__.py", line 131, in free
+  File "/workspace/jit-reflex/venv/lib/python3.12/site-packages/OpenGL/error.py"
+, line 230, in glCheckError
+OpenGL.raw.EGL._errors.EGLError: <exception str() failed>
+Fetching 9 files: 100%|██████████| 9/9 [00:57<00:00,  6.40s/it]
+The PI05 model is a direct port of the OpenPI implementation.
+This implementation follows the original OpenPI structure for compatibility.
+Original implementation: https://github.com/Physical-Intelligence/openpi
+Loading model from: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libe
+ro_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+✓ Loaded state dict from model.safetensors
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expe
+rt.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.bias
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expe
+rt.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.weight
+All keys loaded successfully!
+pi05 cached
+Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 1047.67it/s]
+/workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/sn
+apshots/8e174154ef5f6c60a8da12ae99c303d8963138c1/model.safetensors: OK
+name, driver_version, memory.total [MiB]
+NVIDIA GeForce RTX 3090, 570.124.04, 24576 MiB
+[15:01:57] packed c1e4m_results_R.tgz (16K)
+ ______                 ______            _
+(_____ \               (_____ \          | |
+ _____) ) _   _  ____   _____) )___    __| |
+|  __  / | | | ||  _ \ |  ____// _ \  / _  |
+| |  \ \ | |_| || | | || |    | |_| |( (_| |
+|_|   |_||____/ |_| |_||_|     \___/  \____|
+
+For detailed documentation and guides, please visit:
+https://docs.runpod.io/ and https://blog.runpod.io/
+
+
+root@93de8a668a00:/workspace/jit-reflex#
+=== window 1
+ cases, 68.9 s/case, eta 4.42 h
+group 40: 6 cases 30 episodes 303.9 s, brain 237.9 s 134 calls 507 rows; 246/471
+ cases, 68.4 s/case, eta 4.28 h
+group 41: 6 cases 30 episodes 256.0 s, brain 180.6 s 82 calls 372 rows; 252/471
+cases, 67.8 s/case, eta 4.13 h
+group 42: 6 cases 30 episodes 419.9 s, brain 243.3 s 145 calls 497 rows; 258/471
+ cases, 67.9 s/case, eta 4.02 h
+group 43: 6 cases 30 episodes 573.1 s, brain 336.7 s 145 calls 686 rows; 264/471
+ cases, 68.5 s/case, eta 3.94 h
+group 44: 6 cases 30 episodes 387.2 s, brain 316.2 s 181 calls 632 rows; 270/471
+ cases, 68.4 s/case, eta 3.82 h
+group 45: 6 cases 30 episodes 598.8 s, brain 283.8 s 191 calls 619 rows; 276/471
+ cases, 69.1 s/case, eta 3.74 h
+group 46: 6 cases 30 episodes 344.0 s, brain 287.5 s 144 calls 612 rows; 282/471
+ cases, 68.8 s/case, eta 3.61 h
+group 47: 6 cases 30 episodes 488.6 s, brain 231.3 s 143 calls 530 rows; 288/471
+ cases, 69.1 s/case, eta 3.51 h
+group 48: 6 cases 30 episodes 542.9 s, brain 271.7 s 168 calls 615 rows; 294/471
+ cases, 69.5 s/case, eta 3.42 h
+group 49: 6 cases 30 episodes 352.6 s, brain 281.6 s 157 calls 614 rows; 300/471
+ cases, 69.3 s/case, eta 3.29 h
+group 50: 6 cases 30 episodes 321.1 s, brain 255.1 s 159 calls 539 rows; 306/471
+ cases, 69.0 s/case, eta 3.16 h
+group 51: 6 cases 30 episodes 273.0 s, brain 221.2 s 115 calls 490 rows; 312/471
+ cases, 68.6 s/case, eta 3.03 h
+group 52: 6 cases 30 episodes 399.1 s, brain 318.6 s 214 calls 697 rows; 318/471
+ cases, 68.5 s/case, eta 2.91 h
+group 53: 6 cases 30 episodes 350.3 s, brain 279.9 s 199 calls 587 rows; 324/471
+ cases, 68.3 s/case, eta 2.79 h
+group 54: 6 cases 30 episodes 319.1 s, brain 248.4 s 167 calls 533 rows; 330/471
+ cases, 68.1 s/case, eta 2.67 h
+group 55: 6 cases 30 episodes 387.1 s, brain 315.8 s 182 calls 685 rows; 336/471
+ cases, 68.0 s/case, eta 2.55 h
+group 56: 6 cases 30 episodes 458.5 s, brain 372.8 s 214 calls 791 rows; 342/471
+ cases, 68.1 s/case, eta 2.44 h
+group 57: 6 cases 30 episodes 519.4 s, brain 242.1 s 130 calls 560 rows; 348/471
+ cases, 68.5 s/case, eta 2.34 h
+group 58: 6 cases 30 episodes 336.1 s, brain 266.4 s 162 calls 571 rows; 354/471
+ cases, 68.2 s/case, eta 2.22 h
+group 59: 6 cases 30 episodes 426.9 s, brain 351.2 s 182 calls 770 rows; 360/471
+ cases, 68.3 s/case, eta 2.11 h
+group 60: 6 cases 30 episodes 342.3 s, brain 263.0 s 156 calls 547 rows; 366/471
+ cases, 68.1 s/case, eta 1.99 h
+group 61: 6 cases 30 episodes 330.6 s, brain 258.5 s 157 calls 552 rows; 372/471
+ cases, 67.9 s/case, eta 1.87 h
+group 62: 6 cases 30 episodes 499.4 s, brain 242.6 s 158 calls 544 rows; 378/471
+ cases, 68.1 s/case, eta 1.76 h
+group 63: 6 cases 30 episodes 464.7 s, brain 377.6 s 223 calls 824 rows; 384/471
+ cases, 68.3 s/case, eta 1.65 h
+group 64: 6 cases 30 episodes 323.7 s, brain 245.3 s 165 calls 524 rows; 390/471
+ cases, 68.1 s/case, eta 1.53 h
+group 65: 6 cases 30 episodes 489.5 s, brain 352.3 s 174 calls 753 rows; 396/471
+ cases, 68.3 s/case, eta 1.42 h
+group 66: 6 cases 30 episodes 448.7 s, brain 364.9 s 192 calls 767 rows; 402/471
+ cases, 68.4 s/case, eta 1.31 h
+group 67: 6 cases 30 episodes 410.2 s, brain 266.7 s 151 calls 578 rows; 408/471
+ cases, 68.4 s/case, eta 1.20 h
+group 68: 6 cases 30 episodes 473.0 s, brain 269.1 s 162 calls 611 rows; 414/471
+ cases, 68.5 s/case, eta 1.08 h
+group 69: 6 cases 30 episodes 425.2 s, brain 348.7 s 180 calls 713 rows; 420/471
+ cases, 68.6 s/case, eta 0.97 h
+group 70: 6 cases 30 episodes 464.6 s, brain 386.2 s 234 calls 822 rows; 426/471
+ cases, 68.7 s/case, eta 0.86 h
+group 71: 6 cases 30 episodes 415.7 s, brain 341.7 s 179 calls 728 rows; 432/471
+ cases, 68.7 s/case, eta 0.74 h
+group 72: 6 cases 30 episodes 579.6 s, brain 363.6 s 209 calls 805 rows; 438/471
+ cases, 69.1 s/case, eta 0.63 h
+group 73: 6 cases 30 episodes 369.3 s, brain 296.0 s 148 calls 638 rows; 444/471
+ cases, 69.0 s/case, eta 0.52 h
+group 74: 6 cases 30 episodes 638.2 s, brain 288.1 s 171 calls 670 rows; 450/471
+ cases, 69.5 s/case, eta 0.41 h
+group 75: 6 cases 30 episodes 589.1 s, brain 353.0 s 183 calls 829 rows; 456/471
+ cases, 69.8 s/case, eta 0.29 h
+group 76: 6 cases 30 episodes 387.2 s, brain 314.4 s 156 calls 722 rows; 462/471
+ cases, 69.8 s/case, eta 0.17 h
+group 77: 6 cases 30 episodes 478.5 s, brain 385.1 s 213 calls 886 rows; 468/471
+ cases, 69.9 s/case, eta 0.06 h
+group 78: 3 cases 15 episodes 271.2 s, brain 218.7 s 117 calls 516 rows; 471/471
+ cases, 70.0 s/case, eta 0.00 h
+done 471 of 471 cases, failed 0:
+[00:34:07] pass 2 skipped: pass 1 exited cleanly, no failed group
+[00:34:07] phase r0, R0_pi05_evalrest_pro_d0 (845 episodes): --brain pi05 --sour
+ce pro --set evalrest --arms=Gauto,VST0.3,VTm,PBVS0.3 --d 0 --kbar 0.306 --band
+results/c1-e4/controls/pod_C/band_eps.json
+[00:34:07] pass 1: env LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PR
+O/libero LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config TORCH_FORCE_N
+O_WEIGHTS_ONLY_LOAD=1 PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_
+source_overlay:/workspace/lmax-deps/LIBERO-MAX/src LIBERO_MAX_ROOT=/workspace/lm
+ax-deps/LIBERO-MAX venv/bin/python scripts/c1e4m_run.py --device cuda --brain pi
+05 --source pro --set evalrest --arms=Gauto,VST0.3,VTm,PBVS0.3 --d 0 --kbar 0.30
+6 --band results/c1-e4/controls/pod_C/band_eps.json --n-envs 6 --out results/c1-
+e4/delay/pod_R/R0_pi05_evalrest_pro_d0.jsonl
+169 of 169 pro cases of evalrest to run, 5 episodes each; split 4beda8e750b4, Wa
+nd real
+Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 908.67it/s]
+The PI05 model is a direct port of the OpenPI implementation.
+This implementation follows the original OpenPI structure for compatibility.
+Original implementation: https://github.com/Physical-Intelligence/openpi
+Loading model from: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libe
+ro_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+✓ Loaded state dict from model.safetensors
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expe
+rt.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.bias
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expe
+rt.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.weight
+All keys loaded successfully!
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8
+)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3
+.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8
+)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3
+.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8
+)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3
+.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8
+)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3
+.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8
+)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3
+.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8
+)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3
+.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+WARNING:robosuite_logs:No private macro file found!
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8
+)
+WARNING:robosuite_logs:It is recommended to use a private macro file
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3
+.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+WARNING:robosuite_logs:To setup, run: python /workspace/jit-reflex/venv/lib/pyth
+on3.12/site-packages/robosuite/scripts/setup_macros.py
+group 0: 6 cases 30 episodes 246.7 s, brain 180.5 s 101 calls 446 rows; 6/169 ca
+ses, 41.1 s/case, eta 1.86 h
+group 1: 6 cases 30 episodes 211.9 s, brain 148.5 s 102 calls 334 rows; 12/169 c
+ases, 38.2 s/case, eta 1.67 h
+group 2: 6 cases 30 episodes 388.2 s, brain 266.4 s 193 calls 586 rows; 18/169 c
+ases, 47.0 s/case, eta 1.97 h
+group 3: 6 cases 30 episodes 359.6 s, brain 271.7 s 177 calls 576 rows; 24/169 c
+ases, 50.3 s/case, eta 2.02 h
+group 4: 6 cases 30 episodes 419.3 s, brain 333.4 s 178 calls 727 rows; 30/169 c
+ases, 54.2 s/case, eta 2.09 h
+group 5: 6 cases 30 episodes 258.0 s, brain 179.8 s 104 calls 410 rows; 36/169 c
+ases, 52.3 s/case, eta 1.93 h
+group 6: 6 cases 30 episodes 362.5 s, brain 271.1 s 152 calls 614 rows; 42/169 c
+ases, 53.5 s/case, eta 1.89 h
+group 7: 6 cases 30 episodes 213.0 s, brain 151.8 s 96 calls 345 rows; 48/169 ca
+ses, 51.2 s/case, eta 1.72 h
+group 8: 6 cases 30 episodes 345.7 s, brain 270.4 s 171 calls 591 rows; 54/169 c
+ases, 51.9 s/case, eta 1.66 h
+group 9: 6 cases 30 episodes 303.7 s, brain 227.8 s 152 calls 496 rows; 60/169 c
+ases, 51.8 s/case, eta 1.57 h
+group 10: 6 cases 30 episodes 459.6 s, brain 346.6 s 193 calls 758 rows; 66/169
+cases, 54.1 s/case, eta 1.55 h
+group 11: 6 cases 30 episodes 328.7 s, brain 223.0 s 140 calls 465 rows; 72/169
+cases, 54.1 s/case, eta 1.46 h
+group 12: 6 cases 30 episodes 474.8 s, brain 355.3 s 199 calls 777 rows; 78/169
+cases, 56.0 s/case, eta 1.42 h
+group 13: 6 cases 30 episodes 306.1 s, brain 209.1 s 147 calls 463 rows; 84/169
+cases, 55.7 s/case, eta 1.31 h
+group 14: 6 cases 30 episodes 482.9 s, brain 351.2 s 220 calls 753 rows; 90/169
+cases, 57.3 s/case, eta 1.26 h
+group 15: 6 cases 30 episodes 350.1 s, brain 257.6 s 185 calls 547 rows; 96/169
+cases, 57.4 s/case, eta 1.16 h
+group 16: 6 cases 30 episodes 435.7 s, brain 306.0 s 181 calls 651 rows; 102/169
+ cases, 58.3 s/case, eta 1.08 h
+group 17: 6 cases 30 episodes 478.7 s, brain 362.2 s 188 calls 791 rows; 108/169
+ cases, 59.5 s/case, eta 1.01 h
+group 18: 6 cases 30 episodes 245.1 s, brain 167.2 s 106 calls 378 rows; 114/169
+ cases, 58.5 s/case, eta 0.89 h
+group 19: 6 cases 30 episodes 478.5 s, brain 339.1 s 233 calls 753 rows; 120/169
+ cases, 59.6 s/case, eta 0.81 h
+group 20: 6 cases 30 episodes 335.8 s, brain 232.4 s 128 calls 545 rows; 126/169
+ cases, 59.4 s/case, eta 0.71 h
+group 21: 6 cases 30 episodes 461.5 s, brain 338.8 s 191 calls 775 rows; 132/169
+ cases, 60.2 s/case, eta 0.62 h
+group 22: 6 cases 30 episodes 537.1 s, brain 396.4 s 243 calls 885 rows; 138/169
+ cases, 61.5 s/case, eta 0.53 h
+group 23: 6 cases 30 episodes 442.7 s, brain 331.0 s 191 calls 748 rows; 144/169
+ cases, 62.0 s/case, eta 0.43 h
+group 24: 6 cases 30 episodes 484.5 s, brain 334.8 s 208 calls 750 rows; 150/169
+ cases, 62.7 s/case, eta 0.33 h
+group 25: 6 cases 30 episodes 547.6 s, brain 398.3 s 232 calls 915 rows; 156/169
+ cases, 63.8 s/case, eta 0.23 h
+group 26: 6 cases 30 episodes 439.6 s, brain 317.9 s 227 calls 691 rows; 162/169
+ cases, 64.2 s/case, eta 0.12 h
+group 27: 6 cases 30 episodes 670.3 s, brain 495.8 s 240 calls 1143 rows; 168/16
+9 cases, 65.9 s/case, eta 0.02 h
+group 28: 1 cases 5 episodes 128.9 s, brain 92.6 s 68 calls 206 rows; 169/169 ca
+ses, 66.3 s/case, eta 0.00 h
+done 169 of 169 cases, failed 0:
+[03:43:14] pass 2 skipped: pass 1 exited cleanly, no failed group
+forecast of R20 at 13.8 s/record x 1.22: 3200 records, 15.0 h, $5.56 at $0.371/h
+rgrid0 done. On the Mac (delay spec §8): download, check the sums, commit and pu
+sh R0; journal R20's forecast (above); then POD=R ./scripts/gpu_c1e4m.sh rgrid20
+. Do NOT git pull here before rgrid20: R0's files are untracked here, the pushed
+ ones would collide with them
+[03:43:17] packed c1e4m_results_R.tgz (608K)
+chainR: rgrid0 exit 0 2026-11-19T03:43:17
+ ______                 ______            _
+(_____ \               (_____ \          | |
+ _____) ) _   _  ____   _____) )___    __| |
+|  __  / | | | ||  _ \ |  ____// _ \  / _  |
+| |  \ \ | |_| || | | || |    | |_| |( (_| |
+|_|   |_||____/ |_| |_||_|     \___/  \____|
+
+For detailed documentation and guides, please visit:
+https://docs.runpod.io/ and https://blog.runpod.io/
+
+
+root@93de8a668a00:~#

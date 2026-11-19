@@ -1,3 +1,4 @@
 chainR: setup ok 2026-11-18T15:02:05
 chainR: rsmoke ok 2026-11-18T15:18:34
 chainR: rgrid0 exit 0 2026-11-19T03:43:17
+chainR: rgrid20 exit 0 2026-11-19T19:08:49
