@@ -1,0 +1,2 @@
+[03:50:02] phase r20, R20_pi05_evalrest_plus_d20 (2355 episodes): --brain pi05 --source plus --set evalrest --arms=Gauto,VST0.3,VTm,PBVS0.3 --d 20 --kbar 0.306 --band results/c1-e4/controls/pod_C/band_eps.json
+[15:15:47] phase r20, R20_pi05_evalrest_pro_d20 (845 episodes): --brain pi05 --source pro --set evalrest --arms=Gauto,VST0.3,VTm,PBVS0.3 --d 20 --kbar 0.306 --band results/c1-e4/controls/pod_C/band_eps.json
