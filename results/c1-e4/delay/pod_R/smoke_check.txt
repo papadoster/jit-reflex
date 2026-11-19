@@ -1,0 +1,35 @@
+{
+ "complete": {
+  "expected": 30,
+  "missing": 0,
+  "pass": true
+ },
+ "prefix": {
+  "dynamic": 24,
+  "invalid": 0,
+  "pass": true
+ },
+ "conf": {
+  "distinct": 1,
+  "pass": true
+ },
+ "fields": {
+  "off": 0,
+  "pass": true
+ },
+ "base_full": {
+  "cut": 0,
+  "pass": true
+ },
+ "kbar": {
+  "want": 0.306,
+  "off": 0,
+  "pass": true
+ },
+ "band": {
+  "delta": 0.005,
+  "off": 0,
+  "pass": true
+ }
+}
+C1-E4 delay smoke (code only): PASS

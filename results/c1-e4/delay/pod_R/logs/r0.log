@@ -1,0 +1,2 @@
+[15:21:52] phase r0, R0_pi05_evalrest_plus_d0 (2355 episodes): --brain pi05 --source plus --set evalrest --arms=Gauto,VST0.3,VTm,PBVS0.3 --d 0 --kbar 0.306 --band results/c1-e4/controls/pod_C/band_eps.json
+[00:34:07] phase r0, R0_pi05_evalrest_pro_d0 (845 episodes): --brain pi05 --source pro --set evalrest --arms=Gauto,VST0.3,VTm,PBVS0.3 --d 0 --kbar 0.306 --band results/c1-e4/controls/pod_C/band_eps.json
