@@ -1,0 +1,135 @@
+{
+ "note": "описательно, не правило; пары «ветка − нет» межпрогонные (свой Base у «нет»); M не читается",
+ "R0": {
+  "none_valid": {
+   "success": 0.4379,
+   "cases": 612,
+   "drops": {
+    "missing": 0,
+    "no_event": 28,
+    "invalid": 0
+   }
+  },
+  "cross_run": {
+   "cases": 612,
+   "success": {
+    "G": 0.5131,
+    "T": 0.5719,
+    "V5": 0.5621,
+    "none": 0.4379
+   },
+   "G-none": {
+    "diff_pp": 7.516,
+    "lo2.5": 1.698,
+    "lo5_one_sided": 2.641,
+    "hi95_one_sided": 12.114,
+    "hi97.5": 12.929,
+    "pairs": 612,
+    "clusters": 33,
+    "undefined_resamples": 0
+   },
+   "T-none": {
+    "diff_pp": 13.399,
+    "lo2.5": 8.373,
+    "lo5_one_sided": 9.117,
+    "hi95_one_sided": 17.915,
+    "hi97.5": 18.928,
+    "pairs": 612,
+    "clusters": 33,
+    "undefined_resamples": 0
+   },
+   "V5-none": {
+    "diff_pp": 12.418,
+    "lo2.5": 7.97,
+    "lo5_one_sided": 8.71,
+    "hi95_one_sided": 16.341,
+    "hi97.5": 17.081,
+    "pairs": 612,
+    "clusters": 33,
+    "undefined_resamples": 0
+   }
+  },
+  "e_equal_to_R_base": {
+   "equal": 604,
+   "total": 612
+  },
+  "by_source_descriptive": {
+   "plus": {
+    "cases": 464,
+    "G": 0.5431,
+    "none": 0.4526
+   },
+   "pro": {
+    "cases": 148,
+    "G": 0.4189,
+    "none": 0.3919
+   }
+  }
+ },
+ "R20": {
+  "none_valid": {
+   "success": 0.0508,
+   "cases": 610,
+   "drops": {
+    "missing": 0,
+    "no_event": 30,
+    "invalid": 0
+   }
+  },
+  "cross_run": {
+   "cases": 608,
+   "success": {
+    "G": 0.2089,
+    "T": 0.2089,
+    "V5": 0.1645,
+    "none": 0.051
+   },
+   "G-none": {
+    "diff_pp": 15.789,
+    "lo2.5": 10.201,
+    "lo5_one_sided": 11.093,
+    "hi95_one_sided": 20.509,
+    "hi97.5": 21.402,
+    "pairs": 608,
+    "clusters": 33,
+    "undefined_resamples": 0
+   },
+   "T-none": {
+    "diff_pp": 15.789,
+    "lo2.5": 10.173,
+    "lo5_one_sided": 11.066,
+    "hi95_one_sided": 20.356,
+    "hi97.5": 21.277,
+    "pairs": 608,
+    "clusters": 33,
+    "undefined_resamples": 0
+   },
+   "V5-none": {
+    "diff_pp": 11.349,
+    "lo2.5": 7.262,
+    "lo5_one_sided": 7.97,
+    "hi95_one_sided": 14.828,
+    "hi97.5": 15.509,
+    "pairs": 608,
+    "clusters": 33,
+    "undefined_resamples": 0
+   }
+  },
+  "e_equal_to_R_base": {
+   "equal": 603,
+   "total": 608
+  },
+  "by_source_descriptive": {
+   "plus": {
+    "cases": 456,
+    "G": 0.2303,
+    "none": 0.057
+   },
+   "pro": {
+    "cases": 152,
+    "G": 0.1447,
+    "none": 0.0329
+   }
+  }
+ }
+}
