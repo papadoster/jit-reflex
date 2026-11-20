@@ -1,0 +1,402 @@
+{
+ "checks": {
+  "records": 6400,
+  "read": 6400,
+  "skipped": 0,
+  "off_plan": {},
+  "complete": {
+   "R0_pi05_evalrest_plus_d0": {
+    "expected": 1884,
+    "missing": 0,
+    "pass": true
+   },
+   "R0_pi05_evalrest_pro_d0": {
+    "expected": 676,
+    "missing": 0,
+    "pass": true
+   },
+   "R20_pi05_evalrest_plus_d20": {
+    "expected": 1884,
+    "missing": 0,
+    "pass": true
+   },
+   "R20_pi05_evalrest_pro_d20": {
+    "expected": 676,
+    "missing": 0,
+    "pass": true
+   }
+  },
+  "invalid_pairs": {
+   "R0": {
+    "pairs": 612,
+    "invalid": 0,
+    "pass": true
+   },
+   "R20": {
+    "pairs": 609,
+    "invalid": 1,
+    "pass": true
+   }
+  },
+  "conf": {
+   "except": ["arms"],
+   "mixed": {},
+   "pass": true
+  },
+  "arms": {
+   "R0": {
+    "kbar": {
+     "want": 0.306,
+     "off": 0,
+     "pass": true
+    },
+    "band": {
+     "delta": 0.005,
+     "off": 0,
+     "pass": true
+    }
+   },
+   "R20": {
+    "kbar": {
+     "want": 0.306,
+     "off": 0,
+     "pass": true
+    },
+    "band": {
+     "delta": 0.005,
+     "off": 0,
+     "pass": true
+    }
+   }
+  },
+  "same_cases": {
+   "planned": 640,
+   "foreign_cases": [],
+   "foreign": 0,
+   "pass": true
+  },
+  "pass": true
+ },
+ "rules": {
+  "Q8": {
+   "test": "pi05, evalrest 640, per case (T - G)_R0 - (T - G)_R20, pp",
+   "diff_pp": 6.0,
+   "lo2.5": 0.611,
+   "lo5_one_sided": 1.473,
+   "hi95_one_sided": 11.507,
+   "hi97.5": 12.671,
+   "pairs": 600,
+   "clusters": 33,
+   "undefined_resamples": 0,
+   "sentence": "преимущество привилегированной ветки убывает с задержкой",
+   "without_s_star": {
+    "diff_pp": 5.47,
+    "lo2.5": 0.144,
+    "lo5_one_sided": 0.977,
+    "hi95_one_sided": 10.956,
+    "hi97.5": 12.078,
+    "pairs": 585,
+    "clusters": 33,
+    "undefined_resamples": 0,
+    "cases_out": 15,
+    "note": "вторичная строка: без случаев, где у T нет s* хотя бы в одной клетке"
+   }
+  },
+  "Q9": "не читается: знание утонуло в невязке модели"
+ },
+ "report": {
+  "trend_cases": {
+   "both_valid": 600,
+   "out: valid in R0 only, dropped in R20": 12,
+   "out: valid in R20 only, dropped in R0": 8
+  },
+  "drops": {
+   "R0": {
+    "no_event": 28
+   },
+   "R20": {
+    "no_event": 31,
+    "invalid": 1
+   }
+  },
+  "cells": {
+   "R0": {
+    "T-G": {
+     "diff_pp": 5.882,
+     "lo2.5": 1.818,
+     "lo5_one_sided": 2.389,
+     "hi95_one_sided": 10.155,
+     "hi97.5": 11.092,
+     "pairs": 612,
+     "clusters": 33,
+     "undefined_resamples": 0
+    },
+    "M-V5": "не читается: знание утонуло в невязке модели",
+    "M-G": "не читается: знание утонуло в невязке модели",
+    "T-V5": {
+     "diff_pp": 0.98,
+     "lo2.5": -3.105,
+     "lo5_one_sided": -2.443,
+     "hi95_one_sided": 4.392,
+     "hi97.5": 5.128,
+     "pairs": 612,
+     "clusters": 33,
+     "undefined_resamples": 0
+    },
+    "V5-G": {
+     "diff_pp": 4.902,
+     "lo2.5": 0.0,
+     "lo5_one_sided": 0.772,
+     "hi95_one_sided": 9.794,
+     "hi97.5": 10.903,
+     "pairs": 612,
+     "clusters": 33,
+     "undefined_resamples": 0
+    },
+    "success": {
+     "G": [0.5131, 612],
+     "T": [0.5719, 612],
+     "M": "не читается: знание утонуло в невязке модели",
+     "V5": [0.5621, 612]
+    }
+   },
+   "R20": {
+    "T-G": {
+     "diff_pp": 0.0,
+     "lo2.5": -3.571,
+     "lo5_one_sided": -2.99,
+     "hi95_one_sided": 2.694,
+     "hi97.5": 3.153,
+     "pairs": 608,
+     "clusters": 33,
+     "undefined_resamples": 0
+    },
+    "M-V5": "не читается: знание утонуло в невязке модели",
+    "M-G": "не читается: знание утонуло в невязке модели",
+    "T-V5": {
+     "diff_pp": 4.441,
+     "lo2.5": 0.794,
+     "lo5_one_sided": 1.431,
+     "hi95_one_sided": 7.428,
+     "hi97.5": 8.007,
+     "pairs": 608,
+     "clusters": 33,
+     "undefined_resamples": 0
+    },
+    "V5-G": {
+     "diff_pp": -4.441,
+     "lo2.5": -7.175,
+     "lo5_one_sided": -6.743,
+     "hi95_one_sided": -2.156,
+     "hi97.5": -1.721,
+     "pairs": 608,
+     "clusters": 33,
+     "undefined_resamples": 0
+    },
+    "success": {
+     "G": [0.2089, 608],
+     "T": [0.2089, 608],
+     "M": "не читается: знание утонуло в невязке модели",
+     "V5": [0.1645, 608]
+    }
+   }
+  },
+  "scale": {
+   "Q8": {
+    "R0": {
+     "L": 0.11,
+     "lo2.5": 0.035,
+     "lo5_one_sided": 0.045,
+     "hi95_one_sided": 0.189,
+     "hi97.5": 0.207,
+     "pairs": 600,
+     "clusters": 33,
+     "undefined_resamples": 0
+    },
+    "R20": {
+     "L": 0.0,
+     "lo2.5": -0.17,
+     "lo5_one_sided": -0.141,
+     "hi95_one_sided": 0.133,
+     "hi97.5": 0.158,
+     "pairs": 600,
+     "clusters": 33,
+     "undefined_resamples": 0
+    },
+    "L0-L20": {
+     "L": 0.11,
+     "lo2.5": -0.065,
+     "lo5_one_sided": -0.037,
+     "hi95_one_sided": 0.277,
+     "hi97.5": 0.312,
+     "pairs": 600,
+     "clusters": 33,
+     "undefined_resamples": 0
+    }
+   },
+   "Q9": "не читается: знание утонуло в невязке модели"
+  },
+  "lambda": {
+   "R0": {
+    "bands": {
+     "[0, 4]": {
+      "T-G": {
+       "diff_pp": 6.41,
+       "lo2.5": 1.324,
+       "lo5_one_sided": 1.954,
+       "hi95_one_sided": 11.667,
+       "hi97.5": 12.667,
+       "pairs": 312,
+       "clusters": 33,
+       "undefined_resamples": 0
+      },
+      "M-V5": "не читается: знание утонуло в невязке модели"
+     },
+     "[5, 9]": {
+      "T-G": {
+       "diff_pp": 5.333,
+       "lo2.5": 0.0,
+       "lo5_one_sided": 0.852,
+       "hi95_one_sided": 10.527,
+       "hi97.5": 11.791,
+       "pairs": 300,
+       "clusters": 33,
+       "undefined_resamples": 0
+      },
+      "M-V5": "не читается: знание утонуло в невязке модели"
+     }
+    },
+    "mismatches": 0,
+    "mismatch_list": [],
+    "no_fresh_plan_before_the_end": 0,
+    "outside_bands": 0
+   },
+   "R20": {
+    "bands": {
+     "[20, 24]": {
+      "T-G": {
+       "diff_pp": -2.797,
+       "lo2.5": -8.042,
+       "lo5_one_sided": -7.119,
+       "hi95_one_sided": 1.159,
+       "hi97.5": 1.98,
+       "pairs": 286,
+       "clusters": 33,
+       "undefined_resamples": 0
+      },
+      "M-V5": "не читается: знание утонуло в невязке модели"
+     },
+     "[25, 29]": {
+      "T-G": {
+       "diff_pp": 2.516,
+       "lo2.5": -2.029,
+       "lo5_one_sided": -1.312,
+       "hi95_one_sided": 6.079,
+       "hi97.5": 6.734,
+       "pairs": 318,
+       "clusters": 33,
+       "undefined_resamples": 0
+      },
+      "M-V5": "не читается: знание утонуло в невязке модели"
+     }
+    },
+    "mismatches": 0,
+    "mismatch_list": [],
+    "no_fresh_plan_before_the_end": 4,
+    "outside_bands": 0
+   }
+  },
+  "supplementary_Q8": {
+   "old300": {
+    "diff_pp": 5.705,
+    "lo2.5": -0.662,
+    "lo5_one_sided": 0.336,
+    "hi95_one_sided": 10.884,
+    "hi97.5": 12.0,
+    "pairs": 298,
+    "clusters": 33,
+    "undefined_resamples": 0,
+    "note": "не правило: на старых 300 вопрос и возник",
+    "per_d": {
+     "d0": {
+      "diff_pp": 6.376,
+      "lo2.5": 1.003,
+      "lo5_one_sided": 1.689,
+      "hi95_one_sided": 10.891,
+      "hi97.5": 11.745,
+      "pairs": 298,
+      "clusters": 33,
+      "undefined_resamples": 0,
+      "invalid_pairs": 2
+     },
+     "d20": {
+      "diff_pp": 0.669,
+      "lo2.5": -3.356,
+      "lo5_one_sided": -2.685,
+      "hi95_one_sided": 3.738,
+      "hi97.5": 4.348,
+      "pairs": 299,
+      "clusters": 33,
+      "undefined_resamples": 0,
+      "invalid_pairs": 1
+     }
+    }
+   },
+   "940": {
+    "diff_pp": 5.902,
+    "lo2.5": 1.703,
+    "lo5_one_sided": 2.308,
+    "hi95_one_sided": 9.989,
+    "hi97.5": 10.811,
+    "pairs": 898,
+    "clusters": 33,
+    "undefined_resamples": 0,
+    "note": "не правило: на старых 300 вопрос и возник"
+   }
+  },
+  "Q9_old300": "Q9 на старых 300 нет: M там прогнан только при d = 0 PRO и d = 10 Plus, при d = 20 — нет",
+  "counters": {
+   "noise_floor": {
+    "n": 575,
+    "median_floor_m": 0.014476,
+    "median_signal_m": 0.024959,
+    "ratio": 1.724,
+    "rule": "n >= 30, ratio >= 2",
+    "informative": false,
+    "verdict": "непоказательно",
+    "why": "знание утонуло в невязке модели"
+   },
+   "R0": {
+    "T_without_s_star": 0.0229,
+    "M_steps_aim_share": 0.7292,
+    "M_no_aim_share": 0.0444,
+    "calls_per_episode": {
+     "G": 28.2712,
+     "T": 27.4967,
+     "M": 26.6258,
+     "V5": 27.4608
+    },
+    "base_e": {
+     "equal": 2560,
+     "total": 2560
+    }
+   },
+   "R20": {
+    "T_without_s_star": 0.0214,
+    "M_steps_aim_share": 0.0509,
+    "M_no_aim_share": 0.0203,
+    "calls_per_episode": {
+     "G": 32.9227,
+     "T": 32.8947,
+     "M": 33.4046,
+     "V5": 33.7171
+    },
+    "base_e": {
+     "equal": 2560,
+     "total": 2560
+    }
+   }
+  },
+  "gpu": ["NVIDIA GeForce RTX 3090"]
+ }
+}
