@@ -1,0 +1,5 @@
+[19:14:59] pass 1: venv/bin/python scripts/c1e4m_run.py --device cuda --brain pi05 --source plus --set evalrest --arms=none --base-prefix --d 0 --kbar 0.306 --band results/c1-e4/controls/pod_C/band_eps.json --n-envs 6 --out results/c1-e4/delay/pod_R/N0_pi05_evalrest_plus_d0.jsonl
+471 of 471 plus cases of evalrest to run, 2 episodes each; split 4beda8e750b4, Wand real
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 9 files:  11%|█         | 1/9 [00:00<00:00,  9.99it/s]Fetching 9 files:  78%|███████▊  | 7/9 [00:00<00:00,  9.83it/s]Fetching 9 files: 100%|██████████| 9/9 [00:58<00:00,  8.70s/it]Fetching 9 files: 100%|██████████| 9/9 [00:58<00:00,  6.49s/it]
