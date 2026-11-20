@@ -1,0 +1,19 @@
+NVIDIA GeForce RTX 3090, 330.00 W
+1955ae76a6be16f84a4e4218c2cdfe0cacf479c0
+C1E4_OFT_CKPT=/workspace/oft-ckpt
+HF_HOME=/workspace/.cache/huggingface
+HF_HUB_OFFLINE=1
+LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-plus-config
+LIBERO_MAX_ROOT=/workspace/lmax-deps/LIBERO-MAX
+LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-plus/libero
+MKL_NUM_THREADS=2
+MUJOCO_GL=egl
+OMP_NUM_THREADS=2
+OPENBLAS_NUM_THREADS=2
+OPENVLA_OFT_ROOT=/workspace/lmax-deps/openvla-oft
+PYOPENGL_PLATFORM=egl
+PYTHONPATH=/workspace/lmax-deps/LIBERO-MAX/scripts/libero_source_overlay:/workspace/lmax-deps/LIBERO-MAX/src
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+TF_FORCE_GPU_ALLOW_GROWTH=true
+pro lines: LIBERO_SOURCE_PACKAGE_ROOT=/workspace/lmax-deps/LIBERO-PRO/libero
+pro lines: LIBERO_CONFIG_PATH=/workspace/lmax-deps/libero-pro-config

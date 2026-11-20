@@ -1,0 +1,466 @@
+[02:36:48] pass 1: venv/bin/python scripts/c1e4m_run.py --device cuda --brain pi05 --source pro --set evalrest --arms=none --base-prefix --d 20 --kbar 0.306 --band results/c1-e4/controls/pod_C/band_eps.json --n-envs 6 --out results/c1-e4/delay/pod_R/N20_pi05_evalrest_pro_d20.jsonl
+169 of 169 pro cases of evalrest to run, 2 episodes each; split 4beda8e750b4, Wand real
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 917.30it/s]
+The PI05 model is a direct port of the OpenPI implementation. 
+This implementation follows the original OpenPI structure for compatibility. 
+Original implementation: https://github.com/Physical-Intelligence/openpi
+Loading model from: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+✓ Loaded state dict from model.safetensors
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.bias
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.weight
+All keys loaded successfully!
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+FAILED ['pro-initial-pose-position-angle-object-t07-i01-target_relocation-d0-p195', 'pro-object-texture-10-t01-i09-target_relocation-d0-p195', 'pro-visual-noise-glare-object-t05-i04-target_relocation-d1-p195', 'pro-position-spatial-t00-i04-target_relocation-d0-p195', 'pro-object-shape-goal-t01-i01-target_relocation-d0-p195', 'pro-object-object-t02-i00-target_relocation-d1-p195']: RuntimeError('worker 89034:\nTraceback (most recent call last):\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve\n    conn.send((True, getattr(env, cmd)(*a)))\n                     ^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start\n    task, inits = load_case_task(case, benchmark, self.suites)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task\n    raise FileNotFoundError(str(bddl_path))\nFileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/07_initial_pose_position_angle/bddl/libero_object/pick_up_the_milk_and_place_it_in_the_basket.bddl\n')
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 786, in main
+    recs = run_cases(group, arms, conf, envs, brain, wand, video, args.video_dir, args.base_prefix,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 623, in run_cases
+    batches(bases)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 619, in batches
+    run_batch(eps[j: j + n], envs, brain)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 550, in run_batch
+    ep.see(env.recv())
+           ^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 374, in recv
+    raise RuntimeError(f"worker {self.proc.pid}:\n{out}")
+RuntimeError: worker 89034:
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve
+    conn.send((True, getattr(env, cmd)(*a)))
+                     ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start
+    task, inits = load_case_task(case, benchmark, self.suites)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task
+    raise FileNotFoundError(str(bddl_path))
+FileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/07_initial_pose_position_angle/bddl/libero_object/pick_up_the_milk_and_place_it_in_the_basket.bddl
+
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+FAILED ['pro-task-object-t03-i01-target_relocation-d0-p195', 'pro-object-shape-goal-t03-i04-target_relocation-d1-p195', 'pro-initial-pose-position-angle-spatial-t01-i01-target_relocation-d1-p195', 'pro-position-object-t06-i02-target_relocation-d1-p195', 'pro-object-texture-spatial-t06-i03-target_relocation-d0-p195', 'pro-camera-view-angle-object-t05-i09-target_relocation-d0-p195']: RuntimeError('worker 89796:\nTraceback (most recent call last):\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve\n    conn.send((True, getattr(env, cmd)(*a)))\n                     ^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start\n    task, inits = load_case_task(case, benchmark, self.suites)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task\n    raise FileNotFoundError(str(bddl_path))\nFileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/libero_object_task/pick_up_the_bbq_sauce_and_place_it_in_the_basket.bddl\n')
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 786, in main
+    recs = run_cases(group, arms, conf, envs, brain, wand, video, args.video_dir, args.base_prefix,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 623, in run_cases
+    batches(bases)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 619, in batches
+    run_batch(eps[j: j + n], envs, brain)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 550, in run_batch
+    ep.see(env.recv())
+           ^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 374, in recv
+    raise RuntimeError(f"worker {self.proc.pid}:\n{out}")
+RuntimeError: worker 89796:
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve
+    conn.send((True, getattr(env, cmd)(*a)))
+                     ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start
+    task, inits = load_case_task(case, benchmark, self.suites)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task
+    raise FileNotFoundError(str(bddl_path))
+FileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/libero_object_task/pick_up_the_bbq_sauce_and_place_it_in_the_basket.bddl
+
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+FAILED ['pro-view-occlusion-10-t04-i00-target_relocation-d0-p195', 'pro-task-object-t00-i00-target_relocation-d0-p195', 'pro-view-occlusion-spatial-t00-i06-target_relocation-d1-p195', 'pro-object-texture-spatial-t08-i01-target_relocation-d1-p195', 'pro-semantic-10-t08-i02-target_relocation-d1-p195', 'pro-semantic-spatial-t02-i01-target_relocation-d1-p195']: RuntimeError('worker 90558:\nTraceback (most recent call last):\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve\n    conn.send((True, getattr(env, cmd)(*a)))\n                     ^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start\n    task, inits = load_case_task(case, benchmark, self.suites)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task\n    raise FileNotFoundError(str(bddl_path))\nFileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/05_view_occlusion/bddl/libero_10/LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate.bddl\n')
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 786, in main
+    recs = run_cases(group, arms, conf, envs, brain, wand, video, args.video_dir, args.base_prefix,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 623, in run_cases
+    batches(bases)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 619, in batches
+    run_batch(eps[j: j + n], envs, brain)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 550, in run_batch
+    ep.see(env.recv())
+           ^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 374, in recv
+    raise RuntimeError(f"worker {self.proc.pid}:\n{out}")
+RuntimeError: worker 90558:
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve
+    conn.send((True, getattr(env, cmd)(*a)))
+                     ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start
+    task, inits = load_case_task(case, benchmark, self.suites)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task
+    raise FileNotFoundError(str(bddl_path))
+FileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/05_view_occlusion/bddl/libero_10/LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate.bddl
+
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+FAILED ['pro-object-shape-10-t09-i00-target_relocation-d1-p195', 'pro-position-object-t02-i03-target_relocation-d0-p195', 'pro-semantic-object-t06-i04-target_relocation-d1-p195', 'pro-object-shape-10-t06-i07-target_relocation-d0-p195', 'pro-visual-noise-glare-goal-t08-i01-target_relocation-d0-p195', 'pro-initial-pose-position-angle-10-t07-i09-target_relocation-d1-p195']: RuntimeError('worker 91320:\nTraceback (most recent call last):\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve\n    conn.send((True, getattr(env, cmd)(*a)))\n                     ^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start\n    task, inits = load_case_task(case, benchmark, self.suites)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task\n    raise FileNotFoundError(str(bddl_path))\nFileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/06_object_shape/bddl/libero_10/KITCHEN_SCENE6_put_the_yellow_and_white_mug_in_the_microwave_and_close_it.bddl\n')
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 786, in main
+    recs = run_cases(group, arms, conf, envs, brain, wand, video, args.video_dir, args.base_prefix,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 623, in run_cases
+    batches(bases)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 619, in batches
+    run_batch(eps[j: j + n], envs, brain)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 550, in run_batch
+    ep.see(env.recv())
+           ^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 374, in recv
+    raise RuntimeError(f"worker {self.proc.pid}:\n{out}")
+RuntimeError: worker 91320:
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve
+    conn.send((True, getattr(env, cmd)(*a)))
+                     ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start
+    task, inits = load_case_task(case, benchmark, self.suites)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task
+    raise FileNotFoundError(str(bddl_path))
+FileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/06_object_shape/bddl/libero_10/KITCHEN_SCENE6_put_the_yellow_and_white_mug_in_the_microwave_and_close_it.bddl
+
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+FAILED ['pro-object-texture-goal-t02-i06-target_relocation-d1-p195', 'pro-initial-pose-position-angle-10-t01-i09-target_relocation-d0-p195', 'pro-camera-view-angle-10-t05-i03-target_relocation-d0-p195', 'pro-position-goal-t04-i07-target_relocation-d0-p195', 'pro-object-object-t08-i03-target_relocation-d0-p195', 'pro-object-object-t03-i03-target_relocation-d1-p195']: RuntimeError('worker 92082:\nTraceback (most recent call last):\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve\n    conn.send((True, getattr(env, cmd)(*a)))\n                     ^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start\n    task, inits = load_case_task(case, benchmark, self.suites)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task\n    raise FileNotFoundError(str(bddl_path))\nFileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/04_object_texture/bddl/libero_goal/put_the_wine_bottle_on_top_of_the_cabinet.bddl\n')
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 786, in main
+    recs = run_cases(group, arms, conf, envs, brain, wand, video, args.video_dir, args.base_prefix,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 623, in run_cases
+    batches(bases)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 619, in batches
+    run_batch(eps[j: j + n], envs, brain)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 550, in run_batch
+    ep.see(env.recv())
+           ^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 374, in recv
+    raise RuntimeError(f"worker {self.proc.pid}:\n{out}")
+RuntimeError: worker 92082:
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve
+    conn.send((True, getattr(env, cmd)(*a)))
+                     ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start
+    task, inits = load_case_task(case, benchmark, self.suites)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task
+    raise FileNotFoundError(str(bddl_path))
+FileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/04_object_texture/bddl/libero_goal/put_the_wine_bottle_on_top_of_the_cabinet.bddl
+
+ABORT: systematic failure, 5 of 5 groups failed
+done 0 of 169 cases, failed 30: pro-initial-pose-position-angle-object-t07-i01-target_relocation-d0-p195,pro-object-texture-10-t01-i09-target_relocation-d0-p195,pro-visual-noise-glare-object-t05-i04-target_relocation-d1-p195,pro-position-spatial-t00-i04-target_relocation-d0-p195,pro-object-shape-goal-t01-i01-target_relocation-d0-p195,pro-object-object-t02-i00-target_relocation-d1-p195,pro-task-object-t03-i01-target_relocation-d0-p195,pro-object-shape-goal-t03-i04-target_relocation-d1-p195,pro-initial-pose-position-angle-spatial-t01-i01-target_relocation-d1-p195,pro-position-object-t06-i02-target_relocation-d1-p195,pro-object-texture-spatial-t06-i03-target_relocation-d0-p195,pro-camera-view-angle-object-t05-i09-target_relocation-d0-p195,pro-view-occlusion-10-t04-i00-target_relocation-d0-p195,pro-task-object-t00-i00-target_relocation-d0-p195,pro-view-occlusion-spatial-t00-i06-target_relocation-d1-p195,pro-object-texture-spatial-t08-i01-target_relocation-d1-p195,pro-semantic-10-t08-i02-target_relocation-d1-p195,pro-semantic-spatial-t02-i01-target_relocation-d1-p195,pro-object-shape-10-t09-i00-target_relocation-d1-p195,pro-position-object-t02-i03-target_relocation-d0-p195,pro-semantic-object-t06-i04-target_relocation-d1-p195,pro-object-shape-10-t06-i07-target_relocation-d0-p195,pro-visual-noise-glare-goal-t08-i01-target_relocation-d0-p195,pro-initial-pose-position-angle-10-t07-i09-target_relocation-d1-p195,pro-object-texture-goal-t02-i06-target_relocation-d1-p195,pro-initial-pose-position-angle-10-t01-i09-target_relocation-d0-p195,pro-camera-view-angle-10-t05-i03-target_relocation-d0-p195,pro-position-goal-t04-i07-target_relocation-d0-p195,pro-object-object-t08-i03-target_relocation-d0-p195,pro-object-object-t03-i03-target_relocation-d1-p195
+[02:39:21] pass 2: venv/bin/python scripts/c1e4m_run.py --device cuda --brain pi05 --source pro --set evalrest --arms=none --base-prefix --d 20 --kbar 0.306 --band results/c1-e4/controls/pod_C/band_eps.json --n-envs 6 --out results/c1-e4/delay/pod_R/N20_pi05_evalrest_pro_d20.jsonl
+169 of 169 pro cases of evalrest to run, 2 episodes each; split 4beda8e750b4, Wand real
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 855.15it/s]
+The PI05 model is a direct port of the OpenPI implementation. 
+This implementation follows the original OpenPI structure for compatibility. 
+Original implementation: https://github.com/Physical-Intelligence/openpi
+Loading model from: /workspace/.cache/huggingface/hub/models--lerobot--pi05_libero_finetuned_v044/snapshots/8e174154ef5f6c60a8da12ae99c303d8963138c1
+✓ Loaded state dict from model.safetensors
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.bias
+WARNING:root:Vision embedding key might need handling: model.paligemma_with_expert.paligemma.model.vision_tower.vision_model.embeddings.patch_embedding.weight
+All keys loaded successfully!
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+FAILED ['pro-initial-pose-position-angle-object-t07-i01-target_relocation-d0-p195', 'pro-object-texture-10-t01-i09-target_relocation-d0-p195', 'pro-visual-noise-glare-object-t05-i04-target_relocation-d1-p195', 'pro-position-spatial-t00-i04-target_relocation-d0-p195', 'pro-object-shape-goal-t01-i01-target_relocation-d0-p195', 'pro-object-object-t02-i00-target_relocation-d1-p195']: RuntimeError('worker 93026:\nTraceback (most recent call last):\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve\n    conn.send((True, getattr(env, cmd)(*a)))\n                     ^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start\n    task, inits = load_case_task(case, benchmark, self.suites)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task\n    raise FileNotFoundError(str(bddl_path))\nFileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/07_initial_pose_position_angle/bddl/libero_object/pick_up_the_milk_and_place_it_in_the_basket.bddl\n')
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 786, in main
+    recs = run_cases(group, arms, conf, envs, brain, wand, video, args.video_dir, args.base_prefix,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 623, in run_cases
+    batches(bases)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 619, in batches
+    run_batch(eps[j: j + n], envs, brain)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 550, in run_batch
+    ep.see(env.recv())
+           ^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 374, in recv
+    raise RuntimeError(f"worker {self.proc.pid}:\n{out}")
+RuntimeError: worker 93026:
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve
+    conn.send((True, getattr(env, cmd)(*a)))
+                     ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start
+    task, inits = load_case_task(case, benchmark, self.suites)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task
+    raise FileNotFoundError(str(bddl_path))
+FileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/07_initial_pose_position_angle/bddl/libero_object/pick_up_the_milk_and_place_it_in_the_basket.bddl
+
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+FAILED ['pro-task-object-t03-i01-target_relocation-d0-p195', 'pro-object-shape-goal-t03-i04-target_relocation-d1-p195', 'pro-initial-pose-position-angle-spatial-t01-i01-target_relocation-d1-p195', 'pro-position-object-t06-i02-target_relocation-d1-p195', 'pro-object-texture-spatial-t06-i03-target_relocation-d0-p195', 'pro-camera-view-angle-object-t05-i09-target_relocation-d0-p195']: RuntimeError('worker 93788:\nTraceback (most recent call last):\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve\n    conn.send((True, getattr(env, cmd)(*a)))\n                     ^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start\n    task, inits = load_case_task(case, benchmark, self.suites)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task\n    raise FileNotFoundError(str(bddl_path))\nFileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/libero_object_task/pick_up_the_bbq_sauce_and_place_it_in_the_basket.bddl\n')
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 786, in main
+    recs = run_cases(group, arms, conf, envs, brain, wand, video, args.video_dir, args.base_prefix,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 623, in run_cases
+    batches(bases)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 619, in batches
+    run_batch(eps[j: j + n], envs, brain)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 550, in run_batch
+    ep.see(env.recv())
+           ^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 374, in recv
+    raise RuntimeError(f"worker {self.proc.pid}:\n{out}")
+RuntimeError: worker 93788:
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve
+    conn.send((True, getattr(env, cmd)(*a)))
+                     ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start
+    task, inits = load_case_task(case, benchmark, self.suites)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task
+    raise FileNotFoundError(str(bddl_path))
+FileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/libero_object_task/pick_up_the_bbq_sauce_and_place_it_in_the_basket.bddl
+
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+FAILED ['pro-view-occlusion-10-t04-i00-target_relocation-d0-p195', 'pro-task-object-t00-i00-target_relocation-d0-p195', 'pro-view-occlusion-spatial-t00-i06-target_relocation-d1-p195', 'pro-object-texture-spatial-t08-i01-target_relocation-d1-p195', 'pro-semantic-10-t08-i02-target_relocation-d1-p195', 'pro-semantic-spatial-t02-i01-target_relocation-d1-p195']: RuntimeError('worker 94550:\nTraceback (most recent call last):\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve\n    conn.send((True, getattr(env, cmd)(*a)))\n                     ^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start\n    task, inits = load_case_task(case, benchmark, self.suites)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task\n    raise FileNotFoundError(str(bddl_path))\nFileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/05_view_occlusion/bddl/libero_10/LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate.bddl\n')
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 786, in main
+    recs = run_cases(group, arms, conf, envs, brain, wand, video, args.video_dir, args.base_prefix,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 623, in run_cases
+    batches(bases)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 619, in batches
+    run_batch(eps[j: j + n], envs, brain)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 550, in run_batch
+    ep.see(env.recv())
+           ^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 374, in recv
+    raise RuntimeError(f"worker {self.proc.pid}:\n{out}")
+RuntimeError: worker 94550:
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve
+    conn.send((True, getattr(env, cmd)(*a)))
+                     ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start
+    task, inits = load_case_task(case, benchmark, self.suites)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task
+    raise FileNotFoundError(str(bddl_path))
+FileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/05_view_occlusion/bddl/libero_10/LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate.bddl
+
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+FAILED ['pro-object-shape-10-t09-i00-target_relocation-d1-p195', 'pro-position-object-t02-i03-target_relocation-d0-p195', 'pro-semantic-object-t06-i04-target_relocation-d1-p195', 'pro-object-shape-10-t06-i07-target_relocation-d0-p195', 'pro-visual-noise-glare-goal-t08-i01-target_relocation-d0-p195', 'pro-initial-pose-position-angle-10-t07-i09-target_relocation-d1-p195']: RuntimeError('worker 95312:\nTraceback (most recent call last):\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve\n    conn.send((True, getattr(env, cmd)(*a)))\n                     ^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start\n    task, inits = load_case_task(case, benchmark, self.suites)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task\n    raise FileNotFoundError(str(bddl_path))\nFileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/06_object_shape/bddl/libero_10/KITCHEN_SCENE6_put_the_yellow_and_white_mug_in_the_microwave_and_close_it.bddl\n')
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 786, in main
+    recs = run_cases(group, arms, conf, envs, brain, wand, video, args.video_dir, args.base_prefix,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 623, in run_cases
+    batches(bases)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 619, in batches
+    run_batch(eps[j: j + n], envs, brain)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 550, in run_batch
+    ep.see(env.recv())
+           ^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 374, in recv
+    raise RuntimeError(f"worker {self.proc.pid}:\n{out}")
+RuntimeError: worker 95312:
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve
+    conn.send((True, getattr(env, cmd)(*a)))
+                     ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start
+    task, inits = load_case_task(case, benchmark, self.suites)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task
+    raise FileNotFoundError(str(bddl_path))
+FileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/06_object_shape/bddl/libero_10/KITCHEN_SCENE6_put_the_yellow_and_white_mug_in_the_microwave_and_close_it.bddl
+
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /workspace/jit-reflex/venv/lib/python3.12/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+FAILED ['pro-object-texture-goal-t02-i06-target_relocation-d1-p195', 'pro-initial-pose-position-angle-10-t01-i09-target_relocation-d0-p195', 'pro-camera-view-angle-10-t05-i03-target_relocation-d0-p195', 'pro-position-goal-t04-i07-target_relocation-d0-p195', 'pro-object-object-t08-i03-target_relocation-d0-p195', 'pro-object-object-t03-i03-target_relocation-d1-p195']: RuntimeError('worker 96086:\nTraceback (most recent call last):\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve\n    conn.send((True, getattr(env, cmd)(*a)))\n                     ^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start\n    task, inits = load_case_task(case, benchmark, self.suites)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task\n    raise FileNotFoundError(str(bddl_path))\nFileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/04_object_texture/bddl/libero_goal/put_the_wine_bottle_on_top_of_the_cabinet.bddl\n')
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 786, in main
+    recs = run_cases(group, arms, conf, envs, brain, wand, video, args.video_dir, args.base_prefix,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 623, in run_cases
+    batches(bases)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 619, in batches
+    run_batch(eps[j: j + n], envs, brain)
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 550, in run_batch
+    ep.see(env.recv())
+           ^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 374, in recv
+    raise RuntimeError(f"worker {self.proc.pid}:\n{out}")
+RuntimeError: worker 96086:
+Traceback (most recent call last):
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 356, in _serve
+    conn.send((True, getattr(env, cmd)(*a)))
+                     ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/jit-reflex/scripts/c1e4m_run.py", line 295, in start
+    task, inits = load_case_task(case, benchmark, self.suites)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/lmax-deps/LIBERO-MAX/src/libero_max/substrate.py", line 67, in load_case_task
+    raise FileNotFoundError(str(bddl_path))
+FileNotFoundError: /workspace/lmax-deps/LIBERO-plus/libero/libero/bddl_files/04_object_texture/bddl/libero_goal/put_the_wine_bottle_on_top_of_the_cabinet.bddl
+
+ABORT: systematic failure, 5 of 5 groups failed
+done 0 of 169 cases, failed 30: pro-initial-pose-position-angle-object-t07-i01-target_relocation-d0-p195,pro-object-texture-10-t01-i09-target_relocation-d0-p195,pro-visual-noise-glare-object-t05-i04-target_relocation-d1-p195,pro-position-spatial-t00-i04-target_relocation-d0-p195,pro-object-shape-goal-t01-i01-target_relocation-d0-p195,pro-object-object-t02-i00-target_relocation-d1-p195,pro-task-object-t03-i01-target_relocation-d0-p195,pro-object-shape-goal-t03-i04-target_relocation-d1-p195,pro-initial-pose-position-angle-spatial-t01-i01-target_relocation-d1-p195,pro-position-object-t06-i02-target_relocation-d1-p195,pro-object-texture-spatial-t06-i03-target_relocation-d0-p195,pro-camera-view-angle-object-t05-i09-target_relocation-d0-p195,pro-view-occlusion-10-t04-i00-target_relocation-d0-p195,pro-task-object-t00-i00-target_relocation-d0-p195,pro-view-occlusion-spatial-t00-i06-target_relocation-d1-p195,pro-object-texture-spatial-t08-i01-target_relocation-d1-p195,pro-semantic-10-t08-i02-target_relocation-d1-p195,pro-semantic-spatial-t02-i01-target_relocation-d1-p195,pro-object-shape-10-t09-i00-target_relocation-d1-p195,pro-position-object-t02-i03-target_relocation-d0-p195,pro-semantic-object-t06-i04-target_relocation-d1-p195,pro-object-shape-10-t06-i07-target_relocation-d0-p195,pro-visual-noise-glare-goal-t08-i01-target_relocation-d0-p195,pro-initial-pose-position-angle-10-t07-i09-target_relocation-d1-p195,pro-object-texture-goal-t02-i06-target_relocation-d1-p195,pro-initial-pose-position-angle-10-t01-i09-target_relocation-d0-p195,pro-camera-view-angle-10-t05-i03-target_relocation-d0-p195,pro-position-goal-t04-i07-target_relocation-d0-p195,pro-object-object-t08-i03-target_relocation-d0-p195,pro-object-object-t03-i03-target_relocation-d1-p195
